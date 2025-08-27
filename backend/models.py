@@ -49,7 +49,7 @@ class DatabaseManager:
     """Database connection and session management."""
     
     def __init__(self, database_url: str = None):
-        self.database_url = database_url or "sqlite:///backend/temperature.db"
+        self.database_url = database_url or "sqlite:///temperature.db"
         self.engine = None
         self.Session = None
         self.logger = logging.getLogger(__name__)

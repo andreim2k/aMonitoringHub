@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>aTemperature Monitor</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEwIDhWMjRIMTRWOEgxMFoiIGZpbGw9IiM3Mzc5ODUiLz4KPHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSI+CjxyZWN0IHg9IjE0IiB5PSIyMCIgd2lkdGg9IjQiIGhlaWdodD0iNCIgcng9IjIiIGZpbGw9IiNkYzI2MjYiLz4KPC9zdmc+Cg==">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌡️ aTemperature Monitor</h1>
+            <div class="status" id="status">
+                <span class="indicator" id="indicator"></span>
+                <span id="statusText">Connecting...</span>
+            </div>
+        </header>
+
+        <main>
+            <!-- Current Temperature Display -->
+            <section class="temperature-card">
+                <div class="temp-display">
+                    <span class="temp-value" id="currentTemp">--</span>
+                    <span class="temp-unit">°C</span>
+                </div>
+                <div class="temp-info">
+                    <div class="sensor-info" id="sensorInfo">Sensor: Loading...</div>
+                    <div class="last-update" id="lastUpdate">Last update: --</div>
+                </div>
+            </section>
+
+            <!-- Statistics Cards -->
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Average (24h)</div>
+                    <div class="stat-value" id="avgTemp">--°C</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Minimum (24h)</div>
+                    <div class="stat-value" id="minTemp">--°C</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Maximum (24h)</div>
+                    <div class="stat-value" id="maxTemp">--°C</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Readings</div>
+                    <div class="stat-value" id="readingCount">--</div>
+                </div>
+            </section>
+
+            <!-- Chart Controls -->
+            <section class="controls">
+                <div class="control-group">
+                    <label for="timeRange">Time Range:</label>
+                    <select id="timeRange">
+                        <option value="recent">Last 100 readings</option>
+                        <option value="daily" selected>Last 24 hours</option>
+                        <option value="weekly">Last 7 days</option>
+                    </select>
+                </div>
+                <button id="refreshBtn" class="btn-refresh">Refresh Chart</button>
+            </section>
+
+            <!-- Temperature Chart -->
+            <section class="chart-container">
+                <canvas id="temperatureChart" width="800" height="400"></canvas>
+            </section>
+        </main>
+
+        <footer>
+            <p>aTemperature Monitor &bull; Real-time temperature monitoring system</p>
+        </footer>
+    </div>
+
+    <!-- Lightweight Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.30.0/index.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
