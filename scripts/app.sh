@@ -94,8 +94,8 @@ start_app() {
         return 1
     fi
     
-    if [ ! -f "$BACKEND_PATH/simple_graphql_app.py" ]; then
-        log_error "Backend application not found at $BACKEND_PATH/simple_graphql_app.py"
+    if [ ! -f "$BACKEND_PATH/app.py" ]; then
+        log_error "Backend application not found at $BACKEND_PATH/app.py"
         return 1
     fi
     
@@ -109,7 +109,7 @@ start_app() {
     cd "$BACKEND_PATH"
     
     # Use nohup and background process as requested
-    nohup "$VENV_PATH/bin/python" simple_graphql_app.py \
+    nohup "$VENV_PATH/bin/python" app.py \
         --host 0.0.0.0 \
         --port 5000 \
         > "$LOG_FILE" 2>&1 &

@@ -4,3 +4,4 @@ logs/*.out
 backend/*.db
 __pycache__/
 *.pyc
+logs/*.pid
