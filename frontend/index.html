@@ -510,7 +510,6 @@
         
         eventSource.onopen = function() {
           updateConnectionStatus('online', 'Connected');
-          console.log('SSE connection opened');
         };
         
         eventSource.onmessage = function(event) {
@@ -558,7 +557,6 @@
         
         eventSource.onerror = function() {
           updateConnectionStatus('offline', 'Disconnected');
-          console.log('SSE connection error');
           
           // Attempt to reconnect after 3 seconds
           setTimeout(function() {
@@ -590,7 +588,6 @@
 
     // Initialize the application
     async function initialize() {
-      console.log('Initializing @Temperature application...');
       
       try {
         // Initialize charts first

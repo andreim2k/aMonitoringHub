@@ -248,26 +248,20 @@ if __name__ == "__main__":
     # Test the sensor reader
     import sys
     
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.ERROR)
     
     sensor_type = sys.argv[1] if len(sys.argv) > 1 else "auto"
     
     try:
         sensor = TemperatureSensorReader(sensor_type=sensor_type)
-        print(f"Sensor info: {sensor.get_sensor_info()}")
         
-        print("\nTaking 5 temperature readings:")
         for i in range(5):
             reading = sensor.get_reading()
             if reading:
-                print(f"Reading {i+1}: {reading.temperature_c:.2f}°C "
-                      f"(sensor: {reading.sensor_id}, type: {reading.sensor_type})")
-            else:
-                print(f"Reading {i+1}: Failed")
+                pass  # Reading successful
             
             if i < 4:  # Don't sleep after last reading
                 time.sleep(1)
                 
     except Exception as e:
-        print(f"Error: {e}")
         sys.exit(1)

@@ -237,34 +237,26 @@ if __name__ == "__main__":
     # Test the database models
     import sys
     
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.ERROR)
     
     try:
         # Initialize database
         init_database()
         
         # Add some test data
-        print("Adding test temperature readings...")
         base_time = datetime.now(timezone.utc)
         
         for i in range(10):
             temp = 20.0 + (i % 5) * 0.5  # Temperatures between 20-22°C
             timestamp = base_time - timedelta(minutes=i)
             reading = db.add_temperature_reading(temp, "test", "test_sensor", timestamp)
-            print(f"Added: {reading}")
             
         # Test queries
-        print("\nRecent readings:")
         recent = db.get_recent_readings(5)
         for reading in recent:
-            print(f"  {reading}")
-            
-        print("\nStatistics:")
+            pass  # Process reading
         stats = db.get_statistics()
-        print(f"  {stats}")
         
-        print("\nDatabase test completed successfully!")
         
     except Exception as e:
-        print(f"Database test failed: {e}")
         sys.exit(1)
