@@ -1,6 +1,6 @@
 # @Temperature
 
-A modern, real-time web application for monitoring temperature data using GraphQL and Server-Sent Events (SSE).
+A modern, real-time web application for monitoring temperature data on ARM devices using GraphQL and Server-Sent Events (SSE).
 
 ## Features
 
@@ -18,6 +18,36 @@ A modern, real-time web application for monitoring temperature data using GraphQ
 - **Backend**: Python with GraphQL (Graphene), Flask, and SQLAlchemy
 - **Real-time Updates**: Server-Sent Events (SSE) for live temperature streaming
 - **Frontend**: Vanilla HTML/CSS/JavaScript with Chart.js for interactive charts
+
+## Supported Platforms
+
+**Designed specifically for ARM devices:**
+- Raspberry Pi (all models)
+- Orange Pi
+- Banana Pi
+- NVIDIA Jetson series
+- Other ARM-based single-board computers
+
+**Requirements:**
+- ARM-based processor (ARMv6, ARMv7, ARMv8/AArch64)
+- Linux operating system
+- Python 3.7+
+- GPIO access for temperature sensors
+
+## Supported Platforms
+
+**Designed specifically for ARM devices:**
+- Raspberry Pi (all models)
+- Orange Pi
+- Banana Pi
+- NVIDIA Jetson series
+- Other ARM-based single-board computers
+
+**Requirements:**
+- ARM-based processor (ARMv6, ARMv7, ARMv8/AArch64)
+- Linux operating system
+- Python 3.7+
+- GPIO access for temperature sensors
 - **Database**: SQLite with SQLAlchemy ORM for temperature data storage
 - **Deployment**: Local network accessible with background process management
 
@@ -138,8 +168,9 @@ Real-time temperature updates are streamed as JSON events:
 ## Getting Started
 
 ### Prerequisites
+- **ARM-based device** (Raspberry Pi, Orange Pi, etc.)
 - Python 3.7 or higher
-- Linux/Unix system (for thermal sensors)
+- Linux operating system with GPIO support
 - Modern web browser (Chrome, Firefox, Safari, Edge)
 
 ### Installation
