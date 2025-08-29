@@ -91,7 +91,11 @@
     }
 
     .metric-value.status-online { color: #4caf50 !important; }
-    .status-offline { color: #f44336; }
+    .metric-value.status-offline { color: #f44336 !important; }
+    .metric-value.status-checking {
+      color: #ff9800 !important;
+      animation: pulse 1.5s infinite;
+    }
     .status-connecting {
       color: #ffa726;
       animation: pulse 1.5s infinite;
@@ -304,24 +308,21 @@
 <body>
   <div class="header">
     <h1>@WeatherStation</h1>
-    <p style="font-style: italic; color: #888; font-size: 0.9em;">Real-time weather monitoring</p>
-    <div>
-      <span class="status-indicator status-connecting" id="connectionIndicator"></span>
-      <span id="connectionStatus">Connecting...</span>
-    </div>
+    <p style="font-style: italic; color: #888; font-size: 0.9em;">Environmental sensors & climate insights</p>
+    <!-- Connection status removed - using sensor status instead -->
   </div>
 
   <div class="container">
-      <!-- Row 1: Sensors Status & Data Points -->
+      <!-- Row 1: Sensors Status & Total Readings -->
       <div class="metrics-row">
         <div class="metric-card">
           <div class="metric-icon">📡</div>
           <div class="metric-label">Sensors Status</div>
-          <div class="metric-value status-offline" id="sensorStatus">Offline</div>
+          <div class="metric-value status-checking" id="sensorStatus">Checking...</div>
         </div>
         <div class="metric-card">
           <div class="metric-icon">📊</div>
-          <div class="metric-label">Data Points</div>
+          <div class="metric-label">Total Readings</div>
           <div class="metric-value" id="dataCount">--</div>
         </div>
       </div>
@@ -368,12 +369,7 @@
 
       <!-- Row 4: Temperature Charts -->
       <div class="charts-row">
-        <div class="chart-card">
-          <h3>🌡️ Real-time Temperature</h3>
-          <div class="chart-container">
-            <canvas id="realtimeChart"></canvas>
-          </div>
-        </div>
+
         <div class="chart-card">
           <h3>📈 Temperature History</h3>
           <div class="chart-container">
@@ -384,12 +380,7 @@
 
       <!-- Row 5: Humidity Charts -->
       <div class="charts-row">
-        <div class="chart-card">
-          <h3>💧 Real-time Humidity</h3>
-          <div class="chart-container">
-            <canvas id="realtimeHumidityChart"></canvas>
-          </div>
-        </div>
+
         <div class="chart-card">
           <h3>📊 Humidity History</h3>
           <div class="chart-container">
@@ -429,9 +420,7 @@
     };
 
     let eventSource = null;
-    let realtimeChart = null;
     let historyChart = null;
-    let realtimeHumidityChart = null;
     let historyHumidityChart = null;
 
     // Utility functions
@@ -461,12 +450,27 @@
     }
 
     function updateConnectionStatus(status, text) {
-      const indicator = document.getElementById('connectionIndicator');
-      const statusText = document.getElementById('connectionStatus');
-
-      indicator.className = 'status-indicator status-' + status;
-      statusText.textContent = text;
+      // Legacy function - now handled by updateSensorStatus
       currentData.connected = (status === 'online');
+      updateDisplay(); // Trigger display update to reflect sensor status
+    }
+    
+    function updateSensorStatus(status) {
+      const sensorStatusEl = document.getElementById('sensorStatus');
+      
+      if (status === 'checking') {
+        sensorStatusEl.textContent = 'Checking...';
+        sensorStatusEl.className = 'metric-value status-checking';
+        currentData.connected = false;
+      } else if (status === 'online') {
+        sensorStatusEl.textContent = 'Online';
+        sensorStatusEl.className = 'metric-value status-online';
+        currentData.connected = true;
+      } else {
+        sensorStatusEl.textContent = 'Offline';
+        sensorStatusEl.className = 'metric-value status-offline';
+        currentData.connected = false;
+      }
     }
 
     function updateDisplay() {
@@ -480,17 +484,8 @@
       document.getElementById('currentHumidity').textContent = formatHumidity(currentData.humidity);
       document.getElementById('humidityTimestamp').textContent = formatTimestamp(currentData.humidityTimestamp);
 
-      // Update sensor status
-      const sensorStatusEl = document.getElementById('sensorStatus');
-
-      // Sensor status should only be Online when connected AND data received
-      if (currentData.connected && (currentData.temperature !== null || currentData.humidity !== null)) {
-        sensorStatusEl.textContent = 'Online';
-        sensorStatusEl.className = 'metric-value status-online';
-      } else {
-        sensorStatusEl.textContent = 'Offline';
-        sensorStatusEl.className = 'metric-value status-offline';
-      }
+      // Sensor status is now managed by updateSensorStatus() function
+      // Don't update it here to avoid overriding explicit status changes
 
       // Update stats
       document.getElementById('minTemp').textContent = formatTemperature(currentData.stats.minimum);
@@ -503,42 +498,6 @@
     }
 
     function initCharts() {
-      // Real-time Chart
-      const realtimeCtx = document.getElementById('realtimeChart').getContext('2d');
-      realtimeChart = new Chart(realtimeCtx, {
-        type: 'line',
-        data: {
-          labels: [],
-          datasets: [{
-            label: 'Temperature (°C)',
-            data: [],
-            borderColor: '#90caf9',
-            backgroundColor: 'rgba(144, 202, 249, 0.1)',
-            borderWidth: 2,
-            fill: true,
-            pointBackgroundColor: '#90caf9',
-            pointBorderColor: '#42a5f5',
-            pointRadius: 4,
-            pointHoverRadius: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          legend: { display: false },
-          scales: {
-            xAxes: [{
-              gridLines: { color: 'rgba(255,255,255,0.1)' },
-              ticks: { fontColor: '#b3b3b3', maxTicksLimit: 8 }
-            }],
-            yAxes: [{
-              gridLines: { color: 'rgba(255,255,255,0.1)' },
-              ticks: { fontColor: '#b3b3b3' }
-            }]
-          },
-          animation: { duration: 300 }
-        }
-      });
 
       // History Chart
       const historyCtx = document.getElementById('historyChart').getContext('2d');
@@ -575,42 +534,6 @@
         }
       });
 
-      // Real-time Humidity Chart
-      const realtimeHumidityCtx = document.getElementById('realtimeHumidityChart').getContext('2d');
-      realtimeHumidityChart = new Chart(realtimeHumidityCtx, {
-        type: 'line',
-        data: {
-          labels: [],
-          datasets: [{
-            label: 'Humidity (%)',
-            data: [],
-            borderColor: '#ff9800',
-            backgroundColor: 'rgba(255, 152, 0, 0.1)',
-            borderWidth: 2,
-            fill: true,
-            pointBackgroundColor: '#ff9800',
-            pointBorderColor: '#f57c00',
-            pointRadius: 4,
-            pointHoverRadius: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          legend: { display: false },
-          scales: {
-            xAxes: [{
-              gridLines: { color: 'rgba(255,255,255,0.1)' },
-              ticks: { fontColor: '#b3b3b3', maxTicksLimit: 8 }
-            }],
-            yAxes: [{
-              gridLines: { color: 'rgba(255,255,255,0.1)' },
-              ticks: { fontColor: '#b3b3b3', min: 0, max: 100 }
-            }]
-          },
-          animation: { duration: 300 }
-        }
-      });
 
       // History Humidity Chart
       const historyHumidityCtx = document.getElementById('historyHumidityChart').getContext('2d');
@@ -648,22 +571,7 @@
       });
     }
 
-    function updateRealtimeChart(reading) {
-      if (!realtimeChart) return;
 
-      const timestamp = new Date(reading.timestamp);
-      const timeLabel = timestamp.toLocaleTimeString();
-
-      // Keep only last 20 points
-      if (realtimeChart.data.labels.length >= 20) {
-        realtimeChart.data.labels.shift();
-        realtimeChart.data.datasets[0].data.shift();
-      }
-
-      realtimeChart.data.labels.push(timeLabel);
-      realtimeChart.data.datasets[0].data.push(reading.temperatureC);
-      realtimeChart.update(0); // 0 duration for smooth real-time updates
-    }
 
     function updateHistoryChart() {
       if (!historyChart || currentData.history.length === 0) return;
@@ -684,22 +592,7 @@
       historyChart.update();
     }
 
-    function updateRealtimeHumidityChart(reading) {
-      if (!realtimeHumidityChart) return;
 
-      const timestamp = new Date(reading.timestamp);
-      const timeLabel = timestamp.toLocaleTimeString();
-
-      // Keep only last 20 points
-      if (realtimeHumidityChart.data.labels.length >= 20) {
-        realtimeHumidityChart.data.labels.shift();
-        realtimeHumidityChart.data.datasets[0].data.shift();
-      }
-
-      realtimeHumidityChart.data.labels.push(timeLabel);
-      realtimeHumidityChart.data.datasets[0].data.push(reading.humidityPercent);
-      realtimeHumidityChart.update(0); // 0 duration for smooth real-time updates
-    }
 
     function updateHumidityHistoryChart() {
       if (!historyHumidityChart || currentData.humidityHistory.length === 0) return;
@@ -751,8 +644,20 @@
       }
     }
 
-    async function fetchInitialData() {
-      console.log('Fetching initial data...');
+    async function fetchInitialDataBackground() {
+      console.log('Fetching additional data in background...');
+      // Don't block the UI, just enhance it when data arrives
+      setTimeout(async () => {
+        try {
+          await fetchHistoryData();
+        } catch (error) {
+          console.error('Background data fetch failed:', error);
+        }
+      }, 100);
+    }
+
+    async function fetchHistoryData() {
+      console.log('Fetching history data...');
       try {
         // Fetch current temperature
         console.log('Fetching current temperature...');
@@ -823,7 +728,6 @@
         if (currentData.history.length > 0) {
           const recentPoints = currentData.history.slice(-10);
           recentPoints.forEach(function(reading) {
-            updateRealtimeChart(reading);
           });
         }
 
@@ -831,7 +735,6 @@
         if (currentData.humidityHistory.length > 0) {
           const recentHumidityPoints = currentData.humidityHistory.slice(-10);
           recentHumidityPoints.forEach(function(reading) {
-            updateRealtimeHumidityChart(reading);
           });
         }
 
@@ -847,19 +750,19 @@
 
     function connectSSE() {
       console.log('Connecting to SSE...');
+      updateSensorStatus('checking');
       if (eventSource) {
         eventSource.close();
       }
 
-      updateConnectionStatus('connecting', 'Connecting...');
+      updateSensorStatus('checking');
 
       try {
         eventSource = new EventSource('/events');
 
         eventSource.onopen = function() {
           console.log('SSE connection opened');
-          updateConnectionStatus('online', 'Connected');
-          updateDisplay(); // Update display when connection is established
+          updateSensorStatus('online');
         };
 
         eventSource.onmessage = function(event) {
@@ -899,7 +802,6 @@
               }
 
               // Update display and charts
-              updateRealtimeChart(reading);
               updateDisplay();
 
             } else if (data.type === 'humidity_update' && data.data) {
@@ -933,7 +835,6 @@
               }
 
               // Update display and charts
-              updateRealtimeHumidityChart(reading);
               updateDisplay();
             }
 
@@ -945,8 +846,7 @@
         eventSource.onerror = function(error) {
           console.error('SSE error:', error);
           console.log('SSE readyState:', eventSource.readyState);
-          updateConnectionStatus('offline', 'Disconnected');
-          updateDisplay(); // Update display when disconnected
+          updateSensorStatus('offline');
 
           // Attempt to reconnect after 3 seconds
           setTimeout(function() {
@@ -959,7 +859,7 @@
 
       } catch (error) {
         console.error('Failed to create SSE connection:', error);
-        updateConnectionStatus('offline', 'Connection failed');
+        updateSensorStatus('offline');
         updateDisplay();
       }
     }
@@ -971,9 +871,11 @@
         // Initialize charts first
         initCharts();
 
-        // Then fetch data and connect SSE
-        await fetchInitialData();
+        // Connect SSE immediately for instant data
         connectSSE();
+        
+        // Fetch additional data in background (don't await)
+        fetchInitialDataBackground();
 
       } catch (error) {
         console.error('Initialization failed:', error);

@@ -321,7 +321,7 @@ class Query(ObjectType):
 schema = Schema(query=Query)
 
 
-# Weather Station Collector - Sends SSE updates every second
+# OPTIMIZED Weather Station Collector - Only sends SSE when temperature changes
 class WeatherStationCollector:
     def __init__(self, temperature_sensor: TemperatureSensorReader, humidity_sensor: HumiditySensorReader = None):
         self.temperature_sensor = temperature_sensor
@@ -364,20 +364,24 @@ class WeatherStationCollector:
             
             if not db_reading:
                 self.logger.error("Failed to store temperature reading in database")
-                # Continue anyway to send SSE updates
+                return
             
             # SMART SSE: Only send when temperature changes significantly OR after max time
             should_send_sse = False
             send_reason = ""
             
-            # Always send SSE updates every second
-            should_send_sse = True
             if self.last_temperature is None:
+                # First reading - always send
+                should_send_sse = True
                 send_reason = "first_reading"
             elif abs(current_temp - self.last_temperature) >= self.temperature_threshold:
+                # Temperature changed significantly
+                should_send_sse = True
                 send_reason = f"temp_change_{abs(current_temp - self.last_temperature):.2f}°C"
-            else:
-                send_reason = "regular_update"
+            elif (current_time - self.last_sse_time) >= self.max_time_between_updates:
+                # Too much time has passed - send heartbeat update
+                should_send_sse = True
+                send_reason = "heartbeat_update"
             
             if should_send_sse:
                 temperature_data = {
@@ -431,11 +435,18 @@ class WeatherStationCollector:
             
             if not db_reading:
                 self.logger.error("Failed to store humidity reading in database")
-                # Continue anyway to send SSE updates
+                return
             
-            # Always send SSE updates for humidity every second
+            # Check if we should send SSE update for humidity
             current_time = time.time()
-            should_send_sse = True
+            should_send_sse = False
+            
+            if self.last_humidity is None:
+                should_send_sse = True
+            elif abs(current_humidity - self.last_humidity) >= 2.0:  # 2% threshold for humidity
+                should_send_sse = True
+            elif (current_time - self.last_sse_time) >= self.max_time_between_updates:
+                should_send_sse = True
             
             if should_send_sse:
                 humidity_data = {
@@ -526,53 +537,9 @@ def graphiql():
 @app.route('/events')
 def events():
     def event_stream():
-        # Send immediate connection confirmation with latest data
-        yield f"data: {json.dumps({'type': 'connected', 'timestamp': time.time()})}\n\n"
-        
-        # Immediately send latest temperature from database
-        try:
-            with db.get_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute("SELECT temperature_c, timestamp, sensor_type, sensor_id FROM temperature_readings ORDER BY timestamp DESC LIMIT 1")
-                temp_row = cursor.fetchone()
-                if temp_row:
-                    temp_data = {
-                        'temperature_c': temp_row[0],
-                        'timestamp_iso': temp_row[1],
-                        'sensor_type': temp_row[2],
-                        'sensor_id': temp_row[3]
-                    }
-                    sse_message = {
-                        'type': 'temperature_update',
-                        'data': temp_data,
-                        'timestamp': temp_row[1]
-                    }
-                    yield f"data: {json.dumps(sse_message)}\n\n"
-                
-                # Also send latest humidity
-                cursor.execute("SELECT humidity_percent, timestamp FROM humidity_readings ORDER BY timestamp DESC LIMIT 1")
-                humidity_row = cursor.fetchone()
-                if humidity_row:
-                    humidity_data = {
-                        'humidity_percent': humidity_row[0],
-                        'timestamp_iso': humidity_row[1],
-                        'sensor_type': 'mock',
-                        'sensor_id': 'default'
-                    }
-                    sse_message = {
-                        'type': 'humidity_update',
-                        'humidity_percent': humidity_row[0],
-                        'timestamp': humidity_row[1],
-                        'sensor_type': 'mock',
-                        'sensor_id': 'default'
-                    }
-                    yield f"data: {json.dumps(sse_message)}\n\n"
-        except Exception as e:
-            print(f"Error sending initial data: {e}")
-        
         while True:
             try:
-                data = sse_clients.get(timeout=5)  # Much shorter timeout
+                data = sse_clients.get(timeout=35)  # Slightly longer timeout
                 yield f"data: {json.dumps(data)}\n\n"
                 sse_clients.task_done()
             except:
@@ -629,12 +596,12 @@ def initialize_application():
         scheduler.add_job(
             func=collector.collect_all_data,
             trigger='interval',
-            seconds=300,  # Collect every 5 minutes
+            seconds=1,  # Still collect every second
             id='smart_temperature_collection'
         )
         scheduler.start()
         logger.info("SMART temperature collection scheduler started")
-        logger.info("SSE will send temperature updates every 5 minutes")
+        logger.info("SSE will only send updates when temperature changes >= 0.1°C")
         
         collector.collect_all_data()
         return True

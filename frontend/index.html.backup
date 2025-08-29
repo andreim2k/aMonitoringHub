@@ -350,14 +350,14 @@
           <div class="metric-value" id="minTemp">--°C</div>
         </div>
         <div class="metric-card stat-card">
-          <div class="metric-icon">🥵</div>
-          <div class="metric-label">Max Temperature</div>
-          <div class="metric-value" id="maxTemp">--°C</div>
-        </div>
-        <div class="metric-card stat-card">
           <div class="metric-icon">💨</div>
           <div class="metric-label">Min Humidity</div>
           <div class="metric-value" id="minHumidity">--%</div>
+        </div>
+        <div class="metric-card stat-card">
+          <div class="metric-icon">🥵</div>
+          <div class="metric-label">Max Temperature</div>
+          <div class="metric-value" id="maxTemp">--°C</div>
         </div>
         <div class="metric-card stat-card">
           <div class="metric-icon">💦</div>
