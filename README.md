@@ -1,350 +1,299 @@
 # @WeatherStation
 
-A modern, real-time web application for monitoring temperature data on ARM devices using GraphQL and Server-Sent Events (SSE).
+**Environmental sensors & climate insights** - A modern web application for monitoring temperature and humidity data with real-time updates and intelligent database management.
 
-## Features
+## 🎯 Features
 
-- **Real-time temperature monitoring** with Server-Sent Events (SSE)
-- **Interactive charts** using Chart.js for beautiful data visualization
-- **GraphQL API** for efficient data queries
-- **Modern responsive web interface** with vanilla JavaScript
-- **SQLite database** for data persistence
-- **Background process management** with monitoring scripts
-- **Temperature sensor abstraction** supporting multiple sensor types
-- **Professional glassmorphism UI** with aTorrent-inspired design
+### Core Monitoring
+- **🌡️ Temperature & Humidity monitoring** with 5-minute intervals for optimal sensor lifespan
+- **📡 Real-time updates** via Server-Sent Events (SSE) with instant connection
+- **📊 Interactive historical charts** using Chart.js for trend analysis
+- **📈 Statistical insights** with min/max/average calculations
+- **🗄️ Intelligent database management** with automatic rollover every 10,000 readings
 
-## Architecture
+### User Experience  
+- **⚡ Instant page loading** - Current data displays immediately from database
+- **🎨 Clean, modern UI** with professional glassmorphism design
+- **📱 Responsive interface** works on desktop, tablet, and mobile
+- **🚦 Smart sensor status** - Visual indicators (Checking... → Online/Offline)
+- **🔄 Auto-recovery** - Automatic reconnection and error handling
 
-- **Backend**: Python with GraphQL (Graphene), Flask, and SQLAlchemy
-- **Real-time Updates**: Server-Sent Events (SSE) for live temperature streaming
-- **Frontend**: Vanilla HTML/CSS/JavaScript with Chart.js for interactive charts
+### System Management
+- **🚀 Auto-start on boot** - Systemd service configuration
+- **🔧 Background process management** with monitoring scripts
+- **📦 Automated database archiving** keeps current DB fast and efficient
+- **💾 Data preservation** - All historical data safely archived
 
-## Supported Platforms
+## 🏗️ Architecture
 
-**Designed specifically for ARM devices:**
-- Raspberry Pi (all models)
-- Orange Pi
-- Banana Pi
-- NVIDIA Jetson series
-- Other ARM-based single-board computers
+### Backend Stack
+- **Python 3.11** with GraphQL (Graphene) and Flask
+- **SQLAlchemy ORM** for database operations
+- **SQLite database** with optimized indexes
+- **APScheduler** for background sensor reading
+- **Server-Sent Events** for real-time data streaming
 
-**Requirements:**
-- ARM-based processor (ARMv6, ARMv7, ARMv8/AArch64)
-- Linux operating system
-- Python 3.7+
-- GPIO access for temperature sensors
+### Frontend Stack
+- **Vanilla HTML/CSS/JavaScript** - No framework dependencies
+- **Chart.js 2.x** for Safari-compatible interactive charts
+- **Modern CSS Grid** with glassmorphism styling
+- **Progressive enhancement** with graceful degradation
 
-## Supported Platforms
+### Database Features
+- **Automatic rollover** at 10,000 readings
+- **Timestamped archives** (e.g., `weatherstation_archive_20250829_165704.db`)
+- **Optimized indexes** for fast historical queries
+- **ACID compliance** with transaction safety
 
-**Designed specifically for ARM devices:**
-- Raspberry Pi (all models)
-- Orange Pi
-- Banana Pi
-- NVIDIA Jetson series
-- Other ARM-based single-board computers
+## 🖥️ Supported Platforms
 
-**Requirements:**
-- ARM-based processor (ARMv6, ARMv7, ARMv8/AArch64)
-- Linux operating system
-- Python 3.7+
-- GPIO access for temperature sensors
-- **Database**: SQLite with SQLAlchemy ORM for temperature data storage
-- **Deployment**: Local network accessible with background process management
+**Optimized for ARM devices:**
+- 🍓 **Raspberry Pi** (all models)
+- 🍊 **Orange Pi**  
+- 🍌 **Banana Pi**
+- 🚀 **NVIDIA Jetson** series
+- 🔧 **Other ARM SBCs**
 
-## Technology Stack
+**Also supports:**
+- 💻 **x86/x64 Linux** systems
+- 🐧 **Debian/Ubuntu** distributions
 
-### Backend
-- **Python 3.7+** - Core runtime
-- **Flask** - Web framework
-- **Graphene** - GraphQL implementation for Python
-- **SQLAlchemy** - Database ORM
-- **SQLite** - Database engine
-- **Server-Sent Events (SSE)** - Real-time temperature streaming
-- **APScheduler** - Background temperature collection
+## 📡 Sensor Support
 
-### Frontend
-- **Vanilla JavaScript** - No heavy frameworks, lightweight and fast
-- **Chart.js 2.9.4** - Interactive temperature charts (real-time & historical)
-- **Pure CSS** - Modern glassmorphism design with gradients
-- **Server-Sent Events (SSE)** - Real-time updates from backend
+### Temperature Sensors
+- **🌡️ Thermal zones** (`/sys/class/thermal/`)
+- **🔌 Hardware sensors** via system interfaces
+- **🧪 Mock sensor** for development and testing
 
-### Sensors
-- **System thermal sensors** (`/sys/class/thermal/thermal_zone*/temp`)
-- **Mock sensor** for development and testing
-- **Extensible sensor interface** for adding new sensor types
+### Humidity Sensors  
+- **💧 Mock humidity sensor** (easily extensible for real sensors)
+- **🔧 Extensible architecture** for additional sensor types
 
-## Project Structure
+## 🚀 Quick Start
 
-```
-aWeatherStation/
-├── backend/
-│   ├── app.py              # Main GraphQL + SSE application
-│   ├── models.py           # SQLAlchemy database models
-│   ├── sensor_reader.py    # Temperature sensor abstraction
-│   └── weatherstation.db      # SQLite database (created at runtime)
-├── frontend/
-│   └── index.html          # Complete single-file web application
-├── scripts/
-│   └── app.sh              # Process management script
-├── logs/                   # Application logs (created at runtime)
-├── venv/                   # Python virtual environment
-├── requirements.txt        # Python dependencies
-└── README.md
+### Installation
+```bash
+# Clone the repository
+git clone <repository-url>
+cd aWeatherStation
+
+# Install dependencies
+python3 -m venv venv
+source venv/bin/activate
+pip install -r backend/requirements.txt
 ```
 
-## API Endpoints
+### Start the Application
+```bash
+# Make script executable
+chmod +x scripts/app.sh
 
-### GraphQL Endpoint
-- **URL**: `http://192.168.50.2:5000/graphql`
-- **Method**: POST
-- **Content-Type**: application/json
+# Start the weather station
+./scripts/app.sh start
 
-#### Available Queries
+# Check status
+./scripts/app.sh status
+
+# Stop the service
+./scripts/app.sh stop
+```
+
+### Auto-Start on Boot
+```bash
+# Configure systemd service (already done if following this guide)
+sudo systemctl enable aweatherstation.service
+sudo systemctl start aweatherstation.service
+
+# Check service status
+sudo systemctl status aweatherstation.service
+```
+
+## 🌐 Access Points
+
+- **🏠 Main Interface**: http://192.168.50.2:5000/
+- **🔌 GraphQL Playground**: http://192.168.50.2:5000/graphql  
+- **📡 SSE Endpoint**: http://192.168.50.2:5000/events
+
+## 📊 API Examples
+
+### GraphQL Queries
 ```graphql
-query {
-  # Health check
-  health {
-    status
-    timestamp
-    database
-  }
-  
-  # Current temperature
+# Current temperature
+{
   currentTemperature {
     temperatureC
     timestamp
     sensorType
     sensorId
   }
-  
-  # Temperature history
+}
+
+# Temperature history
+{
   temperatureHistory(limit: 50) {
     temperatureC
     timestamp
     sensorId
   }
-  
-  # Temperature statistics
+}
+
+# Statistics
+{
   temperatureStatistics {
+    count
     average
     minimum
     maximum
-    count
+  }
+}
+```
+
+### Server-Sent Events
+```javascript
+const eventSource = new EventSource('/events');
+
+eventSource.onmessage = function(event) {
+  const data = JSON.parse(event.data);
+  
+  if (data.type === 'temperature_update') {
+    console.log('Temperature:', data.data.temperature_c);
   }
   
-  # Sensor information
-  sensorInfo {
-    sensorType
-    sensorId
-    isActive
-    lastReading
+  if (data.type === 'humidity_update') {
+    console.log('Humidity:', data.humidity_percent);
   }
-}
+};
 ```
 
-### Server-Sent Events (SSE)
-- **URL**: `http://192.168.50.2:5000/events`
-- **Method**: GET
-- **Content-Type**: text/event-stream
+## 🔧 Configuration
 
-Real-time temperature updates are streamed as JSON events:
-```json
-{
-  "type": "temperature_update",
-  "data": {
-    "temperature_c": 36.5,
-    "timestamp_iso": "2025-08-28T04:15:30.123456+00:00",
-    "sensor_type": "thermal_zone",
-    "sensor_id": "cpu-thermal",
-    "change_reason": "temp_change_0.20°C",
-    "previous_temp": 36.3
-  }
-}
-```
-
-### Static Files
-- **Frontend**: `http://192.168.50.2:5000/` (serves index.html)
-
-## Getting Started
-
-### Prerequisites
-- **ARM-based device** (Raspberry Pi, Orange Pi, etc.)
-- Python 3.7 or higher
-- Linux operating system with GPIO support
-- Modern web browser (Chrome, Firefox, Safari, Edge)
-
-### Installation
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/andreim2k/aWeatherStation.git
-   cd aWeatherStation
-   ```
-
-2. **Set up Python virtual environment**:
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate
-   ```
-
-3. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Initialize the database** (automatic on first run):
-   ```bash
-   cd backend
-   python app.py --host 0.0.0.0 --port 5000
-   ```
-
-### Running the Application
-
-#### Using the Management Script (Recommended)
+### Environment Settings
 ```bash
-# Start the server
-./scripts/app.sh start
+# Sensor reading interval (default: 5 minutes)
+--heartbeat 300
 
-# Check status
-./scripts/app.sh status
+# Temperature change threshold for logging
+--threshold 0.1
 
-# View logs
-./scripts/app.sh logs
-
-# Stop the server
-./scripts/app.sh stop
-
-# Restart the server
-./scripts/app.sh restart
-
-# Test endpoints
-./scripts/app.sh test
+# Server configuration  
+--host 0.0.0.0 --port 5000
 ```
 
-#### Manual Execution
+### Database Management
+- **Automatic rollover**: Every 10,000 readings
+- **Archive naming**: `weatherstation_archive_YYYYMMDD_HHMMSS.db`
+- **Performance**: Optimized indexes for fast queries
+- **Size management**: Current DB stays under ~1MB for optimal speed
+
+## 🛠️ Recent Improvements (August 2025)
+
+### Performance Optimizations
+- ✅ **Instant SSE connection** - Eliminated 15-second delays
+- ✅ **Immediate data loading** - Current values display instantly from database
+- ✅ **Background initialization** - Heavy queries don't block UI loading
+- ✅ **Optimized sensor intervals** - 5-minute readings for sensor longevity
+
+### User Interface Enhancements  
+- ✅ **Removed redundant connection status** from header
+- ✅ **Enhanced sensor status indicators** with color-coded states
+- ✅ **Cleaned up real-time charts** - Focus on essential data and history
+- ✅ **Updated terminology** - "Total Readings" instead of "Data Points"
+- ✅ **Professional subtitle** - "Environmental sensors & climate insights"
+
+### System Reliability
+- ✅ **Systemd service integration** - Auto-start on boot
+- ✅ **Database rollover system** - Automatic archiving every 10,000 readings
+- ✅ **Improved error handling** - Graceful degradation and recovery
+- ✅ **Database permission fixes** - Resolved readonly database issues
+
+### Developer Experience
+- ✅ **Enhanced logging** with detailed SSE debugging
+- ✅ **Modular architecture** with clean separation of concerns
+- ✅ **Comprehensive API documentation** with GraphQL schema
+- ✅ **Automated testing** capabilities for rollover functionality
+
+## 📁 File Structure
+
+```
+aWeatherStation/
+├── backend/
+│   ├── app.py              # Main Flask application with GraphQL & SSE
+│   ├── models.py           # SQLAlchemy models with rollover functionality  
+│   ├── sensor_reader.py    # Temperature & humidity sensor abstraction
+│   ├── weatherstation.db  # Current SQLite database (auto-managed)
+│   └── weatherstation_archive_*.db  # Archived databases (10K+ readings)
+├── frontend/
+│   └── index.html          # Modern web interface
+├── scripts/
+│   └── app.sh              # Process management script  
+├── logs/
+│   ├── backend.out         # Application output logs
+│   └── backend.log         # Detailed application logs
+└── /etc/systemd/system/aweatherstation.service  # System service
+```
+
+## 🔄 Database Rollover
+
+The system automatically manages database size and performance:
+
+### Automatic Rollover Process
+1. **Monitor**: Checks total readings after each sensor data insertion
+2. **Trigger**: When total reaches 10,000 readings (temp + humidity combined)
+3. **Archive**: Moves current `weatherstation.db` → `weatherstation_archive_TIMESTAMP.db`
+4. **Reset**: Creates fresh `weatherstation.db` with empty tables
+5. **Continue**: Seamlessly continues data collection
+
+### Archive Management
+- **Archive files**: `weatherstation_archive_20250829_165704.db`
+- **Data preservation**: All historical data safely stored
+- **Query capability**: Archived databases fully functional for historical analysis
+- **Storage efficiency**: Current database optimized for real-time performance
+
+## 🚦 Status Indicators
+
+### Sensor Status Colors
+- **🟠 Checking...** - Initial connection state (orange with pulse animation)
+- **🟢 Online** - Sensors connected and data flowing (green)
+- **🔴 Offline** - Connection lost or sensor failure (red)
+
+### System Health
+- **Total Readings**: Count of all sensor measurements
+- **Current Values**: Latest temperature and humidity with timestamps
+- **Historical Trends**: Charts showing data patterns over time
+- **Statistics**: Min/Max/Average values for analysis
+
+## 📈 Monitoring & Logs
+
+### Service Management
 ```bash
-cd backend
-source ../venv/bin/activate
-python app.py --host 0.0.0.0 --port 5000
+# Service status
+systemctl status aweatherstation.service
+
+# View real-time logs  
+journalctl -u aweatherstation.service -f
+
+# Application logs
+tail -f logs/backend.out
+tail -f logs/backend.log
 ```
 
-## Network Access
+### Performance Monitoring
+- **SSE connection health**: Real-time connection status
+- **Database performance**: Query timing and rollover events
+- **Sensor readings**: Success/failure rates and error handling
+- **System resources**: Memory and CPU usage tracking
 
-When running, the application will be accessible at:
-- **Frontend Interface**: http://192.168.50.2:5000/
-- **GraphQL Endpoint**: http://192.168.50.2:5000/graphql
-- **SSE Events Stream**: http://192.168.50.2:5000/events
+## 🔮 Future Enhancements
 
-## Dashboard Features
-
-### 🌡️ Main Temperature Display
-- **Large temperature reading**: Current temperature prominently displayed
-- **Last update timestamp**: Shows when the reading was taken
-- **Live updates**: Automatically refreshes via SSE
-
-### 📊 Statistics Cards
-- **Sensor Status**: Online/Offline with sensor type information
-- **Minimum Temperature**: Lowest recorded temperature
-- **Maximum Temperature**: Highest recorded temperature  
-- **Data Points**: Total number of temperature readings collected
-
-### 📈 Interactive Charts
-- **Real-time Chart**: Live updating line chart showing last 20 temperature readings
-- **Historical Chart**: Displays up to 50 historical temperature readings
-- **Responsive Design**: Charts adapt to screen size and are mobile-friendly
-
-### 🔄 Real-time Features
-- **Live connection status**: Green/yellow/red indicator in header
-- **Automatic reconnection**: SSE connection auto-recovers from interruptions
-- **Smooth animations**: Chart updates with smooth transitions
-- **Error handling**: User-friendly error messages with retry options
-
-## Temperature Sensors
-
-The application automatically detects and uses available temperature sensors:
-
-1. **System Thermal Sensors**: Reads from `/sys/class/thermal/thermal_zone*/temp`
-2. **Mock Sensor**: Used when no physical sensors are available (generates realistic temperature data)
-3. **Extensible Design**: Easy to add support for additional sensor types
-
-### Sensor Interface
-- Automatic sensor detection and fallback
-- Configurable reading intervals (default: 1 second)
-- Error handling and sensor health monitoring
-- Temperature change detection with configurable thresholds
-
-## Development
-
-### GraphQL Schema
-The GraphQL schema is automatically generated and can be explored by sending introspection queries to `/graphql`.
-
-### Real-time Updates
-Temperature readings are:
-1. Collected every second by the background collector using APScheduler
-2. Stored in the SQLite database
-3. Broadcast to connected clients via Server-Sent Events
-4. Displayed in real-time on the web interface with smooth chart animations
-
-### Database Schema
-```sql
-CREATE TABLE temperature_readings (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    temperature REAL NOT NULL,
-    unit TEXT DEFAULT 'C',
-    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-    sensor_id TEXT DEFAULT 'default'
-);
-```
-
-### Adding New Sensor Types
-To add a new sensor type, extend the `sensor_reader.py` module:
-
-1. Create a new sensor class implementing the sensor interface
-2. Add detection logic to `get_sensor_reader()` function
-3. Test with mock data before deploying to hardware
-
-## Process Management
-
-The `scripts/app.sh` script provides comprehensive process management:
-
-- **Start/Stop/Restart**: Full process lifecycle management
-- **Status Monitoring**: Real-time status with resource usage
-- **Log Management**: Centralized logging with rotation
-- **Health Checks**: Automatic endpoint testing
-- **Background Execution**: Runs as daemon process with nohup
-
-## Troubleshooting
-
-### Common Issues
-
-1. **No Temperature Data**:
-   - Check if thermal sensors exist: `ls /sys/class/thermal/`
-   - Application automatically falls back to mock sensor
-
-2. **Connection Issues**:
-   - Verify port 5000 is available: `netstat -tuln | grep 5000`
-   - Check firewall settings for local network access
-
-3. **Database Issues**:
-   - Database is created automatically on first run
-   - Check permissions in `backend/` directory
-
-4. **Chart Not Loading**:
-   - Ensure internet connection for Chart.js CDN
-   - Check browser console for JavaScript errors
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## License
-
-This project is open source and available under the MIT License.
+- **📊 Multi-sensor support** - Easy addition of pressure, UV, wind sensors
+- **☁️ Cloud integration** - Optional cloud storage for archived data
+- **📧 Alert system** - Notifications for extreme values or sensor failures  
+- **🔌 API extensions** - REST API alongside GraphQL
+- **📱 Mobile app** - Native mobile interface
+- **🌍 Remote access** - Secure external connectivity options
 
 ---
 
-**@WeatherStation** - Real-time temperature monitoring made beautiful and simple.
+**Built with ❤️ for reliable environmental monitoring**
+
+*Last updated: August 29, 2025*
