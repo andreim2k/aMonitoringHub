@@ -1,0 +1,479 @@
+2025-08-29 13:38:39,606 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.50.2:5000
+2025-08-29 13:38:39,608 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-08-29 13:38:41,087 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:38:41] "GET /events HTTP/1.1" 200 -
+2025-08-29 13:38:45,011 - werkzeug - INFO - 127.0.0.1 - - [29/Aug/2025 13:38:45] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:38:45,791 - werkzeug - INFO - 127.0.0.1 - - [29/Aug/2025 13:38:45] "GET /events HTTP/1.1" 200 -
+2025-08-29 13:38:48,411 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 307, in write
+    self.wfile.write(b"\r\n")
+  File "/usr/lib/python3.11/socketserver.py", line 834, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-08-29 13:38:51,667 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:38:51] "GET / HTTP/1.1" 200 -
+2025-08-29 13:38:51,940 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:38:51] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:38:51,995 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:38:51] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:38:52,621 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:38:52] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:38:53,154 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.11/socketserver.py", line 834, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-08-29 13:38:53,884 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:38:53] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:39:07,577 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:39:07] "GET / HTTP/1.1" 200 -
+2025-08-29 13:39:07,735 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:39:07] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:39:07,845 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:39:07] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:39:08,240 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:39:08] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:39:09,708 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:39:09] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:39:10,844 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:39:10] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:39:18,010 - werkzeug - INFO - 127.0.0.1 - - [29/Aug/2025 13:39:18] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:39:18,195 - werkzeug - INFO - 127.0.0.1 - - [29/Aug/2025 13:39:18] "GET /events HTTP/1.1" 200 -
+2025-08-29 13:39:21,114 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 307, in write
+    self.wfile.write(b"\r\n")
+  File "/usr/lib/python3.11/socketserver.py", line 834, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-08-29 13:39:27,608 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:39:27] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:39:29,149 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:39:29] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:39:29,315 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:39:29] "GET /events HTTP/1.1" 200 -
+2025-08-29 13:39:33,734 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:39:33] "GET / HTTP/1.1" 200 -
+2025-08-29 13:39:33,807 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:39:33] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:39:33,852 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:39:33] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:39:34,119 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:39:34] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:39:36,422 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:39:36] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:39:37,348 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.11/socketserver.py", line 834, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-08-29 13:39:50,883 - werkzeug - INFO - 192.168.50.215 - - [29/Aug/2025 13:39:50] "GET /events HTTP/1.1" 200 -
+2025-08-29 13:39:52,248 - werkzeug - INFO - 192.168.50.215 - - [29/Aug/2025 13:39:52] "GET / HTTP/1.1" 200 -
+2025-08-29 13:39:52,431 - werkzeug - INFO - 192.168.50.215 - - [29/Aug/2025 13:39:52] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:39:52,537 - werkzeug - INFO - 192.168.50.215 - - [29/Aug/2025 13:39:52] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:39:52,885 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:39:52] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:39:52,912 - werkzeug - INFO - 192.168.50.215 - - [29/Aug/2025 13:39:52] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:39:53,020 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:39:53] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:39:54,300 - werkzeug - INFO - 192.168.50.215 - - [29/Aug/2025 13:39:54] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:39:55,837 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 309, in write
+    self.wfile.write(data)
+  File "/usr/lib/python3.11/socketserver.py", line 834, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-08-29 13:39:55,916 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:39:55] "GET /events HTTP/1.1" 200 -
+2025-08-29 13:40:09,757 - werkzeug - INFO - 192.168.50.215 - - [29/Aug/2025 13:40:09] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:40:09,903 - werkzeug - INFO - 192.168.50.215 - - [29/Aug/2025 13:40:09] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:40:10,259 - werkzeug - INFO - 192.168.50.215 - - [29/Aug/2025 13:40:10] "GET /events HTTP/1.1" 200 -
+2025-08-29 13:40:18,538 - werkzeug - INFO - 192.168.50.215 - - [29/Aug/2025 13:40:18] "GET / HTTP/1.1" 200 -
+2025-08-29 13:40:18,612 - werkzeug - INFO - 192.168.50.215 - - [29/Aug/2025 13:40:18] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:40:18,657 - werkzeug - INFO - 192.168.50.215 - - [29/Aug/2025 13:40:18] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:40:18,935 - werkzeug - INFO - 192.168.50.215 - - [29/Aug/2025 13:40:18] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:40:19,973 - werkzeug - INFO - 192.168.50.215 - - [29/Aug/2025 13:40:19] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:40:22,286 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.11/socketserver.py", line 834, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-08-29 13:40:35,333 - werkzeug - INFO - 192.168.50.215 - - [29/Aug/2025 13:40:35] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:40:35,504 - werkzeug - INFO - 192.168.50.215 - - [29/Aug/2025 13:40:35] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:40:36,502 - werkzeug - INFO - 192.168.50.215 - - [29/Aug/2025 13:40:36] "GET /events HTTP/1.1" 200 -
+2025-08-29 13:41:29,043 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:41:29] "GET / HTTP/1.1" 200 -
+2025-08-29 13:41:29,117 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:41:29] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:41:29,179 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:41:29] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:41:29,481 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:41:29] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:41:30,671 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.11/socketserver.py", line 834, in write
+    self._sock.sendall(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-08-29 13:41:30,799 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:41:30] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:41:32,278 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.11/socketserver.py", line 834, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-08-29 13:41:43,121 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:41:43] "GET / HTTP/1.1" 200 -
+2025-08-29 13:41:43,281 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:41:43] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-08-29 13:41:43,296 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:41:43] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:41:43,417 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:41:43] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:41:43,775 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:41:43] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:41:46,588 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:41:46] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:41:46,604 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:41:46] "[36mGET / HTTP/1.1[0m" 304 -
+2025-08-29 13:41:46,878 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:41:46] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:41:47,157 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:41:47] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:41:47,266 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:41:47] "GET /events HTTP/1.1" 200 -
+2025-08-29 13:41:47,285 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:41:47] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:41:47,689 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:41:47] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:41:47,753 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:41:47] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:41:48,971 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:41:48] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:42:04,927 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:42:04] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:42:05,112 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:42:05] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:42:06,712 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:42:06] "GET /events HTTP/1.1" 200 -
+2025-08-29 13:42:09,384 - werkzeug - INFO - 192.168.50.215 - - [29/Aug/2025 13:42:09] "GET / HTTP/1.1" 200 -
+2025-08-29 13:42:09,469 - werkzeug - INFO - 192.168.50.215 - - [29/Aug/2025 13:42:09] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:42:09,512 - werkzeug - INFO - 192.168.50.215 - - [29/Aug/2025 13:42:09] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:42:09,882 - werkzeug - INFO - 192.168.50.215 - - [29/Aug/2025 13:42:09] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:42:10,905 - werkzeug - INFO - 192.168.50.215 - - [29/Aug/2025 13:42:10] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:42:13,809 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:42:13] "[36mGET / HTTP/1.1[0m" 304 -
+2025-08-29 13:42:14,265 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:42:14] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:42:14,430 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:42:14] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:42:14,810 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:42:14] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:42:18,944 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:42:18] "[36mGET / HTTP/1.1[0m" 304 -
+2025-08-29 13:42:20,293 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) database is locked
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-08-29 13:42:20,316 - __main__.WeatherStationCollector - ERROR - Failed to store humidity reading in database
+2025-08-29 13:42:21,303 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:42:21] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:42:22,901 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:42:22] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:42:23,064 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 307, in write
+    self.wfile.write(b"\r\n")
+  File "/usr/lib/python3.11/socketserver.py", line 834, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-08-29 13:42:23,373 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:42:23] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:42:23,918 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:42:23] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:42:28,739 - werkzeug - INFO - 192.168.50.215 - - [29/Aug/2025 13:42:28] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:42:29,564 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:42:29] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:42:30,071 - werkzeug - INFO - 192.168.50.215 - - [29/Aug/2025 13:42:30] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:42:33,075 - werkzeug - INFO - 192.168.50.215 - - [29/Aug/2025 13:42:33] "GET /events HTTP/1.1" 200 -
+2025-08-29 13:42:38,925 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 307, in write
+    self.wfile.write(b"\r\n")
+  File "/usr/lib/python3.11/socketserver.py", line 834, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-08-29 13:42:45,728 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:42:45] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:42:45,806 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:42:45] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:42:47,662 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:42:47] "GET /events HTTP/1.1" 200 -
+2025-08-29 13:42:47,728 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.11/socketserver.py", line 834, in write
+    self._sock.sendall(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-08-29 13:43:54,105 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:43:54] "[36mGET / HTTP/1.1[0m" 304 -
+2025-08-29 13:43:54,640 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.11/socketserver.py", line 834, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-08-29 13:43:54,714 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:43:54] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:43:54,829 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:43:54] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:43:55,098 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:43:55] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:43:56,031 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:43:56] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:01,373 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:01] "[36mGET / HTTP/1.1[0m" 304 -
+2025-08-29 13:44:01,538 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:01] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:01,693 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:01] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:02,796 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:02] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:03,809 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:03] "[36mGET / HTTP/1.1[0m" 304 -
+2025-08-29 13:44:04,072 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:04] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:05,601 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:05] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:06,027 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:06] "GET / HTTP/1.1" 200 -
+2025-08-29 13:44:06,281 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:06] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:06,438 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:06] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:06,657 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:06] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:07,148 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:07] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:08,147 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:08] "[36mGET / HTTP/1.1[0m" 304 -
+2025-08-29 13:44:08,425 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:08] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:13,422 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) database is locked
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-08-29 13:44:13,444 - __main__.WeatherStationCollector - ERROR - Failed to store humidity reading in database
+2025-08-29 13:44:13,581 - models - ERROR - Error getting recent readings: (sqlite3.OperationalError) database is locked
+[SQL: SELECT temperature_readings.id AS temperature_readings_id, temperature_readings.timestamp AS temperature_readings_timestamp, temperature_readings.temperature_c AS temperature_readings_temperature_c, temperature_readings.sensor_type AS temperature_readings_sensor_type, temperature_readings.sensor_id AS temperature_readings_sensor_id 
+FROM temperature_readings ORDER BY temperature_readings.timestamp DESC
+ LIMIT ? OFFSET ?]
+[parameters: (1, 0)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-08-29 13:44:13,599 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:13] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:15,317 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:15] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:15,884 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:15] "[36mGET / HTTP/1.1[0m" 304 -
+2025-08-29 13:44:16,001 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:16] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:16,476 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:16] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:16,701 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:16] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:17,296 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:17] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:18,034 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:18] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:19,152 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:19] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:20,357 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:20] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:22,848 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:22] "[36mGET / HTTP/1.1[0m" 304 -
+2025-08-29 13:44:23,103 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:23] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:23,196 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:23] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:23,552 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:23] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:28,947 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) database is locked
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-08-29 13:44:28,957 - __main__.WeatherStationCollector - ERROR - Failed to store humidity reading in database
+2025-08-29 13:44:31,308 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:31] "[36mGET / HTTP/1.1[0m" 304 -
+2025-08-29 13:44:33,821 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:33] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:35,068 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) database is locked
+[SQL: INSERT INTO temperature_readings (timestamp, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?)]
+[parameters: ('2025-08-29 13:44:30.004267', 46.7, 'thermal_zone', 'cpu-thermal')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-08-29 13:44:35,083 - __main__.WeatherStationCollector - ERROR - Failed to store temperature reading in database
+2025-08-29 13:44:35,234 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:35] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:35,335 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:35] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:35,830 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:35] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:39,739 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:39] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:40,617 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:40] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:58,758 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:58] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:58,838 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:58] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:44:58,877 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:44:58] "GET /events HTTP/1.1" 200 -
+2025-08-29 13:45:25,891 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:45:25] "GET / HTTP/1.1" 200 -
+2025-08-29 13:45:25,989 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:45:25] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:45:26,037 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:45:26] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:45:26,301 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:45:26] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:45:26,905 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 312, in write
+    self.wfile.write(b"\r\n")
+  File "/usr/lib/python3.11/socketserver.py", line 834, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-08-29 13:45:27,777 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:45:27] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:45:43,703 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:45:43] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:45:43,812 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:45:43] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:45:43,856 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:45:43] "GET /events HTTP/1.1" 200 -
+2025-08-29 13:46:13,258 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:46:13] "GET / HTTP/1.1" 200 -
+2025-08-29 13:46:13,345 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:46:13] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:46:13,391 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:46:13] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:46:13,686 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:46:13] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:46:14,477 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 307, in write
+    self.wfile.write(b"\r\n")
+  File "/usr/lib/python3.11/socketserver.py", line 834, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/root/aWeatherStation/venv/lib/python3.11/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-08-29 13:46:14,873 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:46:14] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:46:30,198 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:46:30] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:46:30,304 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:46:30] "POST /graphql HTTP/1.1" 200 -
+2025-08-29 13:46:30,334 - werkzeug - INFO - 192.168.50.246 - - [29/Aug/2025 13:46:30] "GET /events HTTP/1.1" 200 -
