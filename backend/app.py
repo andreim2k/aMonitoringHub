@@ -1,5 +1,5 @@
 """
-Optimized GraphQL + SSE Flask application for aTemperature monitoring system.
+Optimized GraphQL + SSE Flask application for aWeatherStation monitoring system.
 
 Features:
 - GraphQL API using pure graphene
@@ -28,15 +28,15 @@ import graphene
 from graphene import ObjectType, String, Float, List as GrapheneList, Field, Int, Schema
 
 # Import our modules
-from models import init_database, db, TemperatureReading as DBTemperatureReading
-from sensor_reader import TemperatureSensorReader
+from models import init_database, db, TemperatureReading as DBTemperatureReading, HumidityReading as DBHumidityReading
+from sensor_reader import TemperatureSensorReader, HumiditySensorReader
 
 # Configure logging
 logging.basicConfig(
     level=logging.ERROR,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('../logs/backend.log'),
+        logging.FileHandler('logs/backend.log'),
         logging.StreamHandler()
     ]
 )
@@ -47,7 +47,13 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'temperature-monitoring-graphql-2025'
 
 # Enable CORS
-CORS(app)
+CORS(app, resources={
+    r"/*": {
+        "origins": "*",
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization", "Cache-Control"]
+    }
+})
 
 # Global variables
 temperature_sensor = None
@@ -72,6 +78,24 @@ class TemperatureStatistics(ObjectType):
     maximum = Float()
     hours_back = Int()
 
+
+
+
+class HumidityReading(ObjectType):
+    id = Int()
+    humidity_percent = Float()
+    timestamp = String()
+    timestamp_unix = Float()
+    sensor_type = String()
+    sensor_id = String()
+
+
+class HumidityStatistics(ObjectType):
+    count = Int()
+    average = Float()
+    minimum = Float()
+    maximum = Float()
+    hours_back = Int()
 
 class SensorInfo(ObjectType):
     sensor_type = String()
@@ -102,6 +126,18 @@ class Query(ObjectType):
         hours=Int(default_value=24)
     )
     sensor_info = Field(SensorInfo)
+
+    # Humidity queries
+    current_humidity = Field(HumidityReading)
+    humidity_history = GrapheneList(
+        HumidityReading,
+        range=String(default_value="daily"),
+        limit=Int(default_value=1000)
+    )
+    humidity_statistics = Field(
+        HumidityStatistics,
+        hours=Int(default_value=24)
+    )
 
     def resolve_health(self, info):
         try:
@@ -212,17 +248,88 @@ class Query(ObjectType):
             return None
 
 
+
+    # Humidity resolvers
+    def resolve_current_humidity(self, info):
+        try:
+            recent_readings = db.get_recent_humidity_readings(limit=1)
+            if not recent_readings:
+                return None
+                
+            reading = recent_readings[0]
+            return HumidityReading(
+                id=reading.id,
+                humidity_percent=reading.humidity_percent,
+                timestamp=reading.timestamp.isoformat(),
+                timestamp_unix=reading.timestamp.timestamp(),
+                sensor_type=reading.sensor_type,
+                sensor_id=reading.sensor_id
+            )
+        except Exception as e:
+            logger.error(f'Error getting current humidity: {e}')
+            return None
+            
+    def resolve_humidity_history(self, info, range='daily', limit=1000):
+        try:
+            if range == 'recent':
+                readings = db.get_recent_humidity_readings(limit=limit)
+            elif range == 'daily':
+                readings = db.get_recent_humidity_readings(limit=min(limit, 1440))  # Max 1 day of minute readings
+            elif range == 'weekly':
+                readings = db.get_recent_humidity_readings(limit=min(limit, 10080))  # Max 1 week of minute readings
+            else:
+                readings = db.get_recent_humidity_readings(limit=limit)
+                
+            return [
+                HumidityReading(
+                    id=reading.id,
+                    humidity_percent=reading.humidity_percent,
+                    timestamp=reading.timestamp.isoformat(),
+                    timestamp_unix=reading.timestamp.timestamp(),
+                    sensor_type=reading.sensor_type,
+                    sensor_id=reading.sensor_id
+                )
+                for reading in readings
+            ]
+        except Exception as e:
+            logger.error(f'Error getting humidity history: {e}')
+            return []
+            
+    def resolve_humidity_statistics(self, info, hours=24):
+        try:
+            stats = db.get_humidity_statistics(hours_back=hours)
+            
+            if stats.get('count', 0) > 0:
+                return HumidityStatistics(
+                    count=stats['count'],
+                    average=round(stats['avg'], 2),
+                    minimum=stats['min'],
+                    maximum=stats['max'],
+                    hours_back=hours
+                )
+            return HumidityStatistics(
+                count=0, average=0.0, minimum=0.0, maximum=0.0, hours_back=hours
+            )
+        except Exception as e:
+            logger.error(f'Error getting humidity statistics: {e}')
+            return HumidityStatistics(
+                count=0, average=0.0, minimum=0.0, maximum=0.0, hours_back=hours
+            )
+
+
 # GraphQL Schema
 schema = Schema(query=Query)
 
 
-# OPTIMIZED Temperature Collector - Only sends SSE when temperature changes
-class SmartTemperatureCollector:
-    def __init__(self, sensor_reader: TemperatureSensorReader):
-        self.sensor = sensor_reader
+# OPTIMIZED Weather Station Collector - Only sends SSE when temperature changes
+class WeatherStationCollector:
+    def __init__(self, temperature_sensor: TemperatureSensorReader, humidity_sensor: HumiditySensorReader = None):
+        self.temperature_sensor = temperature_sensor
+        self.humidity_sensor = humidity_sensor
         self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
         self.last_reading = None
         self.last_temperature = None  # Track previous temperature
+        self.last_humidity = None    # Track previous humidity
         self.error_count = 0
         self.max_errors = 10
         self.temperature_threshold = 0.1  # Only send SSE if change >= 0.1°C
@@ -231,15 +338,15 @@ class SmartTemperatureCollector:
         
     def collect_temperature(self):
         try:
-            reading = self.sensor.get_reading()
+            reading = self.temperature_sensor.get_reading()
             
             if reading is None:
                 self.error_count += 1
                 self.logger.warning(f"Failed to read temperature (error count: {self.error_count})")
                 
-                if self.error_count >= self.max_errors and self.sensor.sensor_type != "mock":
+                if self.error_count >= self.max_errors and self.temperature_sensor.sensor_type != "mock":
                     self.logger.error("Too many sensor errors, switching to mock sensor")
-                    self.sensor = TemperatureSensorReader("mock")
+                    self.temperature_sensor = TemperatureSensorReader("mock")
                     self.error_count = 0
                 return
                 
@@ -305,6 +412,62 @@ class SmartTemperatureCollector:
         except Exception as e:
             self.error_count += 1
             self.logger.error(f"Error in temperature collection: {e}")
+
+
+    def collect_humidity(self):
+        """Collect humidity data and store in database."""
+        try:
+            if not self.humidity_sensor:
+                return  # No humidity sensor configured
+                
+            current_humidity = self.humidity_sensor.get_current_humidity()
+            
+            if current_humidity is None:
+                self.logger.warning("Failed to read humidity")
+                return
+                
+            # Always store in database
+            db_reading = db.add_humidity_reading(
+                humidity_percent=current_humidity,
+                sensor_type=self.humidity_sensor.sensor_type,
+                sensor_id="default"
+            )
+            
+            if not db_reading:
+                self.logger.error("Failed to store humidity reading in database")
+                return
+            
+            # Check if we should send SSE update for humidity
+            current_time = time.time()
+            should_send_sse = False
+            
+            if self.last_humidity is None:
+                should_send_sse = True
+            elif abs(current_humidity - self.last_humidity) >= 2.0:  # 2% threshold for humidity
+                should_send_sse = True
+            elif (current_time - self.last_sse_time) >= self.max_time_between_updates:
+                should_send_sse = True
+            
+            if should_send_sse:
+                humidity_data = {
+                    'type': 'humidity_update',
+                    'humidity_percent': current_humidity,
+                    'timestamp': datetime.now(timezone.utc).isoformat(),
+                    'sensor_type': self.humidity_sensor.sensor_type,
+                    'sensor_id': 'default'
+                }
+                
+                sse_clients.put_nowait(humidity_data)
+                self.last_humidity = current_humidity
+                self.last_sse_time = current_time
+                
+        except Exception as e:
+            self.logger.error(f"Error in humidity collection: {e}")
+    
+    def collect_all_data(self):
+        """Collect both temperature and humidity data."""
+        self.collect_temperature()
+        self.collect_humidity()
 
 
 # GraphQL endpoint
@@ -409,7 +572,7 @@ def serve_static(filename):
 
 
 def initialize_application():
-    global temperature_sensor, scheduler
+    global temperature_sensor, humidity_sensor, scheduler
     
     try:
         logger.info("Initializing database...")
@@ -420,13 +583,18 @@ def initialize_application():
         sensor_info = temperature_sensor.get_sensor_info()
         logger.info(f"Temperature sensor initialized: {sensor_info}")
         
-        # Use the SMART collector
-        collector = SmartTemperatureCollector(temperature_sensor)
+        logger.info("Initializing humidity sensor...")
+        humidity_sensor = HumiditySensorReader()
+        humidity_info = humidity_sensor.get_sensor_info()
+        logger.info(f"Humidity sensor initialized: {humidity_info}")
+        
+        # Use the SMART collector with both sensors
+        collector = WeatherStationCollector(temperature_sensor, humidity_sensor)
         
         logger.info("Setting up SMART temperature collection scheduler...")
         scheduler = BackgroundScheduler(daemon=True)
         scheduler.add_job(
-            func=collector.collect_temperature,
+            func=collector.collect_all_data,
             trigger='interval',
             seconds=1,  # Still collect every second
             id='smart_temperature_collection'
@@ -435,7 +603,7 @@ def initialize_application():
         logger.info("SMART temperature collection scheduler started")
         logger.info("SSE will only send updates when temperature changes >= 0.1°C")
         
-        collector.collect_temperature()
+        collector.collect_all_data()
         return True
         
     except Exception as e:
@@ -458,7 +626,7 @@ def cleanup_application():
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='aTemperature GraphQL monitoring server (OPTIMIZED)')
+    parser = argparse.ArgumentParser(description='aWeatherStation GraphQL monitoring server (OPTIMIZED)')
     parser.add_argument('--host', default='0.0.0.0', help='Host to bind to')
     parser.add_argument('--port', type=int, default=5000, help='Port to listen on')
     parser.add_argument('--debug', action='store_true', help='Enable debug mode')
@@ -472,7 +640,7 @@ if __name__ == '__main__':
             logger.error("Failed to initialize application")
             sys.exit(1)
             
-        logger.info(f"Starting OPTIMIZED aTemperature GraphQL server on {args.host}:{args.port}")
+        logger.info(f"Starting OPTIMIZED aWeatherStation GraphQL server on {args.host}:{args.port}")
         logger.info("GraphQL endpoint: http://192.168.50.2:5000/graphql")
         logger.info("SSE endpoint: http://192.168.50.2:5000/events")
         logger.info(f"SSE optimization: Updates only when temp changes >= {args.threshold}°C")

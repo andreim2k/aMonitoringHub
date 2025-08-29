@@ -1,5 +1,5 @@
 """
-SQLAlchemy models for aTemperature application.
+SQLAlchemy models for aWeatherStation application.
 """
 
 from datetime import datetime, timezone, timedelta
@@ -45,11 +45,44 @@ class TemperatureReading(Base):
         return f"<TemperatureReading(id={self.id}, temp={self.temperature_c}°C, sensor={self.sensor_id}, time={self.timestamp})>"
 
 
+
+
+class HumidityReading(Base):
+    """Humidity reading model."""
+    
+    __tablename__ = 'humidity_readings'
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    timestamp = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+    humidity_percent = Column(Float, nullable=False)
+    sensor_type = Column(String(50), nullable=False, default='unknown')
+    sensor_id = Column(String(100), nullable=False, default='default')
+    
+    # Add indices for common queries
+    __table_args__ = (
+        Index('idx_humidity_timestamp', 'timestamp'),
+        Index('idx_humidity_sensor_timestamp', 'sensor_id', 'timestamp'),
+    )
+    
+    def to_dict(self):
+        """Convert model to dictionary."""
+        return {
+            'id': self.id,
+            'timestamp': self.timestamp.isoformat() if self.timestamp else None,
+            'timestamp_unix': self.timestamp.timestamp() if self.timestamp else None,
+            'humidity_percent': self.humidity_percent,
+            'sensor_type': self.sensor_type,
+            'sensor_id': self.sensor_id
+        }
+    
+    def __repr__(self):
+        return f'<HumidityReading(id={self.id}, humidity={self.humidity_percent}%, sensor={self.sensor_id}, time={self.timestamp})>'
+
 class DatabaseManager:
     """Database connection and session management."""
     
     def __init__(self, database_url: str = None):
-        self.database_url = database_url or "sqlite:///temperature.db"
+        self.database_url = database_url or "sqlite:///weatherstation.db"
         self.engine = None
         self.Session = None
         self.logger = logging.getLogger(__name__)
@@ -219,6 +252,81 @@ class DatabaseManager:
         except Exception as e:
             self.logger.error(f"Error cleaning up old readings: {e}")
             return 0
+
+
+
+    def add_humidity_reading(self, humidity_percent: float, sensor_type: str = "unknown", 
+                            sensor_id: str = "default", timestamp: datetime = None):
+        """Add a humidity reading to the database."""
+        try:
+            with self.get_session() as session:
+                reading = HumidityReading(
+                    humidity_percent=humidity_percent,
+                    sensor_type=sensor_type,
+                    sensor_id=sensor_id,
+                    timestamp=timestamp or datetime.now(timezone.utc)
+                )
+                
+                session.add(reading)
+                session.commit()
+                session.refresh(reading)
+                
+                self.logger.debug(f"Added humidity reading: {reading}")
+                return reading
+                
+        except Exception as e:
+            self.logger.error(f"Error adding humidity reading: {e}")
+            return None
+            
+    def get_recent_humidity_readings(self, limit: int = 100, sensor_id: str = None):
+        """Get recent humidity readings."""
+        try:
+            with self.get_session() as session:
+                query = session.query(HumidityReading)
+                
+                if sensor_id:
+                    query = query.filter(HumidityReading.sensor_id == sensor_id)
+                    
+                readings = query.order_by(HumidityReading.timestamp.desc()).limit(limit).all()
+                return readings
+                
+        except Exception as e:
+            self.logger.error(f"Error getting recent humidity readings: {e}")
+            return []
+
+    def get_humidity_statistics(self, sensor_id: str = None, hours_back: int = 24):
+        """Get humidity statistics."""
+        try:
+            with self.get_session() as session:
+                from datetime import timedelta
+                cutoff_time = datetime.now(timezone.utc) - timedelta(hours=hours_back)
+                
+                query = session.query(HumidityReading).filter(
+                    HumidityReading.timestamp >= cutoff_time
+                )
+                
+                if sensor_id:
+                    query = query.filter(HumidityReading.sensor_id == sensor_id)
+                    
+                readings = query.all()
+                
+                if not readings:
+                    return {'count': 0}
+                    
+                humidity_values = [r.humidity_percent for r in readings]
+                
+                return {
+                    'count': len(readings),
+                    'min': min(humidity_values),
+                    'max': max(humidity_values),
+                    'avg': sum(humidity_values) / len(humidity_values),
+                    'latest': readings[0].humidity_percent if readings else None
+                }
+                
+        except Exception as e:
+            self.logger.error(f"Error getting humidity statistics: {e}")
+            return {'count': 0, 'error': str(e)}
+
 
 
 # Global database instance

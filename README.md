@@ -1,4 +1,4 @@
-# @Temperature
+# @WeatherStation
 
 A modern, real-time web application for monitoring temperature data on ARM devices using GraphQL and Server-Sent Events (SSE).
 
@@ -76,12 +76,12 @@ A modern, real-time web application for monitoring temperature data on ARM devic
 ## Project Structure
 
 ```
-aTemperature/
+aWeatherStation/
 ├── backend/
 │   ├── app.py              # Main GraphQL + SSE application
 │   ├── models.py           # SQLAlchemy database models
 │   ├── sensor_reader.py    # Temperature sensor abstraction
-│   └── temperature.db      # SQLite database (created at runtime)
+│   └── weatherstation.db      # SQLite database (created at runtime)
 ├── frontend/
 │   └── index.html          # Complete single-file web application
 ├── scripts/
@@ -177,8 +177,8 @@ Real-time temperature updates are streamed as JSON events:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/andreim2k/aTemperature.git
-   cd aTemperature
+   git clone https://github.com/andreim2k/aWeatherStation.git
+   cd aWeatherStation
    ```
 
 2. **Set up Python virtual environment**:
@@ -347,4 +347,4 @@ This project is open source and available under the MIT License.
 
 ---
 
-**@Temperature** - Real-time temperature monitoring made beautiful and simple.
+**@WeatherStation** - Real-time temperature monitoring made beautiful and simple.

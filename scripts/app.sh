@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# aTemperature Process Management Script
+# aWeatherStation Process Management Script
 # Manages the GraphQL backend using nohup and background processes
 
 set -e  # Exit on any error
 
 # Configuration
-PROJECT_ROOT="/root/aTemperature"
+PROJECT_ROOT="/root/aWeatherStation"
 VENV_PATH="$PROJECT_ROOT/venv"
 BACKEND_PATH="$PROJECT_ROOT/backend"
 LOGS_PATH="$PROJECT_ROOT/logs"
@@ -56,7 +56,7 @@ is_running() {
 get_status() {
     if is_running; then
         local pid=$(cat "$PID_FILE")
-        log_success "aTemperature server is running (PID: $pid)"
+        log_success "aWeatherStation server is running (PID: $pid)"
         
         # Show additional info
         echo "  GraphQL endpoint: http://192.168.50.2:5000/graphql"
@@ -72,14 +72,14 @@ get_status() {
         
         return 0
     else
-        log_warning "aTemperature server is not running"
+        log_warning "aWeatherStation server is not running"
         return 1
     fi
 }
 
 # Start the application
 start_app() {
-    log_info "Starting aTemperature server..."
+    log_info "Starting aWeatherStation server..."
     
     # Check if already running
     if is_running; then
@@ -123,7 +123,7 @@ start_app() {
     
     # Verify it started successfully
     if is_running; then
-        log_success "aTemperature server started successfully!"
+        log_success "aWeatherStation server started successfully!"
         log_info "Server is running in background (PID: $pid)"
         log_info "Logs are being written to: $LOG_FILE"
         log_info "GraphQL endpoint: http://192.168.50.2:5000/graphql"
@@ -146,7 +146,7 @@ start_app() {
 
 # Stop the application
 stop_app() {
-    log_info "Stopping aTemperature server..."
+    log_info "Stopping aWeatherStation server..."
     
     if ! is_running; then
         log_warning "Server is not running"
@@ -175,7 +175,7 @@ stop_app() {
         # Clean up PID file
         rm -f "$PID_FILE"
         
-        log_success "aTemperature server stopped"
+        log_success "aWeatherStation server stopped"
         return 0
     else
         log_error "Failed to stop process $pid"
@@ -187,7 +187,7 @@ stop_app() {
 
 # Restart the application
 restart_app() {
-    log_info "Restarting aTemperature server..."
+    log_info "Restarting aWeatherStation server..."
     
     if is_running; then
         stop_app
@@ -233,7 +233,7 @@ follow_logs() {
 
 # Test the application
 test_app() {
-    log_info "Testing aTemperature server..."
+    log_info "Testing aWeatherStation server..."
     
     if ! is_running; then
         log_error "Server is not running. Please start it first."
@@ -284,14 +284,14 @@ test_app() {
 
 # Show usage information
 show_usage() {
-    echo "aTemperature Process Management Script"
+    echo "aWeatherStation Process Management Script"
     echo ""
     echo "Usage: $0 [COMMAND] [OPTIONS]"
     echo ""
     echo "Commands:"
-    echo "  start          Start the aTemperature server"
-    echo "  stop           Stop the aTemperature server"
-    echo "  restart        Restart the aTemperature server"
+    echo "  start          Start the aWeatherStation server"
+    echo "  stop           Stop the aWeatherStation server"
+    echo "  restart        Restart the aWeatherStation server"
     echo "  status         Show server status"
     echo "  logs [LINES]   Show last N lines of logs (default: 50)"
     echo "  follow         Follow logs in real-time"

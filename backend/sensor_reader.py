@@ -1,5 +1,5 @@
 """
-Temperature sensor reader module for aTemperature application.
+Temperature sensor reader module for aWeatherStation application.
 
 Supports multiple sensor types:
 - System thermal zones (CPU temperature)
@@ -233,6 +233,72 @@ class TemperatureSensorReader:
         return info
 
 
+
+
+class HumiditySensorReader:
+    """Humidity sensor reader with multiple sensor support."""
+    
+    def __init__(self, sensor_type: str = "mock", sensor_config = None):
+        self.logger = logging.getLogger(__name__)
+        self.sensor_config = sensor_config or {}
+        self.sensor_type = sensor_type
+        
+        # For now, primarily using mock sensor since humidity sensors are less common
+        if sensor_type == "auto":
+            self.sensor_type = "mock"
+            
+        self._initialize_sensor()
+        
+    def _initialize_sensor(self):
+        """Initialize the selected sensor."""
+        if self.sensor_type == "mock":
+            self.mock_base_humidity = self.sensor_config.get('base_humidity', 45.0)  # Base 45% humidity
+            self.mock_variation = self.sensor_config.get('variation', 15.0)  # ±15% variation
+            self.logger.info(f"Initialized mock humidity sensor: base={self.mock_base_humidity}%, variation=±{self.mock_variation}%")
+        else:
+            raise ValueError(f"Unsupported humidity sensor type: {self.sensor_type}")
+    
+    def get_current_humidity(self) -> Optional[float]:
+        """Get current humidity reading."""
+        try:
+            if self.sensor_type == "mock":
+                return self._read_mock_sensor()
+            else:
+                raise ValueError(f"Unsupported sensor type: {self.sensor_type}")
+                
+        except Exception as e:
+            self.logger.error(f"Error reading humidity sensor: {e}")
+            return None
+            
+    def _read_mock_sensor(self) -> float:
+        """Generate mock humidity reading."""
+        import random
+        import time
+        
+        # Generate realistic humidity variation
+        variation = random.uniform(-self.mock_variation, self.mock_variation)
+        # Add some time-based slow drift
+        time_factor = time.time() % 7200  # 2-hour cycle
+        drift = 10.0 * (time_factor / 3600 - 1)  # ±10% over 2 hours
+        
+        humidity = self.mock_base_humidity + variation + drift
+        # Clamp between 0 and 100
+        return max(0.0, min(100.0, humidity))
+        
+    def get_sensor_info(self):
+        """Get information about the current sensor."""
+        info = {
+            "sensor_type": self.sensor_type,
+            "initialized": True
+        }
+        
+        if self.sensor_type == "mock":
+            info["base_humidity"] = self.mock_base_humidity
+            info["variation"] = self.mock_variation
+            
+        return info
+
+
 # Convenience function for quick temperature reading
 def get_current_temp(sensor_type: str = "auto") -> Optional[float]:
     """Quick function to get current temperature."""
@@ -243,6 +309,18 @@ def get_current_temp(sensor_type: str = "auto") -> Optional[float]:
         logging.getLogger(__name__).error(f"Error getting temperature: {e}")
         return None
 
+
+
+
+# Convenience function for quick humidity reading
+def get_current_humidity(sensor_type: str = "mock") -> Optional[float]:
+    """Quick function to get current humidity."""
+    try:
+        sensor = HumiditySensorReader(sensor_type=sensor_type)
+        return sensor.get_current_humidity()
+    except Exception as e:
+        logging.getLogger(__name__).error(f"Error getting humidity: {e}")
+        return None
 
 if __name__ == "__main__":
     # Test the sensor reader
