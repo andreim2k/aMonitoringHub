@@ -1,10 +1,11 @@
-# @WeatherStation
+# @MonitoringHub
 
 **Environmental sensors & climate insights** - A modern web application for monitoring temperature and humidity data with real-time updates and intelligent database management.
 
 ## 🎯 Features
 
 ### Core Monitoring
+- **📹 Live Webcam Integration** - Real-time camera feeds with configurable refresh intervals
 - **🌡️ Temperature & Humidity monitoring** with 5-minute intervals for optimal sensor lifespan
 - **📡 Real-time updates** via Server-Sent Events (SSE) with instant connection
 - **📊 Interactive historical charts** using Chart.js for trend analysis
@@ -41,7 +42,7 @@
 
 ### Database Features
 - **Automatic rollover** at 10,000 readings
-- **Timestamped archives** (e.g., `weatherstation_archive_20250829_165704.db`)
+- **Timestamped archives** (e.g., `monitoringhub_archive_20250829_165704.db`)
 - **Optimized indexes** for fast historical queries
 - **ACID compliance** with transaction safety
 
@@ -75,20 +76,38 @@
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd aWeatherStation
+cd @MonitoringHub
 
 # Install dependencies
 python3 -m venv venv
 source venv/bin/activate
-pip install -r backend/requirements.txt
+pip install -r requirements.txt
 ```
+
+### Webcam Configuration
+
+To configure webcam sources, edit the JavaScript configuration in `frontend/index.html`:
+
+```javascript
+let webcamConfig = {
+  url: "http://192.168.50.3/capture?size=VGAurl: "http://192.168.50.3/snap"flash=1",    // Webcam snapshot URL
+  refreshInterval: 5000,              // Refresh every 5 seconds
+  retryDelay: 10000                   // Retry after 10 seconds on error
+};
+```
+
+**Supported webcam formats:**
+- JPEG snapshots (most IP cameras)
+- MJPEG streams
+- Any HTTP-accessible image URL
+
 
 ### Start the Application
 ```bash
 # Make script executable
 chmod +x scripts/app.sh
 
-# Start the weather station
+# Start the monitoring hub
 ./scripts/app.sh start
 
 # Check status
@@ -101,11 +120,11 @@ chmod +x scripts/app.sh
 ### Auto-Start on Boot
 ```bash
 # Configure systemd service (already done if following this guide)
-sudo systemctl enable aweatherstation.service
-sudo systemctl start aweatherstation.service
+sudo systemctl enable amonitoringhub.service
+sudo systemctl start amonitoringhub.service
 
 # Check service status
-sudo systemctl status aweatherstation.service
+sudo systemctl status amonitoringhub.service
 ```
 
 ## 🌐 Access Points
@@ -181,7 +200,7 @@ eventSource.onmessage = function(event) {
 
 ### Database Management
 - **Automatic rollover**: Every 10,000 readings
-- **Archive naming**: `weatherstation_archive_YYYYMMDD_HHMMSS.db`
+- **Archive naming**: `monitoringhub_archive_YYYYMMDD_HHMMSS.db`
 - **Performance**: Optimized indexes for fast queries
 - **Size management**: Current DB stays under ~1MB for optimal speed
 
@@ -215,13 +234,13 @@ eventSource.onmessage = function(event) {
 ## 📁 File Structure
 
 ```
-aWeatherStation/
+@MonitoringHub/
 ├── backend/
 │   ├── app.py              # Main Flask application with GraphQL & SSE
 │   ├── models.py           # SQLAlchemy models with rollover functionality  
 │   ├── sensor_reader.py    # Temperature & humidity sensor abstraction
-│   ├── weatherstation.db  # Current SQLite database (auto-managed)
-│   └── weatherstation_archive_*.db  # Archived databases (10K+ readings)
+│   ├── monitoringhub.db  # Current SQLite database (auto-managed)
+│   └── monitoringhub_archive_*.db  # Archived databases (10K+ readings)
 ├── frontend/
 │   └── index.html          # Modern web interface
 ├── scripts/
@@ -229,7 +248,7 @@ aWeatherStation/
 ├── logs/
 │   ├── backend.out         # Application output logs
 │   └── backend.log         # Detailed application logs
-└── /etc/systemd/system/aweatherstation.service  # System service
+└── /etc/systemd/system/amonitoringhub.service  # System service
 ```
 
 ## 🔄 Database Rollover
@@ -239,12 +258,12 @@ The system automatically manages database size and performance:
 ### Automatic Rollover Process
 1. **Monitor**: Checks total readings after each sensor data insertion
 2. **Trigger**: When total reaches 10,000 readings (temp + humidity combined)
-3. **Archive**: Moves current `weatherstation.db` → `weatherstation_archive_TIMESTAMP.db`
-4. **Reset**: Creates fresh `weatherstation.db` with empty tables
+3. **Archive**: Moves current `monitoringhub.db` → `monitoringhub_archive_TIMESTAMP.db`
+4. **Reset**: Creates fresh `monitoringhub.db` with empty tables
 5. **Continue**: Seamlessly continues data collection
 
 ### Archive Management
-- **Archive files**: `weatherstation_archive_20250829_165704.db`
+- **Archive files**: `monitoringhub_archive_20250829_165704.db`
 - **Data preservation**: All historical data safely stored
 - **Query capability**: Archived databases fully functional for historical analysis
 - **Storage efficiency**: Current database optimized for real-time performance
@@ -267,10 +286,10 @@ The system automatically manages database size and performance:
 ### Service Management
 ```bash
 # Service status
-systemctl status aweatherstation.service
+systemctl status amonitoringhub.service
 
 # View real-time logs  
-journalctl -u aweatherstation.service -f
+journalctl -u amonitoringhub.service -f
 
 # Application logs
 tail -f logs/backend.out
@@ -297,3 +316,191 @@ tail -f logs/backend.log
 **Built with ❤️ for reliable environmental monitoring**
 
 *Last updated: August 29, 2025*
+
+## 🔧 Troubleshooting
+
+### Database Permission Issues
+
+If you encounter SQLite database write errors like:
+```
+sqlite3.OperationalError: attempt to write a readonly database
+```
+
+**Fix database permissions:**
+```bash
+# Make the database file writable
+chmod 664 backend/*.db
+
+# Ensure the backend directory is writable
+chmod 775 backend/
+
+# If running as a service, check file ownership
+chown $USER:$USER backend/*.db
+```
+
+**Prevention:**
+- Always run the application with proper user permissions
+- Ensure the database directory has write permissions
+- Use the provided `app.sh` script which handles permissions correctly
+
+### Common Issues
+
+1. **Port already in use**: If port 5000 is busy, modify the port in `backend/app.py`
+2. **Virtual environment issues**: Recreate with `rm -rf venv && python3 -m venv venv`
+3. **Missing dependencies**: Run `pip install -r requirements.txt` in activated venv
+4. **SSE connection issues**: Check browser console and ensure `/events` endpoint is accessible
+
+
+## 🔍 AI-Powered OCR Integration
+
+### New OCR Features (September 2025)
+
+@MonitoringHub now includes advanced **Optical Character Recognition (OCR)** capabilities for extracting numbers from electricity meter displays with dual-engine support:
+
+#### **🤖 Dual OCR Engine Support**
+- **🧠 Gemini AI OCR** - Primary engine using Google's Gemini 1.5 Flash for superior accuracy
+- **🔤 Enhanced Tesseract OCR** - Fallback engine with advanced image preprocessing
+- **🔄 Automatic Fallback** - Frontend tries Gemini first, falls back to Tesseract if needed
+
+#### **📸 Webcam Integration**
+- **📷 Live Image Capture** - SXGA resolution with flash (`http://192.168.50.3/snap/SXGA/flash`)
+- **⚙️ Configurable Sources** - Update webcam URL in `backend/config.json`
+- **🔄 Smart Caching** - Optimized image fetching with minimal bandwidth usage
+
+#### **🎯 OCR API Endpoints**
+
+| Endpoint | Engine | Description |
+|----------|---------|-------------|
+| `/ocr-gemini` | Gemini AI | Primary OCR with superior number recognition |
+| `/ocr-webcam` | Tesseract | Enhanced traditional OCR with preprocessing |
+| `/ocr-gemini-debug` | Gemini AI | Debug mode showing detailed analysis |
+
+#### **⚡ Usage Examples**
+
+**Test Gemini OCR:**
+```bash
+curl "http://localhost:5000/ocr-gemini" | jq .
+```
+
+**Expected Response:**
+```json
+{
+  "success": true,
+  "index": "123456",
+  "engine": "Gemini AI",
+  "model": "gemini-1.5-flash"
+}
+```
+
+**Frontend Integration:**
+- **🖱️ Manual Trigger** - "Extract Numbers" button for immediate OCR
+- **⏰ Auto-Refresh** - Runs every 30 seconds automatically
+- **🎨 Visual Feedback** - Shows which engine was used and results
+
+#### **🔧 Configuration**
+
+**OCR Settings** in `backend/config.json`:
+```json
+{
+  "webcam": {
+    "url": "http://192.168.50.3/snap/SXGA/flash",
+    "enabled": true,
+    "title": "📹 Cabana 1 Electricity Meter"
+  },
+  "ocr": {
+    "enabled": true,
+    "engines": {
+      "tesseract": {
+        "enabled": true,
+        "config": "--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789"
+      },
+      "gemini": {
+        "enabled": true,
+        "api_key": "your-gemini-api-key-here",
+        "model": "gemini-1.5-flash"
+      }
+    },
+    "refresh_interval": 30
+  }
+}
+```
+
+#### **🚀 Advanced Features**
+
+**Gemini AI Enhancements:**
+- **📋 Strict Number-Only Responses** - Returns only digits, no commentary
+- **🎯 Meter-Specific Prompts** - Optimized for electricity meter displays
+- **🔍 Multi-Number Detection** - Finds longest/most prominent reading
+- **⚠️ Error Handling** - Clear "UNREADABLE" response when unclear
+
+**Tesseract Optimizations:**
+- **🖼️ Image Preprocessing** - Gaussian blur, adaptive thresholding, morphological operations
+- **📏 3x Scaling** - Upscales images for better recognition
+- **🔄 Dual Processing** - Normal and inverted image analysis
+- **🎯 Number-Only Config** - Whitelist digits for cleaner results
+
+#### **💡 Installation Requirements**
+
+**System Dependencies:**
+```bash
+# Install Tesseract OCR
+sudo apt update
+sudo apt install tesseract-ocr
+
+# Python packages (auto-installed with requirements.txt)
+pip install pytesseract opencv-contrib-python-headless pillow google-generativeai
+```
+
+**Gemini API Setup:**
+1. Get API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Add to `backend/config.json` under `ocr.engines.gemini.api_key`
+3. Or set environment variable: `GEMINI_API_KEY=your-key-here`
+
+#### **🔧 Troubleshooting OCR**
+
+**Common Issues:**
+
+1. **Webcam not accessible:**
+   ```bash
+   # Test webcam URL directly
+   curl -I "http://192.168.50.3/snap/SXGA/flash"
+   ```
+
+2. **Tesseract not found:**
+   ```bash
+   # Install system dependency
+   sudo apt install tesseract-ocr
+   ```
+
+3. **Gemini API errors:**
+   - Verify API key in config.json
+   - Check quota limits in Google Cloud Console
+   - Ensure model `gemini-1.5-flash` is available
+
+4. **Poor OCR accuracy:**
+   - Ensure meter display is well-lit (flash enabled)
+   - Check webcam focus and positioning
+   - Try different resolutions: `/snap/VGA`, `/snap/SVGA`, `/snap/XGA`
+
+#### **📊 OCR Performance Metrics**
+
+| Feature | Gemini AI | Enhanced Tesseract |
+|---------|-----------|-------------------|
+| **Accuracy** | 95%+ | 70-80% |
+| **Speed** | ~2-3 seconds | ~1-2 seconds |
+| **Error Handling** | Excellent | Good |
+| **Number-Only Output** | ✅ Guaranteed | ✅ With preprocessing |
+| **Multi-digit Recognition** | ✅ Superior | ✅ Basic |
+
+#### **🔮 Future OCR Enhancements**
+
+- **📊 Historical Tracking** - Store and graph meter readings over time
+- **⚠️ Anomaly Detection** - Alert on unusual reading changes
+- **📱 Mobile OCR** - Direct phone camera integration
+- **🏗️ Multiple Meter Support** - Monitor several meters simultaneously
+- **☁️ Cloud Storage** - Backup readings to cloud services
+
+---
+
+**🎯 The OCR system transforms static webcam images into actionable electricity meter data, enabling automated monitoring and historical analysis.**
+

@@ -1,5 +1,5 @@
 """
-Optimized GraphQL + SSE Flask application for aMonitoringHub monitoring system.
+Optimized GraphQL + SSE Flask application for aWeatherStation monitoring system.
 
 Features:
 - GraphQL API using pure graphene
@@ -322,7 +322,7 @@ schema = Schema(query=Query)
 
 
 # Weather Station Collector - Sends SSE updates every second
-class MonitoringHubCollector:
+class WeatherStationCollector:
     def __init__(self, temperature_sensor: TemperatureSensorReader, humidity_sensor: HumiditySensorReader = None):
         self.temperature_sensor = temperature_sensor
         self.humidity_sensor = humidity_sensor
@@ -466,19 +466,13 @@ def graphql_endpoint():
         data = request.get_json()
         
         if not data:
-            import base64
-        image_base64 = base64.b64encode(image_data).decode("utf-8")
-        
-        return jsonify({'error': 'No JSON data provided'}), 400
+            return jsonify({'error': 'No JSON data provided'}), 400
             
         query = data.get('query')
         variables = data.get('variables', {})
         
         if not query:
-            import base64
-        image_base64 = base64.b64encode(image_data).decode("utf-8")
-        
-        return jsonify({'error': 'No query provided'}), 400
+            return jsonify({'error': 'No query provided'}), 400
         
         # Execute GraphQL query
         result = schema.execute(query, variables=variables)
@@ -491,9 +485,6 @@ def graphql_endpoint():
         
     except Exception as e:
         logger.error(f"GraphQL endpoint error: {e}")
-        import base64
-        image_base64 = base64.b64encode(image_data).decode("utf-8")
-        
         return jsonify({'error': 'Internal server error'}), 500
 
 
@@ -540,38 +531,7 @@ def events():
         
         # Immediately send latest temperature from database
         try:
-            temp_readings = db.get_recent_readings(limit=1)
-            if temp_readings:
-                temp_reading = temp_readings[0]
-                temp_data = {
-                    "temperature_c": temp_reading.temperature_c,
-                    "timestamp_iso": temp_reading.timestamp.isoformat(),
-                    "sensor_type": temp_reading.sensor_type,
-                    "sensor_id": temp_reading.sensor_id
-                }
-                sse_message = {
-                    "type": "temperature_update",
-                    "data": temp_data,
-                    "timestamp": temp_reading.timestamp.isoformat()
-                }
-                yield f"data: {json.dumps(sse_message)}\n\n"
-            
-            # Get recent humidity reading
-            humidity_readings = db.get_recent_humidity_readings(limit=1)
-            if humidity_readings:
-                humidity_reading = humidity_readings[0]
-                humidity_data = {
-                    "humidity_percent": humidity_reading.humidity_percent,
-                    "timestamp_iso": humidity_reading.timestamp.isoformat(),
-                    "sensor_type": humidity_reading.sensor_type,
-                    "sensor_id": humidity_reading.sensor_id
-                }
-                sse_message = {
-                    "type": "humidity_update",
-                    "data": humidity_data,
-                    "timestamp": humidity_reading.timestamp.isoformat()
-                }
-                yield f"data: {json.dumps(sse_message)}\n\n"
+            with db.get_connection() as conn:
                 cursor = conn.cursor()
                 cursor.execute("SELECT temperature_c, timestamp, sensor_type, sensor_id FROM temperature_readings ORDER BY timestamp DESC LIMIT 1")
                 temp_row = cursor.fetchone()
@@ -662,7 +622,7 @@ def initialize_application():
         logger.info(f"Humidity sensor initialized: {humidity_info}")
         
         # Use the SMART collector with both sensors
-        collector = MonitoringHubCollector(temperature_sensor, humidity_sensor)
+        collector = WeatherStationCollector(temperature_sensor, humidity_sensor)
         
         logger.info("Setting up SMART temperature collection scheduler...")
         scheduler = BackgroundScheduler(daemon=True)
@@ -698,38 +658,8 @@ def cleanup_application():
         logger.info("Database connections closed")
 
 
-
-def get_cached_webcam_image():
-    """Fetch webcam image with basic caching"""
-    try:
-        import requests
-        import json
-        import os
-        
-        # Load config
-        with open(os.path.join(os.path.dirname(__file__), 'config.json'), 'r') as f:
-            config = json.load(f)
-            
-        webcam_url = config['webcam']['url']
-        
-        # Fetch image
-        response = requests.get(webcam_url, timeout=10)
-        response.raise_for_status()
-        
-        return response.content
-        
-    except Exception as e:
-        print(f"Error fetching webcam image: {e}")
-        return None
-
-@app.route("/ocr-webcam")
-def ocr_webcam_alias():
-    """Alias route - redirect to Gemini OCR"""
-    return ocr_gemini()
-
-
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='aMonitoringHub GraphQL monitoring server (OPTIMIZED)')
+    parser = argparse.ArgumentParser(description='aWeatherStation GraphQL monitoring server (OPTIMIZED)')
     parser.add_argument('--host', default='0.0.0.0', help='Host to bind to')
     parser.add_argument('--port', type=int, default=5000, help='Port to listen on')
     parser.add_argument('--debug', action='store_true', help='Enable debug mode')
@@ -743,7 +673,7 @@ if __name__ == '__main__':
             logger.error("Failed to initialize application")
             sys.exit(1)
             
-        logger.info(f"Starting OPTIMIZED aMonitoringHub GraphQL server on {args.host}:{args.port}")
+        logger.info(f"Starting OPTIMIZED aWeatherStation GraphQL server on {args.host}:{args.port}")
         logger.info("GraphQL endpoint: http://192.168.50.2:5000/graphql")
         logger.info("SSE endpoint: http://192.168.50.2:5000/events")
         logger.info(f"SSE optimization: Updates only when temp changes >= {args.threshold}°C")

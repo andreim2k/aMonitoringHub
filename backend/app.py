@@ -658,6 +658,101 @@ def cleanup_application():
         logger.info("Database connections closed")
 
 
+
+@app.route("/config")
+def get_config():
+    """Serve frontend configuration"""
+    try:
+        import json
+        import os
+        
+        # Return minimal working config
+        return jsonify({
+            "webcam": {
+                "url": "http://192.168.50.3/snap/SXGA/flash",
+                "enabled": True,
+                "title": "Webcam"
+            },
+            "ocr": {
+                "enabled": True
+            }
+        })
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/snapshot")
+def snapshot():
+    """Snapshot endpoint - captures image and runs Gemini OCR"""
+    import base64
+    import json
+    import os
+    
+    try:
+        # Get webcam image
+        import requests
+        
+        # Load config
+        with open(os.path.join(os.path.dirname(__file__), 'config.json'), 'r') as f:
+            config = json.load(f)
+        
+        webcam_url = config.get('webcam', {}).get('url', 'http://192.168.50.3/snap/SXGA/flash')
+        
+        # Fetch image
+        response = requests.get(webcam_url, timeout=10)
+        response.raise_for_status()
+        image_data = response.content
+        
+        # Convert to base64 for frontend
+        image_base64 = base64.b64encode(image_data).decode('utf-8')
+        
+        # Try Gemini OCR
+        try:
+            import google.generativeai as genai
+            from PIL import Image
+            import io
+            import re
+            
+            api_key = config.get('ocr', {}).get('engines', {}).get('gemini', {}).get('api_key')
+            
+            if api_key:
+                genai.configure(api_key=api_key)
+                model = genai.GenerativeModel('gemini-1.5-flash')
+                image = Image.open(io.BytesIO(image_data))
+                
+                prompt = "Extract only the numbers from this electricity meter display. Return only digits, no text."
+                ocr_response = model.generate_content([prompt, image])
+                ocr_text = ocr_response.text.strip()
+                
+                numbers = re.findall(r'\d+', ocr_text)
+                
+                return jsonify({
+                    "success": True if numbers else False,
+                    "index": max(numbers, key=len) if numbers else "-----",
+                    "engine": "Gemini AI",
+                    "image": f"data:image/jpeg;base64,{image_base64}"
+                })
+                
+        except Exception as ocr_error:
+            # OCR failed but return image anyway
+            return jsonify({
+                "success": False,
+                "index": "-----", 
+                "error": f"OCR failed: {str(ocr_error)[:50]}...",
+                "engine": "Image Only",
+                "image": f"data:image/jpeg;base64,{image_base64}"
+            })
+            
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": f"Snapshot failed: {str(e)}",
+            "index": "-----",
+            "engine": "Error"
+        }), 500
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='aWeatherStation GraphQL monitoring server (OPTIMIZED)')
     parser.add_argument('--host', default='0.0.0.0', help='Host to bind to')

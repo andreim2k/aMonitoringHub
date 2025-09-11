@@ -1,0 +1,22 @@
+{
+  "webcam": {
+    "url": "http://192.168.50.3/snap/SXGA/flash",
+    "enabled": true,
+    "title": "📹 Cabana 1 Electricity Meter"
+  },
+  "ocr": {
+    "enabled": true,
+    "engines": {
+      "tesseract": {
+        "enabled": true,
+        "config": "--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789"
+      },
+      "gemini": {
+        "enabled": true,
+        "api_key": "AIzaSyDiGBpAzGYt5zsyFWt2_Zc4O7s4f1hRLSk",
+        "model": "gemini-1.5-flash"
+      }
+    },
+    "refresh_interval": 30
+  }
+}

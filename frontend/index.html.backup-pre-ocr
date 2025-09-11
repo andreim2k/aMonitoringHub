@@ -401,13 +401,6 @@
             <img id="webcamImage" style="width: 100%; height: 100%; object-fit: cover; display: none;" src="" />
             <div id="webcamLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #90caf9;"></div>
           </div>
-          
-          <!-- OCR Index Display -->
-          <div style="margin-top: 15px; padding: 12px; background: rgba(255,255,255,0.1); border-radius: 8px; text-align: center;">
-            <div id="ocrIndex" style="font-size: 1.2rem; font-weight: bold; color: #90caf9; font-family: monospace;">Index: -----</div>
-            <div id="ocrStatus" style="font-size: 0.8rem; margin-top: 5px; opacity: 0.8;">Ready</div>
-            <button onclick="runServerOCR()" style="margin-top: 8px; padding: 4px 12px; background: #90caf9; border: none; border-radius: 4px; color: #333; cursor: pointer; font-size: 0.9rem;">Extract Numbers</button>
-          </div>
         </div>
       </div>
 
@@ -914,74 +907,13 @@
       if (!img) return;
       loading.style.display = "block";
       img.style.display = "none";
-      const url = `/webcam-image`;
+      const url = `http://192.168.50.3/snap/SXGA/flash`;
       img.onload = () => { loading.style.display = "none"; img.style.display = "block"; };
       img.onerror = () => { loading.textContent = "Webcam unavailable"; };
       img.src = url;
     }
 
     setTimeout(loadWebcam, 1000);
-
-    // Server-side OCR function
-    async function runServerOCR() {
-      const indexEl = document.getElementById("ocrIndex");
-      const statusEl = document.getElementById("ocrStatus");
-      
-      try {
-        statusEl.textContent = "Processing image...";
-        statusEl.style.color = "#ffa726";
-        
-        const response = await fetch("/ocr-webcam");
-        const data = await response.json();
-        
-        if (data.success) {
-          indexEl.textContent = "Index: " + data.index;
-          statusEl.textContent = data.message;
-          statusEl.style.color = data.index !== "-----" ? "#4caf50" : "#f44336";
-          console.log("OCR Result:", data);
-        } else {
-          indexEl.textContent = "Index: -----";
-          statusEl.textContent = data.error || "OCR failed";
-          statusEl.style.color = "#f44336";
-        }
-      } catch (error) {
-        console.error("OCR Error:", error);
-        indexEl.textContent = "Index: -----";
-        statusEl.textContent = "Connection error";
-        statusEl.style.color = "#f44336";
-      }
-    }
-    
-    // Auto-run OCR every 30 seconds
-    setInterval(runServerOCR, 30000);
-    setTimeout(runServerOCR, 3000); // First run after 3 seconds
-
-    // Load configuration and apply settings
-    async function loadConfig() {
-      try {
-        const response = await fetch("/config");
-        const config = await response.json();
-        
-        // Update webcam refresh interval if configured
-        if (config.webcam?.refresh_interval) {
-          const interval = config.webcam.refresh_interval;
-          setInterval(loadWebcam, interval);
-        }
-        
-        // Update OCR auto-run interval if configured
-        if (config.ocr?.auto_run && config.ocr?.auto_interval) {
-          const interval = config.ocr.auto_interval;
-          setInterval(runServerOCR, interval);
-        }
-        
-        console.log("Configuration loaded:", config);
-      } catch (error) {
-        console.error("Failed to load config:", error);
-      }
-    }
-    
-    // Load config on page load
-    setTimeout(loadConfig, 1000);
 
 
   </script>

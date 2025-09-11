@@ -19,6 +19,7 @@ from queue import Queue
 import threading
 
 from flask import Flask, request, jsonify, Response, send_from_directory
+from config import get_config, update_config
 from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
 from graphql import build_schema, graphql_sync
@@ -321,7 +322,7 @@ class Query(ObjectType):
 schema = Schema(query=Query)
 
 
-# Weather Station Collector - Sends SSE updates every second
+# Monitoring Hub Collector - Sends SSE updates every second
 class MonitoringHubCollector:
     def __init__(self, temperature_sensor: TemperatureSensorReader, humidity_sensor: HumiditySensorReader = None):
         self.temperature_sensor = temperature_sensor
@@ -460,25 +461,42 @@ class MonitoringHubCollector:
 
 
 # GraphQL endpoint
+# Configuration API endpoints
+@app.route("/api/config", methods=["GET"])
+def get_configuration():
+    """Get current configuration"""
+    try:
+        config = get_config()
+        return jsonify(config)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/config", methods=["POST"])
+def update_configuration():
+    """Update configuration"""
+    try:
+        data = request.get_json()
+        if update_config(data):
+            return jsonify({"success": True, "message": "Configuration updated"})
+        else:
+            return jsonify({"success": False, "message": "Failed to save configuration"}), 500
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
 @app.route('/graphql', methods=['POST'])
 def graphql_endpoint():
     try:
         data = request.get_json()
         
         if not data:
-            import base64
-        image_base64 = base64.b64encode(image_data).decode("utf-8")
-        
-        return jsonify({'error': 'No JSON data provided'}), 400
+            return jsonify({'error': 'No JSON data provided'}), 400
             
         query = data.get('query')
         variables = data.get('variables', {})
         
         if not query:
-            import base64
-        image_base64 = base64.b64encode(image_data).decode("utf-8")
-        
-        return jsonify({'error': 'No query provided'}), 400
+            return jsonify({'error': 'No query provided'}), 400
         
         # Execute GraphQL query
         result = schema.execute(query, variables=variables)
@@ -491,13 +509,33 @@ def graphql_endpoint():
         
     except Exception as e:
         logger.error(f"GraphQL endpoint error: {e}")
-        import base64
-        image_base64 = base64.b64encode(image_data).decode("utf-8")
-        
         return jsonify({'error': 'Internal server error'}), 500
 
 
 # GraphiQL interface for development
+# Configuration API endpoints
+@app.route("/api/config", methods=["GET"])
+def get_configuration():
+    """Get current configuration"""
+    try:
+        config = get_config()
+        return jsonify(config)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/config", methods=["POST"])
+def update_configuration():
+    """Update configuration"""
+    try:
+        data = request.get_json()
+        if update_config(data):
+            return jsonify({"success": True, "message": "Configuration updated"})
+        else:
+            return jsonify({"success": False, "message": "Failed to save configuration"}), 500
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
 @app.route('/graphql', methods=['GET'])
 def graphiql():
     return '''
@@ -532,6 +570,29 @@ def graphiql():
 
 
 # Server-Sent Events (optimized)
+# Configuration API endpoints
+@app.route("/api/config", methods=["GET"])
+def get_configuration():
+    """Get current configuration"""
+    try:
+        config = get_config()
+        return jsonify(config)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/config", methods=["POST"])
+def update_configuration():
+    """Update configuration"""
+    try:
+        data = request.get_json()
+        if update_config(data):
+            return jsonify({"success": True, "message": "Configuration updated"})
+        else:
+            return jsonify({"success": False, "message": "Failed to save configuration"}), 500
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
 @app.route('/events')
 def events():
     def event_stream():
@@ -632,10 +693,56 @@ def events():
 
 
 # Static file serving
+# Configuration API endpoints
+@app.route("/api/config", methods=["GET"])
+def get_configuration():
+    """Get current configuration"""
+    try:
+        config = get_config()
+        return jsonify(config)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/config", methods=["POST"])
+def update_configuration():
+    """Update configuration"""
+    try:
+        data = request.get_json()
+        if update_config(data):
+            return jsonify({"success": True, "message": "Configuration updated"})
+        else:
+            return jsonify({"success": False, "message": "Failed to save configuration"}), 500
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
 @app.route('/')
 def serve_frontend():
     frontend_path = os.path.join(os.path.dirname(__file__), '..', 'frontend')
     return send_from_directory(frontend_path, 'index.html')
+
+
+# Configuration API endpoints
+@app.route("/api/config", methods=["GET"])
+def get_configuration():
+    """Get current configuration"""
+    try:
+        config = get_config()
+        return jsonify(config)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/config", methods=["POST"])
+def update_configuration():
+    """Update configuration"""
+    try:
+        data = request.get_json()
+        if update_config(data):
+            return jsonify({"success": True, "message": "Configuration updated"})
+        else:
+            return jsonify({"success": False, "message": "Failed to save configuration"}), 500
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 @app.route('/<path:filename>')
@@ -696,36 +803,6 @@ def cleanup_application():
     if db:
         db.close()
         logger.info("Database connections closed")
-
-
-
-def get_cached_webcam_image():
-    """Fetch webcam image with basic caching"""
-    try:
-        import requests
-        import json
-        import os
-        
-        # Load config
-        with open(os.path.join(os.path.dirname(__file__), 'config.json'), 'r') as f:
-            config = json.load(f)
-            
-        webcam_url = config['webcam']['url']
-        
-        # Fetch image
-        response = requests.get(webcam_url, timeout=10)
-        response.raise_for_status()
-        
-        return response.content
-        
-    except Exception as e:
-        print(f"Error fetching webcam image: {e}")
-        return None
-
-@app.route("/ocr-webcam")
-def ocr_webcam_alias():
-    """Alias route - redirect to Gemini OCR"""
-    return ocr_gemini()
 
 
 if __name__ == '__main__':

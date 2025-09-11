@@ -1,8 +1,8 @@
 nohup: ignoring input
 Traceback (most recent call last):
-  File "/root/aWeatherStation/backend/app.py", line 31, in <module>
+  File "/root/aMonitoringHub/backend/app.py", line 31, in <module>
     from models import init_database, db, TemperatureReading as DBTemperatureReading
-  File "/root/aWeatherStation/backend/models.py", line 258
+  File "/root/aMonitoringHub/backend/models.py", line 258
     stats = db.get_statistics()
     ^
 IndentationError: expected an indented block after 'for' statement on line 256

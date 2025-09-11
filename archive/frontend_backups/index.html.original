@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>@MonitoringHub - Real-time Weather Monitoring</title>
+  <title>@WeatherStation - Real-time Weather Monitoring</title>
 
   <!-- Chart.js 2.x for better Safari compatibility -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
@@ -155,6 +155,7 @@
     .chart-container {
       position: relative;
       height: 300px;
+      background: rgba(0, 0, 0, 0.2);
       border-radius: 8px;
       padding: 10px;
     }
@@ -301,15 +302,12 @@
       max-width: 350px;
     }
 
-/* SPINNER ONLY */
-#webcamLoading { width: 30px; height: 30px; border: 3px solid transparent; border-top: 3px solid #90caf9; border-radius: 50%; animation: spin 1s linear infinite; }
-@keyframes spin { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
     </style>
 </head>
 
 <body>
   <div class="header">
-    <h1>@MonitoringHub</h1>
+    <h1>@WeatherStation</h1>
     <p style="font-style: italic; color: #888; font-size: 0.9em;">Environmental sensors & climate insights</p>
     <!-- Connection status removed - using sensor status instead -->
   </div>
@@ -392,26 +390,6 @@
       </div>
     </div>
 
-
-      <!-- Webcam Section -->
-      <div style="display: flex; justify-content: center; margin: 30px 0;">
-        <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 20px; text-align: center;">
-          <h3>📹 Cabana 1 Electricity Meter</h3>
-          <div style="position: relative; width: 320px; height: 240px; margin: 0 auto; border-radius: 8px; overflow: hidden;">
-            <img id="webcamImage" style="width: 100%; height: 100%; object-fit: cover; display: none;" src="" />
-            <div id="webcamLoading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #90caf9;"></div>
-          </div>
-          
-          <!-- OCR Index Display -->
-          <div style="margin-top: 15px; padding: 12px; background: rgba(255,255,255,0.1); border-radius: 8px; text-align: center;">
-            <div id="ocrIndex" style="font-size: 1.2rem; font-weight: bold; color: #90caf9; font-family: monospace;">Index: -----</div>
-            <div id="ocrStatus" style="font-size: 0.8rem; margin-top: 5px; opacity: 0.8;">Ready</div>
-            <button onclick="runServerOCR()" style="margin-top: 8px; padding: 4px 12px; background: #90caf9; border: none; border-radius: 4px; color: #333; cursor: pointer; font-size: 0.9rem;">Extract Numbers</button>
-          </div>
-        </div>
-      </div>
-
-
     <!-- Error Display -->
     <div id="errorDisplay" style="display: none;"></div>
 
@@ -422,7 +400,7 @@
 
     <!-- Footer -->
     <footer style="text-align: center; padding-top: 0p; color: #888; font-size: 0.8rem; margin-top: 0px;">
-      <p>@MonitoringHub &copy; 2025. All rights reserved.</p>
+      <p>@WeatherStation &copy; 2025. All rights reserved.</p>
     </footer>
   </div>
 
@@ -476,10 +454,10 @@
       currentData.connected = (status === 'online');
       updateDisplay(); // Trigger display update to reflect sensor status
     }
-
+    
     function updateSensorStatus(status) {
       const sensorStatusEl = document.getElementById('sensorStatus');
-
+      
       if (status === 'checking') {
         sensorStatusEl.textContent = 'Checking...';
         sensorStatusEl.className = 'metric-value status-checking';
@@ -895,7 +873,7 @@
 
         // Connect SSE immediately for instant data
         connectSSE();
-
+        
         // Fetch additional data in background (don't await)
         fetchInitialDataBackground();
 
@@ -907,83 +885,6 @@
 
     // Start the application when page loads
     document.addEventListener('DOMContentLoaded', initialize);
-
-    function loadWebcam() {
-      const img = document.getElementById("webcamImage");
-      const loading = document.getElementById("webcamLoading");
-      if (!img) return;
-      loading.style.display = "block";
-      img.style.display = "none";
-      const url = `/webcam-image`;
-      img.onload = () => { loading.style.display = "none"; img.style.display = "block"; };
-      img.onerror = () => { loading.textContent = "Webcam unavailable"; };
-      img.src = url;
-    }
-
-    setTimeout(loadWebcam, 1000);
-
-    // Server-side OCR function
-    async function runServerOCR() {
-      const indexEl = document.getElementById("ocrIndex");
-      const statusEl = document.getElementById("ocrStatus");
-      
-      try {
-        statusEl.textContent = "Processing image...";
-        statusEl.style.color = "#ffa726";
-        
-        const response = await fetch("/ocr-webcam");
-        const data = await response.json();
-        
-        if (data.success) {
-          indexEl.textContent = "Index: " + data.index;
-          statusEl.textContent = data.message;
-          statusEl.style.color = data.index !== "-----" ? "#4caf50" : "#f44336";
-          console.log("OCR Result:", data);
-        } else {
-          indexEl.textContent = "Index: -----";
-          statusEl.textContent = data.error || "OCR failed";
-          statusEl.style.color = "#f44336";
-        }
-      } catch (error) {
-        console.error("OCR Error:", error);
-        indexEl.textContent = "Index: -----";
-        statusEl.textContent = "Connection error";
-        statusEl.style.color = "#f44336";
-      }
-    }
-    
-    // Auto-run OCR every 30 seconds
-    setInterval(runServerOCR, 30000);
-    setTimeout(runServerOCR, 3000); // First run after 3 seconds
-
-    // Load configuration and apply settings
-    async function loadConfig() {
-      try {
-        const response = await fetch("/config");
-        const config = await response.json();
-        
-        // Update webcam refresh interval if configured
-        if (config.webcam?.refresh_interval) {
-          const interval = config.webcam.refresh_interval;
-          setInterval(loadWebcam, interval);
-        }
-        
-        // Update OCR auto-run interval if configured
-        if (config.ocr?.auto_run && config.ocr?.auto_interval) {
-          const interval = config.ocr.auto_interval;
-          setInterval(runServerOCR, interval);
-        }
-        
-        console.log("Configuration loaded:", config);
-      } catch (error) {
-        console.error("Failed to load config:", error);
-      }
-    }
-    
-    // Load config on page load
-    setTimeout(loadConfig, 1000);
-
-
   </script>
 </body>
 </html>
