@@ -1,8 +1,8 @@
 {
   "webcam": {
-    "url": "http://192.168.50.3/snap/SXGA/flash",
+    "url": "http://192.168.50.3/snapshot",
     "enabled": true,
-    "title": "📹 Cabana 1 Electricity Meter"
+    "title": "\ud83d\udcf9 Cabana 1 Electricity Meter"
   },
   "ocr": {
     "enabled": true,

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>@MonitoringHub - Real-time Weather Monitoring</title>
+  <title>@WeatherStation - Real-time Weather Monitoring</title>
 
   <!-- Chart.js 2.x for better Safari compatibility -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
@@ -367,7 +367,7 @@
 
 <body>
   <div class="header">
-    <h1>@MonitoringHub</h1>
+    <h1>@WeatherStation</h1>
     <p style="font-style: italic; color: #888; font-size: 0.9em;">Environmental sensors & climate insights</p>
     <!-- Connection status removed - using sensor status instead -->
   </div>
@@ -453,22 +453,16 @@
       <div class="charts-row electricity-container">
         <div class="electricity-card">
           <h3>📹 Electricity Meter</h3>
-          <div style="position: relative; width: 320px; height: 240px; margin: 0 auto 15px; overflow: hidden;">
+          <div style="position: relative; width: 320px; height: 240px; margin: 0 auto 15px;  overflow: hidden;">
             <img id="webcamImage" style="display: none; object-fit: cover; width: 100%; height: 100%;" />
-            <div id="webcamLoading" class="spinner-container" style="display: none;">
+            <div id="webcamLoading" class="spinner-container">
               <div class="spinner"></div>
               <div class="spinner-text">Taking snapshot...</div>
             </div>
-            <div id="webcamPlaceholder" style="display: none; align-items: center; justify-content: center; width: 100%; height: 100%; background: rgba(255,255,255,0.1); color: #888; font-size: 0.9rem;">
-              📷 Loading image...
-            </div>
-          </div>
-          <div style="text-align: center; width: 100%; margin-bottom: 15px;">
-            <button id="ocrBtn" class="btn" style="margin: 5px; background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%); display: none;">🔍 Read Index No.</button>
           </div>
           <div style="text-align: center; width: 100%;">
-            <div id="ocrIndex" style="font-size: 1.5rem; font-weight: bold; color: #888; margin-bottom: 8px;">Index: -----</div>
-            <div id="ocrStatus" style="font-size: 0.9rem; color: #888;">Loading image...</div>
+            <div id="ocrIndex" style="font-size: 1.5rem; font-weight: bold; color: #4caf50; margin-bottom: 8px;">Index: -----</div>
+            <div id="ocrStatus" style="font-size: 0.9rem; color: #888;">Ready</div>
           </div>
         </div>
       </div>
@@ -485,7 +479,7 @@
 
     <!-- Footer -->
     <footer style="text-align: center; padding-top: 0p; color: #888; font-size: 0.8rem; margin-top: 0px;">
-      <p>@MonitoringHub &copy; 2025. All rights reserved.</p>
+      <p>@WeatherStation &copy; 2025. All rights reserved.</p>
     </footer>
   </div>
 
@@ -971,105 +965,56 @@
     // Start the application when page loads
     document.addEventListener('DOMContentLoaded', initialize);
 
-    
-  
-    // Automatic Webcam Capture on Page Load
-    function captureWebcamImage() {
+    // Auto-load webcam snapshot with OCR on page load
+    setTimeout(() => {
       const img = document.getElementById("webcamImage");
       const loading = document.getElementById("webcamLoading");
-      const placeholder = document.getElementById("webcamPlaceholder");
-      const ocrBtn = document.getElementById("ocrBtn");
-      const statusEl = document.getElementById("ocrStatus");
-      
-      // Show loading
-      loading.style.display = "flex";
-      placeholder.style.display = "none";
-      img.style.display = "none";
-      
-      statusEl.textContent = "Capturing image...";
-      statusEl.style.color = "#ffa726";
-      
-      fetch("/webcam/capture", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"}
-      })
-      .then(response => response.json())
-      .then(data => {
-        loading.style.display = "none";
-        
-        if (data.success && data.image) {
-          img.src = data.image;
-          img.style.display = "block";
-          ocrBtn.style.display = "inline-block";
-          statusEl.textContent = "Image loaded - Ready for Reading Index";
-          statusEl.style.color = "#4caf50";
-        } else {
-          placeholder.style.display = "flex";
-          placeholder.innerHTML = "❌ Capture failed<br><small>" + (data.error || "Unknown error") + "</small>";
-          statusEl.textContent = "Capture failed";
-          statusEl.style.color = "#f44336";
-        }
-      })
-      .catch(error => {
-        loading.style.display = "none";
-        placeholder.style.display = "flex";
-        placeholder.innerHTML = "❌ Connection error";
-        statusEl.textContent = "Network error";
-        statusEl.style.color = "#f44336";
-      });
-    }
-    
-    // Manual Index Reading Function
-    document.getElementById("ocrBtn").addEventListener("click", function() {
       const indexEl = document.getElementById("ocrIndex");
       const statusEl = document.getElementById("ocrStatus");
-      const ocrBtn = document.getElementById("ocrBtn");
-      
-      // Clean up index first and disable button
-      indexEl.textContent = "Index: -----";
-      indexEl.style.color = "#888";
-      ocrBtn.disabled = true;
-      ocrBtn.textContent = "🔍 Reading...";
-      statusEl.textContent = "Reading meter index...";
-      statusEl.style.color = "#ffa726";
-      
-      fetch("/webcam/ocr", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"}
-      })
-      .then(response => response.json())
-      .then(data => {
-        // Re-enable button
-        ocrBtn.disabled = false;
-        ocrBtn.textContent = "🔍 Read Index No.";
-        
-        if (data.success && data.index !== "-----") {
-          indexEl.textContent = "Index: " + data.index;
-          indexEl.style.color = "#4caf50";
-          statusEl.textContent = data.engine + " - Success";
-          statusEl.style.color = "#4caf50";
-        } else {
-          indexEl.textContent = "Index: -----";
-          indexEl.style.color = "#f44336";
-          statusEl.textContent = (data.error || "Reading index failed");
-          statusEl.style.color = "#f44336";
-        }
-      })
-      .catch(error => {
-        ocrBtn.disabled = false;
-        ocrBtn.textContent = "🔍 Read Index No.";
-        indexEl.textContent = "Index: -----";
-        indexEl.style.color = "#f44336";
-        statusEl.textContent = "Reading index request failed";
-        statusEl.style.color = "#f44336";
-      });
-    });
-    
-    // Auto-capture image when page loads (after 3 seconds)
-    setTimeout(() => {
-      captureWebcamImage();
-    }, 3000);
 
+      if (img && loading && indexEl && statusEl) {
+        // Update spinner text for different phases
+        const spinnerText = loading.querySelector('.spinner-text');
+        if (spinnerText) spinnerText.textContent = "Taking snapshot...";
+
+        statusEl.textContent = "Processing...";
+        statusEl.style.color = "#ffa726";
+
+        fetch("/snapshot")
+          .then(response => response.json())
+          .then(data => {
+            // Display image first
+            if (data.image) {
+              img.src = data.image;
+              img.style.display = "block";
+              loading.style.display = "none";
+              statusEl.textContent = "Analyzing image...";
+              statusEl.style.color = "#2196f3";
+            }
+
+            // Show OCR results after delay
+            setTimeout(() => {
+              if (data.success && data.index !== "-----") {
+                indexEl.textContent = "Index: " + data.index;
+                indexEl.style.color = "#4caf50";
+                statusEl.textContent = data.engine + " - Success";
+                statusEl.style.color = "#4caf50";
+              } else {
+                indexEl.textContent = "Index: -----";
+                indexEl.style.color = "#f44336";
+                statusEl.textContent = data.error || data.engine + " - Failed";
+                statusEl.style.color = "#f44336";
+              }
+            }, 1000);
+          })
+          .catch(error => {
+            const spinnerText = loading.querySelector('.spinner-text');
+            if (spinnerText) spinnerText.textContent = "Snapshot failed";
+            statusEl.textContent = "Connection error";
+            statusEl.style.color = "#f44336";
+          });
+      }
+    }, 3000);
   </script>
 </body>
 </html>

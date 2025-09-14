@@ -1,5 +1,5 @@
 """
-Optimized GraphQL + SSE Flask application for aMonitoringHub monitoring system.
+Optimized GraphQL + SSE Flask application for aWeatherStation monitoring system.
 
 Features:
 - GraphQL API using pure graphene
@@ -322,7 +322,7 @@ schema = Schema(query=Query)
 
 
 # Weather Station Collector - Sends SSE updates every second
-class MonitoringHubCollector:
+class WeatherStationCollector:
     def __init__(self, temperature_sensor: TemperatureSensorReader, humidity_sensor: HumiditySensorReader = None):
         self.temperature_sensor = temperature_sensor
         self.humidity_sensor = humidity_sensor
@@ -622,7 +622,7 @@ def initialize_application():
         logger.info(f"Humidity sensor initialized: {humidity_info}")
         
         # Use the SMART collector with both sensors
-        collector = MonitoringHubCollector(temperature_sensor, humidity_sensor)
+        collector = WeatherStationCollector(temperature_sensor, humidity_sensor)
         
         logger.info("Setting up SMART temperature collection scheduler...")
         scheduler = BackgroundScheduler(daemon=True)
@@ -669,9 +669,9 @@ def get_config():
         # Return minimal working config
         return jsonify({
             "webcam": {
-                "url": "http://192.168.50.3/snapshot",
+                "url": "http://192.168.50.3/snap/SXGA/flash",
                 "enabled": True,
-                "title": "📹 Cabana 1 Electricity Meter"
+                "title": "Webcam"
             },
             "ocr": {
                 "enabled": True
@@ -682,148 +682,79 @@ def get_config():
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/webcam/capture", methods=['POST'])
-def capture_webcam():
-    """Capture image from ESP32-CAM using POST API - NO automatic OCR"""
+@app.route("/snapshot")
+def snapshot():
+    """Snapshot endpoint - captures image and runs Gemini OCR"""
     import base64
     import json
     import os
-    import requests
-    from datetime import datetime, timezone
     
     try:
+        # Get webcam image
+        import requests
+        
         # Load config
         with open(os.path.join(os.path.dirname(__file__), 'config.json'), 'r') as f:
             config = json.load(f)
         
-        webcam_url = config.get('webcam', {}).get('url', 'http://192.168.50.3/snapshot')
+        webcam_url = config.get('webcam', {}).get('url', 'http://192.168.50.3/snap/SXGA/flash')
         
-        # Prepare the exact payload as specified
-        payload = {
-            "resolution": "UXGA",
-            "flash": "off",
-            "brightness": 0,
-            "contrast": 0,
-            "saturation": 0,
-            "exposure": 300,
-            "gain": 15,
-            "special_effect": 0,
-            "wb_mode": 0,
-            "hmirror": False,
-            "vflip": False,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "api_endpoint": webcam_url,
-            "method": "POST",
-            "content_type": "application/json"
-        }
-        
-        headers = {'Content-Type': 'application/json'}
-        response = requests.post(webcam_url, json=payload, headers=headers, timeout=20)
+        # Fetch image
+        response = requests.get(webcam_url, timeout=10)
         response.raise_for_status()
-        
         image_data = response.content
+        
+        # Convert to base64 for frontend
         image_base64 = base64.b64encode(image_data).decode('utf-8')
-        
-        return jsonify({
-            "success": True,
-            "image": f"data:image/jpeg;base64,{image_base64}",
-            "timestamp": payload["timestamp"],
-            "source": "ESP32-CAM POST API"
-        })
-    except Exception as e:
-        logger.error(f"Webcam capture failed: {e}")
-        return jsonify({
-            "success": False,
-            "error": f"Capture failed: {str(e)}"
-        }), 500
-
-
-@app.route("/webcam/ocr", methods=['POST'])
-def run_ocr():
-    """Run OCR on a freshly captured image - Manual trigger only"""
-    import base64
-    import json
-    import os
-    import requests
-    from datetime import datetime
-    
-    try:
-        # Capture a fresh image (no auto-OCR elsewhere)
-        cap_resp = capture_webcam()
-        cap_json = json.loads(cap_resp.get_data(as_text=True))
-        if not cap_json.get('success'):
-            return jsonify({
-                "success": False,
-                "error": "Failed to capture image for OCR",
-                "index": "-----"
-            }), 500
-        
-        # Decode base64
-        image_b64 = cap_json['image']
-        prefix = 'data:image/jpeg;base64,'
-        if image_b64.startswith(prefix):
-            image_b64 = image_b64[len(prefix):]
-        image_data = base64.b64decode(image_b64)
-        
-        # Load config for OCR
-        with open(os.path.join(os.path.dirname(__file__), 'config.json'), 'r') as f:
-            config = json.load(f)
         
         # Try Gemini OCR
         try:
             import google.generativeai as genai
             from PIL import Image
-            import io, re
+            import io
+            import re
             
             api_key = config.get('ocr', {}).get('engines', {}).get('gemini', {}).get('api_key')
-            if not api_key:
-                raise Exception("Gemini API key not configured")
             
-            genai.configure(api_key=api_key)
-            model = genai.GenerativeModel(config.get('ocr', {}).get('engines', {}).get('gemini', {}).get('model', 'gemini-1.5-flash'))
-            image = Image.open(io.BytesIO(image_data))
-            prompt = "Extract only the numbers from this electricity meter display. Return only digits, no text."
-            ocr_response = model.generate_content([prompt, image])
-            ocr_text = (ocr_response.text or '').strip()
-            numbers = re.findall(r'\d+', ocr_text)
-            
-            return jsonify({
-                "success": True if numbers else False,
-                "index": max(numbers, key=len) if numbers else "-----",
-                "engine": "Gemini AI",
-                "image": cap_json['image'],
-                "timestamp": datetime.now().isoformat() + "Z",
-                "raw_ocr": ocr_text
-            })
+            if api_key:
+                genai.configure(api_key=api_key)
+                model = genai.GenerativeModel('gemini-1.5-flash')
+                image = Image.open(io.BytesIO(image_data))
+                
+                prompt = "Extract only the numbers from this electricity meter display. Return only digits, no text."
+                ocr_response = model.generate_content([prompt, image])
+                ocr_text = ocr_response.text.strip()
+                
+                numbers = re.findall(r'\d+', ocr_text)
+                
+                return jsonify({
+                    "success": True if numbers else False,
+                    "index": max(numbers, key=len) if numbers else "-----",
+                    "engine": "Gemini AI",
+                    "image": f"data:image/jpeg;base64,{image_base64}"
+                })
+                
         except Exception as ocr_error:
+            # OCR failed but return image anyway
             return jsonify({
                 "success": False,
-                "index": "-----",
-                "error": f"Reading index failed: {str(ocr_error)}",
-                "engine": "Gemini AI - Error",
-                "image": cap_json['image'],
-                "timestamp": datetime.now().isoformat() + "Z"
+                "index": "-----", 
+                "error": f"OCR failed: {str(ocr_error)[:50]}...",
+                "engine": "Image Only",
+                "image": f"data:image/jpeg;base64,{image_base64}"
             })
+            
     except Exception as e:
-        logger.error(f"Index reading failed: {e}")
         return jsonify({
             "success": False,
-            "error": f"Reading index failed: {str(e)}",
+            "error": f"Snapshot failed: {str(e)}",
             "index": "-----",
             "engine": "Error"
         }), 500
 
 
-# Deprecate legacy /snapshot route for webcam - keep but no auto OCR
-@app.route("/snapshot", methods=['POST'])
-def snapshot():
-    """Deprecated: use /webcam/capture (POST)"""
-    return capture_webcam()
-
-
-
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='aMonitoringHub GraphQL monitoring server (OPTIMIZED)')
+    parser = argparse.ArgumentParser(description='aWeatherStation GraphQL monitoring server (OPTIMIZED)')
     parser.add_argument('--host', default='0.0.0.0', help='Host to bind to')
     parser.add_argument('--port', type=int, default=5000, help='Port to listen on')
     parser.add_argument('--debug', action='store_true', help='Enable debug mode')
@@ -837,7 +768,7 @@ if __name__ == '__main__':
             logger.error("Failed to initialize application")
             sys.exit(1)
             
-        logger.info(f"Starting OPTIMIZED aMonitoringHub GraphQL server on {args.host}:{args.port}")
+        logger.info(f"Starting OPTIMIZED aWeatherStation GraphQL server on {args.host}:{args.port}")
         logger.info("GraphQL endpoint: http://192.168.50.2:5000/graphql")
         logger.info("SSE endpoint: http://192.168.50.2:5000/events")
         logger.info(f"SSE optimization: Updates only when temp changes >= {args.threshold}°C")
