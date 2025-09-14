@@ -455,12 +455,12 @@
           <h3>📹 Electricity Meter</h3>
           <div style="position: relative; width: 320px; height: 240px; margin: 0 auto 15px; overflow: hidden;">
             <img id="webcamImage" style="display: none; object-fit: cover; width: 100%; height: 100%;" />
-            <div id="webcamLoading" class="spinner-container" style="display: none;">
+            <div id="webcamLoading" class="spinner-container" style="display: flex;">
               <div class="spinner"></div>
-              <div class="spinner-text">Taking snapshot...</div>
+              <div class="spinner-text">Capturing image...</div>
             </div>
             <div id="webcamPlaceholder" style="display: none; align-items: center; justify-content: center; width: 100%; height: 100%; background: rgba(255,255,255,0.1); color: #888; font-size: 0.9rem;">
-              📷 Loading image...
+              📷 Capture failed
             </div>
           </div>
           <div style="text-align: center; width: 100%; margin-bottom: 15px;">
@@ -468,7 +468,7 @@
           </div>
           <div style="text-align: center; width: 100%;">
             <div id="ocrIndex" style="font-size: 1.5rem; font-weight: bold; color: #888; margin-bottom: 8px;">Index: -----</div>
-            <div id="ocrStatus" style="font-size: 0.9rem; color: #888;">Loading image...</div>
+            <div id="ocrStatus" style="font-size: 0.9rem; color: #888;"></div>
           </div>
         </div>
       </div>
@@ -986,7 +986,7 @@
       placeholder.style.display = "none";
       img.style.display = "none";
       
-      statusEl.textContent = "Capturing image...";
+      // statusEl.textContent = "Capturing image..."; // Removed
       statusEl.style.color = "#ffa726";
       
       fetch("/webcam/capture", {
@@ -1065,10 +1065,10 @@
       });
     });
     
-    // Auto-capture image when page loads (after 3 seconds)
+    // Auto-capture image when page loads (immediately)
     setTimeout(() => {
       captureWebcamImage();
-    }, 3000);
+    }, 100);
 
   </script>
 </body>
