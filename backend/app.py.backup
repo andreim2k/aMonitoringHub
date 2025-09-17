@@ -321,7 +321,7 @@ class Query(ObjectType):
 schema = Schema(query=Query)
 
 
-# OPTIMIZED Weather Station Collector - Only sends SSE when temperature changes
+# Weather Station Collector - Sends SSE updates every second
 class WeatherStationCollector:
     def __init__(self, temperature_sensor: TemperatureSensorReader, humidity_sensor: HumiditySensorReader = None):
         self.temperature_sensor = temperature_sensor
@@ -364,24 +364,20 @@ class WeatherStationCollector:
             
             if not db_reading:
                 self.logger.error("Failed to store temperature reading in database")
-                return
+                # Continue anyway to send SSE updates
             
             # SMART SSE: Only send when temperature changes significantly OR after max time
             should_send_sse = False
             send_reason = ""
             
+            # Always send SSE updates every second
+            should_send_sse = True
             if self.last_temperature is None:
-                # First reading - always send
-                should_send_sse = True
                 send_reason = "first_reading"
             elif abs(current_temp - self.last_temperature) >= self.temperature_threshold:
-                # Temperature changed significantly
-                should_send_sse = True
                 send_reason = f"temp_change_{abs(current_temp - self.last_temperature):.2f}°C"
-            elif (current_time - self.last_sse_time) >= self.max_time_between_updates:
-                # Too much time has passed - send heartbeat update
-                should_send_sse = True
-                send_reason = "heartbeat_update"
+            else:
+                send_reason = "regular_update"
             
             if should_send_sse:
                 temperature_data = {
@@ -435,18 +431,11 @@ class WeatherStationCollector:
             
             if not db_reading:
                 self.logger.error("Failed to store humidity reading in database")
-                return
+                # Continue anyway to send SSE updates
             
-            # Check if we should send SSE update for humidity
+            # Always send SSE updates for humidity every second
             current_time = time.time()
-            should_send_sse = False
-            
-            if self.last_humidity is None:
-                should_send_sse = True
-            elif abs(current_humidity - self.last_humidity) >= 2.0:  # 2% threshold for humidity
-                should_send_sse = True
-            elif (current_time - self.last_sse_time) >= self.max_time_between_updates:
-                should_send_sse = True
+            should_send_sse = True
             
             if should_send_sse:
                 humidity_data = {
@@ -537,9 +526,53 @@ def graphiql():
 @app.route('/events')
 def events():
     def event_stream():
+        # Send immediate connection confirmation with latest data
+        yield f"data: {json.dumps({'type': 'connected', 'timestamp': time.time()})}\n\n"
+        
+        # Immediately send latest temperature from database
+        try:
+            with db.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT temperature_c, timestamp, sensor_type, sensor_id FROM temperature_readings ORDER BY timestamp DESC LIMIT 1")
+                temp_row = cursor.fetchone()
+                if temp_row:
+                    temp_data = {
+                        'temperature_c': temp_row[0],
+                        'timestamp_iso': temp_row[1],
+                        'sensor_type': temp_row[2],
+                        'sensor_id': temp_row[3]
+                    }
+                    sse_message = {
+                        'type': 'temperature_update',
+                        'data': temp_data,
+                        'timestamp': temp_row[1]
+                    }
+                    yield f"data: {json.dumps(sse_message)}\n\n"
+                
+                # Also send latest humidity
+                cursor.execute("SELECT humidity_percent, timestamp FROM humidity_readings ORDER BY timestamp DESC LIMIT 1")
+                humidity_row = cursor.fetchone()
+                if humidity_row:
+                    humidity_data = {
+                        'humidity_percent': humidity_row[0],
+                        'timestamp_iso': humidity_row[1],
+                        'sensor_type': 'mock',
+                        'sensor_id': 'default'
+                    }
+                    sse_message = {
+                        'type': 'humidity_update',
+                        'humidity_percent': humidity_row[0],
+                        'timestamp': humidity_row[1],
+                        'sensor_type': 'mock',
+                        'sensor_id': 'default'
+                    }
+                    yield f"data: {json.dumps(sse_message)}\n\n"
+        except Exception as e:
+            print(f"Error sending initial data: {e}")
+        
         while True:
             try:
-                data = sse_clients.get(timeout=35)  # Slightly longer timeout
+                data = sse_clients.get(timeout=5)  # Much shorter timeout
                 yield f"data: {json.dumps(data)}\n\n"
                 sse_clients.task_done()
             except:
@@ -596,12 +629,12 @@ def initialize_application():
         scheduler.add_job(
             func=collector.collect_all_data,
             trigger='interval',
-            seconds=1,  # Still collect every second
+            seconds=300,  # Collect every 5 minutes
             id='smart_temperature_collection'
         )
         scheduler.start()
         logger.info("SMART temperature collection scheduler started")
-        logger.info("SSE will only send updates when temperature changes >= 0.1°C")
+        logger.info("SSE will send temperature updates every 5 minutes")
         
         collector.collect_all_data()
         return True
@@ -623,6 +656,101 @@ def cleanup_application():
     if db:
         db.close()
         logger.info("Database connections closed")
+
+
+
+@app.route("/config")
+def get_config():
+    """Serve frontend configuration"""
+    try:
+        import json
+        import os
+        
+        # Return minimal working config
+        return jsonify({
+            "webcam": {
+                "url": "http://192.168.50.3/snap/SXGA/flash",
+                "enabled": True,
+                "title": "Webcam"
+            },
+            "ocr": {
+                "enabled": True
+            }
+        })
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/snapshot")
+def snapshot():
+    """Snapshot endpoint - captures image and runs Gemini OCR"""
+    import base64
+    import json
+    import os
+    
+    try:
+        # Get webcam image
+        import requests
+        
+        # Load config
+        with open(os.path.join(os.path.dirname(__file__), 'config.json'), 'r') as f:
+            config = json.load(f)
+        
+        webcam_url = config.get('webcam', {}).get('url', 'http://192.168.50.3/snap/SXGA/flash')
+        
+        # Fetch image
+        response = requests.get(webcam_url, timeout=10)
+        response.raise_for_status()
+        image_data = response.content
+        
+        # Convert to base64 for frontend
+        image_base64 = base64.b64encode(image_data).decode('utf-8')
+        
+        # Try Gemini OCR
+        try:
+            import google.generativeai as genai
+            from PIL import Image
+            import io
+            import re
+            
+            api_key = config.get('ocr', {}).get('engines', {}).get('gemini', {}).get('api_key')
+            
+            if api_key:
+                genai.configure(api_key=api_key)
+                model = genai.GenerativeModel('gemini-1.5-flash')
+                image = Image.open(io.BytesIO(image_data))
+                
+                prompt = "Extract only the numbers from this electricity meter display. Return only digits, no text."
+                ocr_response = model.generate_content([prompt, image])
+                ocr_text = ocr_response.text.strip()
+                
+                numbers = re.findall(r'\d+', ocr_text)
+                
+                return jsonify({
+                    "success": True if numbers else False,
+                    "index": max(numbers, key=len) if numbers else "-----",
+                    "engine": "Gemini AI",
+                    "image": f"data:image/jpeg;base64,{image_base64}"
+                })
+                
+        except Exception as ocr_error:
+            # OCR failed but return image anyway
+            return jsonify({
+                "success": False,
+                "index": "-----", 
+                "error": f"OCR failed: {str(ocr_error)[:50]}...",
+                "engine": "Image Only",
+                "image": f"data:image/jpeg;base64,{image_base64}"
+            })
+            
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": f"Snapshot failed: {str(e)}",
+            "index": "-----",
+            "engine": "Error"
+        }), 500
 
 
 if __name__ == '__main__':

@@ -1,5 +1,5 @@
 """
-SQLAlchemy models for aWeatherStation application.
+SQLAlchemy models for aMonitoringHub application.
 """
 
 from datetime import datetime, timezone, timedelta
@@ -84,7 +84,7 @@ class DatabaseManager:
     """Database connection and session management."""
     
     def __init__(self, database_url: str = None):
-        self.database_url = database_url or "sqlite:///weatherstation.db"
+        self.database_url = database_url or "sqlite:///monitoringhub.db"
         self.engine = None
         self.Session = None
         self.logger = logging.getLogger(__name__)

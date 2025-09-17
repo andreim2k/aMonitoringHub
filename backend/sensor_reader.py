@@ -1,5 +1,5 @@
 """
-Temperature sensor reader module for aWeatherStation application.
+Temperature sensor reader module for aMonitoringHub application.
 
 Supports multiple sensor types:
 - System thermal zones (CPU temperature)

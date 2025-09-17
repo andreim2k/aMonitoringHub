@@ -155,49 +155,16 @@
     .chart-container {
       position: relative;
       height: 300px;
+      background: rgba(0, 0, 0, 0.2);
       border-radius: 8px;
       padding: 10px;
-    }
-
-    /* Spinner Animation */
-    .spinner {
-      border: 3px solid rgba(144, 202, 249, 0.3);
-      border-top: 3px solid #90caf9;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 0 auto;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .spinner-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: #90caf9;
-    }
-
-    .spinner-text {
-      margin-top: 10px;
-      font-size: 0.9rem;
-      color: #90caf9;
     }
 
     /* Row-based Layout Styles */
     .metrics-row, .charts-row {
       display: flex;
-      margin-bottom: 20px;
       gap: 20px;
+      margin-bottom: 20px;
       flex-wrap: wrap;
     }
 
@@ -206,11 +173,11 @@
     }
 
     .charts-row {
-      justify-content: center;
+      justify-content: space-between;
     }
 
     .stats-row {
-      justify-content: center;
+      justify-content: space-around;
     }
 
     .metric-card {
@@ -253,29 +220,6 @@
       text-align: center;
     }
 
-    /* Electricity Meter Card - Compact styling */
-    .electricity-card {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      padding: 20px;
-      width: fit-content;
-      max-width: 400px;
-      margin: 0 auto;
-      text-align: center;
-    }
-
-    .electricity-card h3 {
-      margin: 0 0 15px 0;
-      color: #e0e0e0;
-      font-size: 1.1rem;
-      text-align: center;
-    }
-
-    .electricity-container {
-      justify-content: center;
-    }
-
     .metric-icon {
       font-size: 2rem;
       margin-bottom: 8px;
@@ -312,13 +256,9 @@
         gap: 15px;
       }
 
-      .metric-card, .chart-card, .electricity-card {
+      .metric-card, .chart-card {
         max-width: none;
         min-width: auto;
-      }
-
-      .electricity-container {
-        justify-content: center;
       }
     }
 
@@ -330,7 +270,7 @@
 
     .chart-header {
       display: flex;
-      justify-content: center;
+      justify-content: space-between;
       align-items: center;
       margin-bottom: 15px;
     }
@@ -427,10 +367,9 @@
         </div>
       </div>
 
-
-
       <!-- Row 4: Temperature Charts -->
       <div class="charts-row">
+
         <div class="chart-card">
           <h3>📈 Temperature History</h3>
           <div class="chart-container">
@@ -441,6 +380,7 @@
 
       <!-- Row 5: Humidity Charts -->
       <div class="charts-row">
+
         <div class="chart-card">
           <h3>📊 Humidity History</h3>
           <div class="chart-container">
@@ -448,26 +388,7 @@
           </div>
         </div>
       </div>
-
-      <!-- Row 6: Electricity Meter - Compact Card -->
-      <div class="charts-row electricity-container">
-        <div class="electricity-card">
-          <h3>📹 Electricity Meter</h3>
-          <div style="position: relative; width: 320px; height: 240px; margin: 0 auto 15px;  overflow: hidden;">
-            <img id="webcamImage" style="display: none; object-fit: cover; width: 100%; height: 100%;" />
-            <div id="webcamLoading" class="spinner-container">
-              <div class="spinner"></div>
-              <div class="spinner-text">Taking snapshot...</div>
-            </div>
-          </div>
-          <div style="text-align: center; width: 100%;">
-            <div id="ocrIndex" style="font-size: 1.5rem; font-weight: bold; color: #4caf50; margin-bottom: 8px;">Index: -----</div>
-            <div id="ocrStatus" style="font-size: 0.9rem; color: #888;">Ready</div>
-          </div>
-        </div>
-      </div>
     </div>
-
 
     <!-- Error Display -->
     <div id="errorDisplay" style="display: none;"></div>
@@ -533,10 +454,10 @@
       currentData.connected = (status === 'online');
       updateDisplay(); // Trigger display update to reflect sensor status
     }
-
+    
     function updateSensorStatus(status) {
       const sensorStatusEl = document.getElementById('sensorStatus');
-
+      
       if (status === 'checking') {
         sensorStatusEl.textContent = 'Checking...';
         sensorStatusEl.className = 'metric-value status-checking';
@@ -952,7 +873,7 @@
 
         // Connect SSE immediately for instant data
         connectSSE();
-
+        
         // Fetch additional data in background (don't await)
         fetchInitialDataBackground();
 
@@ -964,57 +885,6 @@
 
     // Start the application when page loads
     document.addEventListener('DOMContentLoaded', initialize);
-
-    // Auto-load webcam snapshot with OCR on page load
-    setTimeout(() => {
-      const img = document.getElementById("webcamImage");
-      const loading = document.getElementById("webcamLoading");
-      const indexEl = document.getElementById("ocrIndex");
-      const statusEl = document.getElementById("ocrStatus");
-
-      if (img && loading && indexEl && statusEl) {
-        // Update spinner text for different phases
-        const spinnerText = loading.querySelector('.spinner-text');
-        if (spinnerText) spinnerText.textContent = "Taking snapshot...";
-
-        statusEl.textContent = "Processing...";
-        statusEl.style.color = "#ffa726";
-
-        fetch("/snapshot")
-          .then(response => response.json())
-          .then(data => {
-            // Display image first
-            if (data.image) {
-              img.src = data.image;
-              img.style.display = "block";
-              loading.style.display = "none";
-              statusEl.textContent = "Analyzing image...";
-              statusEl.style.color = "#2196f3";
-            }
-
-            // Show OCR results after delay
-            setTimeout(() => {
-              if (data.success && data.index !== "-----") {
-                indexEl.textContent = "Index: " + data.index;
-                indexEl.style.color = "#4caf50";
-                statusEl.textContent = data.engine + " - Success";
-                statusEl.style.color = "#4caf50";
-              } else {
-                indexEl.textContent = "Index: -----";
-                indexEl.style.color = "#f44336";
-                statusEl.textContent = data.error || data.engine + " - Failed";
-                statusEl.style.color = "#f44336";
-              }
-            }, 1000);
-          })
-          .catch(error => {
-            const spinnerText = loading.querySelector('.spinner-text');
-            if (spinnerText) spinnerText.textContent = "Snapshot failed";
-            statusEl.textContent = "Connection error";
-            statusEl.style.color = "#f44336";
-          });
-      }
-    }, 3000);
   </script>
 </body>
 </html>

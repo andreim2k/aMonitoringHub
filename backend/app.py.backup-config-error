@@ -19,6 +19,7 @@ from queue import Queue
 import threading
 
 from flask import Flask, request, jsonify, Response, send_from_directory
+from config import get_config, update_config
 from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
 from graphql import build_schema, graphql_sync
@@ -321,7 +322,7 @@ class Query(ObjectType):
 schema = Schema(query=Query)
 
 
-# Weather Station Collector - Sends SSE updates every second
+# Monitoring Hub Collector - Sends SSE updates every second
 class MonitoringHubCollector:
     def __init__(self, temperature_sensor: TemperatureSensorReader, humidity_sensor: HumiditySensorReader = None):
         self.temperature_sensor = temperature_sensor
@@ -460,6 +461,29 @@ class MonitoringHubCollector:
 
 
 # GraphQL endpoint
+# Configuration API endpoints
+@app.route("/api/config", methods=["GET"])
+def get_configuration():
+    """Get current configuration"""
+    try:
+        config = get_config()
+        return jsonify(config)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/config", methods=["POST"])
+def update_configuration():
+    """Update configuration"""
+    try:
+        data = request.get_json()
+        if update_config(data):
+            return jsonify({"success": True, "message": "Configuration updated"})
+        else:
+            return jsonify({"success": False, "message": "Failed to save configuration"}), 500
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
 @app.route('/graphql', methods=['POST'])
 def graphql_endpoint():
     try:
@@ -489,6 +513,29 @@ def graphql_endpoint():
 
 
 # GraphiQL interface for development
+# Configuration API endpoints
+@app.route("/api/config", methods=["GET"])
+def get_configuration():
+    """Get current configuration"""
+    try:
+        config = get_config()
+        return jsonify(config)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/config", methods=["POST"])
+def update_configuration():
+    """Update configuration"""
+    try:
+        data = request.get_json()
+        if update_config(data):
+            return jsonify({"success": True, "message": "Configuration updated"})
+        else:
+            return jsonify({"success": False, "message": "Failed to save configuration"}), 500
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
 @app.route('/graphql', methods=['GET'])
 def graphiql():
     return '''
@@ -523,6 +570,29 @@ def graphiql():
 
 
 # Server-Sent Events (optimized)
+# Configuration API endpoints
+@app.route("/api/config", methods=["GET"])
+def get_configuration():
+    """Get current configuration"""
+    try:
+        config = get_config()
+        return jsonify(config)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/config", methods=["POST"])
+def update_configuration():
+    """Update configuration"""
+    try:
+        data = request.get_json()
+        if update_config(data):
+            return jsonify({"success": True, "message": "Configuration updated"})
+        else:
+            return jsonify({"success": False, "message": "Failed to save configuration"}), 500
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
 @app.route('/events')
 def events():
     def event_stream():
@@ -531,7 +601,38 @@ def events():
         
         # Immediately send latest temperature from database
         try:
-            with db.get_connection() as conn:
+            temp_readings = db.get_recent_readings(limit=1)
+            if temp_readings:
+                temp_reading = temp_readings[0]
+                temp_data = {
+                    "temperature_c": temp_reading.temperature_c,
+                    "timestamp_iso": temp_reading.timestamp.isoformat(),
+                    "sensor_type": temp_reading.sensor_type,
+                    "sensor_id": temp_reading.sensor_id
+                }
+                sse_message = {
+                    "type": "temperature_update",
+                    "data": temp_data,
+                    "timestamp": temp_reading.timestamp.isoformat()
+                }
+                yield f"data: {json.dumps(sse_message)}\n\n"
+            
+            # Get recent humidity reading
+            humidity_readings = db.get_recent_humidity_readings(limit=1)
+            if humidity_readings:
+                humidity_reading = humidity_readings[0]
+                humidity_data = {
+                    "humidity_percent": humidity_reading.humidity_percent,
+                    "timestamp_iso": humidity_reading.timestamp.isoformat(),
+                    "sensor_type": humidity_reading.sensor_type,
+                    "sensor_id": humidity_reading.sensor_id
+                }
+                sse_message = {
+                    "type": "humidity_update",
+                    "data": humidity_data,
+                    "timestamp": humidity_reading.timestamp.isoformat()
+                }
+                yield f"data: {json.dumps(sse_message)}\n\n"
                 cursor = conn.cursor()
                 cursor.execute("SELECT temperature_c, timestamp, sensor_type, sensor_id FROM temperature_readings ORDER BY timestamp DESC LIMIT 1")
                 temp_row = cursor.fetchone()
@@ -592,10 +693,56 @@ def events():
 
 
 # Static file serving
+# Configuration API endpoints
+@app.route("/api/config", methods=["GET"])
+def get_configuration():
+    """Get current configuration"""
+    try:
+        config = get_config()
+        return jsonify(config)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/config", methods=["POST"])
+def update_configuration():
+    """Update configuration"""
+    try:
+        data = request.get_json()
+        if update_config(data):
+            return jsonify({"success": True, "message": "Configuration updated"})
+        else:
+            return jsonify({"success": False, "message": "Failed to save configuration"}), 500
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
 @app.route('/')
 def serve_frontend():
     frontend_path = os.path.join(os.path.dirname(__file__), '..', 'frontend')
     return send_from_directory(frontend_path, 'index.html')
+
+
+# Configuration API endpoints
+@app.route("/api/config", methods=["GET"])
+def get_configuration():
+    """Get current configuration"""
+    try:
+        config = get_config()
+        return jsonify(config)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/config", methods=["POST"])
+def update_configuration():
+    """Update configuration"""
+    try:
+        data = request.get_json()
+        if update_config(data):
+            return jsonify({"success": True, "message": "Configuration updated"})
+        else:
+            return jsonify({"success": False, "message": "Failed to save configuration"}), 500
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 @app.route('/<path:filename>')
@@ -656,170 +803,6 @@ def cleanup_application():
     if db:
         db.close()
         logger.info("Database connections closed")
-
-
-
-@app.route("/config")
-def get_config():
-    """Serve frontend configuration"""
-    try:
-        import json
-        import os
-        
-        # Return minimal working config
-        return jsonify({
-            "webcam": {
-                "url": "http://192.168.50.3/snapshot",
-                "enabled": True,
-                "title": "📹 Cabana 1 Electricity Meter"
-            },
-            "ocr": {
-                "enabled": True
-            }
-        })
-        
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route("/webcam/capture", methods=['POST'])
-def capture_webcam():
-    """Capture image from ESP32-CAM using POST API - NO automatic OCR"""
-    import base64
-    import json
-    import os
-    import requests
-    from datetime import datetime, timezone
-    
-    try:
-        # Load config
-        with open(os.path.join(os.path.dirname(__file__), 'config.json'), 'r') as f:
-            config = json.load(f)
-        
-        webcam_url = config.get('webcam', {}).get('url', 'http://192.168.50.3/snapshot')
-        
-        # Prepare the exact payload as specified
-        payload = {
-            "resolution": "UXGA",
-            "flash": "off",
-            "brightness": 0,
-            "contrast": 0,
-            "saturation": 0,
-            "exposure": 300,
-            "gain": 15,
-            "special_effect": 0,
-            "wb_mode": 0,
-            "hmirror": False,
-            "vflip": False,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "api_endpoint": webcam_url,
-            "method": "POST",
-            "content_type": "application/json"
-        }
-        
-        headers = {'Content-Type': 'application/json'}
-        response = requests.post(webcam_url, json=payload, headers=headers, timeout=20)
-        response.raise_for_status()
-        
-        image_data = response.content
-        image_base64 = base64.b64encode(image_data).decode('utf-8')
-        
-        return jsonify({
-            "success": True,
-            "image": f"data:image/jpeg;base64,{image_base64}",
-            "timestamp": payload["timestamp"],
-            "source": "ESP32-CAM POST API"
-        })
-    except Exception as e:
-        logger.error(f"Webcam capture failed: {e}")
-        return jsonify({
-            "success": False,
-            "error": f"Capture failed: {str(e)}"
-        }), 500
-
-
-@app.route("/webcam/ocr", methods=['POST'])
-def run_ocr():
-    """Run OCR on a freshly captured image - Manual trigger only"""
-    import base64
-    import json
-    import os
-    import requests
-    from datetime import datetime
-    
-    try:
-        # Capture a fresh image (no auto-OCR elsewhere)
-        cap_resp = capture_webcam()
-        cap_json = json.loads(cap_resp.get_data(as_text=True))
-        if not cap_json.get('success'):
-            return jsonify({
-                "success": False,
-                "error": "Failed to capture image for OCR",
-                "index": "-----"
-            }), 500
-        
-        # Decode base64
-        image_b64 = cap_json['image']
-        prefix = 'data:image/jpeg;base64,'
-        if image_b64.startswith(prefix):
-            image_b64 = image_b64[len(prefix):]
-        image_data = base64.b64decode(image_b64)
-        
-        # Load config for OCR
-        with open(os.path.join(os.path.dirname(__file__), 'config.json'), 'r') as f:
-            config = json.load(f)
-        
-        # Try Gemini OCR
-        try:
-            import google.generativeai as genai
-            from PIL import Image
-            import io, re
-            
-            api_key = config.get('ocr', {}).get('engines', {}).get('gemini', {}).get('api_key')
-            if not api_key:
-                raise Exception("Gemini API key not configured")
-            
-            genai.configure(api_key=api_key)
-            model = genai.GenerativeModel(config.get('ocr', {}).get('engines', {}).get('gemini', {}).get('model', 'gemini-1.5-flash'))
-            image = Image.open(io.BytesIO(image_data))
-            prompt = "Extract only the numbers from this electricity meter display. Return only digits, no text."
-            ocr_response = model.generate_content([prompt, image])
-            ocr_text = (ocr_response.text or '').strip()
-            numbers = re.findall(r'\d+', ocr_text)
-            
-            return jsonify({
-                "success": True if numbers else False,
-                "index": max(numbers, key=len) if numbers else "-----",
-                "engine": "Gemini AI",
-                "image": cap_json['image'],
-                "timestamp": datetime.now().isoformat() + "Z",
-                "raw_ocr": ocr_text
-            })
-        except Exception as ocr_error:
-            return jsonify({
-                "success": False,
-                "index": "-----",
-                "error": f"Reading index failed: {str(ocr_error)}",
-                "engine": "Gemini AI - Error",
-                "image": cap_json['image'],
-                "timestamp": datetime.now().isoformat() + "Z"
-            })
-    except Exception as e:
-        logger.error(f"Index reading failed: {e}")
-        return jsonify({
-            "success": False,
-            "error": f"Reading index failed: {str(e)}",
-            "index": "-----",
-            "engine": "Error"
-        }), 500
-
-
-# Deprecate legacy /snapshot route for webcam - keep but no auto OCR
-@app.route("/snapshot", methods=['POST'])
-def snapshot():
-    """Deprecated: use /webcam/capture (POST)"""
-    return capture_webcam()
-
 
 
 if __name__ == '__main__':
