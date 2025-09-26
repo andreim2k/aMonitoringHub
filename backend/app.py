@@ -901,8 +901,8 @@ def capture_webcam():
             "brightness": 0,
             "contrast": 0,
             "saturation": 0,
-            "exposure": 550,
-            "gain": 9,
+            "exposure": 300,
+            "gain": 8,
             "special_effect": 1,
             "wb_mode": 0,
             "hmirror": False,
@@ -912,6 +912,8 @@ def capture_webcam():
             "method": "POST",
             "content_type": "application/json"
         }
+        
+        logger.info(f"Webcam capture payload: {json.dumps(payload)}")
         
         headers = {'Content-Type': 'application/json'}
         response = requests.post(webcam_url, json=payload, headers=headers, timeout=20)
