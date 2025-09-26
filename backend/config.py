@@ -8,6 +8,10 @@ DEFAULT_CONFIG = {
         "url": "http://192.168.50.3/capture?size=VGA&flash=1",
         "enabled": True,
         "title": "📹 Cabana 1 Electricity Meter"
+    },
+    "usb": {
+        "port": None,
+        "baudrate": 115200
     }
 }
 

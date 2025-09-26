@@ -197,6 +197,28 @@ case "$1" in
     help|--help|-h)
         show_help
         ;;
+
+    prod-start)
+        export LOG_LEVEL=INFO
+        check_venv
+        check_backend
+        ensure_logs_dir
+        cd "$BACKEND_PATH"
+        nohup "$VENV_PATH/bin/gunicorn" -w 2 -k gthread -t 60 -b 0.0.0.0:5000             --log-level info --access-logfile "$LOGS_PATH/access.log" --error-logfile "$LOGS_PATH/error.log"             backend.wsgi:application > "$LOG_FILE" 2>&1 &
+        APP_PID=$!
+        echo $APP_PID > "$PID_FILE"
+        sleep 2
+        if ps -p $APP_PID > /dev/null 2>&1; then
+            log_success "aMonitoringHub (gunicorn) started successfully (PID: $APP_PID)"
+        else
+            log_error "Failed to start gunicorn"
+        fi
+        ;;
+    prod-restart)
+        $0 stop
+        sleep 2
+        $0 prod-start
+        ;;
     *)
         log_error "Unknown command: $1"
         show_help

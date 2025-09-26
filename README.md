@@ -370,3 +370,45 @@ sudo kill -9 <PID>
 *@MonitoringHub - Professional monitoring solution for modern homes*
 
 **Repository**: https://github.com/andreim2k/aMonitoringHub
+
+
+
+## Operations
+
+### Reset the database (start from scratch)
+
+1. Stop the app
+   ./scripts/app.sh stop
+
+2. Archive the existing SQLite DB
+   mv backend/monitoringhub.db archive/monitoringhub_$(date +%Y%m%d_%H%M%S).db
+
+3. Start the app (DB will be recreated automatically)
+   ./scripts/app.sh start
+
+### Logging
+
+- Set log level via environment variable:
+  export LOG_LEVEL=INFO
+- Default is INFO.
+
+### Run in development
+
+./scripts/app.sh start
+
+### Run in production (Gunicorn)
+
+- Ensure venv and requirements installed (includes gunicorn)
+- Start with Gunicorn:
+  ./scripts/app.sh prod-start
+- Restart:
+  ./scripts/app.sh prod-restart
+- Logs:
+  tail -f logs/backend.out
+  tail -f logs/access.log
+  tail -f logs/error.log
+
+Endpoints:
+- GraphQL: http://<host>:5000/graphql
+- SSE: http://<host>:5000/events
+

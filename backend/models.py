@@ -287,17 +287,30 @@ class DatabaseManager:
                     
                 result = query.first()
                 
+                # Find timestamps for min and max within window
+                min_row_q = session.query(TemperatureReading).filter(TemperatureReading.timestamp >= start_time)
+                max_row_q = session.query(TemperatureReading).filter(TemperatureReading.timestamp >= start_time)
+                if sensor_id:
+                    min_row_q = min_row_q.filter(TemperatureReading.sensor_id == sensor_id)
+                    max_row_q = max_row_q.filter(TemperatureReading.sensor_id == sensor_id)
+                min_row = min_row_q.order_by(TemperatureReading.temperature_c.asc(), TemperatureReading.timestamp.asc()).first()
+                max_row = max_row_q.order_by(TemperatureReading.temperature_c.desc(), TemperatureReading.timestamp.asc()).first()
+                min_ts = min_row.timestamp.isoformat() if min_row else None
+                max_ts = max_row.timestamp.isoformat() if max_row else None
+
                 return {
                     'count': result.count or 0,
                     'average': round(result.avg or 0, 2),
                     'minimum': round(result.min or 0, 2),
                     'maximum': round(result.max or 0, 2),
-                    'hours_back': hours_back
+                    'hours_back': hours_back,
+                    'min_timestamp': min_ts,
+                    'max_timestamp': max_ts
                 }
                 
         except Exception as e:
             self.logger.error(f"Error getting statistics: {e}")
-            return {'count': 0, 'average': 0, 'minimum': 0, 'maximum': 0, 'hours_back': hours_back}
+            return {'count': 0, 'average': 0, 'minimum': 0, 'maximum': 0, 'hours_back': hours_back, 'min_timestamp': None, 'max_timestamp': None}
             
     def cleanup_old_readings(self, days_to_keep: int = 30) -> int:
         """Remove old temperature readings beyond retention period."""
@@ -379,12 +392,24 @@ class DatabaseManager:
                     return {'count': 0}
                     
                 humidity_values = [r.humidity_percent for r in readings]
+
+                # Determine timestamps when min/max occurred
+                min_val = min(humidity_values)
+                max_val = max(humidity_values)
+                min_ts = None
+                max_ts = None
+                for r in sorted(readings, key=lambda x: x.timestamp):
+                    if min_ts is None and r.humidity_percent == min_val:
+                        min_ts = r.timestamp.isoformat()
+                    if max_ts is None and r.humidity_percent == max_val:
+                        max_ts = r.timestamp.isoformat()
+
                 
                 return {
                     'count': len(readings),
                     'min': min(humidity_values),
                     'max': max(humidity_values),
-                    'avg': sum(humidity_values) / len(humidity_values),
+                    'avg': sum(humidity_values) / len(humidity_values), 'min_timestamp': min_ts, 'max_timestamp': max_ts,
                     'latest': readings[0].humidity_percent if readings else None
                 }
                 
@@ -394,9 +419,204 @@ class DatabaseManager:
 
 
 
+
+    def add_pressure_reading(self, pressure_hpa: float, sensor_type: str = "unknown", sensor_id: str = "default", timestamp: datetime = None):
+        try:
+            with self.get_session() as session:
+                reading = PressureReading(
+                    pressure_hpa=pressure_hpa,
+                    sensor_type=sensor_type,
+                    sensor_id=sensor_id,
+                    timestamp=timestamp or datetime.now(timezone.utc)
+                )
+                session.add(reading)
+                session.commit()
+                session.refresh(reading)
+                return reading
+        except Exception as e:
+            self.logger.error(f"Error adding pressure reading: {e}")
+            return None
+
+    def get_recent_pressure_readings(self, limit: int = 100, sensor_id: str = None):
+        try:
+            with self.get_session() as session:
+                query = session.query(PressureReading)
+                if sensor_id:
+                    query = query.filter(PressureReading.sensor_id == sensor_id)
+                return query.order_by(PressureReading.timestamp.desc()).limit(limit).all()
+        except Exception as e:
+            self.logger.error(f"Error getting recent pressure readings: {e}")
+            return []
+
+    def get_pressure_statistics(self, sensor_id: str = None, hours_back: int = 24):
+        try:
+            with self.get_session() as session:
+                end_time = datetime.now(timezone.utc)
+                start_time = end_time - timedelta(hours=hours_back)
+                query = session.query(
+                    func.count(PressureReading.id).label('count'),
+                    func.avg(PressureReading.pressure_hpa).label('avg'),
+                    func.min(PressureReading.pressure_hpa).label('min'),
+                    func.max(PressureReading.pressure_hpa).label('max')
+                ).filter(PressureReading.timestamp >= start_time)
+                if sensor_id:
+                    query = query.filter(PressureReading.sensor_id == sensor_id)
+                result = query.first()
+                # Find timestamps for min and max within window
+                min_row = session.query(PressureReading)\
+                    .filter(PressureReading.timestamp >= start_time)\
+                    .order_by(PressureReading.pressure_hpa.asc(), PressureReading.timestamp.asc())\
+                    .first()
+                max_row = session.query(PressureReading)\
+                    .filter(PressureReading.timestamp >= start_time)\
+                    .order_by(PressureReading.pressure_hpa.desc(), PressureReading.timestamp.asc())\
+                    .first()
+                if sensor_id:
+                    if min_row and min_row.sensor_id != sensor_id:
+                        min_row = session.query(PressureReading)\
+                            .filter(PressureReading.timestamp >= start_time, PressureReading.sensor_id == sensor_id)\
+                            .order_by(PressureReading.pressure_hpa.asc(), PressureReading.timestamp.asc())\
+                            .first()
+                    if max_row and max_row.sensor_id != sensor_id:
+                        max_row = session.query(PressureReading)\
+                            .filter(PressureReading.timestamp >= start_time, PressureReading.sensor_id == sensor_id)\
+                            .order_by(PressureReading.pressure_hpa.desc(), PressureReading.timestamp.asc())\
+                            .first()
+                min_ts = min_row.timestamp.isoformat() if min_row else None
+                max_ts = max_row.timestamp.isoformat() if max_row else None
+                return {
+                    'count': result.count or 0,
+                    'average': round(result.avg or 0, 2),
+                    'minimum': round(result.min or 0, 2),
+                    'maximum': round(result.max or 0, 2),
+                    'hours_back': hours_back, 'min_timestamp': min_ts, 'max_timestamp': max_ts
+                }
+        except Exception as e:
+            self.logger.error(f"Error getting pressure statistics: {e}")
+            return {'count': 0, 'average': 0, 'minimum': 0, 'maximum': 0, 'hours_back': hours_back, 'min_timestamp': min_ts, 'max_timestamp': max_ts}
+
+    def add_air_quality_reading(self, data: dict, sensor_type: str = "unknown", sensor_id: str = "default", timestamp: datetime = None):
+        try:
+            with self.get_session() as session:
+                reading = AirQualityReading(
+                    co2_ppm=data.get('co2_ppm'),
+                    nh3_ppm=data.get('nh3_ppm'),
+                    alcohol_ppm=data.get('alcohol_ppm'),
+                    aqi=data.get('aqi'),
+                    status=data.get('status'),
+                    raw_adc=data.get('raw_adc'),
+                    voltage_v=data.get('voltage_v'),
+                    resistance_ohm=data.get('resistance_ohm'),
+                    ratio_rs_r0=data.get('ratio_rs_r0'),
+                    sensor_type=sensor_type,
+                    sensor_id=sensor_id,
+                    timestamp=timestamp or datetime.now(timezone.utc)
+                )
+                session.add(reading)
+                session.commit()
+                session.refresh(reading)
+                return reading
+        except Exception as e:
+            self.logger.error(f"Error adding air quality reading: {e}")
+            return None
+
+    def get_recent_air_quality_readings(self, limit: int = 100, sensor_id: str = None):
+        try:
+            with self.get_session() as session:
+                query = session.query(AirQualityReading)
+                if sensor_id:
+                    query = query.filter(AirQualityReading.sensor_id == sensor_id)
+                return query.order_by(AirQualityReading.timestamp.desc()).limit(limit).all()
+        except Exception as e:
+            self.logger.error(f"Error getting recent AQ readings: {e}")
+            return []
+
+    def get_air_quality_statistics(self, sensor_id: str = None, hours_back: int = 24):
+        try:
+            with self.get_session() as session:
+                end_time = datetime.now(timezone.utc)
+                start_time = end_time - timedelta(hours=hours_back)
+                query = session.query(
+                    func.count(AirQualityReading.id).label('count'),
+                    func.avg(AirQualityReading.co2_ppm).label('avg'),
+                    func.min(AirQualityReading.co2_ppm).label('min'),
+                    func.max(AirQualityReading.co2_ppm).label('max')
+                ).filter(AirQualityReading.timestamp >= start_time)
+                if sensor_id:
+                    query = query.filter(AirQualityReading.sensor_id == sensor_id)
+                result = query.first()
+                # Find timestamps for min and max CO2 within window
+                base_q = session.query(AirQualityReading).filter(AirQualityReading.timestamp >= start_time)
+                if sensor_id:
+                    base_q = base_q.filter(AirQualityReading.sensor_id == sensor_id)
+                min_row = base_q.order_by(AirQualityReading.co2_ppm.asc(), AirQualityReading.timestamp.asc()).first()
+                max_row = base_q.order_by(AirQualityReading.co2_ppm.desc(), AirQualityReading.timestamp.asc()).first()
+                min_ts = min_row.timestamp.isoformat() if min_row else None
+                max_ts = max_row.timestamp.isoformat() if max_row else None
+                return {
+                    'count': result.count or 0,
+                    'average': round(result.avg or 0, 1),
+                    'minimum': round(result.min or 0, 1),
+                    'maximum': round(result.max or 0, 1),
+                    'hours_back': hours_back, 'min_timestamp': min_ts, 'max_timestamp': max_ts
+                }
+        except Exception as e:
+            self.logger.error(f"Error getting AQ statistics: {e}")
+            return {'count': 0, 'average': 0, 'minimum': 0, 'maximum': 0, 'hours_back': hours_back, 'min_timestamp': min_ts, 'max_timestamp': max_ts}
+
 # Global database instance
+
 db = DatabaseManager()
 
+class PressureReading(Base):
+    __tablename__ = 'pressure_readings'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    timestamp = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+    pressure_hpa = Column(Float, nullable=False)
+    sensor_type = Column(String(50), nullable=False, default='unknown')
+    sensor_id = Column(String(100), nullable=False, default='default')
+    __table_args__ = (
+        Index('idx_pressure_timestamp', 'timestamp'),
+        Index('idx_pressure_sensor_timestamp', 'sensor_id', 'timestamp'),
+    )
+
+class AirQualityReading(Base):
+    __tablename__ = 'air_quality_readings'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    timestamp = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+    co2_ppm = Column(Float, nullable=True)
+    nh3_ppm = Column(Float, nullable=True)
+    alcohol_ppm = Column(Float, nullable=True)
+    aqi = Column(Integer, nullable=True)
+    status = Column(String(50), nullable=True)
+    raw_adc = Column(Integer, nullable=True)
+    voltage_v = Column(Float, nullable=True)
+    resistance_ohm = Column(Float, nullable=True)
+    ratio_rs_r0 = Column(Float, nullable=True)
+    sensor_type = Column(String(50), nullable=False, default='unknown')
+    sensor_id = Column(String(100), nullable=False, default='default')
+    __table_args__ = (
+        Index('idx_aq_timestamp', 'timestamp'),
+        Index('idx_aq_sensor_timestamp', 'sensor_id', 'timestamp'),
+    )
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'timestamp': self.timestamp.isoformat() if self.timestamp else None,
+            'timestamp_unix': self.timestamp.timestamp() if self.timestamp else None,
+            'co2_ppm': self.co2_ppm,
+            'nh3_ppm': self.nh3_ppm,
+            'alcohol_ppm': self.alcohol_ppm,
+            'aqi': self.aqi,
+            'status': self.status,
+            'raw_adc': self.raw_adc,
+            'voltage_v': self.voltage_v,
+            'resistance_ohm': self.resistance_ohm,
+            'ratio_rs_r0': self.ratio_rs_r0,
+            'sensor_type': self.sensor_type,
+            'sensor_id': self.sensor_id,
+        }
 
 def init_database(database_url: str = None):
     """Initialize the global database instance."""

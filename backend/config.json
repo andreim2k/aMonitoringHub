@@ -14,7 +14,7 @@
       "gemini": {
         "enabled": true,
         "api_key": "AIzaSyDiGBpAzGYt5zsyFWt2_Zc4O7s4f1hRLSk",
-        "model": "gemini-1.5-flash"
+        "model": "gemini-2.0-flash-lite"
       }
     },
     "refresh_interval": 30
