@@ -468,7 +468,44 @@
 /* Ensure badges sit nicely when centered */
 .unit-badge { align-self: center; }
 
-</style>
+
+  /* popup charts */
+  .chart-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 9999; }
+  .chart-modal { width: min(92vw, 680px); height: min(70vh, 440px); background: linear-gradient(135deg, rgba(20,18,35,.98) 0%, rgba(35,30,70,.95) 50%, rgba(25,25,45,.98) 100%); border-radius: 14px; padding: 16px; box-shadow: 0 12px 40px rgba(0,0,0,.5); position: relative; display: flex; flex-direction: column; }
+  .chart-modal h3 { margin: 0 0 8px 0; color: #e0e0e0; font-size: 1rem; text-align: center; }
+  .chart-modal .close-btn { position: absolute; top: 8px; right: 10px; background: transparent; border: none; color: #ccc; font-size: 20px; cursor: pointer; }
+  .chart-canvas-wrap { position: relative; flex: 1; min-height: 240px; }
+  .chart-popover { position: fixed; display: none; pointer-events: none; z-index: 9998; width: 320px; height: 200px; background: rgba(20,18,35,.96); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 8px; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+  .chart-popover h4 { margin: 0 0 4px 0; font-size: .9rem; color: #e0e0e0; text-align: center; }
+  .chart-popover .chart-canvas-wrap { width: 100%; height: calc(100% - 22px); }
+  @media (max-width: 600px) { .chart-popover { width: 280px; height: 180px; } }
+
+  
+  /* pair grid tweak */
+  @media (min-width: 600px) { .metrics-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 1100px) { .metrics-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+
+  /* compact mobile two-up overrides */
+  .chart-popover { display: none !important; }
+  @media (max-width: 420px) {
+    .container { padding: 8px; }
+    .metrics-row { grid-template-columns: 1fr; gap: 10px; }
+    .metric-card, .stat-card { padding: 12px; }
+    .metric-label { font-size: 1rem; }
+    .metric-value { font-size: 1.25rem; }
+    .metric-timestamp { font-size: 0.72rem; }
+    .icon { width: 18px; height: 18px; }
+  }
+  @media (min-width: 421px) and (max-width: 600px) {
+    .metrics-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .metric-card, .stat-card { padding: 12px; }
+    .metric-label { font-size: 1.05rem; }
+    .metric-value { font-size: 1.35rem; }
+    .metric-timestamp { font-size: 0.76rem; }
+  }
+
+  </style>
 </head>
 
 <body>
@@ -495,52 +532,31 @@
 
 
       <!-- Row 2: Temperature with Min/Max -->
-      <div class="metrics-row triple-row">
-        <div class="metric-card glass temperature-card">
+      <!-- Row 2: Temperature & Pressure -->
+      <div class="metrics-row">
+<div class="metric-card glass temperature-card">
           <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Temperature" role="img"><path fill="currentColor" d="M14 14.76V5a2 2 0 10-4 0v9.76A4 4 0 1014 14.76zM12 2a3 3 0 013 3v9.18a5 5 0 11-6 0V5a3 3 0 013-3z"/></svg></div>
           <div class="metric-label">Temperature <span class="unit-badge">°C</span></div>
           <div class="metric-value" id="currentTemp">--°C</div>
           <div class="metric-timestamp" id="tempTimestamp">--</div>
         </div>
-        <div class="metric-card glass stat-card">
-          <div class="metric-icon">🥶</div>
-          <div class="metric-label">Min Temperature <span class="unit-badge">°C</span></div>
-          <div class="metric-value" id="minTemp">--°C</div>
-          <div class="metric-timestamp" id="minTempTs">--</div>
-        </div>
-        <div class="metric-card glass stat-card">
-          <div class="metric-icon">🥵</div>
-          <div class="metric-label">Max Temperature <span class="unit-badge">°C</span></div>
-          <div class="metric-value" id="maxTemp">--°C</div>
-          <div class="metric-timestamp" id="maxTempTs">--</div>
-        </div>
-      </div>
-
-      <!-- Row 2.5: Pressure (with Min/Max) -->
-      <div class="metrics-row triple-row">
-        <div class="metric-card glass">
+<div class="metric-card glass">
           <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Pressure" role="img"><path fill="currentColor" d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm1 5h-2v6l5 3 1-1.73-4-2.27z"/></svg></div>
           <div class="metric-label">Pressure <span class="unit-badge">hPa</span></div>
           <div class="metric-value" id="currentPressure">-- hPa</div>
           <div class="metric-timestamp" id="pressureTimestamp">--</div>
         </div>
-        <div class="metric-card glass stat-card">
-          <div class="metric-icon">🔽</div>
-          <div class="metric-label">Min Pressure <span class="unit-badge">hPa</span></div>
-          <div class="metric-value" id="minPressure">-- hPa</div>
-          <div class="metric-timestamp" id="minPressureTs">--</div>
-        </div>
-        <div class="metric-card glass stat-card">
-          <div class="metric-icon">🔼</div>
-          <div class="metric-label">Max Pressure <span class="unit-badge">hPa</span></div>
-          <div class="metric-value" id="maxPressure">-- hPa</div>
-          <div class="metric-timestamp" id="maxPressureTs">--</div>
-        </div>
       </div>
 
-      <!-- Row 2.6: Air Quality (CO₂) (with Min/Max) -->
-      <div class="metrics-row triple-row">
-        <div class="metric-card glass">
+      <!-- Row 3: Humidity & CO₂ -->
+      <div class="metrics-row">
+<div class="metric-card glass humidity-card">
+          <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Humidity" role="img"><path fill="currentColor" d="M12 2s7 7.58 7 12a7 7 0 11-14 0c0-4.42 7-12 7-12z"/></svg></div>
+          <div class="metric-label">Humidity <span class="unit-badge">%</span></div>
+          <div class="metric-value" id="currentHumidity">--%</div>
+          <div class="metric-timestamp" id="humidityTimestamp">--</div>
+        </div>
+<div class="metric-card glass">
           <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="CO2" role="img"><path fill="currentColor" d="M7 7h3v3H7zm7 0h3v3h-3zM7 14h10v3H7z"/></svg></div>
           <div class="metric-label">CO₂ <span class="unit-badge">ppm</span></div>
           <div class="metric-value" id="currentCO2">-- ppm</div>
@@ -549,76 +565,8 @@
           <div class="metric-timestamp" id="airAlcohol">Alcohol: -- ppm</div>
           <div class="stat-subtitle" id="airQualityStatus" style="margin-top:6px; font-weight:600;">--</div>
         </div>
-        <div class="metric-card glass stat-card">
-          <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="CO2" role="img"><path fill="currentColor" d="M7 7h3v3H7zm7 0h3v3h-3zM7 14h10v3H7z"/></svg></div>
-          <div class="metric-label">Min CO₂ <span class="unit-badge">ppm</span></div>
-          <div class="metric-value" id="minCO2">-- ppm</div>
-          <div class="metric-timestamp" id="minCO2Ts">--</div>
-        </div>
-        <div class="metric-card glass stat-card">
-          <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="CO2" role="img"><path fill="currentColor" d="M7 7h3v3H7zm7 0h3v3h-3zM7 14h10v3H7z"/></svg></div>
-          <div class="metric-label">Max CO₂ <span class="unit-badge">ppm</span></div>
-          <div class="metric-value" id="maxCO2">-- ppm</div>
-          <div class="metric-timestamp" id="maxCO2Ts">--</div>
-        </div>
       </div>
-
-      <!-- Row 3: Humidity with Min/Max -->
-      <div class="metrics-row triple-row">
-        <div class="metric-card glass humidity-card">
-          <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Humidity" role="img"><path fill="currentColor" d="M12 2s7 7.58 7 12a7 7 0 11-14 0c0-4.42 7-12 7-12z"/></svg></div>
-          <div class="metric-label">Humidity <span class="unit-badge">%</span></div>
-          <div class="metric-value" id="currentHumidity">--%</div>
-          <div class="metric-timestamp" id="humidityTimestamp">--</div>
-        </div>
-        <div class="metric-card glass stat-card">
-          <div class="metric-icon">💨</div>
-          <div class="metric-label">Min Humidity <span class="unit-badge">%</span></div>
-          <div class="metric-value" id="minHumidity">--%</div>
-          <div class="metric-timestamp" id="minHumidityTs">--</div>
-        </div>
-        <div class="metric-card glass stat-card">
-          <div class="metric-icon">💦</div>
-          <div class="metric-label">Max Humidity <span class="unit-badge">%</span></div>
-          <div class="metric-value" id="maxHumidity">--%</div>
-          <div class="metric-timestamp" id="maxHumidityTs">--</div>
-        </div>
-      </div>
-
-
-      <!-- Rows 4-5: Temperature & Humidity Charts -->
-      <div class="charts-row">
-        <div class="chart-card glass">
-          <h3>📈 Temperature History</h3>
-          <div class="chart-container">
-            <canvas id="historyChart"></canvas>
-          </div>
-        </div>
-        <div class="chart-card glass">
-          <h3>📊 Humidity History</h3>
-          <div class="chart-container">
-            <canvas id="historyHumidityChart"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <!-- Row 5.5: Pressure & CO₂ Charts -->
-      <div class="charts-row">
-        <div class="chart-card glass">
-          <h3>⏱️ Pressure History</h3>
-          <div class="chart-container">
-            <canvas id="historyPressureChart"></canvas>
-          </div>
-        </div>
-        <div class="chart-card glass">
-          <h3>🌫️ CO₂ History</h3>
-          <div class="chart-container">
-            <canvas id="historyCO2Chart"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <!-- Row 6: Electricity Meter - Compact Card -->
+<!-- Row 6: Electricity Meter - Compact Card -->
       <div class="charts-row electricity-container">
         <div class="electricity-card glass">
           <h3>Electricity Meter</h3>
@@ -673,6 +621,20 @@
       <p>@MonitoringHub &copy; 2025. All rights reserved.</p>
     </footer>
   </div>
+
+
+    <!-- Popup containers -->
+    <div id="chartModalOverlay" class="chart-modal-overlay" role="dialog" aria-modal="true">
+      <div class="chart-modal">
+        <button class="close-btn" id="chartModalClose" aria-label="Close">×</button>
+        <h3 id="chartModalTitle">History</h3>
+        <div class="chart-canvas-wrap"><canvas id="chartModalCanvas"></canvas></div>
+      </div>
+    </div>
+    <div id="hoverPopover" class="chart-popover" aria-hidden="true">
+      <h4 id="hoverPopoverTitle">History</h4>
+      <div class="chart-canvas-wrap"><canvas id="hoverPopoverCanvas"></canvas></div>
+    </div>
 
   <script>
     // Global state
@@ -844,13 +806,13 @@ function formatHumidity(value) {
       // Don't update it here to avoid overriding explicit status changes
 
       // Update stats
-      var miT = document.getElementById('minTemp'); miT.textContent = formatTemperature(currentData.stats.minimum); setSeverity(miT, severityFor('temp', currentData.stats.minimum));
-      var mxT = document.getElementById('maxTemp'); mxT.textContent = formatTemperature(currentData.stats.maximum); setSeverity(mxT, severityFor('temp', currentData.stats.maximum));
+      var miT = document.getElementById('minTemp'); if (miT) { miT.textContent = formatTemperature(currentData.stats.minimum); setSeverity(miT, severityFor('temp', currentData.stats.minimum)); }
+      var mxT = document.getElementById('maxTemp'); if (mxT) { mxT.textContent = formatTemperature(currentData.stats.maximum); setSeverity(mxT, severityFor('temp', currentData.stats.maximum)); }
       document.getElementById('dataCount').textContent = currentData.stats.count || 0;
 
       // Update humidity stats
-      var miH = document.getElementById('minHumidity'); miH.textContent = formatHumidity(currentData.humidityStats.minimum); setSeverity(miH, severityFor('humidity', currentData.humidityStats.minimum));
-      var mxH = document.getElementById('maxHumidity'); mxH.textContent = formatHumidity(currentData.humidityStats.maximum); setSeverity(mxH, severityFor('humidity', currentData.humidityStats.maximum));
+      var miH = document.getElementById('minHumidity'); if (miH) { miH.textContent = formatHumidity(currentData.humidityStats.minimum); setSeverity(miH, severityFor('humidity', currentData.humidityStats.minimum)); }
+      var mxH = document.getElementById('maxHumidity'); if (mxH) { mxH.textContent = formatHumidity(currentData.humidityStats.maximum); setSeverity(mxH, severityFor('humidity', currentData.humidityStats.maximum)); }
       var mtts = document.getElementById('minTempTs'); if (mtts) mtts.textContent = formatTimestamp(currentData.stats.min_timestamp);
       var mxts = document.getElementById('maxTempTs'); if (mxts) mxts.textContent = formatTimestamp(currentData.stats.max_timestamp);
       var mhts = document.getElementById('minHumidityTs'); if (mhts) mhts.textContent = formatTimestamp(currentData.humidityStats.min_timestamp);
@@ -870,103 +832,9 @@ function formatHumidity(value) {
     }
 
     function initCharts() {
+  // No-op: history canvases removed; charts now shown via hover/click popups.
+}
 
-      // History Chart
-      const historyCtx = document.getElementById('historyChart').getContext('2d');
-      historyChart = new Chart(historyCtx, {
-        type: 'line',
-        data: {
-          labels: [],
-          datasets: [{
-            label: 'Temperature History (°C)',
-            data: [],
-            borderColor: '#66bb6a',
-            backgroundColor: 'rgba(102, 187, 106, 0.1)',
-            borderWidth: 2,
-            fill: true,
-            pointRadius: 2,
-            pointBackgroundColor: '#66bb6a',
-            pointBorderColor: '#388e3c'
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          legend: { display: false },
-          scales: {
-            xAxes: [{
-              gridLines: { color: 'rgba(255,255,255,0.1)' },
-              ticks: { fontColor: '#b3b3b3', maxTicksLimit: 10 }
-            }],
-            yAxes: [{
-              gridLines: { color: 'rgba(255,255,255,0.1)' },
-              ticks: { fontColor: '#b3b3b3' }
-            }]
-          }
-        }
-      });
-
-
-      // History Humidity Chart
-      const historyHumidityCtx = document.getElementById('historyHumidityChart').getContext('2d');
-      historyHumidityChart = new Chart(historyHumidityCtx, {
-        type: 'line',
-        data: {
-          labels: [],
-          datasets: [{
-            label: 'Humidity History (%)',
-            data: [],
-            borderColor: '#9c27b0',
-            backgroundColor: 'rgba(156, 39, 176, 0.1)',
-            borderWidth: 2,
-            fill: true,
-            pointRadius: 2,
-            pointBackgroundColor: '#9c27b0',
-            pointBorderColor: '#7b1fa2'
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          legend: { display: false },
-          scales: {
-            xAxes: [{
-              gridLines: { color: 'rgba(255,255,255,0.1)' },
-              ticks: { fontColor: '#b3b3b3', maxTicksLimit: 10 }
-            }],
-            yAxes: [{
-              gridLines: { color: 'rgba(255,255,255,0.1)' },
-              ticks: { fontColor: '#b3b3b3', min: 0, max: 100 }
-            }]
-          }
-        }
-      });
-
-      // Pressure History Chart
-      const historyPressureCtx = document.getElementById('historyPressureChart') && document.getElementById('historyPressureChart').getContext('2d');
-      if (historyPressureCtx) {
-        window.historyPressureChart = new Chart(historyPressureCtx, {
-          type: 'line',
-          data: { labels: [], datasets: [{
-            label: 'Pressure (hPa)', data: [], borderColor: '#ffa726', backgroundColor: 'rgba(255, 167, 38, 0.1)', borderWidth: 2, fill: true, pointRadius: 2
-          }]},
-          options: { responsive: true, maintainAspectRatio: false, legend: { display: false }, scales: { xAxes: [{ gridLines: { color: 'rgba(255,255,255,0.1)' }, ticks: { fontColor: '#b3b3b3', maxTicksLimit: 10 }}], yAxes: [{ gridLines: { color: 'rgba(255,255,255,0.1)' }, ticks: { fontColor: '#b3b3b3' } }] } }
-        });
-      }
-
-      // CO2 History Chart
-      const historyCO2Ctx = document.getElementById('historyCO2Chart') && document.getElementById('historyCO2Chart').getContext('2d');
-      if (historyCO2Ctx) {
-        window.historyCO2Chart = new Chart(historyCO2Ctx, {
-          type: 'line',
-          data: { labels: [], datasets: [{
-            label: 'CO₂ (ppm)', data: [], borderColor: '#ef5350', backgroundColor: 'rgba(239, 83, 80, 0.1)', borderWidth: 2, fill: true, pointRadius: 2
-          }]},
-          options: { responsive: true, maintainAspectRatio: false, legend: { display: false }, scales: { xAxes: [{ gridLines: { color: 'rgba(255,255,255,0.1)' }, ticks: { fontColor: '#b3b3b3', maxTicksLimit: 10 }}], yAxes: [{ gridLines: { color: 'rgba(255,255,255,0.1)' }, ticks: { fontColor: '#b3b3b3' } }] } }
-        });
-      }
-
-    }
 
 
 
@@ -1588,6 +1456,132 @@ function formatHumidity(value) {
     setTimeout(() => {
       captureWebcamImage();
     }, 100);
+
+
+    // === Popup charts logic ===
+    let modalChart = null; let popoverChart = null; let hoverHideTimer = null;
+
+    const chartColors = {
+      temp: { border: '#66bb6a', bg: 'rgba(102,187,106,0.15)' },
+      humidity:{ border: '#9c27b0', bg: 'rgba(156,39,176,0.15)' },
+      pressure:{ border: '#ffa726', bg: 'rgba(255,167,38,0.15)' },
+      co2:{ border: '#ef5350', bg: 'rgba(239,83,80,0.15)' }
+    };
+
+    async function ensureHistory(kind) {
+      // If there is already history loaded, skip
+      if (kind === 'temp' && currentData.history && currentData.history.length) return;
+      if (kind === 'humidity' && currentData.humidityHistory && currentData.humidityHistory.length) return;
+      if (kind === 'pressure' && currentData.pressureHistory && currentData.pressureHistory.length) return;
+      if (kind === 'co2' && currentData.airQualityHistory && currentData.airQualityHistory.length) return;
+      try {
+        if (kind === 'temp') {
+          const r = await graphqlQuery('{ temperatureHistory(limit: 50) { temperatureC timestamp } }');
+          if (r.data && r.data.temperatureHistory) currentData.history = r.data.temperatureHistory;
+        } else if (kind === 'humidity') {
+          const r = await graphqlQuery('{ humidityHistory(limit: 50) { humidityPercent timestamp } }');
+          if (r.data && r.data.humidityHistory) currentData.humidityHistory = r.data.humidityHistory;
+        } else if (kind === 'pressure') {
+          const r = await graphqlQuery('{ pressureHistory(limit: 50) { pressureHpa timestamp } }');
+          if (r.data && r.data.pressureHistory) currentData.pressureHistory = r.data.pressureHistory.map(i=>({pressureHpa:i.pressureHpa,timestamp:i.timestamp}));
+        } else if (kind === 'co2') {
+          const r = await graphqlQuery('{ airQualityHistory(limit: 50) { co2Ppm timestamp } }');
+          if (r.data && r.data.airQualityHistory) currentData.airQualityHistory = r.data.airQualityHistory.map(i=>({co2Ppm:i.co2Ppm,timestamp:i.timestamp}));
+        }
+      } catch (e) { console.warn('ensureHistory failed for', kind, e); }
+    }
+
+    function chartDataFor(kind) {
+      let labels = [], data = [], c = chartColors[kind] || {border:'#90caf9', bg:'rgba(144,202,249,0.15)'};
+      if (kind === 'temp') {
+        const arr = (currentData.history||[]).slice().sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp));
+        labels = arr.map(i=>new Date(i.timestamp).toLocaleString());
+        data = arr.map(i=>i.temperatureC);
+        return { labels, datasets: [{ label: 'Temperature (°C)', data, borderColor: c.border, backgroundColor: c.bg, borderWidth: 2, fill: true, pointRadius: 1 }] };
+      }
+      if (kind === 'humidity') {
+        const arr = (currentData.humidityHistory||[]).slice().sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp));
+        labels = arr.map(i=>new Date(i.timestamp).toLocaleString());
+        data = arr.map(i=>i.humidityPercent);
+        return { labels, datasets: [{ label: 'Humidity (%)', data, borderColor: c.border, backgroundColor: c.bg, borderWidth: 2, fill: true, pointRadius: 1 }] };
+      }
+      if (kind === 'pressure') {
+        const arr = (currentData.pressureHistory||[]).slice().sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp));
+        labels = arr.map(i=>new Date(i.timestamp).toLocaleString());
+        data = arr.map(i=>i.pressureHpa);
+        return { labels, datasets: [{ label: 'Pressure (hPa)', data, borderColor: c.border, backgroundColor: c.bg, borderWidth: 2, fill: true, pointRadius: 1 }] };
+      }
+      if (kind === 'co2') {
+        const arr = (currentData.airQualityHistory||[]).slice().sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp));
+        labels = arr.map(i=>new Date(i.timestamp).toLocaleString());
+        data = arr.map(i=>i.co2Ppm);
+        return { labels, datasets: [{ label: 'CO₂ (ppm)', data, borderColor: c.border, backgroundColor: c.bg, borderWidth: 2, fill: true, pointRadius: 1 }] };
+      }
+      return { labels: [], datasets: [] };
+    }
+
+    function buildLineOptions() {
+      return { responsive: true, maintainAspectRatio: false, legend: { display: false }, scales: { xAxes: [{ gridLines: { color: 'rgba(255,255,255,0.1)' }, ticks: { fontColor: '#b3b3b3', maxTicksLimit: 8 }}], yAxes: [{ gridLines: { color: 'rgba(255,255,255,0.1)' }, ticks: { fontColor: '#b3b3b3' } }] } };
+    }
+
+    async function showMetricChart(kind, mode, anchorEl) {
+      await ensureHistory(kind);
+      const ds = chartDataFor(kind);
+      if (!ds.labels.length) return;
+
+      if (mode === 'modal') {
+        const overlay = document.getElementById('chartModalOverlay');
+        const title = document.getElementById('chartModalTitle');
+        const canvas = document.getElementById('chartModalCanvas');
+        title.textContent = kind.toUpperCase() + ' History';
+        overlay.style.display = 'flex';
+        if (modalChart) { modalChart.destroy(); }
+        modalChart = new Chart(canvas.getContext('2d'), { type: 'line', data: ds, options: buildLineOptions() });
+      } else if (mode === 'hover') {
+        const pop = document.getElementById('hoverPopover');
+        const title = document.getElementById('hoverPopoverTitle');
+        const canvas = document.getElementById('hoverPopoverCanvas');
+        title.textContent = kind.toUpperCase() + ' History';
+        // Position near anchor
+        const r = anchorEl.getBoundingClientRect();
+        const w = pop.offsetWidth || 320; const h = pop.offsetHeight || 200;
+        let top = r.top - h - 8; if (top < 8) top = r.bottom + 8;
+        let left = r.left + (r.width/2) - (w/2); left = Math.max(8, Math.min(left, (window.innerWidth - w - 8)));
+        pop.style.top = top + 'px'; pop.style.left = left + 'px';
+        pop.style.display = 'block';
+        if (popoverChart) { popoverChart.destroy(); }
+        popoverChart = new Chart(canvas.getContext('2d'), { type: 'line', data: ds, options: buildLineOptions() });
+      }
+    }
+
+    function hideHoverPopoverSoon() {
+      const pop = document.getElementById('hoverPopover');
+      if (hoverHideTimer) clearTimeout(hoverHideTimer);
+      hoverHideTimer = setTimeout(()=>{ pop.style.display = 'none'; if (popoverChart) { popoverChart.destroy(); popoverChart = null; } }, 250);
+    }
+
+    // Attach listeners once DOM is ready
+    (function attachChartListeners(){
+      function attach(id, kind) {
+        const valEl = document.getElementById(id); if (!valEl) return;
+        const card = valEl.closest('.metric-card'); if (!card) return;
+        card.style.cursor = 'pointer';
+        // hover disabled
+        // hover disabled
+        card.addEventListener('click', ()=> showMetricChart(kind, 'modal', card));
+      }
+      attach('currentTemp','temp');
+      attach('currentPressure','pressure');
+      attach('currentHumidity','humidity');
+      attach('currentCO2','co2');
+
+      // Modal close handlers
+      const overlay = document.getElementById('chartModalOverlay');
+      const closeBtn = document.getElementById('chartModalClose');
+      if (overlay) overlay.addEventListener('click', (e)=>{ if (e.target === overlay) { overlay.style.display = 'none'; if (modalChart) { modalChart.destroy(); modalChart = null; } } });
+      if (closeBtn) closeBtn.addEventListener('click', ()=>{ overlay.style.display = 'none'; if (modalChart) { modalChart.destroy(); modalChart = null; } });
+    })();
+    // === End popup charts ===
 
   </script>
 </body>
