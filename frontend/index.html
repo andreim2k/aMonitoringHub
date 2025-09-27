@@ -633,15 +633,19 @@
             </div>
           </div>
           <div style="text-align: center; width: 100%; margin-bottom: 15px;">
-            <div style="display:flex; gap:12px; align-items:center; justify-content:center; margin: 0 auto 10px;">
-              <div style="display:flex; align-items:center; gap:6px;">
-                <span style="color:#b3b3b3; font-size:0.9rem;">Flash:</span>
-                <label style="display:flex; align-items:center; gap:4px; color:#b3b3b3; font-size:0.9rem;"><input type="radio" name="flashMode" value="on" checked> On</label>
-                <label style="display:flex; align-items:center; gap:4px; color:#b3b3b3; font-size:0.9rem;"><input type="radio" name="flashMode" value="off"> Off</label>
+            <div class="em-controls" style="display:flex; flex-direction:column; gap:10px; align-items:center; justify-content:center; margin: 0 auto 10px;">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <label for="flashToggle" style="color:#b3b3b3; font-size:0.9rem;">Flash</label>
+                <label style="position:relative; display:inline-block; width:46px; height:24px;">
+                  <input id="flashToggle" type="checkbox" checked style="opacity:0; width:0; height:0;">
+                  <span class="slider" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#777; transition:.2s; border-radius:24px;"></span>
+                  <span class="knob" style="position:absolute; left:2px; top:2px; width:20px; height:20px; background:#fff; border-radius:50%; transition:.2s;"></span>
+                </label>
               </div>
-              <div style="display:flex; align-items:center; gap:6px;">
-                <label for="gainInput" style="color:#b3b3b3; font-size:0.9rem;">Gain:</label>
-                <input id="gainInput" type="number" min="0" max="10" step="1" value="2" style="width:64px; padding:3px 6px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color:#e0e0e0;"/>
+              <div style="display:flex; align-items:center; gap:10px; width:260px;">
+                <label for="gainSlider" style="color:#b3b3b3; font-size:0.9rem;">Gain</label>
+                <input id="gainSlider" type="range" min="0" max="10" step="1" value="2" style="flex:1; accent-color:#4caf50;">
+                <span id="gainValue" class="unit-badge">2</span>
               </div>
             </div>
             <button id="captureSettingsBtn" class="btn" style="margin: 5px; background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%); display: none;">Snapshot</button>
@@ -1402,7 +1406,28 @@ function formatHumidity(value) {
     
   
     // Automatic Webcam Capture on Page Load
-    let latestWebcamOverrides = null; // { gain: number, flash: boolean } set by Capture with settings
+    let latestWebcamOverrides = null;
+
+    // UI: make flash toggle and gain slider visible and dynamic
+    function __renderFlashToggle() {
+      const t = document.getElementById('flashToggle');
+      if (!t) return;
+      const wrap = t.parentElement;
+      const track = wrap && wrap.querySelector('.slider');
+      const knob = wrap && wrap.querySelector('.knob');
+      const on = !!t.checked;
+      if (track) track.style.background = on ? "#4caf50" : "#777";
+      if (knob) knob.style.transform = on ? "translateX(22px)" : "translateX(0)";
+    }
+    function __bindControlsUI() {
+      const t = document.getElementById('flashToggle');
+      if (t) { t.addEventListener('change', __renderFlashToggle); __renderFlashToggle(); }
+      const slider = document.getElementById('gainSlider');
+      const valueEl = document.getElementById('gainValue');
+      const renderGain = () => { if (slider && valueEl) valueEl.textContent = String(slider.value); };
+      if (slider) { slider.addEventListener('input', renderGain); renderGain(); }
+    }
+    document.addEventListener('DOMContentLoaded', __bindControlsUI); // { gain: number, flash: boolean } set by Capture with settings
     function captureWebcamImage() {
       const img = document.getElementById("webcamImage");
       const loading = document.getElementById("webcamLoading");
@@ -1459,9 +1484,10 @@ function formatHumidity(value) {
           const loading = document.getElementById("webcamLoading");
           const placeholder = document.getElementById("webcamPlaceholder");
           const statusEl = document.getElementById("ocrStatus");
-          const gainInput = document.getElementById("gainInput");
-          const gainVal = Number.isFinite(parseInt(gainInput?.value, 10)) ? parseInt(gainInput.value, 10) : 2;
-          const flashVal = (document.querySelector('input[name="flashMode"]:checked')?.value === 'on');
+          const gainSlider = document.getElementById("gainSlider");
+          const gainVal = Number.isFinite(parseInt(gainSlider?.value, 10)) ? parseInt(gainSlider.value, 10) : 2;
+          const flashToggle = document.getElementById("flashToggle");
+          const flashVal = !!(flashToggle && flashToggle.checked);
           latestWebcamOverrides = { gain: gainVal, flash: flashVal };
           // Show loading
           loading.style.display = "flex";
