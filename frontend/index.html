@@ -1450,6 +1450,56 @@ function formatHumidity(value) {
       });
     }
     
+    // Capture with settings button handler
+    (function(){
+      const captureSettingsBtn = document.getElementById("captureSettingsBtn");
+      if (captureSettingsBtn) {
+        captureSettingsBtn.addEventListener("click", function() {
+          const img = document.getElementById("webcamImage");
+          const loading = document.getElementById("webcamLoading");
+          const placeholder = document.getElementById("webcamPlaceholder");
+          const statusEl = document.getElementById("ocrStatus");
+          const gainInput = document.getElementById("gainInput");
+          const gainVal = Number.isFinite(parseInt(gainInput?.value, 10)) ? parseInt(gainInput.value, 10) : 2;
+          const flashVal = (document.querySelector('input[name="flashMode"]:checked')?.value === 'on');
+          latestWebcamOverrides = { gain: gainVal, flash: flashVal };
+          // Show loading
+          loading.style.display = "flex";
+          placeholder.style.display = "none";
+          img.style.display = "none";
+          statusEl.style.color = "#ffa726";
+          statusEl.textContent = "Capturing with settings...";
+          fetch("/webcam/capture", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(latestWebcamOverrides)
+          })
+          .then(r => r.json())
+          .then(data => {
+            loading.style.display = "none";
+            if (data.success && data.image) {
+              img.src = data.image;
+              img.style.display = "block";
+              statusEl.textContent = "Image captured with settings - Ready for Reading Index";
+              statusEl.style.color = "#4caf50";
+            } else {
+              placeholder.style.display = "flex";
+              placeholder.innerHTML = "❌ Capture failed<br><small>" + (data.error || "Unknown error") + "</small>";
+              statusEl.textContent = "Capture with settings failed";
+              statusEl.style.color = "#f44336";
+            }
+          })
+          .catch(err => {
+            loading.style.display = "none";
+            placeholder.style.display = "flex";
+            placeholder.innerHTML = "❌ Connection error";
+            statusEl.textContent = "Network error during capture";
+            statusEl.style.color = "#f44336";
+          });
+        });
+      }
+    })();
+
     // Manual Index Reading Function
     document.getElementById("ocrBtn").addEventListener("click", function() {
       const indexEl = document.getElementById("ocrIndex");
