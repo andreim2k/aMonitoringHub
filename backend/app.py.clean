@@ -35,7 +35,7 @@ from usb_json_reader import USBJSONReader
 
 # Configure logging
 logging.basicConfig(
-    level=getattr(logging, os.getenv('LOG_LEVEL','ERROR').upper(), logging.ERROR),
+    level=getattr(logging, os.getenv('LOG_LEVEL','INFO').upper(), logging.INFO),
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler('logs/backend.log'),
@@ -902,7 +902,7 @@ def capture_webcam():
             "contrast": 0,
             "saturation": 0,
             "exposure": 300,
-            "gain": 2,
+            "gain": 5,
             "special_effect": 1,
             "wb_mode": 0,
             "hmirror": False,
