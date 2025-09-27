@@ -7825,3 +7825,186 @@ Traceback (most recent call last):
     self.response.close()
 RuntimeError: generator ignored GeneratorExit
 2025-09-27 04:57:42,051 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 04:57:42] "POST /webcam/capture HTTP/1.1" 200 -
+2025-09-27 05:06:07,186 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:06:07] "GET / HTTP/1.1" 200 -
+2025-09-27 05:06:07,233 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:06:07] "GET /events HTTP/1.1" 200 -
+2025-09-27 05:06:07,344 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:06:07] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:06:07,367 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:06:07] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:06:07,399 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:06:07] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:06:07,451 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:06:07] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:06:07,481 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:06:07] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:06:07,512 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:06:07] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:06:07,583 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:06:07] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:06:07,619 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:06:07] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:06:07,643 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:06:07] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:06:07,676 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:06:07] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:06:07,700 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:06:07] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:06:07,743 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:06:07] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:06:08,201 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:06:08] "POST /webcam/capture HTTP/1.1" 200 -
+2025-09-27 05:06:12,349 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-09-27 05:06:42,678 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:06:42] "POST /webcam/ocr HTTP/1.1" 200 -
+2025-09-27 05:09:09,661 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:09:09] "GET / HTTP/1.1" 200 -
+2025-09-27 05:09:09,700 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:09:09] "GET /events HTTP/1.1" 200 -
+2025-09-27 05:09:09,809 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:09:09] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:09:09,833 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:09:09] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:09:09,864 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:09:09] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:09:09,912 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:09:09] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:09:09,940 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:09:09] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:09:09,971 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:09:09] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:09:10,043 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:09:10] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:09:10,074 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:09:10] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:09:10,097 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:09:10] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:09:10,130 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:09:10] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:09:10,155 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:09:10] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:09:10,195 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:09:10] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:09:10,663 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:09:10] "POST /webcam/capture HTTP/1.1" 200 -
+2025-09-27 05:09:13,630 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-09-27 05:10:44,116 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:10:44] "GET / HTTP/1.1" 200 -
+2025-09-27 05:10:44,153 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:10:44] "GET /events HTTP/1.1" 200 -
+2025-09-27 05:10:44,273 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:10:44] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:10:44,300 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:10:44] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:10:44,666 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:10:44] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:10:44,752 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:10:44] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:10:44,782 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:10:44] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:10:44,810 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:10:44] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:10:44,892 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:10:44] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:10:44,929 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:10:44] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:10:44,953 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:10:44] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:10:44,986 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:10:44] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:10:45,011 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:10:45] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:10:45,053 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:10:45] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:10:45,113 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:10:45] "POST /webcam/capture HTTP/1.1" 200 -
+2025-09-27 05:11:30,152 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:11:30] "[36mGET / HTTP/1.1[0m" 304 -
+2025-09-27 05:11:30,183 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:11:30] "GET /events HTTP/1.1" 200 -
+2025-09-27 05:11:30,289 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:11:30] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:11:30,310 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:11:30] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:11:30,340 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:11:30] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:11:30,501 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:11:30] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:11:30,533 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:11:30] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:11:30,563 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:11:30] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:11:30,663 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:11:30] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:11:30,700 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:11:30] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:11:30,723 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:11:30] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:11:30,757 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:11:30] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:11:30,782 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:11:30] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:11:30,824 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:11:30] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:11:31,173 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:11:31] "POST /webcam/capture HTTP/1.1" 200 -
+2025-09-27 05:11:34,835 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:11:34] "POST /webcam/capture HTTP/1.1" 200 -
+2025-09-27 05:11:40,784 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:11:40] "POST /webcam/capture HTTP/1.1" 200 -
+2025-09-27 05:11:44,291 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:11:44] "POST /webcam/capture HTTP/1.1" 200 -
+2025-09-27 05:11:52,371 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:11:52] "POST /webcam/capture HTTP/1.1" 200 -
+2025-09-27 05:11:57,804 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:11:57] "POST /webcam/capture HTTP/1.1" 200 -
+2025-09-27 05:12:01,173 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:12:01] "POST /webcam/capture HTTP/1.1" 200 -
+2025-09-27 05:13:43,394 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:13:43] "GET / HTTP/1.1" 200 -
+2025-09-27 05:13:43,432 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:13:43] "GET /events HTTP/1.1" 200 -
+2025-09-27 05:13:43,542 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:13:43] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:13:43,563 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:13:43] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:13:43,596 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:13:43] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:13:43,645 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:13:43] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:13:43,677 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:13:43] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:13:43,711 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:13:43] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:13:43,783 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:13:43] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:13:43,817 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:13:43] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:13:43,840 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:13:43] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:13:43,873 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:13:43] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:13:43,898 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:13:43] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:13:43,939 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:13:43] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:13:44,370 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:13:44] "POST /webcam/capture HTTP/1.1" 200 -
+2025-09-27 05:13:45,555 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-09-27 05:13:49,393 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:13:49] "POST /webcam/capture HTTP/1.1" 200 -
+2025-09-27 05:16:09,999 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:16:09] "GET / HTTP/1.1" 200 -
+2025-09-27 05:16:10,039 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:16:10] "GET /events HTTP/1.1" 200 -
+2025-09-27 05:16:10,146 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:16:10] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:16:10,170 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:16:10] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:16:10,202 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:16:10] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:16:10,250 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:16:10] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:16:10,280 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:16:10] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:16:10,312 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:16:10] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:16:10,385 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:16:10] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:16:10,424 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:16:10] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:16:10,447 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:16:10] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:16:10,481 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:16:10] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:16:10,505 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:16:10] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:16:10,545 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:16:10] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:16:11,024 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:16:11] "POST /webcam/capture HTTP/1.1" 200 -
+2025-09-27 05:16:19,498 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:16:19] "POST /webcam/capture HTTP/1.1" 200 -
+2025-09-27 05:16:23,396 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:16:23] "POST /webcam/capture HTTP/1.1" 200 -
+2025-09-27 05:16:27,715 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:16:27] "POST /webcam/capture HTTP/1.1" 200 -
+2025-09-27 05:16:33,664 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:16:33] "POST /webcam/capture HTTP/1.1" 200 -
+2025-09-27 05:17:00,663 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:17:00] "[36mGET / HTTP/1.1[0m" 304 -
+2025-09-27 05:17:00,696 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:17:00] "GET /events HTTP/1.1" 200 -
+2025-09-27 05:17:00,805 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:17:00] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:17:00,828 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:17:00] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:17:00,861 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:17:00] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:17:00,911 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:17:00] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:17:00,939 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:17:00] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:17:00,968 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:17:00] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:17:01,041 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:17:01] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:17:01,073 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:17:01] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:17:01,096 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:17:01] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:17:01,129 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:17:01] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:17:01,154 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:17:01] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:17:01,195 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:17:01] "POST /graphql HTTP/1.1" 200 -
+2025-09-27 05:17:01,663 - werkzeug - INFO - 192.168.50.246 - - [27/Sep/2025 05:17:01] "POST /webcam/capture HTTP/1.1" 200 -
