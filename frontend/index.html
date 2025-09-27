@@ -223,7 +223,16 @@
       flex: 1;
       max-width: 200px;
     }
-
+    .metric-card-disabled {
+      background: transparent;
+      border: none;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      min-width: 140px;
+      flex: 1;
+      max-width: 200px;
+    }
     .stat-card {
       min-width: 0;
       
@@ -285,10 +294,21 @@
       display: flex; align-items: center; gap: 8px;
     }
     .unit-badge { display:inline-block; padding:2px 6px; font-size: 0.75rem; border-radius: 8px; background: rgba(255,255,255,0.1); color:#b3b3b3; }
-    
+    .metric-label {
+      display: flex; align-items: center; gap: 8px;
       font-size: 0.9rem;
       color: #b3b3b3;
       margin-bottom: 5px;
+    }
+    .metric-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #ffffff;
+      margin-bottom: 3px;
+    }
+    .metric-timestamp {
+      font-size: 0.7rem;
+      color: #888;
     }
 
     .metric-value {
@@ -323,7 +343,7 @@
         gap: 15px;
       }
 
-      .metric-card, .chart-card, .electricity-card {
+      .metric-card, .metric-card-disabled, .chart-card, .electricity-card {
         max-width: none;
         min-width: auto;
       }
@@ -387,15 +407,15 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.25);
     }
 
-    .metric-card, .stat-card, .chart-card, .electricity-card { position: relative; overflow:hidden; }
-    .metric-card::after, .stat-card::after, .chart-card::after, .electricity-card::after {
+    .metric-card, .metric-card-disabled, .stat-card, .chart-card, .electricity-card { position: relative; overflow:hidden; }
+    .metric-card::after, .metric-card-disabled::after, .stat-card::after, .chart-card::after, .electricity-card::after {
       content: ""; position:absolute; inset:0; pointer-events:none;
       background: radial-gradient(1200px 400px at -10% -20%, rgba(255,255,255,0.08), transparent 60%),
                   radial-gradient(800px 300px at 110% 120%, rgba(255,255,255,0.06), transparent 60%);
       mix-blend-mode: screen;
     }
 
-    .metric-card, .stat-card { padding: 18px; }
+    .metric-card, .metric-card-disabled, .stat-card { padding: 18px; }
     .metric-label { font-weight: 600; color: #d9d9e3; letter-spacing: 0.2px; }
     .metric-value { font-size: 1.6rem; font-weight: 800; letter-spacing: 0.3px; }
     .metric-timestamp { margin-top: 6px; color: #9aa0a6; font-size: 0.78rem; }
@@ -420,7 +440,7 @@
     }
 
     /* Unify card background via .glass class */
-    .metric-card, .stat-card { background: none; border: none; }
+    .metric-card, .metric-card-disabled, .stat-card { background: none; border: none; }
     .chart-card, .electricity-card { background: none; border: none; }
 
     .focus-ring:focus { outline: 2px solid rgba(255,255,255,0.35); outline-offset: 2px; }
@@ -433,12 +453,19 @@
 .metric-card .metric-value { align-self: start; }
 .metric-card .metric-timestamp { align-self: start; }
 
+.metric-card-disabled, .stat-card { min-width: 0; display: grid; grid-template-rows: auto auto auto; row-gap: 6px; }
+.metric-card-disabled .metric-icon, .metric-card .metric-label { display: inline-flex; align-items: center; }
+.metric-card-disabled .metric-icon { margin-bottom: 0; }
+.metric-card-disabled .metric-label { margin-left: 8px; }
+.metric-card-disabled .metric-value { align-self: start; }
+.metric-card-disabled .metric-timestamp { align-self: start; }
+
 /* Ensure uniform padding on small screens */
 @media (max-width: 600px) {
   .container { padding: 10px; }
   .metrics-row { grid-template-columns: 1fr; gap: 12px; }
   .charts-row { grid-template-columns: 1fr; gap: 12px; }
-  .metric-card, .stat-card { padding: 14px; }
+  .metric-card, .metric-card-disabled, .stat-card { padding: 14px; }
 }
 
 /* Tablet two columns */
@@ -465,6 +492,12 @@
 .metric-card .metric-label { margin-left: 0 !important; display: flex; align-items: center; gap: 8px; justify-content: center; width: 100%; }
 .metric-card .metric-value { align-self: center; }
 .metric-card .metric-timestamp { align-self: center; }
+
+.metric-card-disabled, .stat-card { display: flex !important; flex-direction: column; align-items: center; text-align: center; }
+.metric-card-disabled .metric-icon { margin: 0 0 8px 0; align-self: center; }
+.metric-card-disabled .metric-label { margin-left: 0 !important; display: flex; align-items: center; gap: 8px; justify-content: center; width: 100%; }
+.metric-card-disabled .metric-value { align-self: center; }
+.metric-card-disabled .metric-timestamp { align-self: center; }
 /* Ensure badges sit nicely when centered */
 .unit-badge { align-self: center; }
 
@@ -499,13 +532,30 @@
   }
   @media (min-width: 421px) and (max-width: 600px) {
     .metrics-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-    .metric-card, .stat-card { padding: 12px; }
+    .metric-card, .metric-card-disabled, .stat-card { padding: 12px; }
     .metric-label { font-size: 1.05rem; }
     .metric-value { font-size: 1.35rem; }
     .metric-timestamp { font-size: 0.76rem; }
   }
 
   </style>
+<style id="no-hover-status-readings">
+/* Conservative approach: Only disable hover effects for Status and Readings cards */
+
+
+.electricity-card:hover,
+.electricity-card:active {
+    transform: none !important;
+    box-shadow: inherit !important;
+    background: inherit !important;
+    transition: none !important;
+}
+</style>
+<style id="kill-pressed-effect">
+/* KILL PRESSED BUTTON EFFECT FOR STATUS AND READINGS CARDS */
+
+/* Force these cards to never move or change appearance */
+</style>
 </head>
 
 <body>
@@ -518,12 +568,12 @@
   <div class="container">
       <!-- Row 1: Sensors Status & Total Readings -->
       <div class="metrics-row">
-        <div class="metric-card glass">
+        <div class="metric-card-disabled glass">
           <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Status" role="img"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
           <div class="metric-label">Sensors Status</div>
           <div class="metric-value status-checking" id="sensorStatus">Checking...</div>
         </div>
-        <div class="metric-card glass">
+        <div class="metric-card-disabled glass">
           <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Readings" role="img"><path fill="currentColor" d="M3 5h18v2H3zm0 6h12v2H3zm0 6h18v2H3z"/></svg></div>
           <div class="metric-label">Total Readings</div>
           <div class="metric-value" id="dataCount">--</div>
