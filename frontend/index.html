@@ -825,7 +825,18 @@ function formatHumidity(value) {
       const airTsEl = document.getElementById('airTimestamp');
       if (airTsEl) airTsEl.textContent = formatTimestamp(currentData.airTimestamp);
       const airStatusEl = document.getElementById('airQualityStatus');
-      if (airStatusEl) airStatusEl.textContent = currentData.airStatus || '--';
+      if (airStatusEl) {
+        const status = (currentData.airStatus || '--').toString();
+        airStatusEl.textContent = status;
+        const sLow = status.trim().toLowerCase();
+        let color = '#b3b3b3';
+        if (/(excellent|excelent|great|optimal|very\s*good|best)/.test(sLow)) color = '#66bb6a';
+        else if (/(good|ok|okay)/.test(sLow)) color = '#81c784';
+        else if (/(moderate|fair|average)/.test(sLow)) color = '#ffa726';
+        else if (/(poor|bad|high|unhealthy|alert|warning|danger|critical)/.test(sLow)) color = '#ef5350';
+        airStatusEl.style.color = color;
+        airStatusEl.style.fontWeight = '700';
+      }
       const nh3El = document.getElementById('airNH3'); if (nh3El) nh3El.textContent = 'NH₃: ' + (currentData.nh3_ppm != null ? currentData.nh3_ppm.toFixed(1) + ' ppm' : '-- ppm');
       const alcEl = document.getElementById('airAlcohol'); if (alcEl) alcEl.textContent = 'Alcohol: ' + (currentData.alcohol_ppm != null ? currentData.alcohol_ppm.toFixed(1) + ' ppm' : '-- ppm');
 
