@@ -33,15 +33,31 @@ from models import init_database, db, TemperatureReading as DBTemperatureReading
 from sensor_reader import TemperatureSensorReader, HumiditySensorReader
 from usb_json_reader import USBJSONReader
 
-# Configure logging
+# Configure logging (force ERROR by default)
 logging.basicConfig(
-    level=getattr(logging, os.getenv('LOG_LEVEL','ERROR').upper(), logging.ERROR),
+    level=getattr(logging, os.getenv('LOG_LEVEL', 'ERROR').upper(), logging.ERROR),
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler('logs/backend.log'),
         logging.StreamHandler()
     ]
 )
+
+# Enforce ERROR level on root and common noisy libraries
+_root_logger = logging.getLogger()
+_root_logger.setLevel(logging.ERROR)
+for _h in list(_root_logger.handlers):
+    try:
+        _h.setLevel(logging.ERROR)
+    except Exception:
+        pass
+
+for _name in ['werkzeug', 'urllib3', 'requests', 'apscheduler', 'graphql', 'PIL', 'google', 'sqlalchemy']:
+    try:
+        logging.getLogger(_name).setLevel(logging.ERROR)
+    except Exception:
+        pass
+
 logger = logging.getLogger(__name__)
 
 # Flask application setup
