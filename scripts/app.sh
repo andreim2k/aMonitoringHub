@@ -8,7 +8,7 @@ set -e  # Exit on any error
 # Configuration - Use relative paths
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-VENV_PATH="$PROJECT_ROOT/venv"
+VENV_PATH="$PROJECT_ROOT/backend/venv"
 BACKEND_PATH="$PROJECT_ROOT/backend"
 LOGS_PATH="$PROJECT_ROOT/logs"
 PID_FILE="$LOGS_PATH/app.pid"

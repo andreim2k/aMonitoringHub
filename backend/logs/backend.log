@@ -8401,3 +8401,927 @@ RuntimeError: generator ignored GeneratorExit
 [SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
 [parameters: ('2025-09-28 10:54:21.473840', 1759056861.47384, 84.5, 82.5, 70.9, 1, 'Excellent', 11394, 0.574, 47517.1, 1.123, 'mq135_usb', 'micropython_device')]
 (Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:54:51,699 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:54:51.696712', 1759056891.696712, 16.31, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:54:51,703 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:54:51.696712', 1759056891.696712, 48.3, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:54:51,707 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:54:51.696712', 1759056891.696712, 942.8, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:54:51,711 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:54:51.696712', 1759056891.696712, 81.4, 79.9, 66.3, 1, 'Excellent', 11266, 0.567, 48170.6, 1.139, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:55:21,917 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:55:21.913867', 1759056921.913867, 16.41, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:55:21,920 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:55:21.913867', 1759056921.913867, 48.8, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:55:21,924 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:55:21.913867', 1759056921.913867, 943.0, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:55:21,928 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:55:21.913867', 1759056921.913867, 82.6, 82.9, 68.0, 1, 'Excellent', 11314, 0.57, 47923.8, 1.133, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:55:52,129 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:55:52.125951', 1759056952.125951, 16.32, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:55:52,133 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:55:52.125951', 1759056952.125951, 48.2, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:55:52,136 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:55:52.125951', 1759056952.125951, 942.9, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:55:52,139 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:55:52.125951', 1759056952.125951, 79.9, 78.0, 64.3, 1, 'Excellent', 11202, 0.564, 48502.9, 1.147, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:56:22,350 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:56:22.346927', 1759056982.346927, 16.35, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:56:22,355 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:56:22.346927', 1759056982.346927, 47.9, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:56:22,358 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:56:22.346927', 1759056982.346927, 942.9, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:56:22,361 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:56:22.346927', 1759056982.346927, 79.1, 80.3, 66.3, 1, 'Excellent', 11170, 0.562, 48670.5, 1.15, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:56:52,562 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:56:52.559169', 1759057012.559169, 16.33, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:56:52,566 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:56:52.559169', 1759057012.559169, 47.5, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:56:52,570 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:56:52.559169', 1759057012.559169, 942.9, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:56:52,573 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:56:52.559169', 1759057012.559169, 83.3, 81.8, 69.5, 1, 'Excellent', 11346, 0.571, 47760.4, 1.129, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:57:22,776 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:57:22.772666', 1759057042.772666, 16.3, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:57:22,779 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:57:22.772666', 1759057042.772666, 47.8, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:57:22,782 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:57:22.772666', 1759057042.772666, 942.9, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:57:22,786 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:57:22.772666', 1759057042.772666, 76.8, 82.2, 66.0, 1, 'Excellent', 11074, 0.558, 49179.2, 1.163, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:57:52,996 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:57:52.993137', 1759057072.993137, 16.31, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:57:53,000 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:57:52.993137', 1759057072.993137, 48.0, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:57:53,003 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:57:52.993137', 1759057072.993137, 942.8, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:57:53,006 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:57:52.993137', 1759057072.993137, 80.2, 79.9, 63.9, 1, 'Excellent', 11218, 0.565, 48419.5, 1.145, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:58:23,199 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:58:23.195331', 1759057103.195331, 16.31, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:58:23,202 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:58:23.195331', 1759057103.195331, 47.7, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:58:23,205 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:58:23.195331', 1759057103.195331, 942.9, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:58:23,208 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:58:23.195331', 1759057103.195331, 79.9, 77.3, 66.3, 1, 'Excellent', 11202, 0.564, 48502.9, 1.147, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:58:53,418 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:58:53.416464', 1759057133.416464, 16.28, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:58:53,421 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:58:53.416464', 1759057133.416464, 48.4, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:58:53,423 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:58:53.416464', 1759057133.416464, 942.9, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:58:53,426 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:58:53.416464', 1759057133.416464, 76.5, 78.4, 64.3, 1, 'Excellent', 11058, 0.557, 49264.8, 1.165, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:59:23,643 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:59:23.639751', 1759057163.639751, 16.37, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:59:23,647 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:59:23.639751', 1759057163.639751, 47.4, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:59:23,651 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:59:23.639751', 1759057163.639751, 942.9, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:59:23,655 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:59:23.639751', 1759057163.639751, 81.0, 80.6, 66.7, 1, 'Excellent', 11250, 0.566, 48253.3, 1.141, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:59:53,845 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:59:53.843098', 1759057193.843098, 16.29, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:59:53,849 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:59:53.843098', 1759057193.843098, 47.1, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:59:53,851 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:59:53.843098', 1759057193.843098, 942.8, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 13:59:53,855 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 10:59:53.843098', 1759057193.843098, 85.7, 84.1, 68.0, 1, 'Excellent', 11442, 0.576, 47275.8, 1.118, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:00:24,075 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:00:24.069013', 1759057224.069013, 16.31, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:00:24,078 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:00:24.069013', 1759057224.069013, 47.4, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:00:24,081 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:00:24.069013', 1759057224.069013, 942.9, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:00:24,085 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:00:24.069013', 1759057224.069013, 79.5, 80.3, 67.0, 1, 'Excellent', 11186, 0.563, 48586.6, 1.148, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:00:54,278 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:00:54.275510', 1759057254.27551, 16.38, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:00:54,282 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:00:54.275510', 1759057254.27551, 48.4, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:00:54,285 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:00:54.275510', 1759057254.27551, 942.9, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:00:54,288 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:00:54.275510', 1759057254.27551, 80.6, 77.3, 66.0, 1, 'Excellent', 11234, 0.566, 48336.3, 1.143, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:01:24,497 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:01:24.494445', 1759057284.494445, 16.36, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:01:24,501 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:01:24.494445', 1759057284.494445, 48.8, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:01:24,504 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:01:24.494445', 1759057284.494445, 942.8, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:01:24,509 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:01:24.494445', 1759057284.494445, 81.8, 83.7, 68.7, 1, 'Excellent', 11282, 0.568, 48088.1, 1.137, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:01:54,717 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:01:54.713374', 1759057314.713374, 16.33, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:01:54,720 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:01:54.713374', 1759057314.713374, 49.3, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:01:54,723 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:01:54.713374', 1759057314.713374, 942.9, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:01:54,727 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:01:54.713374', 1759057314.713374, 81.8, 79.1, 65.0, 1, 'Excellent', 11282, 0.568, 48088.1, 1.137, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:02:24,919 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:02:24.915197', 1759057344.915197, 16.26, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:02:24,922 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:02:24.915197', 1759057344.915197, 50.2, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:02:24,925 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:02:24.915197', 1759057344.915197, 942.9, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:02:24,927 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:02:24.915197', 1759057344.915197, 81.8, 78.8, 66.3, 1, 'Excellent', 11282, 0.568, 48088.1, 1.137, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:02:25,016 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-09-28 14:02:55,149 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:02:55.145324', 1759057375.145324, 16.3, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:02:55,152 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:02:55.145324', 1759057375.145324, 48.9, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:02:55,155 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:02:55.145324', 1759057375.145324, 942.9, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:02:55,159 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:02:55.145324', 1759057375.145324, 82.2, 79.1, 66.3, 1, 'Excellent', 11298, 0.569, 48005.8, 1.135, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:03:25,361 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:03:25.357901', 1759057405.357901, 16.26, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:03:25,366 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:03:25.357901', 1759057405.357901, 49.0, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:03:25,369 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:03:25.357901', 1759057405.357901, 942.9, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:03:25,373 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:03:25.357901', 1759057405.357901, 81.8, 80.6, 69.8, 1, 'Excellent', 11282, 0.568, 48088.1, 1.137, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:03:55,574 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:03:55.571635', 1759057435.571635, 16.31, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:03:55,578 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:03:55.571635', 1759057435.571635, 49.9, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:03:55,582 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:03:55.571635', 1759057435.571635, 942.9, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:03:55,585 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:03:55.571635', 1759057435.571635, 78.3, 81.8, 66.0, 1, 'Excellent', 11138, 0.561, 48839.1, 1.154, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:04:25,794 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:04:25.791477', 1759057465.791477, 16.34, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:04:25,799 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:04:25.791477', 1759057465.791477, 48.3, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:04:25,802 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:04:25.791477', 1759057465.791477, 942.9, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:04:25,806 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:04:25.791477', 1759057465.791477, 76.5, 77.3, 63.6, 1, 'Excellent', 11058, 0.557, 49264.8, 1.165, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:04:56,008 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:04:56.005143', 1759057496.005143, 16.41, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:04:56,012 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:04:56.005143', 1759057496.005143, 48.9, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:04:56,015 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:04:56.005143', 1759057496.005143, 942.9, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:04:56,019 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:04:56.005143', 1759057496.005143, 78.3, 81.0, 66.0, 1, 'Excellent', 11138, 0.561, 48839.1, 1.154, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:05:26,220 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:05:26.216659', 1759057526.216659, 16.37, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:05:26,224 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:05:26.216659', 1759057526.216659, 47.3, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:05:26,227 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:05:26.216659', 1759057526.216659, 942.8, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:05:26,230 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:05:26.216659', 1759057526.216659, 78.7, 79.1, 68.0, 1, 'Excellent', 11154, 0.562, 48754.7, 1.152, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:05:56,440 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:05:56.436828', 1759057556.436828, 16.37, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:05:56,444 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:05:56.436828', 1759057556.436828, 47.8, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:05:56,447 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:05:56.436828', 1759057556.436828, 942.8, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:05:56,450 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:05:56.436828', 1759057556.436828, 81.8, 81.4, 65.0, 1, 'Excellent', 11282, 0.568, 48088.1, 1.137, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:06:26,653 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:06:26.650492', 1759057586.650492, 16.39, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:06:26,659 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:06:26.650492', 1759057586.650492, 47.3, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:06:26,663 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:06:26.650492', 1759057586.650492, 942.8, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:06:26,666 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:06:26.650492', 1759057586.650492, 77.2, 79.1, 66.0, 1, 'Excellent', 11090, 0.558, 49093.8, 1.16, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:06:56,875 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:06:56.871485', 1759057616.871485, 16.36, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:06:56,879 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:06:56.871485', 1759057616.871485, 47.2, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:06:56,883 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:06:56.871485', 1759057616.871485, 942.8, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:06:56,886 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:06:56.871485', 1759057616.871485, 76.5, 81.4, 64.3, 1, 'Excellent', 11058, 0.557, 49264.8, 1.165, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:07:27,089 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:07:27.085726', 1759057647.085726, 16.33, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:07:27,093 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:07:27.085726', 1759057647.085726, 46.1, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:07:27,096 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:07:27.085726', 1759057647.085726, 942.8, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:07:27,100 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:07:27.085726', 1759057647.085726, 80.2, 81.0, 70.2, 1, 'Excellent', 11218, 0.565, 48419.5, 1.145, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:07:57,295 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:07:57.293140', 1759057677.29314, 16.38, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:07:57,297 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:07:57.293140', 1759057677.29314, 47.7, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:07:57,300 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:07:57.293140', 1759057677.29314, 942.8, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:07:57,302 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:07:57.293140', 1759057677.29314, 79.1, 78.0, 68.7, 1, 'Excellent', 11170, 0.562, 48670.5, 1.15, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:08:27,524 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:08:27.520249', 1759057707.520249, 16.34, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:08:27,528 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:08:27.520249', 1759057707.520249, 47.6, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:08:27,532 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:08:27.520249', 1759057707.520249, 942.8, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:08:27,535 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:08:27.520249', 1759057707.520249, 79.9, 78.8, 66.0, 1, 'Excellent', 11202, 0.564, 48502.9, 1.147, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:08:57,736 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:08:57.732960', 1759057737.73296, 16.29, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:08:57,741 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:08:57.732960', 1759057737.73296, 46.3, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:08:57,744 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:08:57.732960', 1759057737.73296, 942.8, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:08:57,748 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:08:57.732960', 1759057737.73296, 82.9, 82.2, 67.0, 1, 'Excellent', 11330, 0.571, 47842.0, 1.131, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:09:32,000 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-09-28 14:09:32,981 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-09-28 14:10:57,596 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:10:57.593127', 1759057857.593127, 16.37, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:10:57,601 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:10:57.593127', 1759057857.593127, 47.8, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:10:57,604 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:10:57.593127', 1759057857.593127, 942.9, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:10:57,609 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:10:57.593127', 1759057857.593127, 81.8, 83.3, 68.7, 1, 'Excellent', 11282, 0.568, 48088.1, 1.137, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:11:27,809 - models - ERROR - Error adding temperature reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO temperature_readings (timestamp, timestamp_unix, temperature_c, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:11:27.806350', 1759057887.80635, 16.46, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:11:27,813 - models - ERROR - Error adding humidity reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO humidity_readings (timestamp, timestamp_unix, humidity_percent, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:11:27.806350', 1759057887.80635, 49.2, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:11:27,816 - models - ERROR - Error adding pressure reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO pressure_readings (timestamp, timestamp_unix, pressure_hpa, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:11:27.806350', 1759057887.80635, 942.9, 'bme280_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:11:27,820 - models - ERROR - Error adding air quality reading: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO air_quality_readings (timestamp, timestamp_unix, co2_ppm, nh3_ppm, alcohol_ppm, aqi, status, raw_adc, voltage_v, resistance_ohm, ratio_rs_r0, sensor_type, sensor_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('2025-09-28 11:11:27.806350', 1759057887.80635, 81.4, 83.3, 71.3, 1, 'Excellent', 11266, 0.567, 48170.6, 1.139, 'mq135_usb', 'micropython_device')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-28 14:11:39,909 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-09-28 14:11:45,937 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-09-28 14:12:36,301 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-09-28 14:16:12,859 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-09-28 14:16:15,870 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-09-28 14:16:33,998 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-09-28 14:19:47,373 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-09-28 14:45:56,778 - app - ERROR - Exception on /webcam/capture [POST]
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask_cors/extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/app.py", line 927, in capture_webcam
+    import requests
+ModuleNotFoundError: No module named 'requests'
+2025-09-28 14:45:58,097 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-09-28 14:45:59,864 - app - ERROR - Exception on /webcam/capture [POST]
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask_cors/extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/app.py", line 927, in capture_webcam
+    import requests
+ModuleNotFoundError: No module named 'requests'
+2025-09-28 14:46:00,015 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 309, in write
+    self.wfile.write(data)
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-09-28 14:46:04,134 - app - ERROR - Exception on /webcam/capture [POST]
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask_cors/extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/app.py", line 927, in capture_webcam
+    import requests
+ModuleNotFoundError: No module named 'requests'
+2025-09-28 14:46:05,012 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-09-28 14:46:19,444 - app - ERROR - Exception on /webcam/capture [POST]
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask_cors/extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/app.py", line 927, in capture_webcam
+    import requests
+ModuleNotFoundError: No module named 'requests'
+2025-09-28 14:46:21,124 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-09-28 14:46:25,283 - app - ERROR - Exception on /webcam/capture [POST]
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask_cors/extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/app.py", line 927, in capture_webcam
+    import requests
+ModuleNotFoundError: No module named 'requests'
+2025-09-28 14:46:39,726 - app - ERROR - Exception on /webcam/capture [POST]
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask_cors/extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrei/aMonitoringHub/backend/app.py", line 927, in capture_webcam
+    import requests
+ModuleNotFoundError: No module named 'requests'

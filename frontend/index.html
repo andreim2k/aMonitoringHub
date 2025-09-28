@@ -562,7 +562,6 @@
   <div class="header">
     <h1>@MonitoringHub</h1>
     <p style="font-style: italic; color: #888; font-size: 0.9em;">Environmental sensors & climate insights</p>
-    <div id="nowClock" style="margin-top:6px;color:#9aa0a6;font-size:0.9rem;">Now: --</div>
     <div id="lastReadingTime" style="margin-top:8px;color:#90caf9;font-size:1.0rem;font-weight:600;">Last reading time: --</div>
     <!-- Connection status removed - using sensor status instead -->
   </div>
@@ -1343,12 +1342,6 @@ function formatHumidity(value) {
 
     // Initialize the application
     
-    function updateNowClock() {
-      const el = document.getElementById('nowClock');
-      if (!el) return;
-      // Pass epoch seconds to formatter
-      el.textContent = "Now: " + formatBucharest(Math.floor(Date.now()/1000));
-    }
 async function initialize() {
       console.log('Initializing application...');
       try {
@@ -1672,16 +1665,5 @@ async function initialize() {
     // === End popup charts ===
 
   </script>
-  <script>
-  function updateNowClockStandalone() {
-    const el = document.getElementById('nowClock');
-    if (el) el.textContent = 'Now: ' + formatBucharest(Math.floor(Date.now()/1000));
-  }
-  document.addEventListener('DOMContentLoaded', () => {
-    updateNowClockStandalone();
-    setInterval(updateNowClockStandalone, 1000);
-  });
-</script>
-
 </body>
 </html>
