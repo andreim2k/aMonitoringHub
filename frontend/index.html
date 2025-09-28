@@ -20,7 +20,7 @@
     }
 
     .container {
-      max-width: 1400px;
+      max-width: 900px;
       margin: 0 auto;
       padding: 20px;
     }
@@ -179,7 +179,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: center; width: fit-content; margin: 0 auto;
       position: absolute;
       top: 50%;
       left: 50%;
@@ -202,15 +202,15 @@
     }
 
     .metrics-row {
-      justify-content: center;
+      justify-content: center; width: fit-content; margin: 0 auto;
     }
 
     .charts-row {
-      justify-content: center;
+      justify-content: center; width: fit-content; margin: 0 auto;
     }
 
     .stats-row {
-      justify-content: center;
+      justify-content: center; width: fit-content; margin: 0 auto;
     }
 
     .metric-card {
@@ -219,8 +219,8 @@
       border-radius: 12px;
       padding: 20px;
       text-align: center;
-      min-width: 140px;
-      flex: 1;
+      width: 200px;
+      
       max-width: 200px;
     }
     .metric-card-disabled {
@@ -229,8 +229,8 @@
       border-radius: 12px;
       padding: 20px;
       text-align: center;
-      min-width: 140px;
-      flex: 1;
+      width: 200px;
+      
       max-width: 200px;
     }
     .stat-card {
@@ -251,7 +251,7 @@
       border: none;
       border-radius: 12px;
       padding: 20px;
-      flex: 1;
+      
       min-width: 300px;
     }
 
@@ -282,7 +282,7 @@
     }
 
     .electricity-container {
-      justify-content: center;
+      justify-content: center; width: fit-content; margin: 0 auto;
     }
 
     .metric-icon {
@@ -349,7 +349,7 @@
       }
 
       .electricity-container {
-        justify-content: center;
+        justify-content: center; width: fit-content; margin: 0 auto;
       }
     }
 
@@ -361,7 +361,7 @@
 
     .chart-header {
       display: flex;
-      justify-content: center;
+      justify-content: center; width: fit-content; margin: 0 auto;
       align-items: center;
       margin-bottom: 15px;
     }
@@ -383,12 +383,12 @@
     .weather-metrics {
       display: flex;
       gap: 20px;
-      justify-content: center;
+      justify-content: center; width: fit-content; margin: 0 auto;
       flex-wrap: wrap;
     }
 
     .weather-metrics .card {
-      flex: 1;
+      
       min-width: 250px;
       max-width: 350px;
     }
@@ -489,13 +489,13 @@
 /* Center content within metric cards */
 .metric-card, .stat-card { display: flex !important; flex-direction: column; align-items: center; text-align: center; }
 .metric-card .metric-icon { margin: 0 0 8px 0; align-self: center; }
-.metric-card .metric-label { margin-left: 0 !important; display: flex; align-items: center; gap: 8px; justify-content: center; width: 100%; }
+.metric-card .metric-label { margin-left: 0 !important; display: flex; align-items: center; gap: 8px; justify-content: center; width: fit-content; margin: 0 auto; width: 100%; }
 .metric-card .metric-value { align-self: center; }
 .metric-card .metric-timestampUnix { align-self: center; }
 
 .metric-card-disabled, .stat-card { display: flex !important; flex-direction: column; align-items: center; text-align: center; }
 .metric-card-disabled .metric-icon { margin: 0 0 8px 0; align-self: center; }
-.metric-card-disabled .metric-label { margin-left: 0 !important; display: flex; align-items: center; gap: 8px; justify-content: center; width: 100%; }
+.metric-card-disabled .metric-label { margin-left: 0 !important; display: flex; align-items: center; gap: 8px; justify-content: center; width: fit-content; margin: 0 auto; width: 100%; }
 .metric-card-disabled .metric-value { align-self: center; }
 .metric-card-disabled .metric-timestampUnix { align-self: center; }
 /* Ensure badges sit nicely when centered */
@@ -503,21 +503,21 @@
 
 
   /* popup charts */
-  .chart-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 9999; }
+  .chart-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; width: fit-content; margin: 0 auto; z-index: 9999; }
   .chart-modal { width: min(92vw, 680px); height: min(70vh, 440px); background: linear-gradient(135deg, rgba(20,18,35,.98) 0%, rgba(35,30,70,.95) 50%, rgba(25,25,45,.98) 100%); border-radius: 14px; padding: 16px; box-shadow: 0 12px 40px rgba(0,0,0,.5); position: relative; display: flex; flex-direction: column; }
   .chart-modal h3 { margin: 0 0 8px 0; color: #e0e0e0; font-size: 1rem; text-align: center; }
   .chart-modal .close-btn { position: absolute; top: 8px; right: 10px; background: transparent; border: none; color: #ccc; font-size: 20px; cursor: pointer; }
-  .chart-modal .time-period-selector { display: flex; justify-content: center; gap: 15px; margin: 10px 0; }
+  .chart-modal .time-period-selector { display: flex; justify-content: center; width: fit-content; margin: 0 auto; gap: 15px; margin: 10px 0; }
   .chart-modal .time-period-option { display: flex; align-items: center; gap: 5px; }
   .chart-modal .time-period-option input[type="radio"] { appearance: none; width: 16px; height: 16px; border: 2px solid #90caf9; border-radius: 50%; background: transparent; cursor: pointer; position: relative; }
   .chart-modal .time-period-option input[type="radio"]:checked { background: #90caf9; }
   .chart-modal .time-period-option input[type="radio"]:checked::after { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 6px; height: 6px; background: white; border-radius: 50%; }
   .chart-modal .time-period-option label { color: #e0e0e0; font-size: 0.9rem; cursor: pointer; user-select: none; }
-  .chart-modal .time-period-inputs { display: flex; justify-content: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+  .chart-modal .time-period-inputs { display: flex; justify-content: center; width: fit-content; margin: 0 auto; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
   .chart-modal .time-period-inputs input, .chart-modal .time-period-inputs select { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; }
   .chart-modal .time-period-inputs input { width: 60px; }
   @media (max-width: 600px) { .chart-modal .time-period-selector { flex-direction: column; gap: 8px; } }
-  .chart-canvas-wrap { position: relative; flex: 1; min-height: 240px; }
+  .chart-canvas-wrap { position: relative;  min-height: 240px; }
   .chart-popover { position: fixed; display: none; pointer-events: none; z-index: 9998; width: 320px; height: 200px; background: rgba(20,18,35,.96); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 8px; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
   .chart-popover h4 { margin: 0 0 4px 0; font-size: .9rem; color: #e0e0e0; text-align: center; }
   .chart-popover .chart-canvas-wrap { width: 100%; height: calc(100% - 22px); }
@@ -633,7 +633,7 @@
               <div class="spinner"></div>
               <div class="spinner-text">Capturing image...</div>
             </div>
-            <div id="webcamPlaceholder" style="display: none; align-items: center; justify-content: center; width: 100%; height: 100%; background: rgba(255,255,255,0.1); color: #888; font-size: 0.9rem;">
+            <div id="webcamPlaceholder" style="display: none; align-items: center; justify-content: center; width: fit-content; margin: 0 auto; width: 100%; height: 100%; background: rgba(255,255,255,0.1); color: #888; font-size: 0.9rem;">
               📷 Capture failed
             </div>
           </div>
