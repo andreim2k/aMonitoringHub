@@ -1,6 +1,6 @@
 monitoringhub.db
+venv
 *.log
-capture_and_process.sh
 *.bak
 __pycache__
 *.py[cod]

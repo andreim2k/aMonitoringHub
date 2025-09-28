@@ -18,6 +18,24 @@ from typing import Dict, Any, List
 from queue import Queue
 import threading
 
+
+# Helper to present timestamps in local system time
+from datetime import timezone as _tzmod, datetime as _dtmod
+
+def _to_local_iso_unix(dt):
+    if dt is None:
+        return None, None
+    try:
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=_tzmod.utc).astimezone()
+        else:
+            dt = dt.astimezone()
+        return dt.isoformat(), dt.timestamp()
+    except Exception:
+        now = _dtmod.now().astimezone()
+        return now.isoformat(), now.timestamp()
+
+
 from flask import Flask, request, jsonify, Response, send_from_directory
 from flask_cors import CORS
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -234,7 +252,7 @@ class Query(ObjectType):
             
             return HealthStatus(
                 status="ok",
-                timestamp=datetime.now(timezone.utc).isoformat(),
+                timestamp=datetime.now().astimezone().isoformat(),
                 database="connected",
                 sensor=SensorInfo(
                     sensor_type=sensor_info_dict.get('sensor_type', 'unknown'),
@@ -248,7 +266,7 @@ class Query(ObjectType):
             logger.error(f"Health check failed: {e}")
             return HealthStatus(
                 status="error",
-                timestamp=datetime.now(timezone.utc).isoformat(),
+                timestamp=datetime.now().astimezone().isoformat(),
                 database="error",
                 sensor=None,
                 recent_readings=0
@@ -264,8 +282,8 @@ class Query(ObjectType):
             return TemperatureReading(
                 id=reading.id,
                 temperature_c=reading.temperature_c,
-                timestamp=reading.timestamp.isoformat(),
-                timestamp_unix=reading.timestamp.timestamp(),
+                timestamp=_to_local_iso_unix(reading.timestamp)[0],
+                timestamp_unix=_to_local_iso_unix(reading.timestamp)[1],
                 sensor_type=reading.sensor_type,
                 sensor_id=reading.sensor_id
             )
@@ -286,13 +304,17 @@ class Query(ObjectType):
             else:
                 readings = db.get_recent_readings(limit=limit)
                 
+            # Ensure we return the most recent N items for time-range queries
+            if range in ("daily", "weekly"):
+                readings = readings[-limit:]
+                
             result = []
-            for reading in readings[:limit]:
+            for reading in readings:
                 result.append(TemperatureReading(
                     id=reading.id,
                     temperature_c=reading.temperature_c,
-                    timestamp=reading.timestamp.isoformat(),
-                    timestamp_unix=reading.timestamp.timestamp(),
+                    timestamp=_to_local_iso_unix(reading.timestamp)[0],
+                    timestamp_unix=_to_local_iso_unix(reading.timestamp)[1],
                     sensor_type=reading.sensor_type,
                     sensor_id=reading.sensor_id
                 ))
@@ -303,6 +325,8 @@ class Query(ObjectType):
         except Exception as e:
             logger.error(f"Error getting temperature history: {e}")
             return []
+
+    
 
     def resolve_temperature_statistics(self, info, hours=24):
         try:
@@ -350,8 +374,8 @@ class Query(ObjectType):
             return HumidityReading(
                 id=reading.id,
                 humidity_percent=reading.humidity_percent,
-                timestamp=reading.timestamp.isoformat(),
-                timestamp_unix=reading.timestamp.timestamp(),
+                timestamp=_to_local_iso_unix(reading.timestamp)[0],
+                timestamp_unix=_to_local_iso_unix(reading.timestamp)[1],
                 sensor_type=reading.sensor_type,
                 sensor_id=reading.sensor_id
             )
@@ -374,8 +398,8 @@ class Query(ObjectType):
                 HumidityReading(
                     id=reading.id,
                     humidity_percent=reading.humidity_percent,
-                    timestamp=reading.timestamp.isoformat(),
-                    timestamp_unix=reading.timestamp.timestamp(),
+                    timestamp=_to_local_iso_unix(reading.timestamp)[0],
+                    timestamp_unix=_to_local_iso_unix(reading.timestamp)[1],
                     sensor_type=reading.sensor_type,
                     sensor_id=reading.sensor_id
                 )
@@ -419,8 +443,8 @@ class Query(ObjectType):
             return PressureReading(
                 id=r.id,
                 pressure_hpa=r.pressure_hpa,
-                timestamp=r.timestamp.isoformat(),
-                timestamp_unix=r.timestamp.timestamp(),
+                timestamp=_to_local_iso_unix(r.timestamp)[0],
+                timestamp_unix=_to_local_iso_unix(r.timestamp)[1],
                 sensor_type=r.sensor_type,
                 sensor_id=r.sensor_id
             )
@@ -435,8 +459,8 @@ class Query(ObjectType):
                 PressureReading(
                     id=r.id,
                     pressure_hpa=r.pressure_hpa,
-                    timestamp=r.timestamp.isoformat(),
-                    timestamp_unix=r.timestamp.timestamp(),
+                    timestamp=_to_local_iso_unix(r.timestamp)[0],
+                    timestamp_unix=_to_local_iso_unix(r.timestamp)[1],
                     sensor_type=r.sensor_type,
                     sensor_id=r.sensor_id
                 ) for r in readings
@@ -476,8 +500,8 @@ class Query(ObjectType):
                 alcohol_ppm=r.alcohol_ppm,
                 aqi=r.aqi,
                 status=r.status,
-                timestamp=r.timestamp.isoformat(),
-                timestamp_unix=r.timestamp.timestamp(),
+                timestamp=_to_local_iso_unix(r.timestamp)[0],
+                timestamp_unix=_to_local_iso_unix(r.timestamp)[1],
                 sensor_type=r.sensor_type,
                 sensor_id=r.sensor_id
             )
@@ -496,8 +520,8 @@ class Query(ObjectType):
                     alcohol_ppm=r.alcohol_ppm,
                     aqi=r.aqi,
                     status=r.status,
-                    timestamp=r.timestamp.isoformat(),
-                    timestamp_unix=r.timestamp.timestamp(),
+                    timestamp=_to_local_iso_unix(r.timestamp)[0],
+                    timestamp_unix=_to_local_iso_unix(r.timestamp)[1],
                     sensor_type=r.sensor_type,
                     sensor_id=r.sensor_id
                 ) for r in readings
@@ -923,7 +947,7 @@ def capture_webcam():
             "wb_mode": 0,
             "hmirror": False,
             "vflip": False,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now().astimezone().isoformat(),
             "api_endpoint": webcam_url,
             "method": "POST",
             "content_type": "application/json"

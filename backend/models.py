@@ -22,6 +22,7 @@ class TemperatureReading(Base):
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     timestamp = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+    timestamp_unix = Column(Float, nullable=False, default=lambda: time.time())
     temperature_c = Column(Float, nullable=False)
     sensor_type = Column(String(50), nullable=False, default='unknown')
     sensor_id = Column(String(100), nullable=False, default='default')
@@ -56,6 +57,7 @@ class HumidityReading(Base):
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     timestamp = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+    timestamp_unix = Column(Float, nullable=False, default=lambda: time.time())
     humidity_percent = Column(Float, nullable=False)
     sensor_type = Column(String(50), nullable=False, default='unknown')
     sensor_id = Column(String(100), nullable=False, default='default')
@@ -189,24 +191,23 @@ class DatabaseManager:
         """Add a temperature reading to the database."""
         try:
             with self.get_session() as session:
+                reading_ts = timestamp or datetime.now(timezone.utc)
                 reading = TemperatureReading(
                     temperature_c=temperature_c,
                     sensor_type=sensor_type,
                     sensor_id=sensor_id,
-                    timestamp=timestamp or datetime.now(timezone.utc)
+                    timestamp=reading_ts,
+                    timestamp_unix=reading_ts.timestamp()
                 )
-                
                 session.add(reading)
                 session.commit()
                 session.refresh(reading)
-                
                 self.logger.debug(f"Added temperature reading: {reading}")
                 return reading
-                
         except Exception as e:
             self.logger.error(f"Error adding temperature reading: {e}")
             return None
-            
+
     def get_recent_readings(self, limit: int = 100, sensor_id: str = None) -> List[TemperatureReading]:
         """Get recent temperature readings."""
         try:
@@ -338,24 +339,23 @@ class DatabaseManager:
         """Add a humidity reading to the database."""
         try:
             with self.get_session() as session:
+                reading_ts = timestamp or datetime.now(timezone.utc)
                 reading = HumidityReading(
                     humidity_percent=humidity_percent,
                     sensor_type=sensor_type,
                     sensor_id=sensor_id,
-                    timestamp=timestamp or datetime.now(timezone.utc)
+                    timestamp=reading_ts,
+                    timestamp_unix=reading_ts.timestamp()
                 )
-                
                 session.add(reading)
                 session.commit()
                 session.refresh(reading)
-                
                 self.logger.debug(f"Added humidity reading: {reading}")
                 return reading
-                
         except Exception as e:
             self.logger.error(f"Error adding humidity reading: {e}")
             return None
-            
+
     def get_recent_humidity_readings(self, limit: int = 100, sensor_id: str = None):
         """Get recent humidity readings."""
         try:
@@ -423,11 +423,13 @@ class DatabaseManager:
     def add_pressure_reading(self, pressure_hpa: float, sensor_type: str = "unknown", sensor_id: str = "default", timestamp: datetime = None):
         try:
             with self.get_session() as session:
+                reading_ts = timestamp or datetime.now(timezone.utc)
                 reading = PressureReading(
                     pressure_hpa=pressure_hpa,
                     sensor_type=sensor_type,
                     sensor_id=sensor_id,
-                    timestamp=timestamp or datetime.now(timezone.utc)
+                    timestamp=reading_ts,
+                    timestamp_unix=reading_ts.timestamp()
                 )
                 session.add(reading)
                 session.commit()
@@ -498,6 +500,7 @@ class DatabaseManager:
     def add_air_quality_reading(self, data: dict, sensor_type: str = "unknown", sensor_id: str = "default", timestamp: datetime = None):
         try:
             with self.get_session() as session:
+                reading_ts = timestamp or datetime.now(timezone.utc)
                 reading = AirQualityReading(
                     co2_ppm=data.get('co2_ppm'),
                     nh3_ppm=data.get('nh3_ppm'),
@@ -510,7 +513,8 @@ class DatabaseManager:
                     ratio_rs_r0=data.get('ratio_rs_r0'),
                     sensor_type=sensor_type,
                     sensor_id=sensor_id,
-                    timestamp=timestamp or datetime.now(timezone.utc)
+                    timestamp=reading_ts,
+                    timestamp_unix=reading_ts.timestamp()
                 )
                 session.add(reading)
                 session.commit()
@@ -572,6 +576,7 @@ class PressureReading(Base):
     __tablename__ = 'pressure_readings'
     id = Column(Integer, primary_key=True, autoincrement=True)
     timestamp = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+    timestamp_unix = Column(Float, nullable=False, default=lambda: time.time())
     pressure_hpa = Column(Float, nullable=False)
     sensor_type = Column(String(50), nullable=False, default='unknown')
     sensor_id = Column(String(100), nullable=False, default='default')
@@ -584,6 +589,7 @@ class AirQualityReading(Base):
     __tablename__ = 'air_quality_readings'
     id = Column(Integer, primary_key=True, autoincrement=True)
     timestamp = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+    timestamp_unix = Column(Float, nullable=False, default=lambda: time.time())
     co2_ppm = Column(Float, nullable=True)
     nh3_ppm = Column(Float, nullable=True)
     alcohol_ppm = Column(Float, nullable=True)
