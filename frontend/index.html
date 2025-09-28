@@ -306,7 +306,7 @@
       color: #ffffff;
       margin-bottom: 3px;
     }
-    .metric-timestamp {
+    .metric-timestampUnix {
       font-size: 0.7rem;
       color: #888;
     }
@@ -325,7 +325,7 @@
       margin-bottom: 3px;
     }
 
-    .metric-timestamp {
+    .metric-timestampUnix {
       font-size: 0.7rem;
       color: #888;
     }
@@ -418,7 +418,7 @@
     .metric-card, .metric-card-disabled, .stat-card { padding: 18px; }
     .metric-label { font-weight: 600; color: #d9d9e3; letter-spacing: 0.2px; }
     .metric-value { font-size: 1.6rem; font-weight: 800; letter-spacing: 0.3px; }
-    .metric-timestamp { margin-top: 6px; color: #9aa0a6; font-size: 0.78rem; }
+    .metric-timestampUnix { margin-top: 6px; color: #9aa0a6; font-size: 0.78rem; }
 
     .metric-card:hover, .stat-card:hover, .chart-card:hover, .electricity-card:hover {
       transform: translateY(-2px);
@@ -451,14 +451,14 @@
 .metric-card .metric-icon { margin-bottom: 0; }
 .metric-card .metric-label { margin-left: 8px; }
 .metric-card .metric-value { align-self: start; }
-.metric-card .metric-timestamp { align-self: start; }
+.metric-card .metric-timestampUnix { align-self: start; }
 
 .metric-card-disabled, .stat-card { min-width: 0; display: grid; grid-template-rows: auto auto auto; row-gap: 6px; }
 .metric-card-disabled .metric-icon, .metric-card .metric-label { display: inline-flex; align-items: center; }
 .metric-card-disabled .metric-icon { margin-bottom: 0; }
 .metric-card-disabled .metric-label { margin-left: 8px; }
 .metric-card-disabled .metric-value { align-self: start; }
-.metric-card-disabled .metric-timestamp { align-self: start; }
+.metric-card-disabled .metric-timestampUnix { align-self: start; }
 
 /* Ensure uniform padding on small screens */
 @media (max-width: 600px) {
@@ -481,7 +481,7 @@
   .metrics-row.triple-row .stat-card { padding: 10px; }
   .metrics-row.triple-row .metric-label { font-size: 0.95rem; }
   .metrics-row.triple-row .metric-value { font-size: 1.2rem; }
-  .metrics-row.triple-row .metric-timestamp { font-size: 0.7rem; }
+  .metrics-row.triple-row .metric-timestampUnix { font-size: 0.7rem; }
   .metrics-row.triple-row .metric-icon { width: 24px; height: 24px; }
 }
 
@@ -491,13 +491,13 @@
 .metric-card .metric-icon { margin: 0 0 8px 0; align-self: center; }
 .metric-card .metric-label { margin-left: 0 !important; display: flex; align-items: center; gap: 8px; justify-content: center; width: 100%; }
 .metric-card .metric-value { align-self: center; }
-.metric-card .metric-timestamp { align-self: center; }
+.metric-card .metric-timestampUnix { align-self: center; }
 
 .metric-card-disabled, .stat-card { display: flex !important; flex-direction: column; align-items: center; text-align: center; }
 .metric-card-disabled .metric-icon { margin: 0 0 8px 0; align-self: center; }
 .metric-card-disabled .metric-label { margin-left: 0 !important; display: flex; align-items: center; gap: 8px; justify-content: center; width: 100%; }
 .metric-card-disabled .metric-value { align-self: center; }
-.metric-card-disabled .metric-timestamp { align-self: center; }
+.metric-card-disabled .metric-timestampUnix { align-self: center; }
 /* Ensure badges sit nicely when centered */
 .unit-badge { align-self: center; }
 
@@ -527,7 +527,7 @@
     .metric-card, .stat-card { padding: 12px; }
     .metric-label { font-size: 1rem; }
     .metric-value { font-size: 1.25rem; }
-    .metric-timestamp { font-size: 0.72rem; }
+    .metric-timestampUnix { font-size: 0.72rem; }
     .icon { width: 18px; height: 18px; }
   }
   @media (min-width: 421px) and (max-width: 600px) {
@@ -535,7 +535,7 @@
     .metric-card, .metric-card-disabled, .stat-card { padding: 12px; }
     .metric-label { font-size: 1.05rem; }
     .metric-value { font-size: 1.35rem; }
-    .metric-timestamp { font-size: 0.76rem; }
+    .metric-timestampUnix { font-size: 0.76rem; }
   }
 
   </style>
@@ -562,6 +562,8 @@
   <div class="header">
     <h1>@MonitoringHub</h1>
     <p style="font-style: italic; color: #888; font-size: 0.9em;">Environmental sensors & climate insights</p>
+    <div id="nowClock" style="margin-top:6px;color:#9aa0a6;font-size:0.9rem;">Now: --</div>
+    <div id="lastReadingTime" style="margin-top:8px;color:#90caf9;font-size:1.0rem;font-weight:600;">Last reading time: --</div>
     <!-- Connection status removed - using sensor status instead -->
   </div>
 
@@ -588,13 +590,11 @@
           <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Temperature" role="img"><path fill="currentColor" d="M14 14.76V5a2 2 0 10-4 0v9.76A4 4 0 1014 14.76zM12 2a3 3 0 013 3v9.18a5 5 0 11-6 0V5a3 3 0 013-3z"/></svg></div>
           <div class="metric-label">Temperature <span class="unit-badge">°C</span></div>
           <div class="metric-value" id="currentTemp">--°C</div>
-          <div class="metric-timestamp" id="tempTimestamp">--</div>
         </div>
 <div class="metric-card glass">
           <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Pressure" role="img"><path fill="currentColor" d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm1 5h-2v6l5 3 1-1.73-4-2.27z"/></svg></div>
           <div class="metric-label">Pressure <span class="unit-badge">hPa</span></div>
           <div class="metric-value" id="currentPressure">-- hPa</div>
-          <div class="metric-timestamp" id="pressureTimestamp">--</div>
         </div>
       </div>
 
@@ -604,15 +604,13 @@
           <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Humidity" role="img"><path fill="currentColor" d="M12 2s7 7.58 7 12a7 7 0 11-14 0c0-4.42 7-12 7-12z"/></svg></div>
           <div class="metric-label">Humidity <span class="unit-badge">%</span></div>
           <div class="metric-value" id="currentHumidity">--%</div>
-          <div class="metric-timestamp" id="humidityTimestamp">--</div>
         </div>
 <div class="metric-card glass">
           <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="CO2" role="img"><path fill="currentColor" d="M7 7h3v3H7zm7 0h3v3h-3zM7 14h10v3H7z"/></svg></div>
           <div class="metric-label">CO₂ <span class="unit-badge">ppm</span></div>
           <div class="metric-value" id="currentCO2">-- ppm</div>
-          <div class="metric-timestamp" id="airTimestamp">--</div>
-          <div class="metric-timestamp" id="airNH3">NH₃: -- ppm</div>
-          <div class="metric-timestamp" id="airAlcohol">Alcohol: -- ppm</div>
+          <div class="metric-timestampUnix" id="airNH3">NH₃: -- ppm</div>
+          <div class="metric-timestampUnix" id="airAlcohol">Alcohol: -- ppm</div>
           <div class="stat-subtitle" id="airQualityStatus" style="margin-top:6px; font-weight:600;">--</div>
         </div>
       </div>
@@ -691,7 +689,7 @@
     let currentData = {
       temperature: null,
       humidity: null,
-      timestamp: null,
+      timestampUnix: null,
       humidityTimestamp: null,
       sensorType: null,
       stats: { minimum: null, maximum: null, average: null, count: 0, min_timestamp: null, max_timestamp: null },
@@ -717,6 +715,29 @@
     let historyHumidityChart = null;
 
     // Utility functions
+
+    // Timezone-aware formatting (Europe/Bucharest) using epoch seconds when available
+    const BUCHAREST_FMT = new Intl.DateTimeFormat('ro-RO', { timeZone: 'Europe/Bucharest', dateStyle: 'short', timeStyle: 'medium' });
+    function formatBucharest(ts) {
+      if (ts === null || ts === undefined) return 'No data';
+      let d;
+      if (typeof ts === 'number') {
+        d = new Date(ts * 1000);
+      } else {
+        let str = String(ts);
+        if (str.indexOf('T') === -1 && str.indexOf(' ') > -1) str = str.replace(' ', 'T');
+        if (!(/[zZ]|[\+\-]\d{2}:?\d{2}$/.test(str))) str += 'Z';
+        d = new Date(str);
+      }
+      if (isNaN(d.getTime())) return 'No data';
+      const opts = { timeZone: 'Europe/Bucharest' };
+      const dateStr = new Intl.DateTimeFormat('ro-RO', { day:'2-digit', month:'2-digit', year:'numeric', ...opts }).format(d);
+      const timeStr = new Intl.DateTimeFormat('ro-RO', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false, ...opts }).format(d);
+      const tzMinutes = new Date(d.toLocaleString('en-US', opts)).getTimezoneOffset();
+      const tzAbbr = (tzMinutes <= -180) ? 'EEST' : 'EET';
+      return `${dateStr}, ${timeStr} ${tzAbbr}`;
+    }
+
     function formatTemperature(value) {
       if (value === null || value === undefined) return '--°C';
       return parseFloat(value).toFixed(1) + '°C';
@@ -767,20 +788,6 @@ function formatHumidity(value) {
       return parseFloat(value).toFixed(1) + '%';
     }
 
-    function formatTimestamp(timestamp) {
-      if (!timestamp) return 'No data';
-      let d = new Date(timestamp);
-      if (isNaN(d.getTime())) {
-        // normalize: add 'Z' if missing timezone; ensure 'T' separator
-        let ts = String(timestamp);
-        if (ts.indexOf('T') === -1 && ts.indexOf(' ') > -1) ts = ts.replace(' ', 'T');
-        if (!/[zZ]|[\+\-]\d{2}:?\d{2}$/.test(ts)) ts += 'Z';
-        d = new Date(ts);
-      }
-      if (isNaN(d.getTime())) return 'No data';
-      return d.toLocaleString();
-    }
-
     function showError(message) {
       const errorDiv = document.getElementById('errorDisplay');
       errorDiv.innerHTML = '<div class="error"><strong>Error:</strong> ' + message + '</div>';
@@ -813,29 +820,50 @@ function formatHumidity(value) {
         currentData.connected = false;
       }
     }
+    function updateUnifiedTimestamp() {
+      const lastReadingEl = document.getElementById('lastReadingTime');
+      
+      // Find the most recent timestamp from all sensors
+      let latestTimestamp = null;
+      const timestamps = [
+        currentData.timestamp,
+        currentData.humidityTimestamp, 
+        currentData.pressureTimestamp,
+        currentData.airTimestamp
+      ].filter(ts => ts != null);
+      
+      if (timestamps.length > 0) {
+        latestTimestamp = Math.max(...timestamps);
+        lastReadingEl.textContent = 'Last reading time: ' + formatBucharest(latestTimestamp);
+      } else {
+        lastReadingEl.textContent = 'Last reading time: --';
+      }
+    }
+
 
     function updateDisplay() {
       console.log('Updating display with currentData:', currentData);
 
+      // Update unified timestamp in header
+      updateUnifiedTimestamp();
+
       // Update main temperature display
       var elT = document.getElementById('currentTemp'); elT.textContent = formatTemperature(currentData.temperature); setSeverity(elT, severityFor('temp', currentData.temperature));
-      document.getElementById('tempTimestamp').textContent = formatTimestamp(currentData.timestamp);
 
       // Update main humidity display
       var elH = document.getElementById('currentHumidity'); elH.textContent = formatHumidity(currentData.humidity); setSeverity(elH, severityFor('humidity', currentData.humidity));
-      document.getElementById('humidityTimestamp').textContent = formatTimestamp(currentData.humidityTimestamp);
 
       // Update pressure display
       const pEl = document.getElementById('currentPressure');
       if (pEl) { pEl.textContent = formatPressure(currentData.pressure_hpa); setSeverity(pEl, severityFor('pressure', currentData.pressure_hpa)); }
       const ptEl = document.getElementById('pressureTimestamp');
-      if (ptEl) ptEl.textContent = formatTimestamp(currentData.pressureTimestamp);
+      if (ptEl) ptEl.textContent = 'Last reading: ' + formatBucharest(currentData.pressureTimestamp);
 
       // Update air quality display
       const co2El = document.getElementById('currentCO2');
       if (co2El) { co2El.textContent = formatCO2(currentData.co2_ppm); setSeverity(co2El, severityFor('co2', currentData.co2_ppm)); }
       const airTsEl = document.getElementById('airTimestamp');
-      if (airTsEl) airTsEl.textContent = formatTimestamp(currentData.airTimestamp);
+      
       const airStatusEl = document.getElementById('airQualityStatus');
       if (airStatusEl) {
         const status = (currentData.airStatus || '--').toString();
@@ -863,14 +891,14 @@ function formatHumidity(value) {
       // Update humidity stats
       var miH = document.getElementById('minHumidity'); if (miH) { miH.textContent = formatHumidity(currentData.humidityStats.minimum); setSeverity(miH, severityFor('humidity', currentData.humidityStats.minimum)); }
       var mxH = document.getElementById('maxHumidity'); if (mxH) { mxH.textContent = formatHumidity(currentData.humidityStats.maximum); setSeverity(mxH, severityFor('humidity', currentData.humidityStats.maximum)); }
-      var mtts = document.getElementById('minTempTs'); if (mtts) mtts.textContent = formatTimestamp(currentData.stats.min_timestamp);
-      var mxts = document.getElementById('maxTempTs'); if (mxts) mxts.textContent = formatTimestamp(currentData.stats.max_timestamp);
-      var mhts = document.getElementById('minHumidityTs'); if (mhts) mhts.textContent = formatTimestamp(currentData.humidityStats.min_timestamp);
-      var mHxTs = document.getElementById('maxHumidityTs'); if (mHxTs) mHxTs.textContent = formatTimestamp(currentData.humidityStats.max_timestamp);
-      var mpts = document.getElementById('minPressureTs'); if (mpts) mpts.textContent = formatTimestamp(currentData.pressureStats.min_timestamp);
-      var mpxts = document.getElementById('maxPressureTs'); if (mpxts) mpxts.textContent = formatTimestamp(currentData.pressureStats.max_timestamp);
-      var mcts = document.getElementById('minCO2Ts'); if (mcts) mcts.textContent = formatTimestamp(currentData.airQualityStats.min_timestamp);
-      var mcxts = document.getElementById('maxCO2Ts'); if (mcxts) mcxts.textContent = formatTimestamp(currentData.airQualityStats.max_timestamp);
+      var mtts = document.getElementById('minTempTs'); if (mtts) mtts.textContent = formatBucharest(currentData.stats.min_timestamp);
+      var mxts = document.getElementById('maxTempTs'); if (mxts) mxts.textContent = formatBucharest(currentData.stats.max_timestamp);
+      var mhts = document.getElementById('minHumidityTs'); if (mhts) mhts.textContent = formatBucharest(currentData.humidityStats.min_timestamp);
+      var mHxTs = document.getElementById('maxHumidityTs'); if (mHxTs) mHxTs.textContent = formatBucharest(currentData.humidityStats.max_timestamp);
+      var mpts = document.getElementById('minPressureTs'); if (mpts) mpts.textContent = formatBucharest(currentData.pressureStats.min_timestamp);
+      var mpxts = document.getElementById('maxPressureTs'); if (mpxts) mpxts.textContent = formatBucharest(currentData.pressureStats.max_timestamp);
+      var mcts = document.getElementById('minCO2Ts'); if (mcts) mcts.textContent = formatBucharest(currentData.airQualityStats.min_timestamp);
+      var mcxts = document.getElementById('maxCO2Ts'); if (mcxts) mcxts.textContent = formatBucharest(currentData.airQualityStats.max_timestamp);
 
       // Update pressure stats
       var minP = document.getElementById('minPressure'); if (minP) { minP.textContent = formatPressure(currentData.pressureStats.minimum); setSeverity(minP, severityFor('pressure', currentData.pressureStats.minimum)); }
@@ -892,12 +920,11 @@ function formatHumidity(value) {
       if (!historyChart || currentData.history.length === 0) return;
 
       const sortedHistory = currentData.history.slice().sort(function(a, b) {
-        return new Date(a.timestamp) - new Date(b.timestamp);
+        return a.timestampUnix - b.timestampUnix;
       });
 
       historyChart.data.labels = sortedHistory.map(function(item) {
-        const date = new Date(item.timestamp);
-        return date.toLocaleString();
+        return formatBucharest(item.timestampUnix);
       });
 
       historyChart.data.datasets[0].data = sortedHistory.map(function(item) {
@@ -913,16 +940,16 @@ function formatHumidity(value) {
 
     function updatePressureHistoryChart() {
       if (!window.historyPressureChart || !window.historyPressureChart.data || currentData.pressureHistory.length === 0) return;
-      const sorted = currentData.pressureHistory.slice().sort(function(a,b){ return new Date(a.timestamp) - new Date(b.timestamp); });
-      window.historyPressureChart.data.labels = sorted.map(function(i){ return new Date(i.timestamp).toLocaleString(); });
+      const sorted = currentData.pressureHistory.slice().sort(function(a,b){ return a.timestampUnix - b.timestampUnix; });
+      window.historyPressureChart.data.labels = sorted.map(function(i){ return formatBucharest(i.timestampUnix); });
       window.historyPressureChart.data.datasets[0].data = sorted.map(function(i){ return i.pressureHpa; });
       window.historyPressureChart.update();
     }
 
     function updateCO2HistoryChart() {
       if (!window.historyCO2Chart || !window.historyCO2Chart.data || currentData.airQualityHistory.length === 0) return;
-      const sorted = currentData.airQualityHistory.slice().sort(function(a,b){ return new Date(a.timestamp) - new Date(b.timestamp); });
-      window.historyCO2Chart.data.labels = sorted.map(function(i){ return new Date(i.timestamp).toLocaleString(); });
+      const sorted = currentData.airQualityHistory.slice().sort(function(a,b){ return a.timestampUnix - b.timestampUnix; });
+      window.historyCO2Chart.data.labels = sorted.map(function(i){ return formatBucharest(i.timestampUnix); });
       window.historyCO2Chart.data.datasets[0].data = sorted.map(function(i){ return i.co2Ppm; });
       window.historyCO2Chart.update();
     }
@@ -931,12 +958,11 @@ function formatHumidity(value) {
       if (!historyHumidityChart || currentData.humidityHistory.length === 0) return;
 
       const sortedHistory = currentData.humidityHistory.slice().sort(function(a, b) {
-        return new Date(a.timestamp) - new Date(b.timestamp);
+        return a.timestampUnix - b.timestampUnix;
       });
 
       historyHumidityChart.data.labels = sortedHistory.map(function(item) {
-        const date = new Date(item.timestamp);
-        return date.toLocaleString();
+        return formatBucharest(item.timestampUnix);
       });
 
       historyHumidityChart.data.datasets[0].data = sortedHistory.map(function(item) {
@@ -994,12 +1020,12 @@ function formatHumidity(value) {
       try {
         // Fetch current temperature
         console.log('Fetching current temperature...');
-        const currentResponse = await graphqlQuery('{ currentTemperature { temperatureC timestamp sensorType sensorId } }');
+        const currentResponse = await graphqlQuery('{ currentTemperature { temperatureC timestampUnix sensorType sensorId } }');
 
         if (currentResponse.data && currentResponse.data.currentTemperature) {
           const temp = currentResponse.data.currentTemperature;
           currentData.temperature = temp.temperatureC;
-          currentData.timestamp = temp.timestamp;
+          currentData.timestamp = temp.timestampUnix;
           currentData.sensorType = temp.sensorType;
           console.log('Current temperature loaded:', temp);
         } else {
@@ -1008,12 +1034,12 @@ function formatHumidity(value) {
 
         // Fetch current humidity
         console.log('Fetching current humidity...');
-        const humidityResponse = await graphqlQuery('{ currentHumidity { humidityPercent timestamp } }');
+        const humidityResponse = await graphqlQuery('{ currentHumidity { humidityPercent timestampUnix } }');
 
         if (humidityResponse.data && humidityResponse.data.currentHumidity) {
           const humidity = humidityResponse.data.currentHumidity;
           currentData.humidity = humidity.humidityPercent;
-          currentData.humidityTimestamp = humidity.timestamp;
+          currentData.humidityTimestamp = humidity.timestampUnix;
           console.log('Current humidity loaded:', humidity);
         } else {
           console.log('No current humidity data available');
@@ -1032,6 +1058,7 @@ function formatHumidity(value) {
           };
           console.log('Temperature stats loaded:', currentData.stats);
           updateDisplay();
+      updateUnifiedTimestamp();
         }
 
         // Fetch humidity stats
@@ -1065,6 +1092,7 @@ function formatHumidity(value) {
             };
             console.log('Pressure stats loaded:', currentData.pressureStats);
             updateDisplay();
+      updateUnifiedTimestamp();
           }
         } catch (e) { console.warn('Pressure stats query failed:', e); }
 
@@ -1081,6 +1109,7 @@ function formatHumidity(value) {
             };
             console.log('Air quality stats loaded:', currentData.airQualityStats);
             updateDisplay();
+      updateUnifiedTimestamp();
           }
         } catch (e) { console.warn('Air quality stats query failed:', e); }
 
@@ -1088,7 +1117,7 @@ function formatHumidity(value) {
 
         // Fetch history
         console.log('Fetching temperature history...');
-        const historyResponse = await graphqlQuery('{ temperatureHistory(limit: 50) { temperatureC timestamp sensorId } }');
+        const historyResponse = await graphqlQuery('{ temperatureHistory(limit: 5000) { temperatureC timestampUnix sensorId } }');
 
         if (historyResponse.data && historyResponse.data.temperatureHistory) {
           currentData.history = historyResponse.data.temperatureHistory;
@@ -1098,41 +1127,41 @@ function formatHumidity(value) {
 
         // Fetch humidity history
         console.log('Fetching humidity history...');
-        const humidityHistoryResponse = await graphqlQuery('{ humidityHistory(limit: 50) { humidityPercent timestamp sensorId } }');
+        const humidityHistoryResponse = await graphqlQuery('{ humidityHistory(limit: 5000) { humidityPercent timestampUnix sensorId } }');
 
         // Fetch current pressure
         console.log('Fetching current pressure...');
-        const curP = await graphqlQuery('{ currentPressure { pressureHpa timestamp } }');
+        const curP = await graphqlQuery('{ currentPressure { pressureHpa timestampUnix } }');
         if (curP.data && curP.data.currentPressure) {
           currentData.pressure_hpa = curP.data.currentPressure.pressureHpa;
-          currentData.pressureTimestamp = curP.data.currentPressure.timestamp;
+          currentData.pressureTimestamp = curP.data.currentPressure.timestampUnix;
         }
 
         // Fetch pressure history
         console.log('Fetching pressure history...');
-        const pHist = await graphqlQuery('{ pressureHistory(limit: 50) { pressureHpa timestamp } }');
+        const pHist = await graphqlQuery('{ pressureHistory(limit: 5000) { pressureHpa timestampUnix } }');
         if (pHist.data && pHist.data.pressureHistory) {
-          currentData.pressureHistory = pHist.data.pressureHistory.map(function(r){ return { pressureHpa: r.pressureHpa, timestamp: r.timestamp }; });
+          currentData.pressureHistory = pHist.data.pressureHistory.map(function(r){ return { pressureHpa: r.pressureHpa, timestampUnix: r.timestampUnix }; });
           updatePressureHistoryChart();
         }
 
         // Fetch current AQ
         console.log('Fetching current air quality...');
-        const curAQ = await graphqlQuery('{ currentAirQuality { co2Ppm nh3Ppm alcoholPpm aqi status timestamp } }');
+        const curAQ = await graphqlQuery('{ currentAirQuality { co2Ppm nh3Ppm alcoholPpm aqi status timestampUnix } }');
         if (curAQ.data && curAQ.data.currentAirQuality) {
           const aq = curAQ.data.currentAirQuality;
           currentData.co2_ppm = aq.co2Ppm;
           currentData.nh3_ppm = aq.nh3Ppm;
           currentData.alcohol_ppm = aq.alcoholPpm;
           currentData.airStatus = aq.status;
-          currentData.airTimestamp = aq.timestamp;
+          currentData.airTimestamp = aq.timestampUnix;
         }
 
         // Fetch AQ history
         console.log('Fetching air quality history...');
-        const aqHist = await graphqlQuery('{ airQualityHistory(limit: 50) { co2Ppm nh3Ppm alcoholPpm aqi status timestamp } }');
+        const aqHist = await graphqlQuery('{ airQualityHistory(limit: 5000) { co2Ppm nh3Ppm alcoholPpm aqi status timestampUnix } }');
         if (aqHist.data && aqHist.data.airQualityHistory) {
-          currentData.airQualityHistory = aqHist.data.airQualityHistory.map(function(r){ return { co2Ppm: r.co2Ppm, timestamp: r.timestamp }; });
+          currentData.airQualityHistory = aqHist.data.airQualityHistory.map(function(r){ return { co2Ppm: r.co2Ppm, timestampUnix: r.timestampUnix }; });
           updateCO2HistoryChart();
         }
 
@@ -1158,6 +1187,7 @@ function formatHumidity(value) {
 
         console.log('Initial data fetch complete, updating display...');
         updateDisplay();
+      updateUnifiedTimestamp();
 
       } catch (error) {
         console.error('Failed to fetch initial data:', error);
@@ -1194,44 +1224,44 @@ function formatHumidity(value) {
 
               // Update current data
               currentData.temperature = tempData.temperature_c;
-              currentData.timestamp = tempData.timestamp_iso;
+              currentData.timestamp = tempData.timestamp;
               currentData.sensorType = tempData.sensor_type;
 
               // Update simple stats
               if (currentData.stats.minimum == null || tempData.temperature_c < currentData.stats.minimum) {
-                currentData.stats.minimum = tempData.temperature_c; currentData.stats.min_timestamp = tempData.timestamp_iso;
+                currentData.stats.minimum = tempData.temperature_c; currentData.stats.min_timestamp = tempData.timestamp;
               }
               if (currentData.stats.maximum == null || tempData.temperature_c > currentData.stats.maximum) {
-                currentData.stats.maximum = tempData.temperature_c; currentData.stats.max_timestamp = tempData.timestamp_iso;
+                currentData.stats.maximum = tempData.temperature_c; currentData.stats.max_timestamp = tempData.timestamp;
               }
               currentData.stats.count++;
 
               // Create reading object for charts
               const reading = {
                 temperatureC: tempData.temperature_c,
-                timestamp: tempData.timestamp_iso,
+                timestampUnix: tempData.timestamp,
                 sensorId: tempData.sensor_id
               };
 
-              // Add to history (keep last 50)
+              // Add to history (keep full)
               currentData.history.push(reading);
-              if (currentData.history.length > 50) {
-                currentData.history = currentData.history.slice(-50);
-              }
+              
 
               // Update display and charts
               updateDisplay();
+      updateUnifiedTimestamp();
 
             } else if (data.type === 'pressure_update' && data.data) {
               const p = data.data;
               currentData.pressure_hpa = p.pressure_hpa;
-              currentData.pressureTimestamp = p.timestamp_iso;
+              currentData.pressureTimestamp = p.timestamp;
               if (p.pressure_hpa != null) {
-                if (currentData.pressureStats.minimum == null || p.pressure_hpa < currentData.pressureStats.minimum) { currentData.pressureStats.minimum = p.pressure_hpa; currentData.pressureStats.min_timestamp = p.timestamp_iso; }
-                if (currentData.pressureStats.maximum == null || p.pressure_hpa > currentData.pressureStats.maximum) { currentData.pressureStats.maximum = p.pressure_hpa; currentData.pressureStats.max_timestamp = p.timestamp_iso; }
+                if (currentData.pressureStats.minimum == null || p.pressure_hpa < currentData.pressureStats.minimum) { currentData.pressureStats.minimum = p.pressure_hpa; currentData.pressureStats.min_timestamp = p.timestamp; }
+                if (currentData.pressureStats.maximum == null || p.pressure_hpa > currentData.pressureStats.maximum) { currentData.pressureStats.maximum = p.pressure_hpa; currentData.pressureStats.max_timestamp = p.timestamp; }
                 currentData.pressureStats.count = (currentData.pressureStats.count || 0) + 1;
               }
               updateDisplay();
+      updateUnifiedTimestamp();
 
             } else if (data.type === 'air_quality_update' && data.data) {
               const aq = data.data;
@@ -1239,15 +1269,16 @@ function formatHumidity(value) {
               currentData.nh3_ppm = aq.nh3_ppm;
               currentData.alcohol_ppm = aq.alcohol_ppm;
               currentData.airStatus = aq.status;
-              currentData.airTimestamp = aq.timestamp_iso;
+              currentData.airTimestamp = aq.timestamp;
               if (aq.co2_ppm != null) {
-                if (currentData.airQualityStats.minimum == null || aq.co2_ppm < currentData.airQualityStats.minimum) { currentData.airQualityStats.minimum = aq.co2_ppm; currentData.airQualityStats.min_timestamp = aq.timestamp_iso; }
-                if (currentData.airQualityStats.maximum == null || aq.co2_ppm > currentData.airQualityStats.maximum) { currentData.airQualityStats.maximum = aq.co2_ppm; currentData.airQualityStats.max_timestamp = aq.timestamp_iso; }
+                if (currentData.airQualityStats.minimum == null || aq.co2_ppm < currentData.airQualityStats.minimum) { currentData.airQualityStats.minimum = aq.co2_ppm; currentData.airQualityStats.min_timestamp = aq.timestamp; }
+                if (currentData.airQualityStats.maximum == null || aq.co2_ppm > currentData.airQualityStats.maximum) { currentData.airQualityStats.maximum = aq.co2_ppm; currentData.airQualityStats.max_timestamp = aq.timestamp; }
                 currentData.airQualityStats.count = (currentData.airQualityStats.count || 0) + 1;
               }
-              currentData.airQualityHistory.push({ co2Ppm: aq.co2_ppm, timestamp: aq.timestamp_iso });
-              if (currentData.airQualityHistory.length > 50) { currentData.airQualityHistory = currentData.airQualityHistory.slice(-50); }
+              currentData.airQualityHistory.push({ co2Ppm: aq.co2_ppm, timestampUnix: aq.timestamp });
+              
               updateDisplay();
+      updateUnifiedTimestamp();
 
             } else if (data.type === 'humidity_update' && data.data) {
               const humidityData = data.data;
@@ -1255,32 +1286,31 @@ function formatHumidity(value) {
 
               // Update current humidity data
               currentData.humidity = humidityData.humidity_percent;
-              currentData.humidityTimestamp = humidityData.timestamp_iso;
+              currentData.humidityTimestamp = humidityData.timestamp;
 
               // Update simple humidity stats
               if (currentData.humidityStats.minimum == null || humidityData.humidity_percent < currentData.humidityStats.minimum) {
-                currentData.humidityStats.minimum = humidityData.humidity_percent; currentData.humidityStats.min_timestamp = humidityData.timestamp_iso;
+                currentData.humidityStats.minimum = humidityData.humidity_percent; currentData.humidityStats.min_timestamp = humidityData.timestamp;
               }
               if (currentData.humidityStats.maximum == null || humidityData.humidity_percent > currentData.humidityStats.maximum) {
-                currentData.humidityStats.maximum = humidityData.humidity_percent; currentData.humidityStats.max_timestamp = humidityData.timestamp_iso;
+                currentData.humidityStats.maximum = humidityData.humidity_percent; currentData.humidityStats.max_timestamp = humidityData.timestamp;
               }
               currentData.humidityStats.count++;
 
               // Create reading object for charts
               const reading = {
                 humidityPercent: humidityData.humidity_percent,
-                timestamp: humidityData.timestamp_iso,
+                timestampUnix: humidityData.timestamp,
                 sensorId: humidityData.sensor_id
               };
 
-              // Add to history (keep last 50)
+              // Add to history (keep full)
               currentData.humidityHistory.push(reading);
-              if (currentData.humidityHistory.length > 50) {
-                currentData.humidityHistory = currentData.humidityHistory.slice(-50);
-              }
+              
 
               // Update display and charts
               updateDisplay();
+      updateUnifiedTimestamp();
 
             }
 
@@ -1307,11 +1337,19 @@ function formatHumidity(value) {
         console.error('Failed to create SSE connection:', error);
         updateSensorStatus('offline');
         updateDisplay();
+      updateUnifiedTimestamp();
       }
     }
 
     // Initialize the application
-    async function initialize() {
+    
+    function updateNowClock() {
+      const el = document.getElementById('nowClock');
+      if (!el) return;
+      // Pass epoch seconds to formatter
+      el.textContent = "Now: " + formatBucharest(Math.floor(Date.now()/1000));
+    }
+async function initialize() {
       console.log('Initializing application...');
       try {
         // Initialize charts first
@@ -1526,17 +1564,17 @@ function formatHumidity(value) {
       if (kind === 'co2' && currentData.airQualityHistory && currentData.airQualityHistory.length) return;
       try {
         if (kind === 'temp') {
-          const r = await graphqlQuery('{ temperatureHistory(limit: 50) { temperatureC timestamp } }');
+          const r = await graphqlQuery('{ temperatureHistory(limit: 5000) { temperatureC timestampUnix } }');
           if (r.data && r.data.temperatureHistory) currentData.history = r.data.temperatureHistory;
         } else if (kind === 'humidity') {
-          const r = await graphqlQuery('{ humidityHistory(limit: 50) { humidityPercent timestamp } }');
+          const r = await graphqlQuery('{ humidityHistory(limit: 5000) { humidityPercent timestampUnix } }');
           if (r.data && r.data.humidityHistory) currentData.humidityHistory = r.data.humidityHistory;
         } else if (kind === 'pressure') {
-          const r = await graphqlQuery('{ pressureHistory(limit: 50) { pressureHpa timestamp } }');
-          if (r.data && r.data.pressureHistory) currentData.pressureHistory = r.data.pressureHistory.map(i=>({pressureHpa:i.pressureHpa,timestamp:i.timestamp}));
+          const r = await graphqlQuery('{ pressureHistory(limit: 5000) { pressureHpa timestampUnix } }');
+          if (r.data && r.data.pressureHistory) currentData.pressureHistory = r.data.pressureHistory.map(i=>({pressureHpa:i.pressureHpa,timestampUnix:i.timestampUnix}));
         } else if (kind === 'co2') {
-          const r = await graphqlQuery('{ airQualityHistory(limit: 50) { co2Ppm timestamp } }');
-          if (r.data && r.data.airQualityHistory) currentData.airQualityHistory = r.data.airQualityHistory.map(i=>({co2Ppm:i.co2Ppm,timestamp:i.timestamp}));
+          const r = await graphqlQuery('{ airQualityHistory(limit: 5000) { co2Ppm timestampUnix } }');
+          if (r.data && r.data.airQualityHistory) currentData.airQualityHistory = r.data.airQualityHistory.map(i=>({co2Ppm:i.co2Ppm,timestampUnix:i.timestampUnix}));
         }
       } catch (e) { console.warn('ensureHistory failed for', kind, e); }
     }
@@ -1544,26 +1582,26 @@ function formatHumidity(value) {
     function chartDataFor(kind) {
       let labels = [], data = [], c = chartColors[kind] || {border:'#90caf9', bg:'rgba(144,202,249,0.15)'};
       if (kind === 'temp') {
-        const arr = (currentData.history||[]).slice().sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp));
-        labels = arr.map(i=>new Date(i.timestamp).toLocaleString());
+        const arr = (currentData.history||[]).slice().sort((a,b)=>a.timestampUnix - b.timestampUnix); // Show all history data
+        labels = arr.map(i=>formatBucharest(i.timestampUnix));
         data = arr.map(i=>i.temperatureC);
         return { labels, datasets: [{ label: 'Temperature (°C)', data, borderColor: c.border, backgroundColor: c.bg, borderWidth: 2, fill: true, pointRadius: 1 }] };
       }
       if (kind === 'humidity') {
-        const arr = (currentData.humidityHistory||[]).slice().sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp));
-        labels = arr.map(i=>new Date(i.timestamp).toLocaleString());
+        const arr = (currentData.humidityHistory||[]).slice().sort((a,b)=>a.timestampUnix - b.timestampUnix); // Show all history data
+        labels = arr.map(i=>formatBucharest(i.timestampUnix));
         data = arr.map(i=>i.humidityPercent);
         return { labels, datasets: [{ label: 'Humidity (%)', data, borderColor: c.border, backgroundColor: c.bg, borderWidth: 2, fill: true, pointRadius: 1 }] };
       }
       if (kind === 'pressure') {
-        const arr = (currentData.pressureHistory||[]).slice().sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp));
-        labels = arr.map(i=>new Date(i.timestamp).toLocaleString());
+        const arr = (currentData.pressureHistory||[]).slice().sort((a,b)=>a.timestampUnix - b.timestampUnix); // Show all history data
+        labels = arr.map(i=>formatBucharest(i.timestampUnix));
         data = arr.map(i=>i.pressureHpa);
         return { labels, datasets: [{ label: 'Pressure (hPa)', data, borderColor: c.border, backgroundColor: c.bg, borderWidth: 2, fill: true, pointRadius: 1 }] };
       }
       if (kind === 'co2') {
-        const arr = (currentData.airQualityHistory||[]).slice().sort((a,b)=>new Date(a.timestamp)-new Date(b.timestamp));
-        labels = arr.map(i=>new Date(i.timestamp).toLocaleString());
+        const arr = (currentData.airQualityHistory||[]).slice().sort((a,b)=>a.timestampUnix - b.timestampUnix); // Show all history data
+        labels = arr.map(i=>formatBucharest(i.timestampUnix));
         data = arr.map(i=>i.co2Ppm);
         return { labels, datasets: [{ label: 'CO₂ (ppm)', data, borderColor: c.border, backgroundColor: c.bg, borderWidth: 2, fill: true, pointRadius: 1 }] };
       }
@@ -1634,5 +1672,16 @@ function formatHumidity(value) {
     // === End popup charts ===
 
   </script>
+  <script>
+  function updateNowClockStandalone() {
+    const el = document.getElementById('nowClock');
+    if (el) el.textContent = 'Now: ' + formatBucharest(Math.floor(Date.now()/1000));
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    updateNowClockStandalone();
+    setInterval(updateNowClockStandalone, 1000);
+  });
+</script>
+
 </body>
 </html>
