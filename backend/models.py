@@ -3,6 +3,7 @@ SQLAlchemy models for aMonitoringHub application.
 """
 
 from datetime import datetime, timezone, timedelta
+import time
 from typing import List, Optional, Dict, Any
 from sqlalchemy import create_engine, Column, Integer, Float, DateTime, String, Index
 from sqlalchemy.ext.declarative import declarative_base
@@ -567,6 +568,175 @@ class DatabaseManager:
         except Exception as e:
             self.logger.error(f"Error getting AQ statistics: {e}")
             return {'count': 0, 'average': 0, 'minimum': 0, 'maximum': 0, 'hours_back': hours_back, 'min_timestamp': min_ts, 'max_timestamp': max_ts}
+
+    # Time-based aggregation methods for charts
+    def get_readings_by_year(self, year: int, sensor_id: str = None) -> List[TemperatureReading]:
+        """Get temperature readings for a specific year."""
+        try:
+            with self.get_session() as session:
+                start_time = datetime(year, 1, 1, tzinfo=timezone.utc)
+                end_time = datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+                
+                query = session.query(TemperatureReading).filter(
+                    TemperatureReading.timestamp >= start_time,
+                    TemperatureReading.timestamp < end_time
+                )
+                
+                if sensor_id:
+                    query = query.filter(TemperatureReading.sensor_id == sensor_id)
+                
+                return query.order_by(TemperatureReading.timestamp.desc()).all()
+        except Exception as e:
+            self.logger.error(f"Error getting readings for year {year}: {e}")
+            return []
+    
+    def get_readings_by_month(self, year: int, month: int, sensor_id: str = None) -> List[TemperatureReading]:
+        """Get temperature readings for a specific month."""
+        try:
+            with self.get_session() as session:
+                start_time = datetime(year, month, 1, tzinfo=timezone.utc)
+                if month == 12:
+                    end_time = datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+                else:
+                    end_time = datetime(year, month + 1, 1, tzinfo=timezone.utc)
+                
+                query = session.query(TemperatureReading).filter(
+                    TemperatureReading.timestamp >= start_time,
+                    TemperatureReading.timestamp < end_time
+                )
+                
+                if sensor_id:
+                    query = query.filter(TemperatureReading.sensor_id == sensor_id)
+                
+                return query.order_by(TemperatureReading.timestamp.desc()).all()
+        except Exception as e:
+            self.logger.error(f"Error getting readings for {year}-{month}: {e}")
+            return []
+    
+    def get_readings_by_day(self, year: int, month: int, day: int, sensor_id: str = None) -> List[TemperatureReading]:
+        """Get temperature readings for a specific day."""
+        try:
+            with self.get_session() as session:
+                start_time = datetime(year, month, day, tzinfo=timezone.utc)
+                end_time = start_time + timedelta(days=1)
+                
+                query = session.query(TemperatureReading).filter(
+                    TemperatureReading.timestamp >= start_time,
+                    TemperatureReading.timestamp < end_time
+                )
+                
+                if sensor_id:
+                    query = query.filter(TemperatureReading.sensor_id == sensor_id)
+                
+                return query.order_by(TemperatureReading.timestamp.desc()).all()
+        except Exception as e:
+            self.logger.error(f"Error getting readings for {year}-{month}-{day}: {e}")
+            return []
+    
+    def get_yearly_statistics(self, year: int, sensor_id: str = None) -> Dict[str, Any]:
+        """Get temperature statistics for a specific year."""
+        try:
+            with self.get_session() as session:
+                start_time = datetime(year, 1, 1, tzinfo=timezone.utc)
+                end_time = datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+                
+                query = session.query(
+                    func.count(TemperatureReading.id).label("count"),
+                    func.avg(TemperatureReading.temperature_c).label("avg"),
+                    func.min(TemperatureReading.temperature_c).label("min"),
+                    func.max(TemperatureReading.temperature_c).label("max")
+                ).filter(
+                    TemperatureReading.timestamp >= start_time,
+                    TemperatureReading.timestamp < end_time
+                )
+                
+                if sensor_id:
+                    query = query.filter(TemperatureReading.sensor_id == sensor_id)
+                
+                result = query.first()
+                
+                return {
+                    "count": result.count or 0,
+                    "average": round(result.avg or 0, 2),
+                    "minimum": result.min or 0,
+                    "maximum": result.max or 0,
+                    "year": year
+                }
+        except Exception as e:
+            self.logger.error(f"Error getting yearly statistics for {year}: {e}")
+            return {"count": 0, "average": 0, "minimum": 0, "maximum": 0, "year": year}
+    
+    def get_monthly_statistics(self, year: int, month: int, sensor_id: str = None) -> Dict[str, Any]:
+        """Get temperature statistics for a specific month."""
+        try:
+            with self.get_session() as session:
+                start_time = datetime(year, month, 1, tzinfo=timezone.utc)
+                if month == 12:
+                    end_time = datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+                else:
+                    end_time = datetime(year, month + 1, 1, tzinfo=timezone.utc)
+                
+                query = session.query(
+                    func.count(TemperatureReading.id).label("count"),
+                    func.avg(TemperatureReading.temperature_c).label("avg"),
+                    func.min(TemperatureReading.temperature_c).label("min"),
+                    func.max(TemperatureReading.temperature_c).label("max")
+                ).filter(
+                    TemperatureReading.timestamp >= start_time,
+                    TemperatureReading.timestamp < end_time
+                )
+                
+                if sensor_id:
+                    query = query.filter(TemperatureReading.sensor_id == sensor_id)
+                
+                result = query.first()
+                
+                return {
+                    "count": result.count or 0,
+                    "average": round(result.avg or 0, 2),
+                    "minimum": result.min or 0,
+                    "maximum": result.max or 0,
+                    "year": year,
+                    "month": month
+                }
+        except Exception as e:
+            self.logger.error(f"Error getting monthly statistics for {year}-{month}: {e}")
+            return {"count": 0, "average": 0, "minimum": 0, "maximum": 0, "year": year, "month": month}
+    
+    def get_daily_statistics(self, year: int, month: int, day: int, sensor_id: str = None) -> Dict[str, Any]:
+        """Get temperature statistics for a specific day."""
+        try:
+            with self.get_session() as session:
+                start_time = datetime(year, month, day, tzinfo=timezone.utc)
+                end_time = start_time + timedelta(days=1)
+                
+                query = session.query(
+                    func.count(TemperatureReading.id).label("count"),
+                    func.avg(TemperatureReading.temperature_c).label("avg"),
+                    func.min(TemperatureReading.temperature_c).label("min"),
+                    func.max(TemperatureReading.temperature_c).label("max")
+                ).filter(
+                    TemperatureReading.timestamp >= start_time,
+                    TemperatureReading.timestamp < end_time
+                )
+                
+                if sensor_id:
+                    query = query.filter(TemperatureReading.sensor_id == sensor_id)
+                
+                result = query.first()
+                
+                return {
+                    "count": result.count or 0,
+                    "average": round(result.avg or 0, 2),
+                    "minimum": result.min or 0,
+                    "maximum": result.max or 0,
+                    "year": year,
+                    "month": month,
+                    "day": day
+                }
+        except Exception as e:
+            self.logger.error(f"Error getting daily statistics for {year}-{month}-{day}: {e}")
+            return {"count": 0, "average": 0, "minimum": 0, "maximum": 0, "year": year, "month": month, "day": day}
 
 # Global database instance
 

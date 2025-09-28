@@ -96,7 +96,31 @@ temperature_sensor = None
 scheduler = None
 usb_reader = None
 sse_clients = Queue()
-last_db_store = time.time()  # Track when we last stored to DB
+
+# Configurable throttling system
+THROTTLE_INTERVAL = 3600  # Default: 1 hour in seconds
+last_throttle_time = 0    # Global throttle timestamp
+
+def should_throttle():
+    """Check if we should throttle based on global interval setting"""
+    global last_throttle_time
+    current_time = time.time()
+    return current_time - last_throttle_time < THROTTLE_INTERVAL
+
+def update_throttle_time():
+    """Update the global throttle timestamp"""
+    global last_throttle_time
+    last_throttle_time = time.time()
+
+def get_throttle_interval():
+    """Get the current throttle interval"""
+    return THROTTLE_INTERVAL
+
+def set_throttle_interval(seconds):
+    """Set the throttle interval (for configuration)"""
+    global THROTTLE_INTERVAL
+    THROTTLE_INTERVAL = max(1, int(seconds))  # Minimum 1 second
+
 
 
 # GraphQL Types (same as before)
@@ -193,6 +217,32 @@ class HealthStatus(ObjectType):
     recent_readings = Int()
 
 
+# Time-based Statistics Types
+class YearlyStatistics(ObjectType):
+    count = Int()
+    average = Float()
+    minimum = Float()
+    maximum = Float()
+    year = Int()
+
+class MonthlyStatistics(ObjectType):
+    count = Int()
+    average = Float()
+    minimum = Float()
+    maximum = Float()
+    year = Int()
+    month = Int()
+
+class DailyStatistics(ObjectType):
+    count = Int()
+    average = Float()
+    minimum = Float()
+    maximum = Float()
+    year = Int()
+    month = Int()
+    day = Int()
+
+
 # GraphQL Queries
 class Query(ObjectType):
     health = Field(HealthStatus)
@@ -200,6 +250,9 @@ class Query(ObjectType):
     temperature_history = GrapheneList(
         TemperatureReading,
         range=String(default_value="daily"),
+        year=Int(),
+        month=Int(),
+        day=Int(),
         limit=Int(default_value=1000)
     )
     temperature_statistics = Field(
@@ -213,6 +266,9 @@ class Query(ObjectType):
     humidity_history = GrapheneList(
         HumidityReading,
         range=String(default_value="daily"),
+        year=Int(),
+        month=Int(),
+        day=Int(),
         limit=Int(default_value=1000)
     )
     humidity_statistics = Field(
@@ -226,6 +282,9 @@ class Query(ObjectType):
     pressure_history = GrapheneList(
         PressureReading,
         range=String(default_value="daily"),
+        year=Int(),
+        month=Int(),
+        day=Int(),
         limit=Int(default_value=1000)
     )
     pressure_statistics = Field(
@@ -238,11 +297,45 @@ class Query(ObjectType):
     air_quality_history = GrapheneList(
         AirQualityReading,
         range=String(default_value="daily"),
+        year=Int(),
+        month=Int(),
+        day=Int(),
         limit=Int(default_value=1000)
     )
     air_quality_statistics = Field(
         AirQualityStatistics,
         hours=Int(default_value=24)
+    )
+    # Time-based statistics queries
+    temperature_history_by_year = GrapheneList(
+        TemperatureReading,
+        year=Int(required=True)
+    )
+    temperature_history_by_month = GrapheneList(
+        TemperatureReading,
+        year=Int(required=True),
+        month=Int(required=True)
+    )
+    temperature_history_by_day = GrapheneList(
+        TemperatureReading,
+        year=Int(required=True),
+        month=Int(required=True),
+        day=Int(required=True)
+    )
+    yearly_statistics = Field(
+        YearlyStatistics,
+        year=Int(required=True)
+    )
+    monthly_statistics = Field(
+        MonthlyStatistics,
+        year=Int(required=True),
+        month=Int(required=True)
+    )
+    daily_statistics = Field(
+        DailyStatistics,
+        year=Int(required=True),
+        month=Int(required=True),
+        day=Int(required=True)
     )
 
     def resolve_health(self, info):
@@ -291,11 +384,18 @@ class Query(ObjectType):
             logger.error(f"Error getting current temperature: {e}")
             return None
 
-    def resolve_temperature_history(self, info, range="daily", limit=1000):
+    def resolve_temperature_history(self, info, range="daily", limit=1000, year=None, month=None, day=None):
         try:
             limit = min(limit, 5000)
-            
-            if range == "daily":
+            # Handle time-based queries first
+            if year is not None:
+                if month is not None and day is not None:
+                    readings = db.get_readings_by_day(year, month, day)
+                elif month is not None:
+                    readings = db.get_readings_by_month(year, month)
+                else:
+                    readings = db.get_readings_by_year(year)
+                readings = db.get_daily_readings(days_back=1)
                 readings = db.get_daily_readings(days_back=1)
             elif range == "weekly":
                 readings = db.get_weekly_readings(weeks_back=1)
@@ -546,6 +646,109 @@ class Query(ObjectType):
             )
         except Exception as e:
             logger.error(f"Error getting air quality statistics: {e}")
+    # Time-based resolvers
+    def resolve_temperature_history_by_year(self, info, year):
+        try:
+            readings = db.get_readings_by_year(year)
+            result = []
+            for reading in readings:
+                timestamp_str, timestamp_unix = _to_local_iso_unix(reading.timestamp)
+                result.append(TemperatureReading(
+                    id=reading.id,
+                    temperature_c=reading.temperature_c,
+                    timestamp=timestamp_str,
+                    timestamp_unix=timestamp_unix,
+                    sensor_type=reading.sensor_type,
+                    sensor_id=reading.sensor_id
+                ))
+            return result
+        except Exception as e:
+            logger.error(f"Error getting temperature history for year {year}: {e}")
+            return []
+    
+    def resolve_temperature_history_by_month(self, info, year, month):
+        try:
+            readings = db.get_readings_by_month(year, month)
+            result = []
+            for reading in readings:
+                timestamp_str, timestamp_unix = _to_local_iso_unix(reading.timestamp)
+                result.append(TemperatureReading(
+                    id=reading.id,
+                    temperature_c=reading.temperature_c,
+                    timestamp=timestamp_str,
+                    timestamp_unix=timestamp_unix,
+                    sensor_type=reading.sensor_type,
+                    sensor_id=reading.sensor_id
+                ))
+            return result
+        except Exception as e:
+            logger.error(f"Error getting temperature history for {year}-{month}: {e}")
+            return []
+    
+    def resolve_temperature_history_by_day(self, info, year, month, day):
+        try:
+            readings = db.get_readings_by_day(year, month, day)
+            result = []
+            for reading in readings:
+                timestamp_str, timestamp_unix = _to_local_iso_unix(reading.timestamp)
+                result.append(TemperatureReading(
+                    id=reading.id,
+                    temperature_c=reading.temperature_c,
+                    timestamp=timestamp_str,
+                    timestamp_unix=timestamp_unix,
+                    sensor_type=reading.sensor_type,
+                    sensor_id=reading.sensor_id
+                ))
+            return result
+        except Exception as e:
+            logger.error(f"Error getting temperature history for {year}-{month}-{day}: {e}")
+            return []
+    
+    def resolve_yearly_statistics(self, info, year):
+        try:
+            stats = db.get_yearly_statistics(year)
+            return YearlyStatistics(
+                count=stats["count"],
+                average=stats["average"],
+                minimum=stats["minimum"],
+                maximum=stats["maximum"],
+                year=stats["year"]
+            )
+        except Exception as e:
+            logger.error(f"Error getting yearly statistics for {year}: {e}")
+            return YearlyStatistics(count=0, average=0.0, minimum=0.0, maximum=0.0, year=year)
+    
+    def resolve_monthly_statistics(self, info, year, month):
+        try:
+            stats = db.get_monthly_statistics(year, month)
+            return MonthlyStatistics(
+                count=stats["count"],
+                average=stats["average"],
+                minimum=stats["minimum"],
+                maximum=stats["maximum"],
+                year=stats["year"],
+                month=stats["month"]
+            )
+        except Exception as e:
+            logger.error(f"Error getting monthly statistics for {year}-{month}: {e}")
+            return MonthlyStatistics(count=0, average=0.0, minimum=0.0, maximum=0.0, year=year, month=month)
+    
+    def resolve_daily_statistics(self, info, year, month, day):
+        try:
+            stats = db.get_daily_statistics(year, month, day)
+            return DailyStatistics(
+                count=stats["count"],
+                average=stats["average"],
+                minimum=stats["minimum"],
+                maximum=stats["maximum"],
+                year=stats["year"],
+                month=stats["month"],
+                day=stats["day"]
+            )
+        except Exception as e:
+            logger.error(f"Error getting daily statistics for {year}-{month}-{day}: {e}")
+            return DailyStatistics(count=0, average=0.0, minimum=0.0, maximum=0.0, year=year, month=month, day=day)
+
             return AirQualityStatistics(count=0, average=0.0, minimum=0.0, maximum=0.0, hours_back=hours)
 
 # GraphQL Schema
@@ -555,22 +758,27 @@ schema = Schema(query=Query)
 # USB Data Processor - Handles real sensor data from USB device
 class USBDataProcessor:
     def __init__(self, logger):
-        self.last_emit_time = 0
         self.logger = logger
         self.error_count = 0
         self.max_errors = 10
         
     def process_sensor_data(self, data):
         """Process incoming sensor data from USB and update system."""
-        global last_db_store
         try:
             # Use host wall-clock time; device timestamp is monotonic (ticks_ms), not epoch
             current_time = time.time()
             timestamp = datetime.fromtimestamp(current_time, tz=timezone.utc)
 
-            # Throttle to 30s intervals
-            if current_time - self.last_emit_time < 30:
+            # Use unified throttling system
+            if should_throttle():
                 return
+            
+            # Update throttle time for all operations
+            update_throttle_time()
+            
+            # Update emit time immediately to prevent further emissions for 1 hour
+            self.last_emit_time = current_time
+
             
             # Extract data
             temp_c = data.get('temperature_c')
@@ -655,8 +863,8 @@ class USBDataProcessor:
                 except:
                     pass
 
-            # Store to database periodically (every 30 seconds to avoid overload)
-            if current_time - last_db_store >= 30:
+            # Store to database (controlled by unified throttling)
+            # Database operations (already throttled by unified system)
                 if temp_c is not None:
                     db.add_temperature_reading(
                         temperature_c=temp_c,
@@ -687,8 +895,7 @@ class USBDataProcessor:
                         sensor_id='micropython_device',
                         timestamp=timestamp
                     )
-                self.last_emit_time = current_time
-                last_db_store = current_time
+                # self.last_emit_time already updated above
                 self.logger.info("Stored readings to database")
             
             self.error_count = 0  # Reset error count on success
@@ -809,7 +1016,7 @@ def events():
         
         while True:
             try:
-                data = sse_clients.get(timeout=5)  # Much shorter timeout
+                data = sse_clients.get(timeout=get_throttle_interval())  # Much shorter timeout
                 yield f"data: {json.dumps(data)}\n\n"
                 sse_clients.task_done()
             except:
@@ -1084,9 +1291,15 @@ if __name__ == '__main__':
     parser.add_argument('--port', type=int, default=5000, help='Port to listen on')
     parser.add_argument('--debug', action='store_true', help='Enable debug mode')
     parser.add_argument('--threshold', type=float, default=0.1, help='Temperature change threshold for SSE (default: 0.1°C)')
-    parser.add_argument('--heartbeat', type=int, default=30, help='Max seconds between SSE updates (default: 30)')
+    parser.add_argument('--throttle', type=int, default=3600, help='Throttle interval for all operations - SSE, DB storage, USB reading (default: 3600 seconds = 1 hour)')
     
     args = parser.parse_args()
+
+    # Apply throttle interval from command line
+    if hasattr(args, 'throttle'):
+        set_throttle_interval(args.throttle)
+        print(f"Throttle interval set to {args.throttle} seconds")
+
     
     try:
         if not initialize_application():

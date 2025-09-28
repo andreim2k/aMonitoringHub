@@ -507,6 +507,16 @@
   .chart-modal { width: min(92vw, 680px); height: min(70vh, 440px); background: linear-gradient(135deg, rgba(20,18,35,.98) 0%, rgba(35,30,70,.95) 50%, rgba(25,25,45,.98) 100%); border-radius: 14px; padding: 16px; box-shadow: 0 12px 40px rgba(0,0,0,.5); position: relative; display: flex; flex-direction: column; }
   .chart-modal h3 { margin: 0 0 8px 0; color: #e0e0e0; font-size: 1rem; text-align: center; }
   .chart-modal .close-btn { position: absolute; top: 8px; right: 10px; background: transparent; border: none; color: #ccc; font-size: 20px; cursor: pointer; }
+  .chart-modal .time-period-selector { display: flex; justify-content: center; gap: 15px; margin: 10px 0; }
+  .chart-modal .time-period-option { display: flex; align-items: center; gap: 5px; }
+  .chart-modal .time-period-option input[type="radio"] { appearance: none; width: 16px; height: 16px; border: 2px solid #90caf9; border-radius: 50%; background: transparent; cursor: pointer; position: relative; }
+  .chart-modal .time-period-option input[type="radio"]:checked { background: #90caf9; }
+  .chart-modal .time-period-option input[type="radio"]:checked::after { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 6px; height: 6px; background: white; border-radius: 50%; }
+  .chart-modal .time-period-option label { color: #e0e0e0; font-size: 0.9rem; cursor: pointer; user-select: none; }
+  .chart-modal .time-period-inputs { display: flex; justify-content: center; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
+  .chart-modal .time-period-inputs input, .chart-modal .time-period-inputs select { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; }
+  .chart-modal .time-period-inputs input { width: 60px; }
+  @media (max-width: 600px) { .chart-modal .time-period-selector { flex-direction: column; gap: 8px; } }
   .chart-canvas-wrap { position: relative; flex: 1; min-height: 240px; }
   .chart-popover { position: fixed; display: none; pointer-events: none; z-index: 9998; width: 320px; height: 200px; background: rgba(20,18,35,.96); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 8px; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
   .chart-popover h4 { margin: 0 0 4px 0; font-size: .9rem; color: #e0e0e0; text-align: center; }
@@ -546,8 +556,6 @@
 .electricity-card:hover,
 .electricity-card:active {
     transform: none !important;
-    box-shadow: inherit !important;
-    background: inherit !important;
     transition: none !important;
 }
 </style>
@@ -564,6 +572,8 @@
     <p style="font-style: italic; color: #888; font-size: 0.9em;">Environmental sensors & climate insights</p>
     <div id="lastReadingTime" style="margin-top:8px;color:#90caf9;font-size:1.0rem;font-weight:600;">Last reading time: --</div>
     <!-- Connection status removed - using sensor status instead -->
+  </div>
+    </div>
   </div>
 
   <div class="container">
@@ -675,6 +685,33 @@
       <div class="chart-modal">
         <button class="close-btn" id="chartModalClose" aria-label="Close">×</button>
         <h3 id="chartModalTitle">History</h3>
+        <div class="time-period-selector">
+          <div class="time-period-option">
+            <input type="radio" id="periodRecent" name="chartPeriod" value="recent" checked>
+            <label for="periodRecent">Recent</label>
+          </div>
+          <div class="time-period-option">
+            <input type="radio" id="periodYear" name="chartPeriod" value="year">
+            <label for="periodYear">Years</label>
+          </div>
+          <div class="time-period-option">
+            <input type="radio" id="periodMonth" name="chartPeriod" value="month">
+            <label for="periodMonth">Months</label>
+          </div>
+          <div class="time-period-option">
+            <input type="radio" id="periodDay" name="chartPeriod" value="day">
+            <label for="periodDay">Days</label>
+          </div>
+        </div>
+        <div class="time-period-inputs" id="timePeriodInputs" style="display: none;">
+          <input type="number" id="modalYearInput" placeholder="Year" min="2020" max="2030" style="display: none;">
+          <select id="modalMonthInput" style="display: none;">
+            <option value="1">Jan</option><option value="2">Feb</option><option value="3">Mar</option><option value="4">Apr</option>
+            <option value="5">May</option><option value="6">Jun</option><option value="7">Jul</option><option value="8">Aug</option>
+            <option value="9">Sep</option><option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option>
+          </select>
+          <input type="number" id="modalDayInput" placeholder="Day" min="1" max="31" style="display: none;">
+        </div>
         <div class="chart-canvas-wrap"><canvas id="chartModalCanvas"></canvas></div>
       </div>
     </div>
@@ -1604,6 +1641,105 @@ async function initialize() {
     function buildLineOptions() {
       return { responsive: true, maintainAspectRatio: false, legend: { display: false }, scales: { xAxes: [{ gridLines: { color: 'rgba(255,255,255,0.1)' }, ticks: { fontColor: '#b3b3b3', maxTicksLimit: 8 }}], yAxes: [{ gridLines: { color: 'rgba(255,255,255,0.1)' }, ticks: { fontColor: '#b3b3b3' } }] } };
     }
+    // Chart Modal Time Period Logic
+    let currentChartKind = null;
+    let currentModalChart = null;
+    
+    function updateModalInputsVisibility() {
+      const selectedPeriod = document.querySelector("input[name=\"chartPeriod\"]:checked")?.value;
+      const inputsContainer = document.getElementById("timePeriodInputs");
+      const yearInput = document.getElementById("modalYearInput");
+      const monthInput = document.getElementById("modalMonthInput");
+      const dayInput = document.getElementById("modalDayInput");
+      
+      // Hide all inputs first
+      yearInput.style.display = "none";
+      monthInput.style.display = "none";
+      dayInput.style.display = "none";
+      inputsContainer.style.display = "none";
+      
+      if (selectedPeriod === "recent") {
+        return; // No inputs needed for recent
+      }
+      
+      inputsContainer.style.display = "flex";
+      
+      if (selectedPeriod === "year" || selectedPeriod === "month" || selectedPeriod === "day") {
+        yearInput.style.display = "inline-block";
+        if (!yearInput.value) yearInput.value = new Date().getFullYear();
+      }
+      if (selectedPeriod === "month" || selectedPeriod === "day") {
+        monthInput.style.display = "inline-block";
+        if (!monthInput.value) monthInput.value = new Date().getMonth() + 1;
+      }
+      if (selectedPeriod === "day") {
+        dayInput.style.display = "inline-block";
+        if (!dayInput.value) dayInput.value = new Date().getDate();
+      }
+    }
+    
+    async function updateModalChartData() {
+      if (!currentChartKind) return;
+      
+      const selectedPeriod = document.querySelector("input[name=\"chartPeriod\"]:checked")?.value;
+      const year = parseInt(document.getElementById("modalYearInput").value) || null;
+      const month = parseInt(document.getElementById("modalMonthInput").value) || null;
+      const day = parseInt(document.getElementById("modalDayInput").value) || null;
+      
+      try {
+        let query = "";
+        let dataKey = "";
+        
+        if (selectedPeriod === "year" && year) {
+          query = `{ temperatureHistoryByYear(year: ${year}) { temperatureC timestampUnix sensorId } }`;
+          dataKey = "temperatureHistoryByYear";
+        } else if (selectedPeriod === "month" && year && month) {
+          query = `{ temperatureHistoryByMonth(year: ${year}, month: ${month}) { temperatureC timestampUnix sensorId } }`;
+          dataKey = "temperatureHistoryByMonth";
+        } else if (selectedPeriod === "day" && year && month && day) {
+          query = `{ temperatureHistoryByDay(year: ${year}, month: ${month}, day: ${day}) { temperatureC timestampUnix sensorId } }`;
+          dataKey = "temperatureHistoryByDay";
+        } else {
+          query = "{ temperatureHistory(limit: 5000) { temperatureC timestampUnix sensorId } }";
+          dataKey = "temperatureHistory";
+        }
+        
+        const response = await graphqlQuery(query);
+        if (response.data && response.data[dataKey]) {
+          // Temporarily update the current data to refresh the chart
+          const originalHistory = currentData.history;
+          currentData.history = response.data[dataKey];
+          
+          // Update the chart
+          const ds = chartDataFor(currentChartKind);
+          if (currentModalChart && ds.labels.length > 0) {
+            currentModalChart.data = ds;
+            currentModalChart.update();
+          }
+          
+          // Restore original history (so main app data is not affected)
+          currentData.history = originalHistory;
+        }
+      } catch (error) {
+        console.error("Error updating modal chart data:", error);
+      }
+    }
+    
+    function setupModalEventListeners() {
+      // Add event listeners for radio buttons
+      document.querySelectorAll("input[name=\"chartPeriod\"]").forEach(radio => {
+        radio.addEventListener("change", function() {
+          updateModalInputsVisibility();
+          updateModalChartData();
+        });
+      });
+      
+      // Add event listeners for input changes
+      document.getElementById("modalYearInput").addEventListener("change", updateModalChartData);
+      document.getElementById("modalMonthInput").addEventListener("change", updateModalChartData);
+      document.getElementById("modalDayInput").addEventListener("change", updateModalChartData);
+    }
+
 
     async function showMetricChart(kind, mode, anchorEl) {
       await ensureHistory(kind);
@@ -1611,13 +1747,26 @@ async function initialize() {
       if (!ds.labels.length) return;
 
       if (mode === 'modal') {
+        currentChartKind = kind;
         const overlay = document.getElementById('chartModalOverlay');
         const title = document.getElementById('chartModalTitle');
         const canvas = document.getElementById('chartModalCanvas');
         title.textContent = kind.toUpperCase() + ' History';
         overlay.style.display = 'flex';
+        
+        // Reset radio buttons to "Recent"
+        document.getElementById('periodRecent').checked = true;
+        updateModalInputsVisibility();
+        
         if (modalChart) { modalChart.destroy(); }
         modalChart = new Chart(canvas.getContext('2d'), { type: 'line', data: ds, options: buildLineOptions() });
+        currentModalChart = modalChart;
+        
+        // Setup event listeners if not already done
+        if (!overlay.hasAttribute('data-listeners-setup')) {
+          setupModalEventListeners();
+          overlay.setAttribute('data-listeners-setup', 'true');
+        }
       } else if (mode === 'hover') {
         const pop = document.getElementById('hoverPopover');
         const title = document.getElementById('hoverPopoverTitle');
@@ -1641,6 +1790,7 @@ async function initialize() {
       hoverHideTimer = setTimeout(()=>{ pop.style.display = 'none'; if (popoverChart) { popoverChart.destroy(); popoverChart = null; } }, 250);
     }
 
+
     // Attach listeners once DOM is ready
     (function attachChartListeners(){
       function attach(id, kind) {
@@ -1659,8 +1809,8 @@ async function initialize() {
       // Modal close handlers
       const overlay = document.getElementById('chartModalOverlay');
       const closeBtn = document.getElementById('chartModalClose');
-      if (overlay) overlay.addEventListener('click', (e)=>{ if (e.target === overlay) { overlay.style.display = 'none'; if (modalChart) { modalChart.destroy(); modalChart = null; } } });
-      if (closeBtn) closeBtn.addEventListener('click', ()=>{ overlay.style.display = 'none'; if (modalChart) { modalChart.destroy(); modalChart = null; } });
+      if (overlay) overlay.addEventListener('click', (e)=>{ if (e.target === overlay) { overlay.style.display = 'none'; if (modalChart) { modalChart.destroy(); modalChart = null; } currentChartKind = null; currentModalChart = null; } });
+      if (closeBtn) closeBtn.addEventListener('click', ()=>{ overlay.style.display = 'none'; if (modalChart) { modalChart.destroy(); modalChart = null; } currentChartKind = null; currentModalChart = null; });
     })();
     // === End popup charts ===
 
