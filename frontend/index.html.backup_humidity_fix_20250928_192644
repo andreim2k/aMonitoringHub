@@ -859,7 +859,22 @@ function formatHumidity(value) {
     }
 
 
-
+        // Helper function for consistent timestamp formatting across all charts
+    function formatTimestampForChart(timestampUnix) {
+      const date = new Date(timestampUnix * 1000);
+      
+      // Use the same timezone formatting as the header
+      return date.toLocaleString("en-GB", {
+        timeZone: "Europe/Bucharest", 
+        year: "numeric", 
+        month: "2-digit", 
+        day: "2-digit", 
+        hour: "2-digit", 
+        minute: "2-digit", 
+        second: "2-digit", 
+        hour12: false
+      });
+    }
 
 function updateDisplay() {
       console.log('Updating display with currentData:', currentData);
@@ -961,7 +976,7 @@ function updateDisplay() {
     function updatePressureHistoryChart() {
       if (!window.historyPressureChart || !window.historyPressureChart.data || currentData.pressureHistory.length === 0) return;
       const sorted = currentData.pressureHistory.slice().sort(function(a,b){ return a.timestampUnix - b.timestampUnix; });
-      window.historyPressureChart.data.labels = sorted.map(function(i){ return new Date(i.timestampUnix * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false}); });
+      window.historyPressureChart.data.labels = sorted.map(function(i){ return formatTimestampForChart(i.timestampUnix); });
       window.historyPressureChart.data.datasets[0].data = sorted.map(function(i){ return i.pressureHpa; });
       window.historyPressureChart.update();
     }
@@ -969,7 +984,7 @@ function updateDisplay() {
     function updateCO2HistoryChart() {
       if (!window.historyCO2Chart || !window.historyCO2Chart.data || currentData.airQualityHistory.length === 0) return;
       const sorted = currentData.airQualityHistory.slice().sort(function(a,b){ return a.timestampUnix - b.timestampUnix; });
-      window.historyCO2Chart.data.labels = sorted.map(function(i){ return new Date(i.timestampUnix * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false}); });
+      window.historyCO2Chart.data.labels = sorted.map(function(i){ return formatTimestampForChart(i.timestampUnix); });
       window.historyCO2Chart.data.datasets[0].data = sorted.map(function(i){ return i.co2Ppm; });
       window.historyCO2Chart.update();
     }
@@ -1623,34 +1638,7 @@ async function initialize() {
     }
 
     function buildLineOptions() {
-      return { 
-        responsive: true, 
-        maintainAspectRatio: false, 
-        legend: { display: false }, 
-        tooltips: {
-          callbacks: {
-            label: function(tooltipItem, data) {
-              const value = tooltipItem.yLabel;
-              return value;
-            },
-            title: function(tooltipItems, data) {
-              // Use the same Bucharest timezone formatting as the labels
-              const label = data.labels[tooltipItems[0].index];
-              return label; // This will use the already formatted timestamp from our labels
-            }
-          }
-        },
-        scales: { 
-          xAxes: [{ 
-            gridLines: { color: 'rgba(255,255,255,0.1)' }, 
-            ticks: { fontColor: '#b3b3b3', maxTicksLimit: 8 }
-          }], 
-          yAxes: [{ 
-            gridLines: { color: 'rgba(255,255,255,0.1)' }, 
-            ticks: { fontColor: '#b3b3b3' } 
-          }] 
-        } 
-      };
+      return { responsive: true, maintainAspectRatio: false, legend: { display: false }, scales: { xAxes: [{ gridLines: { color: 'rgba(255,255,255,0.1)' }, ticks: { fontColor: '#b3b3b3', maxTicksLimit: 8 }}], yAxes: [{ gridLines: { color: 'rgba(255,255,255,0.1)' }, ticks: { fontColor: '#b3b3b3' } }] } };
     }
     // Chart Modal Time Period Logic
     let currentChartKind = null;

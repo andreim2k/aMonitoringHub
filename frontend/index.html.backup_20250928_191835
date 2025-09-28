@@ -859,9 +859,7 @@ function formatHumidity(value) {
     }
 
 
-
-
-function updateDisplay() {
+    function updateDisplay() {
       console.log('Updating display with currentData:', currentData);
 
       // Update unified timestamp in header
@@ -1623,34 +1621,7 @@ async function initialize() {
     }
 
     function buildLineOptions() {
-      return { 
-        responsive: true, 
-        maintainAspectRatio: false, 
-        legend: { display: false }, 
-        tooltips: {
-          callbacks: {
-            label: function(tooltipItem, data) {
-              const value = tooltipItem.yLabel;
-              return value;
-            },
-            title: function(tooltipItems, data) {
-              // Use the same Bucharest timezone formatting as the labels
-              const label = data.labels[tooltipItems[0].index];
-              return label; // This will use the already formatted timestamp from our labels
-            }
-          }
-        },
-        scales: { 
-          xAxes: [{ 
-            gridLines: { color: 'rgba(255,255,255,0.1)' }, 
-            ticks: { fontColor: '#b3b3b3', maxTicksLimit: 8 }
-          }], 
-          yAxes: [{ 
-            gridLines: { color: 'rgba(255,255,255,0.1)' }, 
-            ticks: { fontColor: '#b3b3b3' } 
-          }] 
-        } 
-      };
+      return { responsive: true, maintainAspectRatio: false, legend: { display: false }, scales: { xAxes: [{ gridLines: { color: 'rgba(255,255,255,0.1)' }, ticks: { fontColor: '#b3b3b3', maxTicksLimit: 8 }}], yAxes: [{ gridLines: { color: 'rgba(255,255,255,0.1)' }, ticks: { fontColor: '#b3b3b3' } }] } };
     }
     // Chart Modal Time Period Logic
     let currentChartKind = null;

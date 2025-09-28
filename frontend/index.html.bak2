@@ -754,7 +754,25 @@
 
     // Timezone-aware formatting (Europe/Bucharest) using epoch seconds when available
     const BUCHAREST_FMT = new Intl.DateTimeFormat('ro-RO', { timeZone: 'Europe/Bucharest', dateStyle: 'short', timeStyle: 'medium' });
-    
+    function formatBucharest(ts) {
+      if (ts === null || ts === undefined) return 'No data';
+      let d;
+      if (typeof ts === 'number') {
+        d = new Date(ts * 1000);
+      } else {
+        let str = String(ts);
+        if (str.indexOf('T') === -1 && str.indexOf(' ') > -1) str = str.replace(' ', 'T');
+        if (!(/[zZ]|[\+\-]\d{2}:?\d{2}$/.test(str))) str += 'Z';
+        d = new Date(str);
+      }
+      if (isNaN(d.getTime())) return 'No data';
+      const opts = { timeZone: 'Europe/Bucharest' };
+      const dateStr = new Intl.DateTimeFormat('ro-RO', { day:'2-digit', month:'2-digit', year:'numeric', ...opts }).format(d);
+      const timeStr = new Intl.DateTimeFormat('ro-RO', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false, ...opts }).format(d);
+      const tzMinutes = new Date(d.toLocaleString('en-US', opts)).getTimezoneOffset();
+      const tzAbbr = (tzMinutes <= -180) ? 'EEST' : 'EET';
+      return `${dateStr}, ${timeStr} ${tzAbbr}`;
+    }
 
     function formatTemperature(value) {
       if (value === null || value === undefined) return '--°C';
@@ -852,16 +870,14 @@ function formatHumidity(value) {
       
       if (timestamps.length > 0) {
         latestTimestamp = Math.max(...timestamps);
-        lastReadingEl.textContent = 'Last reading time: ' + new Date(latestTimestamp * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
+        lastReadingEl.textContent = 'Last reading time: ' + formatBucharest(latestTimestamp);
       } else {
         lastReadingEl.textContent = 'Last reading time: --';
       }
     }
 
 
-
-
-function updateDisplay() {
+    function updateDisplay() {
       console.log('Updating display with currentData:', currentData);
 
       // Update unified timestamp in header
@@ -877,7 +893,7 @@ function updateDisplay() {
       const pEl = document.getElementById('currentPressure');
       if (pEl) { pEl.textContent = formatPressure(currentData.pressure_hpa); setSeverity(pEl, severityFor('pressure', currentData.pressure_hpa)); }
       const ptEl = document.getElementById('pressureTimestamp');
-      if (ptEl) ptEl.textContent = 'Last reading: ' + new Date(currentData.pressureTimestamp * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
+      if (ptEl) ptEl.textContent = 'Last reading: ' + formatBucharest(currentData.pressureTimestamp);
 
       // Update air quality display
       const co2El = document.getElementById('currentCO2');
@@ -911,14 +927,14 @@ function updateDisplay() {
       // Update humidity stats
       var miH = document.getElementById('minHumidity'); if (miH) { miH.textContent = formatHumidity(currentData.humidityStats.minimum); setSeverity(miH, severityFor('humidity', currentData.humidityStats.minimum)); }
       var mxH = document.getElementById('maxHumidity'); if (mxH) { mxH.textContent = formatHumidity(currentData.humidityStats.maximum); setSeverity(mxH, severityFor('humidity', currentData.humidityStats.maximum)); }
-      var mtts = document.getElementById('minTempTs'); if (mtts) mtts.textContent = new Date(currentData.stats.min_timestamp * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
-      var mxts = document.getElementById('maxTempTs'); if (mxts) mxts.textContent = new Date(currentData.stats.max_timestamp * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
-      var mhts = document.getElementById('minHumidityTs'); if (mhts) mhts.textContent = new Date(currentData.humidityStats.min_timestamp * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
-      var mHxTs = document.getElementById('maxHumidityTs'); if (mHxTs) mHxTs.textContent = new Date(currentData.humidityStats.max_timestamp * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
-      var mpts = document.getElementById('minPressureTs'); if (mpts) mpts.textContent = new Date(currentData.pressureStats.min_timestamp * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
-      var mpxts = document.getElementById('maxPressureTs'); if (mpxts) mpxts.textContent = new Date(currentData.pressureStats.max_timestamp * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
-      var mcts = document.getElementById('minCO2Ts'); if (mcts) mcts.textContent = new Date(currentData.airQualityStats.min_timestamp * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
-      var mcxts = document.getElementById('maxCO2Ts'); if (mcxts) mcxts.textContent = new Date(currentData.airQualityStats.max_timestamp * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
+      var mtts = document.getElementById('minTempTs'); if (mtts) mtts.textContent = formatBucharest(currentData.stats.min_timestamp);
+      var mxts = document.getElementById('maxTempTs'); if (mxts) mxts.textContent = formatBucharest(currentData.stats.max_timestamp);
+      var mhts = document.getElementById('minHumidityTs'); if (mhts) mhts.textContent = formatBucharest(currentData.humidityStats.min_timestamp);
+      var mHxTs = document.getElementById('maxHumidityTs'); if (mHxTs) mHxTs.textContent = formatBucharest(currentData.humidityStats.max_timestamp);
+      var mpts = document.getElementById('minPressureTs'); if (mpts) mpts.textContent = formatBucharest(currentData.pressureStats.min_timestamp);
+      var mpxts = document.getElementById('maxPressureTs'); if (mpxts) mpxts.textContent = formatBucharest(currentData.pressureStats.max_timestamp);
+      var mcts = document.getElementById('minCO2Ts'); if (mcts) mcts.textContent = formatBucharest(currentData.airQualityStats.min_timestamp);
+      var mcxts = document.getElementById('maxCO2Ts'); if (mcxts) mcxts.textContent = formatBucharest(currentData.airQualityStats.max_timestamp);
 
       // Update pressure stats
       var minP = document.getElementById('minPressure'); if (minP) { minP.textContent = formatPressure(currentData.pressureStats.minimum); setSeverity(minP, severityFor('pressure', currentData.pressureStats.minimum)); }
@@ -944,7 +960,7 @@ function updateDisplay() {
       });
 
       historyChart.data.labels = sortedHistory.map(function(item) {
-        return new Date(item.timestampUnix * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
+        return formatBucharest(item.timestampUnix);
       });
 
       historyChart.data.datasets[0].data = sortedHistory.map(function(item) {
@@ -961,7 +977,7 @@ function updateDisplay() {
     function updatePressureHistoryChart() {
       if (!window.historyPressureChart || !window.historyPressureChart.data || currentData.pressureHistory.length === 0) return;
       const sorted = currentData.pressureHistory.slice().sort(function(a,b){ return a.timestampUnix - b.timestampUnix; });
-      window.historyPressureChart.data.labels = sorted.map(function(i){ return new Date(i.timestampUnix * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false}); });
+      window.historyPressureChart.data.labels = sorted.map(function(i){ return formatBucharest(i.timestampUnix); });
       window.historyPressureChart.data.datasets[0].data = sorted.map(function(i){ return i.pressureHpa; });
       window.historyPressureChart.update();
     }
@@ -969,7 +985,7 @@ function updateDisplay() {
     function updateCO2HistoryChart() {
       if (!window.historyCO2Chart || !window.historyCO2Chart.data || currentData.airQualityHistory.length === 0) return;
       const sorted = currentData.airQualityHistory.slice().sort(function(a,b){ return a.timestampUnix - b.timestampUnix; });
-      window.historyCO2Chart.data.labels = sorted.map(function(i){ return new Date(i.timestampUnix * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false}); });
+      window.historyCO2Chart.data.labels = sorted.map(function(i){ return formatBucharest(i.timestampUnix); });
       window.historyCO2Chart.data.datasets[0].data = sorted.map(function(i){ return i.co2Ppm; });
       window.historyCO2Chart.update();
     }
@@ -982,7 +998,7 @@ function updateDisplay() {
       });
 
       historyHumidityChart.data.labels = sortedHistory.map(function(item) {
-        return new Date(item.timestampUnix * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
+        return formatBucharest(item.timestampUnix);
       });
 
       historyHumidityChart.data.datasets[0].data = sortedHistory.map(function(item) {
@@ -1597,25 +1613,25 @@ async function initialize() {
       let labels = [], data = [], c = chartColors[kind] || {border:'#90caf9', bg:'rgba(144,202,249,0.15)'};
       if (kind === 'temp') {
         const arr = (currentData.history||[]).slice().sort((a,b)=>a.timestampUnix - b.timestampUnix); // Show all history data
-        labels = arr.map(i=>new Date(i.timestampUnix * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false}));
+        labels = arr.map(i=>formatBucharest(i.timestampUnix));
         data = arr.map(i=>i.temperatureC);
         return { labels, datasets: [{ label: 'Temperature (°C)', data, borderColor: c.border, backgroundColor: c.bg, borderWidth: 2, fill: true, pointRadius: 1 }] };
       }
       if (kind === 'humidity') {
         const arr = (currentData.humidityHistory||[]).slice().sort((a,b)=>a.timestampUnix - b.timestampUnix); // Show all history data
-        labels = arr.map(i=>new Date(i.timestampUnix * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false}));
+        labels = arr.map(i=>formatBucharest(i.timestampUnix));
         data = arr.map(i=>i.humidityPercent);
         return { labels, datasets: [{ label: 'Humidity (%)', data, borderColor: c.border, backgroundColor: c.bg, borderWidth: 2, fill: true, pointRadius: 1 }] };
       }
       if (kind === 'pressure') {
         const arr = (currentData.pressureHistory||[]).slice().sort((a,b)=>a.timestampUnix - b.timestampUnix); // Show all history data
-        labels = arr.map(i=>new Date(i.timestampUnix * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false}));
+        labels = arr.map(i=>formatBucharest(i.timestampUnix));
         data = arr.map(i=>i.pressureHpa);
         return { labels, datasets: [{ label: 'Pressure (hPa)', data, borderColor: c.border, backgroundColor: c.bg, borderWidth: 2, fill: true, pointRadius: 1 }] };
       }
       if (kind === 'co2') {
         const arr = (currentData.airQualityHistory||[]).slice().sort((a,b)=>a.timestampUnix - b.timestampUnix); // Show all history data
-        labels = arr.map(i=>new Date(i.timestampUnix * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false}));
+        labels = arr.map(i=>formatBucharest(i.timestampUnix));
         data = arr.map(i=>i.co2Ppm);
         return { labels, datasets: [{ label: 'CO₂ (ppm)', data, borderColor: c.border, backgroundColor: c.bg, borderWidth: 2, fill: true, pointRadius: 1 }] };
       }
@@ -1623,34 +1639,7 @@ async function initialize() {
     }
 
     function buildLineOptions() {
-      return { 
-        responsive: true, 
-        maintainAspectRatio: false, 
-        legend: { display: false }, 
-        tooltips: {
-          callbacks: {
-            label: function(tooltipItem, data) {
-              const value = tooltipItem.yLabel;
-              return value;
-            },
-            title: function(tooltipItems, data) {
-              // Use the same Bucharest timezone formatting as the labels
-              const label = data.labels[tooltipItems[0].index];
-              return label; // This will use the already formatted timestamp from our labels
-            }
-          }
-        },
-        scales: { 
-          xAxes: [{ 
-            gridLines: { color: 'rgba(255,255,255,0.1)' }, 
-            ticks: { fontColor: '#b3b3b3', maxTicksLimit: 8 }
-          }], 
-          yAxes: [{ 
-            gridLines: { color: 'rgba(255,255,255,0.1)' }, 
-            ticks: { fontColor: '#b3b3b3' } 
-          }] 
-        } 
-      };
+      return { responsive: true, maintainAspectRatio: false, legend: { display: false }, scales: { xAxes: [{ gridLines: { color: 'rgba(255,255,255,0.1)' }, ticks: { fontColor: '#b3b3b3', maxTicksLimit: 8 }}], yAxes: [{ gridLines: { color: 'rgba(255,255,255,0.1)' }, ticks: { fontColor: '#b3b3b3' } }] } };
     }
     // Chart Modal Time Period Logic
     let currentChartKind = null;
