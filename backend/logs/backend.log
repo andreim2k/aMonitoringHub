@@ -9677,3 +9677,113 @@ Traceback (most recent call last):
   File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
     self.response.close()
 RuntimeError: generator ignored GeneratorExit
+2025-09-28 21:20:08,820 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-09-28 21:20:08,821 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-09-28 22:20:09,138 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+TimeoutError: [Errno 110] Connection timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-09-28 22:20:09,141 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+TimeoutError: [Errno 110] Connection timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-09-28 22:20:09,143 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
