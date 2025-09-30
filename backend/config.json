@@ -11,10 +11,9 @@
         "enabled": true,
         "config": "--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789"
       },
-      "gemini": {
+      "perplexity": {
         "enabled": true,
-        "api_key": "AIzaSyDiGBpAzGYt5zsyFWt2_Zc4O7s4f1hRLSk",
-        "model": "gemini-2.0-flash-lite"
+        "model": "sonar"
       }
     },
     "refresh_interval": 30
