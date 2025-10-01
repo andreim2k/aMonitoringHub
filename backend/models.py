@@ -496,7 +496,7 @@ class DatabaseManager:
                 }
         except Exception as e:
             self.logger.error(f"Error getting pressure statistics: {e}")
-            return {'count': 0, 'average': 0, 'minimum': 0, 'maximum': 0, 'hours_back': hours_back, 'min_timestamp': min_ts, 'max_timestamp': max_ts}
+            return {'count': 0, 'average': 0, 'minimum': 0, 'maximum': 0, 'hours_back': hours_back, 'min_timestamp': None, 'max_timestamp': None}
 
     def add_air_quality_reading(self, data: dict, sensor_type: str = "unknown", sensor_id: str = "default", timestamp: datetime = None):
         try:
@@ -567,7 +567,140 @@ class DatabaseManager:
                 }
         except Exception as e:
             self.logger.error(f"Error getting AQ statistics: {e}")
-            return {'count': 0, 'average': 0, 'minimum': 0, 'maximum': 0, 'hours_back': hours_back, 'min_timestamp': min_ts, 'max_timestamp': max_ts}
+            return {'count': 0, 'average': 0, 'minimum': 0, 'maximum': 0, 'hours_back': hours_back, 'min_timestamp': None, 'max_timestamp': None}
+
+    def add_meter_reading(self, meter_value: str, ocr_engine: str = None, raw_ocr_text: str = None,
+                         sensor_type: str = "esp32cam_ocr", sensor_id: str = "cabana1_meter",
+                         timestamp: datetime = None):
+        """Add a meter reading to the database."""
+        try:
+            with self.get_session() as session:
+                reading_ts = timestamp or datetime.now(timezone.utc)
+                reading = MeterReading(
+                    meter_value=meter_value,
+                    ocr_engine=ocr_engine,
+                    raw_ocr_text=raw_ocr_text,
+                    sensor_type=sensor_type,
+                    sensor_id=sensor_id,
+                    timestamp=reading_ts,
+                    timestamp_unix=reading_ts.timestamp()
+                )
+                session.add(reading)
+                session.commit()
+                session.refresh(reading)
+                self.logger.info(f"Added meter reading: {reading}")
+                return reading
+        except Exception as e:
+            self.logger.error(f"Error adding meter reading: {e}")
+            return None
+
+    def get_recent_meter_readings(self, limit: int = 100, sensor_id: str = None):
+        """Get recent meter readings."""
+        try:
+            with self.get_session() as session:
+                query = session.query(MeterReading)
+                if sensor_id:
+                    query = query.filter(MeterReading.sensor_id == sensor_id)
+                readings = query.order_by(MeterReading.timestamp.desc()).limit(limit).all()
+                for reading in readings:
+                    session.expunge(reading)
+                return readings
+        except Exception as e:
+            self.logger.error(f"Error getting recent meter readings: {e}")
+            return []
+
+    def get_meter_readings_by_year(self, year: int, sensor_id: str = None):
+        """Get meter readings for a specific year."""
+        try:
+            with self.get_session() as session:
+                start_time = datetime(year, 1, 1, tzinfo=timezone.utc)
+                end_time = datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+                query = session.query(MeterReading).filter(
+                    MeterReading.timestamp >= start_time,
+                    MeterReading.timestamp < end_time
+                )
+                if sensor_id:
+                    query = query.filter(MeterReading.sensor_id == sensor_id)
+                readings = query.order_by(MeterReading.timestamp.asc()).all()
+                for reading in readings:
+                    session.expunge(reading)
+                return readings
+        except Exception as e:
+            self.logger.error(f"Error getting meter readings for year {year}: {e}")
+            return []
+
+    def get_meter_readings_by_month(self, year: int, month: int, sensor_id: str = None):
+        """Get meter readings for a specific month."""
+        try:
+            with self.get_session() as session:
+                start_time = datetime(year, month, 1, tzinfo=timezone.utc)
+                if month == 12:
+                    end_time = datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+                else:
+                    end_time = datetime(year, month + 1, 1, tzinfo=timezone.utc)
+                query = session.query(MeterReading).filter(
+                    MeterReading.timestamp >= start_time,
+                    MeterReading.timestamp < end_time
+                )
+                if sensor_id:
+                    query = query.filter(MeterReading.sensor_id == sensor_id)
+                readings = query.order_by(MeterReading.timestamp.asc()).all()
+                for reading in readings:
+                    session.expunge(reading)
+                return readings
+        except Exception as e:
+            self.logger.error(f"Error getting meter readings for {year}-{month}: {e}")
+            return []
+
+    def get_meter_readings_by_day(self, year: int, month: int, day: int, sensor_id: str = None):
+        """Get meter readings for a specific day."""
+        try:
+            with self.get_session() as session:
+                start_time = datetime(year, month, day, tzinfo=timezone.utc)
+                end_time = start_time + timedelta(days=1)
+                query = session.query(MeterReading).filter(
+                    MeterReading.timestamp >= start_time,
+                    MeterReading.timestamp < end_time
+                )
+                if sensor_id:
+                    query = query.filter(MeterReading.sensor_id == sensor_id)
+                readings = query.order_by(MeterReading.timestamp.asc()).all()
+                for reading in readings:
+                    session.expunge(reading)
+                return readings
+        except Exception as e:
+            self.logger.error(f"Error getting meter readings for {year}-{month}-{day}: {e}")
+            return []
+
+    def get_meter_statistics(self, sensor_id: str = None, hours_back: int = 24):
+        """Get meter reading statistics."""
+        try:
+            with self.get_session() as session:
+                end_time = datetime.now(timezone.utc)
+                start_time = end_time - timedelta(hours=hours_back)
+                query = session.query(MeterReading).filter(MeterReading.timestamp >= start_time)
+                if sensor_id:
+                    query = query.filter(MeterReading.sensor_id == sensor_id)
+                readings = query.order_by(MeterReading.timestamp.asc()).all()
+
+                if not readings:
+                    return {'count': 0, 'hours_back': hours_back}
+
+                # Get first and last reading
+                first_reading = readings[0]
+                last_reading = readings[-1]
+
+                return {
+                    'count': len(readings),
+                    'first_value': first_reading.meter_value,
+                    'last_value': last_reading.meter_value,
+                    'first_timestamp': first_reading.timestamp.isoformat(),
+                    'last_timestamp': last_reading.timestamp.isoformat(),
+                    'hours_back': hours_back
+                }
+        except Exception as e:
+            self.logger.error(f"Error getting meter statistics: {e}")
+            return {'count': 0, 'hours_back': hours_back}
 
     # Time-based aggregation methods for charts
     def get_readings_by_year(self, year: int, sensor_id: str = None) -> List[TemperatureReading]:
@@ -793,6 +926,40 @@ class AirQualityReading(Base):
             'sensor_type': self.sensor_type,
             'sensor_id': self.sensor_id,
         }
+
+class MeterReading(Base):
+    """Meter reading model for OCR-captured electricity meter values."""
+
+    __tablename__ = 'meter_readings'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    timestamp = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+    timestamp_unix = Column(Float, nullable=False, default=lambda: time.time())
+    meter_value = Column(String(50), nullable=False)
+    ocr_engine = Column(String(100), nullable=True)
+    raw_ocr_text = Column(String(500), nullable=True)
+    sensor_type = Column(String(50), nullable=False, default='esp32cam_ocr')
+    sensor_id = Column(String(100), nullable=False, default='cabana1_meter')
+
+    __table_args__ = (
+        Index('idx_meter_timestamp', 'timestamp'),
+        Index('idx_meter_sensor_timestamp', 'sensor_id', 'timestamp'),
+    )
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'timestamp': self.timestamp.isoformat() if self.timestamp else None,
+            'timestamp_unix': self.timestamp.timestamp() if self.timestamp else None,
+            'meter_value': self.meter_value,
+            'ocr_engine': self.ocr_engine,
+            'raw_ocr_text': self.raw_ocr_text,
+            'sensor_type': self.sensor_type,
+            'sensor_id': self.sensor_id,
+        }
+
+    def __repr__(self):
+        return f'<MeterReading(id={self.id}, value={self.meter_value}, sensor={self.sensor_id}, time={self.timestamp})>'
 
 def init_database(database_url: str = None):
     """Initialize the global database instance."""

@@ -47,7 +47,7 @@ from config import get_config as load_app_config
 from graphene import ObjectType, String, Float, List as GrapheneList, Field, Int, Schema
 
 # Import our modules
-from models import init_database, db, TemperatureReading as DBTemperatureReading, HumidityReading as DBHumidityReading
+from models import init_database, db, TemperatureReading as DBTemperatureReading, HumidityReading as DBHumidityReading, MeterReading as DBMeterReading
 from sensor_reader import TemperatureSensorReader, HumiditySensorReader
 from usb_json_reader import USBJSONReader
 
@@ -120,6 +120,23 @@ def set_throttle_interval(seconds):
     """Set the throttle interval (for configuration)"""
     global THROTTLE_INTERVAL
     THROTTLE_INTERVAL = max(1, int(seconds))  # Minimum 1 second
+
+
+def scheduled_ocr_task():
+    """Scheduled task to capture webcam and run OCR daily at 12:00"""
+    logger.info("Running scheduled OCR task...")
+    try:
+        # Use Flask test client to call the OCR endpoint
+        with app.test_client() as client:
+            response = client.post('/webcam/ocr')
+            result = response.get_json()
+
+            if result and result.get('success'):
+                logger.info(f"Scheduled OCR succeeded: {result.get('index')}")
+            else:
+                logger.warning(f"Scheduled OCR failed or no value recognized: {result.get('error', 'Unknown error')}")
+    except Exception as e:
+        logger.error(f"Scheduled OCR task error: {e}")
 
 
 
@@ -199,6 +216,24 @@ class AirQualityStatistics(ObjectType):
     maximum = Float()
     min_timestamp = String()
     max_timestamp = String()
+    hours_back = Int()
+
+class MeterReading(ObjectType):
+    id = Int()
+    meter_value = String()
+    timestamp = String()
+    timestamp_unix = Float()
+    ocr_engine = String()
+    raw_ocr_text = String()
+    sensor_type = String()
+    sensor_id = String()
+
+class MeterStatistics(ObjectType):
+    count = Int()
+    first_value = String()
+    last_value = String()
+    first_timestamp = String()
+    last_timestamp = String()
     hours_back = Int()
 
 
@@ -306,6 +341,21 @@ class Query(ObjectType):
         AirQualityStatistics,
         hours=Int(default_value=24)
     )
+
+    # Meter reading queries
+    current_meter_reading = Field(MeterReading)
+    meter_history = GrapheneList(
+        MeterReading,
+        year=Int(),
+        month=Int(),
+        day=Int(),
+        limit=Int(default_value=1000)
+    )
+    meter_statistics = Field(
+        MeterStatistics,
+        hours=Int(default_value=24)
+    )
+
     # Time-based statistics queries
     temperature_history_by_year = GrapheneList(
         TemperatureReading,
@@ -395,7 +445,7 @@ class Query(ObjectType):
                     readings = db.get_readings_by_month(year, month)
                 else:
                     readings = db.get_readings_by_year(year)
-                readings = db.get_daily_readings(days_back=1)
+            elif range == "daily":
                 readings = db.get_daily_readings(days_back=1)
             elif range == "weekly":
                 readings = db.get_weekly_readings(weeks_back=1)
@@ -646,6 +696,75 @@ class Query(ObjectType):
             )
         except Exception as e:
             logger.error(f"Error getting air quality statistics: {e}")
+            return AirQualityStatistics(count=0, average=0.0, minimum=0.0, maximum=0.0, hours_back=hours)
+
+    # Meter reading resolvers
+    def resolve_current_meter_reading(self, info):
+        try:
+            readings = db.get_recent_meter_readings(limit=1)
+            if not readings:
+                return None
+            r = readings[0]
+            return MeterReading(
+                id=r.id,
+                meter_value=r.meter_value,
+                timestamp=_to_local_iso_unix(r.timestamp)[0],
+                timestamp_unix=_to_local_iso_unix(r.timestamp)[1],
+                ocr_engine=r.ocr_engine,
+                raw_ocr_text=r.raw_ocr_text,
+                sensor_type=r.sensor_type,
+                sensor_id=r.sensor_id
+            )
+        except Exception as e:
+            logger.error(f"Error getting current meter reading: {e}")
+            return None
+
+    def resolve_meter_history(self, info, limit=1000, year=None, month=None, day=None):
+        try:
+            # Handle time-based queries
+            if year is not None:
+                if month is not None and day is not None:
+                    readings = db.get_meter_readings_by_day(year, month, day)
+                elif month is not None:
+                    readings = db.get_meter_readings_by_month(year, month)
+                else:
+                    readings = db.get_meter_readings_by_year(year)
+            else:
+                readings = db.get_recent_meter_readings(limit=min(limit, 5000))
+
+            result = [
+                MeterReading(
+                    id=r.id,
+                    meter_value=r.meter_value,
+                    timestamp=_to_local_iso_unix(r.timestamp)[0],
+                    timestamp_unix=_to_local_iso_unix(r.timestamp)[1],
+                    ocr_engine=r.ocr_engine,
+                    raw_ocr_text=r.raw_ocr_text,
+                    sensor_type=r.sensor_type,
+                    sensor_id=r.sensor_id
+                ) for r in readings
+            ]
+            result.sort(key=lambda x: x.timestamp_unix)
+            return result
+        except Exception as e:
+            logger.error(f"Error getting meter history: {e}")
+            return []
+
+    def resolve_meter_statistics(self, info, hours=24):
+        try:
+            stats = db.get_meter_statistics(hours_back=hours)
+            return MeterStatistics(
+                count=stats.get('count', 0),
+                first_value=stats.get('first_value'),
+                last_value=stats.get('last_value'),
+                first_timestamp=stats.get('first_timestamp'),
+                last_timestamp=stats.get('last_timestamp'),
+                hours_back=hours
+            )
+        except Exception as e:
+            logger.error(f"Error getting meter statistics: {e}")
+            return MeterStatistics(count=0, hours_back=hours)
+
     # Time-based resolvers
     def resolve_temperature_history_by_year(self, info, year):
         try:
@@ -749,8 +868,6 @@ class Query(ObjectType):
             logger.error(f"Error getting daily statistics for {year}-{month}-{day}: {e}")
             return DailyStatistics(count=0, average=0.0, minimum=0.0, maximum=0.0, year=year, month=month, day=day)
 
-            return AirQualityStatistics(count=0, average=0.0, minimum=0.0, maximum=0.0, hours_back=hours)
-
 # GraphQL Schema
 schema = Schema(query=Query)
 
@@ -772,14 +889,10 @@ class USBDataProcessor:
             # Use unified throttling system
             if should_throttle():
                 return
-            
+
             # Update throttle time for all operations
             update_throttle_time()
-            
-            # Update emit time immediately to prevent further emissions for 1 hour
-            self.last_emit_time = current_time
 
-            
             # Extract data
             temp_c = data.get('temperature_c')
             humidity_pct = data.get('humidity_percent')
@@ -864,39 +977,39 @@ class USBDataProcessor:
                     pass
 
             # Store to database (controlled by unified throttling)
-            # Database operations (already throttled by unified system)
-                if temp_c is not None:
-                    db.add_temperature_reading(
-                        temperature_c=temp_c,
-                        sensor_type='bme280_usb',
-                        sensor_id='micropython_device',
-                        timestamp=timestamp
-                    )
-                
-                if humidity_pct is not None:
-                    db.add_humidity_reading(
-                        humidity_percent=humidity_pct,
-                        sensor_type='bme280_usb',
-                        sensor_id='micropython_device',
-                        timestamp=timestamp
-                    )
-                
-                if pressure_hpa is not None:
-                    db.add_pressure_reading(
-                        pressure_hpa=pressure_hpa,
-                        sensor_type='bme280_usb',
-                        sensor_id='micropython_device',
-                        timestamp=timestamp
-                    )
-                if air_data:
-                    db.add_air_quality_reading(
-                        data=air_data,
-                        sensor_type='mq135_usb',
-                        sensor_id='micropython_device',
-                        timestamp=timestamp
-                    )
-                # self.last_emit_time already updated above
-                self.logger.info("Stored readings to database")
+            if temp_c is not None:
+                db.add_temperature_reading(
+                    temperature_c=temp_c,
+                    sensor_type='bme280_usb',
+                    sensor_id='micropython_device',
+                    timestamp=timestamp
+                )
+
+            if humidity_pct is not None:
+                db.add_humidity_reading(
+                    humidity_percent=humidity_pct,
+                    sensor_type='bme280_usb',
+                    sensor_id='micropython_device',
+                    timestamp=timestamp
+                )
+
+            if pressure_hpa is not None:
+                db.add_pressure_reading(
+                    pressure_hpa=pressure_hpa,
+                    sensor_type='bme280_usb',
+                    sensor_id='micropython_device',
+                    timestamp=timestamp
+                )
+
+            if air_data:
+                db.add_air_quality_reading(
+                    data=air_data,
+                    sensor_type='mq135_usb',
+                    sensor_id='micropython_device',
+                    timestamp=timestamp
+                )
+
+            self.logger.info("Stored readings to database")
             
             self.error_count = 0  # Reset error count on success
             
@@ -1069,15 +1182,23 @@ def initialize_application():
         temperature_sensor = TemperatureSensorReader("mock")
         from sensor_reader import HumiditySensorReader
         humidity_sensor = HumiditySensorReader("mock")
-        
-        # No scheduler needed - USB reader handles real-time data
+
+        # Initialize scheduler for daily OCR task at 12:00
+        scheduler = BackgroundScheduler()
+        scheduler.add_job(
+            scheduled_ocr_task,
+            'cron',
+            hour=12,
+            minute=0,
+            id='daily_ocr_task',
+            name='Daily OCR Meter Reading at 12:00'
+        )
+        scheduler.start()
+        logger.info("Scheduler started - OCR task will run daily at 12:00")
+
         logger.info("Application initialized with USB sensor data")
         return True
-        
-    except Exception as e:
-        logger.error(f"Failed to initialize application: {e}")
-        return False
-        
+
     except Exception as e:
         logger.error(f"Failed to initialize application: {e}")
         return False
@@ -1304,6 +1425,19 @@ def run_ocr():
                     break
             
             if four_digit:
+                # Save successful reading to database
+                try:
+                    db.add_meter_reading(
+                        meter_value=four_digit,
+                        ocr_engine=f"Google Gemini ({model})",
+                        raw_ocr_text=ocr_text,
+                        sensor_type="esp32cam_ocr",
+                        sensor_id="cabana1_meter"
+                    )
+                    logger.info(f"Saved meter reading to database: {four_digit}")
+                except Exception as db_err:
+                    logger.error(f"Failed to save meter reading to database: {db_err}")
+
                 return jsonify({
                     "success": True,
                     "index": four_digit,
