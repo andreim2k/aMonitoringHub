@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="version" content="1759253889">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>@MonitoringHub - Real-time Weather Monitoring</title>
@@ -638,7 +642,7 @@
             </div>
           </div>
           <div style="text-align: center; width: 100%; margin-bottom: 15px;">
-            <div class="em-controls" style="display:flex; flex-direction:column; gap:10px; align-items:center; justify-content:center; margin: 0 auto 10px;">
+            <div id="webcamControls" class="em-controls" style="display:flex; flex-direction:column; gap:10px; align-items:center; justify-content:center; margin: 0 auto 10px;">
               <div style="display:flex; align-items:center; gap:10px;">
                 <label for="flashToggle" style="color:#b3b3b3; font-size:0.9rem;">Flash</label>
                 <label style="position:relative; display:inline-block; width:46px; height:24px;">
@@ -654,10 +658,9 @@
               </div>
             </div>
             <button id="captureSettingsBtn" class="btn" style="margin: 5px; background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%); display: none;">Snapshot</button>
-            <button id="ocrBtn" class="btn" style="margin: 5px; background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%); display: none;">🔍 Read Index No.</button>
           </div>
           <div style="text-align: center; width: 100%;">
-            <div id="ocrIndex" style="font-size: 1.5rem; font-weight: bold; color: #888; margin-bottom: 8px;">Index: -----</div>
+            <div id="ocrIndex" style="font-size: 1.5rem; font-weight: bold; color: #888; margin-bottom: 8px; display: none;"></div>
             <div id="ocrStatus" style="font-size: 0.9rem; color: #888;"></div>
           </div>
         </div>
@@ -1417,6 +1420,11 @@ async function initialize() {
       const statusEl = document.getElementById("ocrStatus");
       
       // Show loading
+      // Hide controls and button during capture
+      const controls = document.getElementById("webcamControls");
+      const btn = document.getElementById("captureSettingsBtn");
+      if (controls) controls.style.display = "none";
+      if (btn) btn.style.display = "none";
       loading.style.display = "flex";
       placeholder.style.display = "none";
       img.style.display = "none";
@@ -1431,15 +1439,19 @@ async function initialize() {
       .then(response => response.json())
       .then(data => {
         loading.style.display = "none";
-        
         if (data.success && data.image) {
           img.src = data.image;
           img.style.display = "block";
-          ocrBtn.style.display = "inline-block";
+          // Show controls after image loads
+          const controls = document.getElementById("webcamControls");
+          const btn = document.getElementById("captureSettingsBtn");
+          if (controls) controls.style.display = "flex";
+          if (btn) btn.style.display = "block";
           const capSetBtn = document.getElementById("captureSettingsBtn");
           if (capSetBtn) capSetBtn.style.display = "inline-block";
           statusEl.textContent = "Image loaded - Ready for Reading Index";
           statusEl.style.color = "#4caf50";
+          readIndexAfterCapture(latestWebcamOverrides);
         } else {
           placeholder.style.display = "flex";
           placeholder.innerHTML = "❌ Capture failed<br><small>" + (data.error || "Unknown error") + "</small>";
@@ -1451,16 +1463,69 @@ async function initialize() {
         loading.style.display = "none";
         placeholder.style.display = "flex";
         placeholder.innerHTML = "❌ Connection error";
-        statusEl.textContent = "Network error";
+        statusEl.textContent = "Network error" + error;
         statusEl.style.color = "#f44336";
       });
     }
-    
+
+    // Manual Index Reading Function
+    // OCR function refactored for reuse after snapshot
+    async function readIndexAfterCapture(overrides) {
+      const indexEl = document.getElementById("ocrIndex");
+      const statusEl = document.getElementById("ocrStatus");
+      // Show reading status in status field, hide index
+      indexEl.textContent = "";
+      indexEl.style.display = "none";
+      statusEl.textContent = "📖 Reading index...";
+      statusEl.style.color = "#2196F3";
+
+      const fetchOptions = { method: 'POST', headers: { 'Content-Type': 'application/json' } };
+      if (overrides) { fetchOptions.body = JSON.stringify(overrides); }
+
+      fetch("/webcam/ocr", fetchOptions)
+      .then(response => response.json())
+      .then(data => {
+        console.log('OCR Response:', data);
+        
+        // Clear reading status
+        statusEl.textContent = "";
+        
+        if (data.success && data.index !== "-----") {
+          // SUCCESS: Show index
+          indexEl.textContent = "Index: 1" + data.index;
+          indexEl.style.display = "block";
+          indexEl.style.color = "#4CAF50";
+          statusEl.textContent = "✓ " + (data.engine || "Success");
+          statusEl.style.color = "#4CAF50";
+        } else {
+          // FAILURE: Hide index, show error
+          indexEl.textContent = "";
+          indexEl.style.display = "none";
+          statusEl.textContent = "✗ " + (data.error || "Failed to read index!");
+          statusEl.style.color = "#f44336";
+        }
+      })
+      .catch(error => {
+        console.error('OCR Error:', error);
+        indexEl.textContent = "";
+        indexEl.style.display = "none";
+        statusEl.textContent = "✗ Network error: " + error.message;
+        statusEl.style.color = "#f44336";
+      });
+    }
+
     // Capture with settings button handler
     (function(){
+        console.log('I AM HEREEEEEEEEEEEEE');   
       const captureSettingsBtn = document.getElementById("captureSettingsBtn");
       if (captureSettingsBtn) {
         captureSettingsBtn.addEventListener("click", function() {
+          // Hide controls and snapshot button while capturing
+          const controls = document.getElementById("webcamControls");
+          const btn = document.getElementById("captureSettingsBtn");
+          if (controls) controls.style.display = "none";
+          if (btn) btn.style.display = "none";
+          
           const img = document.getElementById("webcamImage");
           const loading = document.getElementById("webcamLoading");
           const placeholder = document.getElementById("webcamPlaceholder");
@@ -1484,11 +1549,16 @@ async function initialize() {
           .then(r => r.json())
           .then(data => {
             loading.style.display = "none";
+            // Show controls and snapshot button
+            const controls = document.getElementById("webcamControls");
+            const btn = document.getElementById("captureSettingsBtn");
+            if (controls) controls.style.display = "flex";
+            if (btn) btn.style.display = "block";
             if (data.success && data.image) {
               img.src = data.image;
               img.style.display = "block";
-              statusEl.textContent = "Snapshot captured - Ready for Reading Index";
-              statusEl.style.color = "#4caf50";
+              // Automatically read index after capture
+              readIndexAfterCapture(latestWebcamOverrides);
             } else {
               placeholder.style.display = "flex";
               placeholder.innerHTML = "❌ Capture failed<br><small>" + (data.error || "Unknown error") + "</small>";
@@ -1507,52 +1577,6 @@ async function initialize() {
       }
     })();
 
-    // Manual Index Reading Function
-    document.getElementById("ocrBtn").addEventListener("click", function() {
-      const indexEl = document.getElementById("ocrIndex");
-      const statusEl = document.getElementById("ocrStatus");
-      const ocrBtn = document.getElementById("ocrBtn");
-      
-      // Clean up index first and disable button
-      indexEl.textContent = "Index: -----";
-      indexEl.style.color = "#888";
-      ocrBtn.disabled = true;
-      ocrBtn.textContent = "🔍 Reading...";
-      statusEl.textContent = "Reading meter index...";
-      statusEl.style.color = "#ffa726";
-      
-      // Use only the latest captured settings (if available)
-      const fetchOptions = { method: 'POST', headers: { 'Content-Type': 'application/json' } };
-      if (latestWebcamOverrides) { fetchOptions.body = JSON.stringify(latestWebcamOverrides); }
-
-      fetch("/webcam/ocr", fetchOptions)
-      .then(response => response.json())
-      .then(data => {
-        // Re-enable button
-        ocrBtn.disabled = false;
-        ocrBtn.textContent = "🔍 Read Index No.";
-        
-        if (data.success && data.index !== "-----") {
-          indexEl.textContent = "Index: " + data.index;
-          indexEl.style.color = "#4caf50";
-          statusEl.textContent = data.engine + " - Success";
-          statusEl.style.color = "#4caf50";
-        } else {
-          indexEl.textContent = "Index: -----";
-          indexEl.style.color = "#f44336";
-          statusEl.textContent = (data.error || "Reading index failed");
-          statusEl.style.color = "#f44336";
-        }
-      })
-      .catch(error => {
-        ocrBtn.disabled = false;
-        ocrBtn.textContent = "🔍 Read Index No.";
-        indexEl.textContent = "Index: -----";
-        indexEl.style.color = "#f44336";
-        statusEl.textContent = "Reading index request failed";
-        statusEl.style.color = "#f44336";
-      });
-    });
     
     // Auto-capture image when page loads (immediately)
     setTimeout(() => {

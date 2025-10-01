@@ -1149,7 +1149,7 @@ def capture_webcam():
             "contrast": 0,
             "saturation": 0,
             "exposure": 300,
-            "gain": 2,
+            "gain": 10,
             "special_effect": 1,
             "wb_mode": 0,
             "hmirror": False,
@@ -1203,17 +1203,19 @@ def capture_webcam():
 
 @app.route("/webcam/ocr", methods=['POST'])
 def run_ocr():
-    """Run OCR on a freshly captured image - Manual trigger only"""
+    """Run OCR on a freshly captured image using Gemini API - Manual trigger only"""
     import base64
     import json
     import os
     import requests
+    import re
     from datetime import datetime
     
     try:
         # Capture a fresh image (no auto-OCR elsewhere)
-        cap_resp = capture_webcam()
-        cap_json = json.loads(cap_resp.get_data(as_text=True))
+        with app.test_client() as client:
+            cap_resp = client.post('/webcam/capture')
+            cap_json = cap_resp.get_json()
         if not cap_json.get('success'):
             return jsonify({
                 "success": False,
@@ -1226,7 +1228,6 @@ def run_ocr():
         prefix = 'data:image/jpeg;base64,'
         if image_b64.startswith(prefix):
             image_b64 = image_b64[len(prefix):]
-        image_data = base64.b64decode(image_b64)
         
         # Load config for OCR
         with open(os.path.join(os.path.dirname(__file__), 'config.json'), 'r') as f:
@@ -1234,31 +1235,96 @@ def run_ocr():
         
         # Try Gemini OCR
         try:
-            import google.generativeai as genai
-            from PIL import Image
-            import io, re
+            gemini_config = config.get('ocr', {}).get('engines', {}).get('gemini', {})
+            api_key = gemini_config.get('api_key')
+            model = gemini_config.get('model', 'gemini-2.0-flash-exp')
+            prompt = gemini_config.get('prompt', 'Extract only the numbers from this image.')
             
-            api_key = config.get('ocr', {}).get('engines', {}).get('gemini', {}).get('api_key')
             if not api_key:
                 raise Exception("Gemini API key not configured")
             
-            genai.configure(api_key=api_key)
-            model = genai.GenerativeModel(config.get('ocr', {}).get('engines', {}).get('gemini', {}).get('model', 'gemini-1.5-flash'))
-            image = Image.open(io.BytesIO(image_data))
-            prompt = "Extract only the numbers from this electricity meter display. Return only digits, no text."
-            ocr_response = model.generate_content([prompt, image])
-            ocr_text = (ocr_response.text or '').strip()
+            # Prepare Gemini API request
+            url = f'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}'
+            
+            headers = {
+                'Content-Type': 'application/json'
+            }
+            
+            payload = {
+                "contents": [
+                    {
+                        "parts": [
+                            {
+                                "text": prompt
+                            },
+                            {
+                                "inline_data": {
+                                    "mime_type": "image/jpeg",
+                                    "data": image_b64
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+            
+            # Make API call to Gemini
+            ocr_response = requests.post(
+                url,
+                headers=headers,
+                json=payload,
+                timeout=30
+            )
+            ocr_response.raise_for_status()
+            
+            result = ocr_response.json()
+            ocr_text = result.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', '').strip()
+            
+            # Check if OCR failed according to the prompt (EXACT match)
+            if 'Failed to read index!' in ocr_text:
+                # Gemini wasn't confident - return the exact failure message
+                return jsonify({
+                    "success": False,
+                    "index": "-----",
+                    "engine": f"Google Gemini ({model})",
+                    "image": cap_json['image'],
+                    "timestamp": datetime.now().isoformat() + "Z",
+                    "raw_ocr": ocr_text,
+                    "error": "Failed to read index!"
+                })
+            
+            # Extract numbers from response
             numbers = re.findall(r'\d+', ocr_text)
             
-            return jsonify({
-                "success": True if numbers else False,
-                "index": "1" + max(numbers, key=len) if numbers else "-----",
-                "engine": "Gemini AI",
-                "image": cap_json['image'],
-                "timestamp": datetime.now().isoformat() + "Z",
-                "raw_ocr": ocr_text
-            })
+            # Find exactly 4-digit number
+            four_digit = None
+            for num in numbers:
+                if len(num) == 4:
+                    four_digit = num
+                    break
+            
+            if four_digit:
+                return jsonify({
+                    "success": True,
+                    "index": four_digit,
+                    "engine": f"Google Gemini ({model})",
+                    "image": cap_json['image'],
+                    "timestamp": datetime.now().isoformat() + "Z",
+                    "raw_ocr": ocr_text
+                })
+            else:
+                return jsonify({
+                    "success": False,
+                    "index": "-----",
+                    "engine": f"Google Gemini ({model})",
+                    "image": cap_json['image'],
+                    "timestamp": datetime.now().isoformat() + "Z",
+                    "raw_ocr": ocr_text,
+                    "error": "No 4-digit number found in response"
+                })
+                
         except Exception as ocr_error:
+            logger.error(f"Gemini OCR error: {ocr_error}")
             return jsonify({
                 "success": False,
                 "index": "-----",
@@ -1277,7 +1343,6 @@ def run_ocr():
         }), 500
 
 
-# Deprecate legacy /snapshot route for webcam - keep but no auto OCR
 @app.route("/snapshot", methods=['GET', 'POST'])
 def snapshot():
     """Snapshot endpoint - accessible via GET or POST for compatibility"""

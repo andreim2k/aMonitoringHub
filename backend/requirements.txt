@@ -19,11 +19,8 @@ pyserial==3.5
 # Production server
 gunicorn>=21.2.0
 
-# HTTP client for webcam functionality
+# HTTP client for webcam functionality and OpenRouter API
 requests>=2.32.0
 
-# AI/ML - Google Generative AI
-google-generativeai>=0.8.5
-
-# Image processing
+# Image processing (optional for future use)
 Pillow>=11.3.0

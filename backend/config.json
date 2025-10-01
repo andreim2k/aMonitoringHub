@@ -2,7 +2,7 @@
   "webcam": {
     "url": "http://192.168.50.3/snapshot",
     "enabled": true,
-    "title": "\ud83d\udcf9 Cabana 1 Electricity Meter"
+    "title": "📹 Cabana 1 Electricity Meter"
   },
   "ocr": {
     "enabled": true,
@@ -11,9 +11,11 @@
         "enabled": true,
         "config": "--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789"
       },
-      "perplexity": {
+      "gemini": {
         "enabled": true,
-        "model": "sonar"
+        "api_key": "AIzaSyB1Stx5-UA9GrvpROHaT2dUE92BTQRkGrc",
+        "model": "gemini-2.0-flash-exp",
+        "prompt": "Pay attention and look very carefully: extract me the number ONLY from the image! number is made from 4 digits! If you are not sure which is the last digit, just return exactly this text: 'Failed to read index!', else return only the number without any comment!"
       }
     },
     "refresh_interval": 30

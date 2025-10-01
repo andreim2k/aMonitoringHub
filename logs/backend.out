@@ -1,5 +1,449 @@
 Throttle interval set to 3600 seconds
  * Serving Flask app 'app'
  * Debug mode: off
-Address already in use
-Port 5000 is in use by another program. Either identify and stop that program, or start the server with a different port.
+2025-09-30 21:52:02,732 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by ConnectTimeoutError(<urllib3.connection.HTTPConnection object at 0x75d270385880>, 'Connection to 192.168.50.3 timed out. (connect timeout=20)'))
+2025-09-30 21:52:36,455 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by ConnectTimeoutError(<urllib3.connection.HTTPConnection object at 0x75d270384380>, 'Connection to 192.168.50.3 timed out. (connect timeout=20)'))
+2025-09-30 21:52:40,734 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by ConnectTimeoutError(<urllib3.connection.HTTPConnection object at 0x75d270413ec0>, 'Connection to 192.168.50.3 timed out. (connect timeout=20)'))
+2025-09-30 21:55:08,589 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by ConnectTimeoutError(<urllib3.connection.HTTPConnection object at 0x75d270413c20>, 'Connection to 192.168.50.3 timed out. (connect timeout=20)'))
+2025-09-30 22:15:46,906 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by ConnectTimeoutError(<urllib3.connection.HTTPConnection object at 0x75d270411af0>, 'Connection to 192.168.50.3 timed out. (connect timeout=20)'))
+2025-09-30 22:41:47,390 - werkzeug - ERROR - 100.125.144.107 - - [30/Sep/2025 22:41:47] code 400, message Bad request version ('Ï1è\x94F%ìdûÅ@ùXW¿ÿ×blýN\x8b#ØxÌ:\x9c0\x98èf\x00*\x8a\x8a\x13\x02\x13\x03\x13\x01À,À+Ì©À0À/Ì¨À')
+2025-09-30 22:41:47,579 - werkzeug - ERROR - 100.125.144.107 - - [30/Sep/2025 22:41:47] code 400, message Bad request version ('êqiV\x00*\x9a\x9a\x13\x02\x13\x03\x13\x01À,À+Ì©À0À/Ì¨À')
+2025-09-30 22:41:47,761 - werkzeug - ERROR - 100.125.144.107 - - [30/Sep/2025 22:41:47] code 400, message Bad request version ('D#9\x00*jj\x13\x02\x13\x03\x13\x01À,À+Ì©À0À/Ì¨À')
+2025-09-30 22:41:47,937 - werkzeug - ERROR - 100.125.144.107 - - [30/Sep/2025 22:41:47] code 400, message Bad request version ('.õoNÿ£ð®T\x96gÞ\x86úÐ\x9e\x18Ã\x9añýýlJ5\x8düçD`\x90A\x00*\x1a\x1a\x13\x02\x13\x03\x13\x01À,À+Ì©À0À/Ì¨À')
+2025-09-30 22:41:50,751 - werkzeug - ERROR - 100.125.144.107 - - [30/Sep/2025 22:41:50] code 400, message Bad request version ('âÛw\x07$\x82ïsm^ï\x12m\x9bÊ\x12\x86zS1_\x00*ªª\x13\x02\x13\x03\x13\x01À,À+Ì©À0À/Ì¨À')
+2025-09-30 22:41:50,930 - werkzeug - ERROR - 100.125.144.107 - - [30/Sep/2025 22:41:50] code 400, message Bad request version ('Ä\x9dÔDALÂuÏaùû:\x04\xadfâ\x04)R\x00***\x13\x02\x13\x03\x13\x01À,À+Ì©À0À/Ì¨À')
+2025-09-30 22:41:51,120 - werkzeug - ERROR - 100.125.144.107 - - [30/Sep/2025 22:41:51] code 400, message Bad request version ('D0f\x16Ug\xadú¤FRYÒ;\x00*zz\x13\x02\x13\x03\x13\x01À,À+Ì©À0À/Ì¨À')
+2025-09-30 22:41:51,308 - werkzeug - ERROR - 100.125.144.107 - - [30/Sep/2025 22:41:51] code 400, message Bad request version ('6î\x96\x8d)3')
+2025-09-30 22:42:08,357 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by ConnectTimeoutError(<urllib3.connection.HTTPConnection object at 0x75d270264b60>, 'Connection to 192.168.50.3 timed out. (connect timeout=20)'))
+2025-09-30 23:11:43,830 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-09-30 23:11:43,832 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-09-30 23:25:09,421 - __main__ - ERROR - USBJSONReader error: device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2025-09-30 23:25:10,422 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:11,423 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:12,424 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:13,425 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:14,426 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:15,426 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:16,427 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:17,428 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:18,429 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:19,430 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:20,431 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:21,432 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:22,433 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:23,433 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:24,434 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:25,435 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:26,436 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:27,437 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:28,438 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:29,439 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:30,439 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:31,440 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:32,441 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:33,442 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:34,443 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:35,444 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:36,444 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:37,445 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:38,446 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:39,447 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:40,448 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:41,449 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:42,449 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:43,450 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:44,451 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:45,452 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:46,453 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:47,454 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:48,454 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:49,455 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:50,456 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:51,457 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:52,458 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:53,459 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:54,460 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:55,460 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:56,461 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:57,462 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:58,463 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:25:59,464 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:00,465 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:01,466 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:02,467 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:03,468 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:04,469 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:05,470 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:06,470 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:07,471 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:08,472 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:09,473 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:10,474 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:11,475 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:12,476 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:13,476 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:14,477 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:15,478 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:16,479 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:17,480 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:18,481 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:19,482 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:20,482 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:21,483 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:22,484 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:23,485 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:24,486 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:25,487 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:26,487 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:27,488 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:28,489 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:29,490 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:30,491 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:31,492 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:32,492 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:33,493 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:34,494 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:35,495 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:36,496 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:37,497 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:38,498 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:39,498 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:40,499 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:41,500 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:42,501 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:43,502 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:44,503 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:45,503 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:46,504 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:47,505 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:48,506 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:49,507 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:50,508 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:51,509 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:26:52,509 - __main__ - ERROR - USBJSONReader error: [Errno 13] could not open port /dev/ttyACM0: [Errno 13] Permission denied: '/dev/ttyACM0'
+2025-09-30 23:30:30,080 - __main__ - ERROR - USBJSONReader error: device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2025-09-30 23:30:31,081 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:30:32,082 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:30:33,083 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:30:34,084 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:30:35,085 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:30:36,087 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:30:37,087 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:30:38,088 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:30:39,089 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:30:40,090 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:30:41,091 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:30:42,092 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:30:43,093 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:30:44,094 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:30:45,095 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:30:46,097 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:30:47,097 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:30:48,098 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:30:49,099 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:30:50,100 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:30:51,101 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:30:52,102 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:30:53,103 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:30:54,104 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:30:55,105 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:30:56,106 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:30:57,107 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:30:58,108 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:30:59,109 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:00,109 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:01,111 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:02,112 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:03,113 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:04,114 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:05,114 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:06,116 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:07,117 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:08,118 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:09,119 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:10,119 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:11,121 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:12,122 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:13,122 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:14,123 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:15,124 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:16,125 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:17,126 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:18,127 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:19,128 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:20,129 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:21,130 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:22,131 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:23,132 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:24,132 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:25,133 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:26,134 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:27,135 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:28,136 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:29,137 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:30,138 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:31,139 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:32,140 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:33,141 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:34,141 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:35,142 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:36,144 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:37,145 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:38,145 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:39,146 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:40,147 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:41,148 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:42,149 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:43,150 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:44,151 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:45,152 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:46,153 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:47,154 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:48,155 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:49,156 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:50,157 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:51,158 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:52,159 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:53,160 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:54,160 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:55,161 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:56,163 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:57,164 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:58,165 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:31:59,165 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:00,166 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:01,168 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:02,169 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:03,170 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:04,170 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:05,171 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:06,173 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:07,173 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:08,174 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:09,175 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:10,176 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:11,177 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:12,178 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:13,179 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:14,180 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:15,181 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:16,182 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:17,183 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:18,184 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:19,185 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:20,186 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:21,187 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:22,188 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:23,189 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:24,190 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:25,190 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:26,192 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:27,193 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:28,193 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:29,194 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:30,195 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:31,196 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:32,197 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:33,198 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:34,199 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:35,200 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:36,201 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:37,202 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:38,203 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:39,204 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:40,205 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:41,206 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:42,207 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:43,208 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:44,208 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:45,209 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:46,211 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:47,212 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:48,212 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:49,213 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:50,214 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:51,216 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:52,216 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:53,217 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:54,218 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:55,219 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:56,220 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:57,221 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:58,222 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:32:59,223 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:00,223 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:01,225 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:02,226 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:03,227 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:04,227 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:05,228 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:06,229 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:07,230 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:08,231 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:09,232 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:10,233 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:11,234 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:12,235 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:13,236 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:14,237 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:15,237 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:16,239 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:17,240 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:18,241 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:19,241 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:20,242 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:21,244 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:22,245 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:23,245 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:24,246 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:25,247 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:26,249 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:27,249 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:28,250 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:29,251 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:30,252 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:31,253 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:32,254 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:33,255 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:34,256 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:35,257 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:36,259 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:37,260 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:38,261 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:39,262 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:40,263 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:41,264 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:42,265 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:43,266 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:44,267 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:45,267 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:46,269 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:47,270 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:48,271 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:49,272 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:50,272 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:51,274 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:52,274 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:53,275 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:54,276 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:55,277 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:56,278 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:57,279 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:58,280 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:33:59,281 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:34:00,282 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:34:01,282 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:34:02,283 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:34:03,284 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:34:04,285 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:34:05,286 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:34:06,287 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-09-30 23:34:07,288 - __main__ - ERROR - USBJSONReader error: [Errno 13] could not open port /dev/ttyACM0: [Errno 13] Permission denied: '/dev/ttyACM0'
+2025-10-01 01:11:44,327 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-01 01:11:44,331 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-01 08:11:46,581 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
