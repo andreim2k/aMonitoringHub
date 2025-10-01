@@ -1149,7 +1149,7 @@ def capture_webcam():
             "contrast": 0,
             "saturation": 0,
             "exposure": 300,
-            "gain": 10,
+            "gain": 2,
             "special_effect": 1,
             "wb_mode": 0,
             "hmirror": False,

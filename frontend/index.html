@@ -657,7 +657,7 @@
                 <span id="gainValue" class="unit-badge">2</span>
               </div>
             </div>
-            <button id="captureSettingsBtn" class="btn" style="margin: 5px; background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%); display: none;">Snapshot</button>
+            <button id="captureSettingsBtn" class="btn" style="margin: 5px auto; background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%); display: none;">Snapshot</button>
           </div>
           <div style="text-align: center; width: 100%;">
             <div id="ocrIndex" style="font-size: 1.5rem; font-weight: bold; color: #888; margin-bottom: 8px; display: none;"></div>
@@ -1448,23 +1448,23 @@ async function initialize() {
           if (controls) controls.style.display = "flex";
           if (btn) btn.style.display = "block";
           const capSetBtn = document.getElementById("captureSettingsBtn");
-          if (capSetBtn) capSetBtn.style.display = "inline-block";
-          statusEl.textContent = "Image loaded - Ready for Reading Index";
-          statusEl.style.color = "#4caf50";
-          readIndexAfterCapture(latestWebcamOverrides);
+          if (capSetBtn) capSetBtn.style.display = "block";
+          // statusEl.textContent = "Image loaded - Ready for Reading Index"; // Removed
+          // statusEl.style.color = "#4caf50"; // Removed
+          // readIndexAfterCapture(latestWebcamOverrides);
         } else {
           placeholder.style.display = "flex";
           placeholder.innerHTML = "❌ Capture failed<br><small>" + (data.error || "Unknown error") + "</small>";
-          statusEl.textContent = "Capture failed";
-          statusEl.style.color = "#f44336";
+          // statusEl.textContent = "Capture failed"; // Removed
+          // statusEl.style.color = "#f44336"; // Removed
         }
       })
       .catch(error => {
         loading.style.display = "none";
         placeholder.style.display = "flex";
         placeholder.innerHTML = "❌ Connection error";
-        statusEl.textContent = "Network error" + error;
-        statusEl.style.color = "#f44336";
+        // statusEl.textContent = "Network error" + error; // Removed
+        // statusEl.style.color = "#f44336"; // Removed
       });
     }
 
@@ -1539,8 +1539,8 @@ async function initialize() {
           loading.style.display = "flex";
           placeholder.style.display = "none";
           img.style.display = "none";
-          statusEl.style.color = "#ffa726";
-          statusEl.textContent = "Capturing with settings...";
+          // statusEl.style.color = "#ffa726"; // Removed
+          // statusEl.textContent = "Capturing with settings..."; // Removed
           fetch("/webcam/capture", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
@@ -1557,32 +1557,30 @@ async function initialize() {
             if (data.success && data.image) {
               img.src = data.image;
               img.style.display = "block";
-              // Automatically read index after capture
-              readIndexAfterCapture(latestWebcamOverrides);
             } else {
               placeholder.style.display = "flex";
               placeholder.innerHTML = "❌ Capture failed<br><small>" + (data.error || "Unknown error") + "</small>";
-              statusEl.textContent = "Capture with settings failed";
-              statusEl.style.color = "#f44336";
+              // statusEl.textContent = "Capture with settings failed"; // Removed
+              // statusEl.style.color = "#f44336"; // Removed
             }
           })
           .catch(err => {
             loading.style.display = "none";
             placeholder.style.display = "flex";
             placeholder.innerHTML = "❌ Connection error";
-            statusEl.textContent = "Network error during capture";
-            statusEl.style.color = "#f44336";
+            // statusEl.textContent = "Network error during capture"; // Removed
+            // statusEl.style.color = "#f44336"; // Removed
           });
         });
       }
     })();
 
     
+    
     // Auto-capture image when page loads (immediately)
     setTimeout(() => {
       captureWebcamImage();
     }, 100);
-
 
     // === Popup charts logic ===
     let modalChart = null; let popoverChart = null; let hoverHideTimer = null;
