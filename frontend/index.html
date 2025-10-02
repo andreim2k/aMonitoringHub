@@ -582,77 +582,6 @@
     .metric-timestampUnix { font-size: 0.76rem; }
   }
 
-  /* Mobile-friendly info tooltips */
-  .info-tooltip {
-    position: relative;
-    display: inline-block;
-  }
-
-  .info-icon {
-    display: inline-block;
-    width: 18px;
-    height: 18px;
-    line-height: 18px;
-    text-align: center;
-    background: rgba(255,255,255,0.1);
-    border-radius: 50%;
-    font-size: 12px;
-    cursor: pointer;
-    margin-left: 6px;
-    vertical-align: middle;
-    color: rgba(255,255,255,0.5);
-    transition: all 0.2s;
-  }
-
-  .info-icon:hover {
-    background: rgba(255,255,255,0.2);
-    color: rgba(255,255,255,0.8);
-  }
-
-  .tooltip-content {
-    display: none;
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    margin-bottom: 8px;
-    padding: 10px 12px;
-    background: rgba(0,0,0,0.95);
-    color: #fff;
-    border-radius: 8px;
-    font-size: 0.75rem;
-    line-height: 1.4;
-    width: max-content;
-    max-width: 280px;
-    z-index: 1000;
-    text-align: left;
-    border: 1px solid rgba(255,255,255,0.2);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  }
-
-  .tooltip-content::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 6px solid transparent;
-    border-top-color: rgba(0,0,0,0.95);
-  }
-
-  .tooltip-content.show {
-    display: block;
-  }
-
-  /* Ensure tooltip doesn't go off-screen on mobile */
-  @media (max-width: 600px) {
-    .tooltip-content {
-      max-width: 90vw;
-      left: 50%;
-      right: auto;
-    }
-  }
-
   </style>
 <style id="no-hover-status-readings">
 /* Conservative approach: Only disable hover effects for Status and Readings cards */
@@ -712,13 +641,7 @@
 
           <!-- AQI Main Display -->
           <div style="background: rgba(102,187,106,0.15); border-radius: 12px; padding: 16px; margin-bottom: 14px; text-align: center; border: 1px solid rgba(102,187,106,0.3);">
-            <div style="font-size: 0.8rem; color: #b3b3b3; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">
-              Air Quality Index
-              <span class="info-tooltip">
-                <span class="info-icon">ℹ</span>
-                <span class="tooltip-content">Air Quality Index (AQI): Overall air quality score from 1-5. Lower values indicate better air quality. Calculated from CO₂, NH₃, and Alcohol levels.</span>
-              </span>
-            </div>
+            <div style="font-size: 0.8rem; color: #b3b3b3; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Air Quality Index</div>
             <div id="currentAQI" style="font-size: 2.5rem; font-weight: 800; line-height: 1; margin-bottom: 6px; color: #66bb6a;">--</div>
             <div id="airQualityStatus" style="font-weight: 600; font-size: 0.85rem; padding: 6px 12px; border-radius: 6px; display: inline-block; background: rgba(255,255,255,0.08);">--</div>
           </div>
@@ -726,33 +649,15 @@
           <!-- Gas Readings Row -->
           <div class="gas-grid" style="display: flex; gap: 10px; justify-content: space-between; align-items: stretch;">
             <div style="background: rgba(239,83,80,0.15); border-radius: 8px; padding: 14px 10px; text-align: center; border: 1px solid rgba(239,83,80,0.3); flex: 1;">
-              <div style="font-size: 0.75rem; color: #ef5350; font-weight: 600; margin-bottom: 6px;">
-                CO₂
-                <span class="info-tooltip">
-                  <span class="info-icon">ℹ</span>
-                  <span class="tooltip-content">Carbon Dioxide (CO₂): Main indicator of air quality and ventilation. Levels above 1000 ppm indicate poor ventilation. Normal outdoor: 400 ppm. Good indoor: &lt;800 ppm.</span>
-                </span>
-              </div>
+              <div style="font-size: 0.75rem; color: #ef5350; font-weight: 600; margin-bottom: 6px;">CO₂</div>
               <div id="currentCO2" class="metric-value" style="font-size: 1.25rem; font-weight: 700;">-- ppm</div>
             </div>
             <div style="background: rgba(66,165,245,0.15); border-radius: 8px; padding: 14px 10px; text-align: center; border: 1px solid rgba(66,165,245,0.3); flex: 1;">
-              <div style="font-size: 0.75rem; color: #42a5f5; font-weight: 600; margin-bottom: 6px;">
-                NH₃
-                <span class="info-tooltip">
-                  <span class="info-icon">ℹ</span>
-                  <span class="tooltip-content">Ammonia (NH₃): Colorless gas with pungent smell. Common sources: cleaning products, fertilizers, human/pet waste. Levels above 50 ppm can cause irritation. Safe indoor: &lt;25 ppm.</span>
-                </span>
-              </div>
+              <div style="font-size: 0.75rem; color: #42a5f5; font-weight: 600; margin-bottom: 6px;">NH₃</div>
               <div id="currentNH3" class="metric-value" style="font-size: 1.25rem; font-weight: 700;">-- ppm</div>
             </div>
             <div style="background: rgba(255,167,38,0.15); border-radius: 8px; padding: 14px 10px; text-align: center; border: 1px solid rgba(255,167,38,0.3); flex: 1;">
-              <div style="font-size: 0.75rem; color: #ffa726; font-weight: 600; margin-bottom: 6px;">
-                Alcohol
-                <span class="info-tooltip">
-                  <span class="info-icon">ℹ</span>
-                  <span class="tooltip-content">Alcohol/VOCs: Volatile organic compounds from various sources including alcoholic beverages, solvents, paints, and cleaning products. High levels may indicate poor air circulation or chemical contamination.</span>
-                </span>
-              </div>
+              <div style="font-size: 0.75rem; color: #ffa726; font-weight: 600; margin-bottom: 6px;">Alcohol</div>
               <div id="currentAlcohol" class="metric-value" style="font-size: 1.25rem; font-weight: 700;">-- ppm</div>
             </div>
           </div>
@@ -908,6 +813,14 @@
           <input type="number" id="modalDayInput" placeholder="Day" min="1" max="31" style="display: none;">
         </div>
         <div class="chart-canvas-wrap"><canvas id="chartModalCanvas"></canvas></div>
+
+        <!-- Air Quality Information (shown only for CO2 chart) -->
+        <div id="airQualityInfo" style="display: none; margin-top: 15px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 0.75rem; line-height: 1.6; color: #e0e0e0;">
+          <div style="margin-bottom: 6px;"><span style="color: #66bb6a; font-weight: 600;">AQI:</span> Score 1-5, lower is better</div>
+          <div style="margin-bottom: 6px;"><span style="color: #ef5350; font-weight: 600;">CO₂:</span> Ventilation indicator</div>
+          <div style="margin-bottom: 6px;"><span style="color: #42a5f5; font-weight: 600;">NH₃:</span> From cleaning, waste</div>
+          <div><span style="color: #ffa726; font-weight: 600;">Alcohol:</span> VOCs from solvents</div>
+        </div>
       </div>
     </div>
     <div id="hoverPopover" class="chart-popover" aria-hidden="true">
@@ -2184,8 +2097,10 @@ async function initialize() {
         // Set better title for Air Quality
         if (kind === 'co2') {
           title.textContent = 'Air Quality History';
+          document.getElementById('airQualityInfo').style.display = 'block';
         } else {
           title.textContent = kind.toUpperCase() + ' History';
+          document.getElementById('airQualityInfo').style.display = 'none';
         }
         overlay.style.display = 'flex';
 
@@ -2259,46 +2174,6 @@ async function initialize() {
       if (closeBtn) closeBtn.addEventListener('click', ()=>{ overlay.style.display = 'none'; if (modalChart) { modalChart.destroy(); modalChart = null; } currentChartKind = null; currentModalChart = null; });
     })();
     // === End popup charts ===
-
-    // === Mobile-friendly tooltips ===
-    document.addEventListener('DOMContentLoaded', function() {
-      // Add click/tap handlers for info tooltips (prevent chart opening)
-      document.querySelectorAll('.info-tooltip').forEach(tooltipContainer => {
-        tooltipContainer.addEventListener('click', function(e) {
-          e.stopPropagation();
-          e.preventDefault();
-        });
-      });
-
-      // Add click/tap handlers for info icons
-      document.querySelectorAll('.info-icon').forEach(icon => {
-        icon.addEventListener('click', function(e) {
-          e.stopPropagation();
-          e.preventDefault();
-          const tooltip = this.nextElementSibling;
-          const wasVisible = tooltip.classList.contains('show');
-
-          // Hide all other tooltips
-          document.querySelectorAll('.tooltip-content.show').forEach(t => {
-            t.classList.remove('show');
-          });
-
-          // Toggle current tooltip
-          if (!wasVisible) {
-            tooltip.classList.add('show');
-          }
-        });
-      });
-
-      // Close tooltips when clicking outside
-      document.addEventListener('click', function(e) {
-        if (!e.target.closest('.info-tooltip')) {
-          document.querySelectorAll('.tooltip-content.show').forEach(tooltip => {
-            tooltip.classList.remove('show');
-          });
-        }
-      });
-    });
 
   </script>
 </body>
