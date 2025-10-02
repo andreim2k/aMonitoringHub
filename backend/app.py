@@ -533,9 +533,17 @@ class Query(ObjectType):
             logger.error(f'Error getting current humidity: {e}')
             return None
             
-    def resolve_humidity_history(self, info, range='daily', limit=1000):
+    def resolve_humidity_history(self, info, range='daily', limit=1000, year=None, month=None, day=None):
         try:
-            if range == 'recent':
+            # Handle time-based queries
+            if year is not None:
+                if month is not None and day is not None:
+                    readings = db.get_humidity_readings_by_day(year, month, day)
+                elif month is not None:
+                    readings = db.get_humidity_readings_by_month(year, month)
+                else:
+                    readings = db.get_humidity_readings_by_year(year)
+            elif range == 'recent':
                 readings = db.get_recent_humidity_readings(limit=limit)
             elif range == 'daily':
                 readings = db.get_recent_humidity_readings(limit=min(limit, 1440))  # Max 1 day of minute readings
@@ -543,7 +551,7 @@ class Query(ObjectType):
                 readings = db.get_recent_humidity_readings(limit=min(limit, 10080))  # Max 1 week of minute readings
             else:
                 readings = db.get_recent_humidity_readings(limit=limit)
-                
+
             return [
                 HumidityReading(
                     id=reading.id,
@@ -602,9 +610,19 @@ class Query(ObjectType):
             logger.error(f"Error getting current pressure: {e}")
             return None
 
-    def resolve_pressure_history(self, info, range="daily", limit=1000):
+    def resolve_pressure_history(self, info, range="daily", limit=1000, year=None, month=None, day=None):
         try:
-            readings = db.get_recent_pressure_readings(limit=min(limit, 5000))
+            # Handle time-based queries
+            if year is not None:
+                if month is not None and day is not None:
+                    readings = db.get_pressure_readings_by_day(year, month, day)
+                elif month is not None:
+                    readings = db.get_pressure_readings_by_month(year, month)
+                else:
+                    readings = db.get_pressure_readings_by_year(year)
+            else:
+                readings = db.get_recent_pressure_readings(limit=min(limit, 5000))
+
             result = [
                 PressureReading(
                     id=r.id,
@@ -659,9 +677,19 @@ class Query(ObjectType):
             logger.error(f"Error getting current air quality: {e}")
             return None
 
-    def resolve_air_quality_history(self, info, range="daily", limit=1000):
+    def resolve_air_quality_history(self, info, range="daily", limit=1000, year=None, month=None, day=None):
         try:
-            readings = db.get_recent_air_quality_readings(limit=min(limit, 5000))
+            # Handle time-based queries
+            if year is not None:
+                if month is not None and day is not None:
+                    readings = db.get_air_quality_readings_by_day(year, month, day)
+                elif month is not None:
+                    readings = db.get_air_quality_readings_by_month(year, month)
+                else:
+                    readings = db.get_air_quality_readings_by_year(year)
+            else:
+                readings = db.get_recent_air_quality_readings(limit=min(limit, 5000))
+
             result = [
                 AirQualityReading(
                     id=r.id,

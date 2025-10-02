@@ -418,6 +418,69 @@ class DatabaseManager:
             self.logger.error(f"Error getting humidity statistics: {e}")
             return {'count': 0, 'error': str(e)}
 
+    def get_humidity_readings_by_year(self, year: int, sensor_id: str = None) -> List[HumidityReading]:
+        """Get humidity readings for a specific year."""
+        try:
+            with self.get_session() as session:
+                start_time = datetime(year, 1, 1, tzinfo=timezone.utc)
+                end_time = datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+
+                query = session.query(HumidityReading).filter(
+                    HumidityReading.timestamp >= start_time,
+                    HumidityReading.timestamp < end_time
+                )
+
+                if sensor_id:
+                    query = query.filter(HumidityReading.sensor_id == sensor_id)
+
+                return query.order_by(HumidityReading.timestamp.desc()).all()
+        except Exception as e:
+            self.logger.error(f"Error getting humidity readings for year {year}: {e}")
+            return []
+
+    def get_humidity_readings_by_month(self, year: int, month: int, sensor_id: str = None) -> List[HumidityReading]:
+        """Get humidity readings for a specific month."""
+        try:
+            with self.get_session() as session:
+                start_time = datetime(year, month, 1, tzinfo=timezone.utc)
+                if month == 12:
+                    end_time = datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+                else:
+                    end_time = datetime(year, month + 1, 1, tzinfo=timezone.utc)
+
+                query = session.query(HumidityReading).filter(
+                    HumidityReading.timestamp >= start_time,
+                    HumidityReading.timestamp < end_time
+                )
+
+                if sensor_id:
+                    query = query.filter(HumidityReading.sensor_id == sensor_id)
+
+                return query.order_by(HumidityReading.timestamp.desc()).all()
+        except Exception as e:
+            self.logger.error(f"Error getting humidity readings for {year}-{month}: {e}")
+            return []
+
+    def get_humidity_readings_by_day(self, year: int, month: int, day: int, sensor_id: str = None) -> List[HumidityReading]:
+        """Get humidity readings for a specific day."""
+        try:
+            with self.get_session() as session:
+                start_time = datetime(year, month, day, tzinfo=timezone.utc)
+                end_time = start_time + timedelta(days=1)
+
+                query = session.query(HumidityReading).filter(
+                    HumidityReading.timestamp >= start_time,
+                    HumidityReading.timestamp < end_time
+                )
+
+                if sensor_id:
+                    query = query.filter(HumidityReading.sensor_id == sensor_id)
+
+                return query.order_by(HumidityReading.timestamp.desc()).all()
+        except Exception as e:
+            self.logger.error(f"Error getting humidity readings for {year}-{month}-{day}: {e}")
+            return []
+
 
 
 
@@ -498,6 +561,69 @@ class DatabaseManager:
             self.logger.error(f"Error getting pressure statistics: {e}")
             return {'count': 0, 'average': 0, 'minimum': 0, 'maximum': 0, 'hours_back': hours_back, 'min_timestamp': None, 'max_timestamp': None}
 
+    def get_pressure_readings_by_year(self, year: int, sensor_id: str = None) -> List[PressureReading]:
+        """Get pressure readings for a specific year."""
+        try:
+            with self.get_session() as session:
+                start_time = datetime(year, 1, 1, tzinfo=timezone.utc)
+                end_time = datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+
+                query = session.query(PressureReading).filter(
+                    PressureReading.timestamp >= start_time,
+                    PressureReading.timestamp < end_time
+                )
+
+                if sensor_id:
+                    query = query.filter(PressureReading.sensor_id == sensor_id)
+
+                return query.order_by(PressureReading.timestamp.desc()).all()
+        except Exception as e:
+            self.logger.error(f"Error getting pressure readings for year {year}: {e}")
+            return []
+
+    def get_pressure_readings_by_month(self, year: int, month: int, sensor_id: str = None) -> List[PressureReading]:
+        """Get pressure readings for a specific month."""
+        try:
+            with self.get_session() as session:
+                start_time = datetime(year, month, 1, tzinfo=timezone.utc)
+                if month == 12:
+                    end_time = datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+                else:
+                    end_time = datetime(year, month + 1, 1, tzinfo=timezone.utc)
+
+                query = session.query(PressureReading).filter(
+                    PressureReading.timestamp >= start_time,
+                    PressureReading.timestamp < end_time
+                )
+
+                if sensor_id:
+                    query = query.filter(PressureReading.sensor_id == sensor_id)
+
+                return query.order_by(PressureReading.timestamp.desc()).all()
+        except Exception as e:
+            self.logger.error(f"Error getting pressure readings for {year}-{month}: {e}")
+            return []
+
+    def get_pressure_readings_by_day(self, year: int, month: int, day: int, sensor_id: str = None) -> List[PressureReading]:
+        """Get pressure readings for a specific day."""
+        try:
+            with self.get_session() as session:
+                start_time = datetime(year, month, day, tzinfo=timezone.utc)
+                end_time = start_time + timedelta(days=1)
+
+                query = session.query(PressureReading).filter(
+                    PressureReading.timestamp >= start_time,
+                    PressureReading.timestamp < end_time
+                )
+
+                if sensor_id:
+                    query = query.filter(PressureReading.sensor_id == sensor_id)
+
+                return query.order_by(PressureReading.timestamp.desc()).all()
+        except Exception as e:
+            self.logger.error(f"Error getting pressure readings for {year}-{month}-{day}: {e}")
+            return []
+
     def add_air_quality_reading(self, data: dict, sensor_type: str = "unknown", sensor_id: str = "default", timestamp: datetime = None):
         try:
             with self.get_session() as session:
@@ -568,6 +694,69 @@ class DatabaseManager:
         except Exception as e:
             self.logger.error(f"Error getting AQ statistics: {e}")
             return {'count': 0, 'average': 0, 'minimum': 0, 'maximum': 0, 'hours_back': hours_back, 'min_timestamp': None, 'max_timestamp': None}
+
+    def get_air_quality_readings_by_year(self, year: int, sensor_id: str = None) -> List[AirQualityReading]:
+        """Get air quality readings for a specific year."""
+        try:
+            with self.get_session() as session:
+                start_time = datetime(year, 1, 1, tzinfo=timezone.utc)
+                end_time = datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+
+                query = session.query(AirQualityReading).filter(
+                    AirQualityReading.timestamp >= start_time,
+                    AirQualityReading.timestamp < end_time
+                )
+
+                if sensor_id:
+                    query = query.filter(AirQualityReading.sensor_id == sensor_id)
+
+                return query.order_by(AirQualityReading.timestamp.desc()).all()
+        except Exception as e:
+            self.logger.error(f"Error getting air quality readings for year {year}: {e}")
+            return []
+
+    def get_air_quality_readings_by_month(self, year: int, month: int, sensor_id: str = None) -> List[AirQualityReading]:
+        """Get air quality readings for a specific month."""
+        try:
+            with self.get_session() as session:
+                start_time = datetime(year, month, 1, tzinfo=timezone.utc)
+                if month == 12:
+                    end_time = datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+                else:
+                    end_time = datetime(year, month + 1, 1, tzinfo=timezone.utc)
+
+                query = session.query(AirQualityReading).filter(
+                    AirQualityReading.timestamp >= start_time,
+                    AirQualityReading.timestamp < end_time
+                )
+
+                if sensor_id:
+                    query = query.filter(AirQualityReading.sensor_id == sensor_id)
+
+                return query.order_by(AirQualityReading.timestamp.desc()).all()
+        except Exception as e:
+            self.logger.error(f"Error getting air quality readings for {year}-{month}: {e}")
+            return []
+
+    def get_air_quality_readings_by_day(self, year: int, month: int, day: int, sensor_id: str = None) -> List[AirQualityReading]:
+        """Get air quality readings for a specific day."""
+        try:
+            with self.get_session() as session:
+                start_time = datetime(year, month, day, tzinfo=timezone.utc)
+                end_time = start_time + timedelta(days=1)
+
+                query = session.query(AirQualityReading).filter(
+                    AirQualityReading.timestamp >= start_time,
+                    AirQualityReading.timestamp < end_time
+                )
+
+                if sensor_id:
+                    query = query.filter(AirQualityReading.sensor_id == sensor_id)
+
+                return query.order_by(AirQualityReading.timestamp.desc()).all()
+        except Exception as e:
+            self.logger.error(f"Error getting air quality readings for {year}-{month}-{day}: {e}")
+            return []
 
     def add_meter_reading(self, meter_value: str, ocr_engine: str = None, raw_ocr_text: str = None,
                          sensor_type: str = "esp32cam_ocr", sensor_id: str = "cabana1_meter",
