@@ -1900,9 +1900,13 @@ async function initialize() {
         if (radio.value !== 'recent' && !supportsTimeQuery) {
           radio.disabled = true;
           radio.parentElement.style.opacity = '0.5';
+          radio.parentElement.style.pointerEvents = 'none';
+          radio.parentElement.style.cursor = 'not-allowed';
         } else {
           radio.disabled = false;
           radio.parentElement.style.opacity = '1';
+          radio.parentElement.style.pointerEvents = 'auto';
+          radio.parentElement.style.cursor = 'pointer';
         }
       });
 
@@ -2027,11 +2031,16 @@ async function initialize() {
       // Add event listeners for radio buttons
       document.querySelectorAll("input[name=\"chartPeriod\"]").forEach(radio => {
         radio.addEventListener("change", function() {
+          // Prevent disabled options from being selected
+          if (this.disabled) {
+            document.getElementById('periodRecent').checked = true;
+            return;
+          }
           updateModalInputsVisibility();
           updateModalChartData();
         });
       });
-      
+
       // Add event listeners for input changes
       document.getElementById("modalYearInput").addEventListener("change", updateModalChartData);
       document.getElementById("modalMonthInput").addEventListener("change", updateModalChartData);
