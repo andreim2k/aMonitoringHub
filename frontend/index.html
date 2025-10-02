@@ -223,9 +223,7 @@
       border-radius: 12px;
       padding: 20px;
       text-align: center;
-      width: 200px;
       
-      max-width: 200px;
     }
     .metric-card-disabled {
       background: transparent;
@@ -233,9 +231,6 @@
       border-radius: 12px;
       padding: 20px;
       text-align: center;
-      width: 200px;
-      
-      max-width: 200px;
     }
     .stat-card {
       min-width: 0;
@@ -448,16 +443,10 @@
       box-shadow: 0 16px 48px rgba(102,187,106,0.25), inset 0 1px 0 rgba(255,255,255,0.25) !important;
     }
 
-    @media (max-width: 760px) {
+    @media (max-width: 600) {
       .air-quality-card {
         grid-column: span 1 !important;
         min-width: auto !important;
-      }
-      .air-quality-card .gas-grid {
-        flex-wrap: wrap !important;
-      }
-      .air-quality-card .gas-grid > div {
-        min-width: calc(33.333% - 8px) !important;
       }
       .air-quality-card #currentAQI {
         font-size: 2rem !important;
@@ -478,9 +467,9 @@
 
     /* Responsive grid */
     .metrics-row, .charts-row { display: grid; gap: 16px; }
-    .metrics-row { grid-template-columns: repeat(2, 1fr); margin-bottom: 18px; }
+    .metrics-row { grid-template-columns: repeat(2, 150px); margin-bottom: 18px; justify-content: center; max-width: 316px; margin-left: auto; margin-right: auto; }
     .charts-row { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); margin-bottom: 18px; }
-    @media (max-width: 760px) {
+    @media (max-width: 600) {
       .metric-value { font-size: 1.4rem; }
       .charts-row { grid-template-columns: 1fr; }
     }
@@ -571,8 +560,8 @@
 
   
   /* pair grid tweak */
-  @media (min-width: 600px) { .metrics-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  @media (min-width: 1100px) { .metrics-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 600px) { .metrics-row { grid-template-columns: repeat(2, minmax(200px, 280px)); } }
+  @media (min-width: 1100px) { .metrics-row { grid-template-columns: repeat(2, minmax(200px, 280px)); } }
 
 
   /* compact mobile two-up overrides */
@@ -587,7 +576,7 @@
     .icon { width: 18px; height: 18px; }
   }
   @media (min-width: 421px) and (max-width: 600px) {
-    .metrics-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .metrics-row { grid-template-columns: repeat(2, minmax(180px, 250px)); gap: 10px; }
     .metric-card, .metric-card-disabled, .stat-card { padding: 12px; }
     .metric-label { font-size: 1.05rem; }
     .metric-value { font-size: 1.35rem; }
@@ -624,7 +613,7 @@
 
   <div class="container">
       <!-- Row 1-2: Sensors Status & Total Readings (top), Air Quality below (spans both) -->
-      <div class="metrics-row" style="display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: auto auto; gap: 16px;">
+      <div class="metrics-row" style="grid-template-rows: auto auto;">
         <div class="metric-card-disabled glass" style="grid-column: 1; grid-row: 1;">
           <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Status" role="img"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
           <div class="metric-label">Sensors Status</div>
@@ -659,18 +648,18 @@
           </div>
 
           <!-- Gas Readings Row -->
-          <div class="gas-grid" style="display: flex; gap: 10px; justify-content: space-between; align-items: center;">
-            <div style="background: rgba(239,83,80,0.15); border-radius: 8px; padding: 10px; text-align: center; border: 1px solid rgba(239,83,80,0.3); flex: 1;">
-              <div style="font-size: 0.7rem; color: #ef5350; font-weight: 600; margin-bottom: 4px;">CO₂</div>
-              <div id="currentCO2" class="metric-value" style="font-size: 1.1rem; font-weight: 700;">-- ppm</div>
+          <div class="gas-grid" style="display: flex; gap: 10px; justify-content: space-between; align-items: stretch;">
+            <div style="background: rgba(239,83,80,0.15); border-radius: 8px; padding: 14px 10px; text-align: center; border: 1px solid rgba(239,83,80,0.3); flex: 1;">
+              <div style="font-size: 0.75rem; color: #ef5350; font-weight: 600; margin-bottom: 6px;">CO₂</div>
+              <div id="currentCO2" class="metric-value" style="font-size: 1.25rem; font-weight: 700;">-- ppm</div>
             </div>
-            <div style="background: rgba(66,165,245,0.15); border-radius: 8px; padding: 10px; text-align: center; border: 1px solid rgba(66,165,245,0.3); flex: 1;">
-              <div style="font-size: 0.7rem; color: #42a5f5; font-weight: 600; margin-bottom: 4px;">NH₃</div>
-              <div id="currentNH3" class="metric-value" style="font-size: 1.1rem; font-weight: 700;">-- ppm</div>
+            <div style="background: rgba(66,165,245,0.15); border-radius: 8px; padding: 14px 10px; text-align: center; border: 1px solid rgba(66,165,245,0.3); flex: 1;">
+              <div style="font-size: 0.75rem; color: #42a5f5; font-weight: 600; margin-bottom: 6px;">NH₃</div>
+              <div id="currentNH3" class="metric-value" style="font-size: 1.25rem; font-weight: 700;">-- ppm</div>
             </div>
-            <div style="background: rgba(255,167,38,0.15); border-radius: 8px; padding: 10px; text-align: center; border: 1px solid rgba(255,167,38,0.3); flex: 1;">
-              <div style="font-size: 0.7rem; color: #ffa726; font-weight: 600; margin-bottom: 4px;">Alcohol</div>
-              <div id="currentAlcohol" class="metric-value" style="font-size: 1.1rem; font-weight: 700;">-- ppm</div>
+            <div style="background: rgba(255,167,38,0.15); border-radius: 8px; padding: 14px 10px; text-align: center; border: 1px solid rgba(255,167,38,0.3); flex: 1;">
+              <div style="font-size: 0.75rem; color: #ffa726; font-weight: 600; margin-bottom: 6px;">Alcohol</div>
+              <div id="currentAlcohol" class="metric-value" style="font-size: 1.25rem; font-weight: 700;">-- ppm</div>
             </div>
           </div>
         </div>
@@ -691,7 +680,7 @@
       </div>
 
       <!-- Row 4-5: Humidity & Electricity Index (top), Electricity Meter below (spans both) -->
-      <div class="metrics-row" style="display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: auto auto; gap: 16px;">
+      <div class="metrics-row" style="grid-template-rows: auto auto;">
 <div class="metric-card glass humidity-card" style="grid-column: 1; grid-row: 1;">
           <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Humidity" role="img"><path fill="currentColor" d="M12 2s7 7.58 7 12a7 7 0 11-14 0c0-4.42 7-12 7-12z"/></svg></div>
           <div class="metric-label">Humidity <span class="unit-badge">%</span></div>
