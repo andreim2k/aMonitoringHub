@@ -2094,14 +2094,24 @@ async function initialize() {
           title.textContent = kind.toUpperCase() + ' History';
         }
         overlay.style.display = 'flex';
-        
-        // Reset radio buttons to "Recent"
-        document.getElementById('periodRecent').checked = true;
+
+        // Set default to "Days" with current date
+        document.getElementById('periodDay').checked = true;
+
+        // Set inputs to current date
+        const now = new Date();
+        document.getElementById('modalYearInput').value = now.getFullYear();
+        document.getElementById('modalMonthInput').value = now.getMonth() + 1;
+        document.getElementById('modalDayInput').value = now.getDate();
+
         updateModalInputsVisibility();
-        
+
         if (modalChart) { modalChart.destroy(); }
         modalChart = new Chart(canvas.getContext('2d'), { type: 'line', data: ds, options: buildLineOptions(kind) });
         currentModalChart = modalChart;
+
+        // Load current day's data
+        await updateModalChartData();
         
         // Setup event listeners if not already done
         if (!overlay.hasAttribute('data-listeners-setup')) {
