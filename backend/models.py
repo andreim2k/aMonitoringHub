@@ -418,7 +418,7 @@ class DatabaseManager:
             self.logger.error(f"Error getting humidity statistics: {e}")
             return {'count': 0, 'error': str(e)}
 
-    def get_humidity_readings_by_year(self, year: int, sensor_id: str = None) -> List[HumidityReading]:
+    def get_humidity_readings_by_year(self, year: int, sensor_id: str = None) -> List['HumidityReading']:
         """Get humidity readings for a specific year."""
         try:
             with self.get_session() as session:
@@ -438,7 +438,7 @@ class DatabaseManager:
             self.logger.error(f"Error getting humidity readings for year {year}: {e}")
             return []
 
-    def get_humidity_readings_by_month(self, year: int, month: int, sensor_id: str = None) -> List[HumidityReading]:
+    def get_humidity_readings_by_month(self, year: int, month: int, sensor_id: str = None) -> List['HumidityReading']:
         """Get humidity readings for a specific month."""
         try:
             with self.get_session() as session:
@@ -461,7 +461,7 @@ class DatabaseManager:
             self.logger.error(f"Error getting humidity readings for {year}-{month}: {e}")
             return []
 
-    def get_humidity_readings_by_day(self, year: int, month: int, day: int, sensor_id: str = None) -> List[HumidityReading]:
+    def get_humidity_readings_by_day(self, year: int, month: int, day: int, sensor_id: str = None) -> List['HumidityReading']:
         """Get humidity readings for a specific day."""
         try:
             with self.get_session() as session:
@@ -561,7 +561,7 @@ class DatabaseManager:
             self.logger.error(f"Error getting pressure statistics: {e}")
             return {'count': 0, 'average': 0, 'minimum': 0, 'maximum': 0, 'hours_back': hours_back, 'min_timestamp': None, 'max_timestamp': None}
 
-    def get_pressure_readings_by_year(self, year: int, sensor_id: str = None) -> List[PressureReading]:
+    def get_pressure_readings_by_year(self, year: int, sensor_id: str = None) -> List['PressureReading']:
         """Get pressure readings for a specific year."""
         try:
             with self.get_session() as session:
@@ -581,7 +581,7 @@ class DatabaseManager:
             self.logger.error(f"Error getting pressure readings for year {year}: {e}")
             return []
 
-    def get_pressure_readings_by_month(self, year: int, month: int, sensor_id: str = None) -> List[PressureReading]:
+    def get_pressure_readings_by_month(self, year: int, month: int, sensor_id: str = None) -> List['PressureReading']:
         """Get pressure readings for a specific month."""
         try:
             with self.get_session() as session:
@@ -604,7 +604,7 @@ class DatabaseManager:
             self.logger.error(f"Error getting pressure readings for {year}-{month}: {e}")
             return []
 
-    def get_pressure_readings_by_day(self, year: int, month: int, day: int, sensor_id: str = None) -> List[PressureReading]:
+    def get_pressure_readings_by_day(self, year: int, month: int, day: int, sensor_id: str = None) -> List['PressureReading']:
         """Get pressure readings for a specific day."""
         try:
             with self.get_session() as session:
@@ -695,7 +695,7 @@ class DatabaseManager:
             self.logger.error(f"Error getting AQ statistics: {e}")
             return {'count': 0, 'average': 0, 'minimum': 0, 'maximum': 0, 'hours_back': hours_back, 'min_timestamp': None, 'max_timestamp': None}
 
-    def get_air_quality_readings_by_year(self, year: int, sensor_id: str = None) -> List[AirQualityReading]:
+    def get_air_quality_readings_by_year(self, year: int, sensor_id: str = None) -> List['AirQualityReading']:
         """Get air quality readings for a specific year."""
         try:
             with self.get_session() as session:
@@ -715,7 +715,7 @@ class DatabaseManager:
             self.logger.error(f"Error getting air quality readings for year {year}: {e}")
             return []
 
-    def get_air_quality_readings_by_month(self, year: int, month: int, sensor_id: str = None) -> List[AirQualityReading]:
+    def get_air_quality_readings_by_month(self, year: int, month: int, sensor_id: str = None) -> List['AirQualityReading']:
         """Get air quality readings for a specific month."""
         try:
             with self.get_session() as session:
@@ -738,7 +738,7 @@ class DatabaseManager:
             self.logger.error(f"Error getting air quality readings for {year}-{month}: {e}")
             return []
 
-    def get_air_quality_readings_by_day(self, year: int, month: int, day: int, sensor_id: str = None) -> List[AirQualityReading]:
+    def get_air_quality_readings_by_day(self, year: int, month: int, day: int, sensor_id: str = None) -> List['AirQualityReading']:
         """Get air quality readings for a specific day."""
         try:
             with self.get_session() as session:
