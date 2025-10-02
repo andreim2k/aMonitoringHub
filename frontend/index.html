@@ -469,7 +469,7 @@
     .metrics-row, .charts-row { display: grid; gap: 16px; }
     .metrics-row { grid-template-columns: repeat(2, 150px); margin-bottom: 18px; justify-content: center; max-width: 316px; margin-left: auto; margin-right: auto; }
     .charts-row { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); margin-bottom: 18px; }
-    @media (max-width: 600) {
+    @media (max-width: 600px) {
       .metric-value { font-size: 1.4rem; }
       .charts-row { grid-template-columns: 1fr; }
     }
@@ -660,6 +660,45 @@
             <div style="background: rgba(255,167,38,0.15); border-radius: 8px; padding: 14px 10px; text-align: center; border: 1px solid rgba(255,167,38,0.3); flex: 1;">
               <div style="font-size: 0.75rem; color: #ffa726; font-weight: 600; margin-bottom: 6px;">Alcohol</div>
               <div id="currentAlcohol" class="metric-value" style="font-size: 1.25rem; font-weight: 700;">-- ppm</div>
+            </div>
+          </div>
+
+          <!-- Air Quality Legend -->
+          <div style="margin-top: 12px; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
+            <div style="font-size: 0.7rem; color: #b3b3b3; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; text-align: center;">Air Quality Thresholds</div>
+            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; font-size: 0.65rem; line-height: 1.4;">
+              <div style="text-align: center;">
+                <div style="color: #ef5350; font-weight: 600; margin-bottom: 2px;">CO₂</div>
+                <div style="color: #66bb6a;">≤800</div>
+                <div style="color: #ffa726;">800-1000</div>
+                <div style="color: #ef5350;">&gt;1000</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="color: #42a5f5; font-weight: 600; margin-bottom: 2px;">NH₃</div>
+                <div style="color: #66bb6a;">≤50</div>
+                <div style="color: #ffa726;">50-100</div>
+                <div style="color: #ef5350;">&gt;100</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="color: #ffa726; font-weight: 600; margin-bottom: 2px;">Alcohol</div>
+                <div style="color: #66bb6a;">≤100</div>
+                <div style="color: #ffa726;">100-300</div>
+                <div style="color: #ef5350;">&gt;300</div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 8px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.05);">
+              <div style="display: flex; align-items: center; gap: 3px;">
+                <div style="width: 10px; height: 10px; border-radius: 2px; background: #66bb6a;"></div>
+                <span style="font-size: 0.65rem; color: #e0e0e0;">Good</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 3px;">
+                <div style="width: 10px; height: 10px; border-radius: 2px; background: #ffa726;"></div>
+                <span style="font-size: 0.65rem; color: #e0e0e0;">Warning</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 3px;">
+                <div style="width: 10px; height: 10px; border-radius: 2px; background: #ef5350;"></div>
+                <span style="font-size: 0.65rem; color: #e0e0e0;">Bad</span>
+              </div>
             </div>
           </div>
         </div>
@@ -1882,43 +1921,78 @@ async function initialize() {
     
     async function updateModalChartData() {
       if (!currentChartKind) return;
-      
+
       const selectedPeriod = document.querySelector("input[name=\"chartPeriod\"]:checked")?.value;
       const year = parseInt(document.getElementById("modalYearInput").value) || null;
       const month = parseInt(document.getElementById("modalMonthInput").value) || null;
       const day = parseInt(document.getElementById("modalDayInput").value) || null;
-      
+
       try {
         let query = "";
         let dataKey = "";
-        
+        let historyField = "";
+
+        // Determine which history query to use based on metric type
+        const metricQueries = {
+          'temperature': {
+            fields: 'temperatureC timestampUnix sensorId',
+            yearQuery: 'temperatureHistoryByYear',
+            monthQuery: 'temperatureHistoryByMonth',
+            dayQuery: 'temperatureHistoryByDay',
+            recentQuery: 'temperatureHistory'
+          },
+          'humidity': {
+            fields: 'humidityPercent timestampUnix sensorId',
+            yearQuery: 'humidityHistory',
+            monthQuery: 'humidityHistory',
+            dayQuery: 'humidityHistory',
+            recentQuery: 'humidityHistory'
+          },
+          'pressure': {
+            fields: 'pressureHpa timestampUnix',
+            yearQuery: 'pressureHistory',
+            monthQuery: 'pressureHistory',
+            dayQuery: 'pressureHistory',
+            recentQuery: 'pressureHistory'
+          },
+          'co2': {
+            fields: 'co2Ppm timestampUnix',
+            yearQuery: 'airQualityHistory',
+            monthQuery: 'airQualityHistory',
+            dayQuery: 'airQualityHistory',
+            recentQuery: 'airQualityHistory'
+          }
+        };
+
+        const metricConfig = metricQueries[currentChartKind] || metricQueries['temperature'];
+
         if (selectedPeriod === "year" && year) {
-          query = `{ temperatureHistoryByYear(year: ${year}) { temperatureC timestampUnix sensorId } }`;
-          dataKey = "temperatureHistoryByYear";
+          dataKey = metricConfig.yearQuery;
+          query = `{ ${dataKey}(year: ${year}) { ${metricConfig.fields} } }`;
         } else if (selectedPeriod === "month" && year && month) {
-          query = `{ temperatureHistoryByMonth(year: ${year}, month: ${month}) { temperatureC timestampUnix sensorId } }`;
-          dataKey = "temperatureHistoryByMonth";
+          dataKey = metricConfig.monthQuery;
+          query = `{ ${dataKey}(year: ${year}, month: ${month}) { ${metricConfig.fields} } }`;
         } else if (selectedPeriod === "day" && year && month && day) {
-          query = `{ temperatureHistoryByDay(year: ${year}, month: ${month}, day: ${day}) { temperatureC timestampUnix sensorId } }`;
-          dataKey = "temperatureHistoryByDay";
+          dataKey = metricConfig.dayQuery;
+          query = `{ ${dataKey}(year: ${year}, month: ${month}, day: ${day}) { ${metricConfig.fields} } }`;
         } else {
-          query = "{ temperatureHistory(limit: 5000) { temperatureC timestampUnix sensorId } }";
-          dataKey = "temperatureHistory";
+          dataKey = metricConfig.recentQuery;
+          query = `{ ${dataKey}(limit: 5000) { ${metricConfig.fields} } }`;
         }
-        
+
         const response = await graphqlQuery(query);
         if (response.data && response.data[dataKey]) {
           // Temporarily update the current data to refresh the chart
           const originalHistory = currentData.history;
           currentData.history = response.data[dataKey];
-          
+
           // Update the chart
           const ds = chartDataFor(currentChartKind);
           if (currentModalChart && ds.labels.length > 0) {
             currentModalChart.data = ds;
             currentModalChart.update();
           }
-          
+
           // Restore original history (so main app data is not affected)
           currentData.history = originalHistory;
         }
