@@ -1937,29 +1937,18 @@ async function initialize() {
 
       // Validate date inputs
       if (selectedPeriod !== "recent") {
-        // Check for future dates
+        // Validate day for the selected month (silently handle invalid dates)
         if (year && month && day) {
-          const selectedDate = new Date(year, month - 1, day);
-          const now = new Date();
-          now.setHours(23, 59, 59, 999); // End of today
-          if (selectedDate > now) {
-            console.warn("Cannot select future date");
-            alert("Cannot select a future date. Please choose today or earlier.");
-            return;
-          }
-
-          // Validate day for the selected month
           const daysInMonth = new Date(year, month, 0).getDate();
           if (day > daysInMonth) {
-            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            alert(`Invalid date: ${monthNames[month-1]} ${year} only has ${daysInMonth} days.`);
+            console.warn(`Invalid date: day ${day} exceeds ${daysInMonth} days in month ${month}`);
             return;
           }
         }
 
-        // Validate year range
+        // Validate year range (silently handle invalid years)
         if (year && (year < 2020 || year > new Date().getFullYear())) {
-          alert(`Year must be between 2020 and ${new Date().getFullYear()}`);
+          console.warn(`Year ${year} out of range (2020-${new Date().getFullYear()})`);
           return;
         }
       }
