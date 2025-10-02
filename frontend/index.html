@@ -1904,20 +1904,26 @@ async function initialize() {
 
       inputsContainer.style.display = "flex";
 
-      // Set default values to current date when switching periods
+      // Set default values to current date ONLY if input is empty
       const now = new Date();
 
       if (selectedPeriod === "year" || selectedPeriod === "month" || selectedPeriod === "day") {
         yearInput.style.display = "inline-block";
-        yearInput.value = now.getFullYear();
+        if (!yearInput.value || yearInput.value === "") {
+          yearInput.value = now.getFullYear();
+        }
       }
       if (selectedPeriod === "month" || selectedPeriod === "day") {
         monthInput.style.display = "inline-block";
-        monthInput.value = now.getMonth() + 1;
+        if (!monthInput.value || monthInput.value === "") {
+          monthInput.value = now.getMonth() + 1;
+        }
       }
       if (selectedPeriod === "day") {
         dayInput.style.display = "inline-block";
-        dayInput.value = now.getDate();
+        if (!dayInput.value || dayInput.value === "") {
+          dayInput.value = now.getDate();
+        }
       }
     }
     
@@ -1929,10 +1935,49 @@ async function initialize() {
       const month = parseInt(document.getElementById("modalMonthInput").value) || null;
       const day = parseInt(document.getElementById("modalDayInput").value) || null;
 
+      // Validate date inputs
+      if (selectedPeriod !== "recent") {
+        // Check for future dates
+        if (year && month && day) {
+          const selectedDate = new Date(year, month - 1, day);
+          const now = new Date();
+          now.setHours(23, 59, 59, 999); // End of today
+          if (selectedDate > now) {
+            console.warn("Cannot select future date");
+            alert("Cannot select a future date. Please choose today or earlier.");
+            return;
+          }
+
+          // Validate day for the selected month
+          const daysInMonth = new Date(year, month, 0).getDate();
+          if (day > daysInMonth) {
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            alert(`Invalid date: ${monthNames[month-1]} ${year} only has ${daysInMonth} days.`);
+            return;
+          }
+        }
+
+        // Validate year range
+        if (year && (year < 2020 || year > new Date().getFullYear())) {
+          alert(`Year must be between 2020 and ${new Date().getFullYear()}`);
+          return;
+        }
+      }
+
       try {
         let query = "";
         let dataKey = "";
-        let historyField = "";
+
+        // Map metric type to correct currentData field
+        const dataFieldMap = {
+          'temperature': 'history',
+          'temp': 'history',
+          'humidity': 'humidityHistory',
+          'pressure': 'pressureHistory',
+          'co2': 'airQualityHistory'
+        };
+
+        const currentDataField = dataFieldMap[currentChartKind] || 'history';
 
         // Determine which history query to use based on metric type
         const metricQueries = {
@@ -1985,22 +2030,45 @@ async function initialize() {
 
         const response = await graphqlQuery(query);
         if (response.data && response.data[dataKey]) {
-          // Temporarily update the current data to refresh the chart
-          const originalHistory = currentData.history;
-          currentData.history = response.data[dataKey];
+          // Temporarily update the CORRECT current data field to refresh the chart
+          const originalHistory = currentData[currentDataField];
+          currentData[currentDataField] = response.data[dataKey];
 
           // Update the chart
           const ds = chartDataFor(currentChartKind);
-          if (currentModalChart && ds.labels.length > 0) {
-            currentModalChart.data = ds;
-            currentModalChart.update();
+
+          if (currentModalChart) {
+            if (ds.labels.length === 0) {
+              // Handle empty data - clear the chart
+              currentModalChart.data.labels = [];
+              currentModalChart.data.datasets.forEach(dataset => {
+                dataset.data = [];
+              });
+              currentModalChart.update();
+              console.warn("No data available for selected period");
+            } else {
+              // Update with new data
+              currentModalChart.data = ds;
+              currentModalChart.update();
+            }
           }
 
           // Restore original history (so main app data is not affected)
-          currentData.history = originalHistory;
+          currentData[currentDataField] = originalHistory;
+        } else {
+          // No data returned - clear chart
+          if (currentModalChart) {
+            currentModalChart.data.labels = [];
+            currentModalChart.data.datasets.forEach(dataset => {
+              dataset.data = [];
+            });
+            currentModalChart.update();
+            console.warn("No data received from query");
+          }
         }
       } catch (error) {
         console.error("Error updating modal chart data:", error);
+        alert("Error loading chart data. Please try again.");
       }
     }
     
