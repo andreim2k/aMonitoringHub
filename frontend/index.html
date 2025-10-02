@@ -542,16 +542,15 @@
   .chart-modal { width: min(92vw, 680px); height: min(70vh, 440px); background: linear-gradient(135deg, rgba(20,18,35,.98) 0%, rgba(35,30,70,.95) 50%, rgba(25,25,45,.98) 100%); border-radius: 14px; padding: 16px; box-shadow: 0 12px 40px rgba(0,0,0,.5); position: relative; display: flex; flex-direction: column; }
   .chart-modal h3 { margin: 0 0 8px 0; color: #e0e0e0; font-size: 1rem; text-align: center; }
   .chart-modal .close-btn { position: absolute; top: 8px; right: 10px; background: transparent; border: none; color: #ccc; font-size: 20px; cursor: pointer; }
-  .chart-modal .time-period-selector { display: flex; justify-content: center; margin: 0 auto; gap: 15px; margin: 10px 0; }
-  .chart-modal .time-period-option { display: flex; align-items: center; gap: 5px; }
-  .chart-modal .time-period-option input[type="radio"] { appearance: none; width: 16px; height: 16px; border: 2px solid #90caf9; border-radius: 50%; background: transparent; cursor: pointer; position: relative; }
+  .chart-modal .time-period-selector { display: flex; justify-content: center; margin: 0 auto; gap: 15px; margin: 10px 0; flex-wrap: nowrap; }
+  .chart-modal .time-period-option { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .chart-modal .time-period-option input[type="radio"] { appearance: none; width: 16px; height: 16px; border: 2px solid #90caf9; border-radius: 50%; background: transparent; cursor: pointer; position: relative; flex-shrink: 0; }
   .chart-modal .time-period-option input[type="radio"]:checked { background: #90caf9; }
   .chart-modal .time-period-option input[type="radio"]:checked::after { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 6px; height: 6px; background: white; border-radius: 50%; }
   .chart-modal .time-period-option label { color: #e0e0e0; font-size: 0.9rem; cursor: pointer; user-select: none; }
   .chart-modal .time-period-inputs { display: flex; justify-content: center; margin: 0 auto; gap: 10px; margin: 8px 0; flex-wrap: wrap; }
   .chart-modal .time-period-inputs input, .chart-modal .time-period-inputs select { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; }
   .chart-modal .time-period-inputs input { width: 60px; }
-  @media (max-width: 600px) { .chart-modal .time-period-selector { flex-direction: column; gap: 8px; } }
   .chart-canvas-wrap { position: relative;  min-height: 240px; }
   .chart-popover { position: fixed; display: none; pointer-events: none; z-index: 9998; width: 320px; height: 200px; background: rgba(20,18,35,.96); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 8px; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
   .chart-popover h4 { margin: 0 0 4px 0; font-size: .9rem; color: #e0e0e0; text-align: center; }
@@ -1892,19 +1891,39 @@ async function initialize() {
       const yearInput = document.getElementById("modalYearInput");
       const monthInput = document.getElementById("modalMonthInput");
       const dayInput = document.getElementById("modalDayInput");
-      
+
+      // Check if current metric supports time-based queries
+      const supportsTimeQuery = currentChartKind === 'temperature';
+
+      // Disable period options for non-temperature metrics
+      document.querySelectorAll("input[name=\"chartPeriod\"]").forEach(radio => {
+        if (radio.value !== 'recent' && !supportsTimeQuery) {
+          radio.disabled = true;
+          radio.parentElement.style.opacity = '0.5';
+        } else {
+          radio.disabled = false;
+          radio.parentElement.style.opacity = '1';
+        }
+      });
+
+      // If non-temperature metric, force "Recent" selection
+      if (!supportsTimeQuery && selectedPeriod !== 'recent') {
+        document.getElementById('periodRecent').checked = true;
+        return;
+      }
+
       // Hide all inputs first
       yearInput.style.display = "none";
       monthInput.style.display = "none";
       dayInput.style.display = "none";
       inputsContainer.style.display = "none";
-      
-      if (selectedPeriod === "recent") {
-        return; // No inputs needed for recent
+
+      if (selectedPeriod === "recent" || !supportsTimeQuery) {
+        return; // No inputs needed for recent or non-temperature metrics
       }
-      
+
       inputsContainer.style.display = "flex";
-      
+
       if (selectedPeriod === "year" || selectedPeriod === "month" || selectedPeriod === "day") {
         yearInput.style.display = "inline-block";
         if (!yearInput.value) yearInput.value = new Date().getFullYear();
@@ -1933,9 +1952,11 @@ async function initialize() {
         let historyField = "";
 
         // Determine which history query to use based on metric type
+        // NOTE: Only temperature supports year/month/day queries in backend
         const metricQueries = {
           'temperature': {
             fields: 'temperatureC timestampUnix sensorId',
+            supportsTimeQuery: true,
             yearQuery: 'temperatureHistoryByYear',
             monthQuery: 'temperatureHistoryByMonth',
             dayQuery: 'temperatureHistoryByDay',
@@ -1943,39 +1964,40 @@ async function initialize() {
           },
           'humidity': {
             fields: 'humidityPercent timestampUnix sensorId',
-            yearQuery: 'humidityHistory',
-            monthQuery: 'humidityHistory',
-            dayQuery: 'humidityHistory',
+            supportsTimeQuery: false,
             recentQuery: 'humidityHistory'
           },
           'pressure': {
-            fields: 'pressureHpa timestampUnix',
-            yearQuery: 'pressureHistory',
-            monthQuery: 'pressureHistory',
-            dayQuery: 'pressureHistory',
+            fields: 'pressureHpa timestampUnix sensorId sensorType',
+            supportsTimeQuery: false,
             recentQuery: 'pressureHistory'
           },
           'co2': {
-            fields: 'co2Ppm timestampUnix',
-            yearQuery: 'airQualityHistory',
-            monthQuery: 'airQualityHistory',
-            dayQuery: 'airQualityHistory',
+            fields: 'co2Ppm nh3Ppm alcoholPpm aqi status timestampUnix',
+            supportsTimeQuery: false,
             recentQuery: 'airQualityHistory'
           }
         };
 
         const metricConfig = metricQueries[currentChartKind] || metricQueries['temperature'];
 
-        if (selectedPeriod === "year" && year) {
-          dataKey = metricConfig.yearQuery;
-          query = `{ ${dataKey}(year: ${year}) { ${metricConfig.fields} } }`;
-        } else if (selectedPeriod === "month" && year && month) {
-          dataKey = metricConfig.monthQuery;
-          query = `{ ${dataKey}(year: ${year}, month: ${month}) { ${metricConfig.fields} } }`;
-        } else if (selectedPeriod === "day" && year && month && day) {
-          dataKey = metricConfig.dayQuery;
-          query = `{ ${dataKey}(year: ${year}, month: ${month}, day: ${day}) { ${metricConfig.fields} } }`;
+        // Build query based on whether metric supports time-based queries
+        if (metricConfig.supportsTimeQuery) {
+          if (selectedPeriod === "year" && year) {
+            dataKey = metricConfig.yearQuery;
+            query = `{ ${dataKey}(year: ${year}) { ${metricConfig.fields} } }`;
+          } else if (selectedPeriod === "month" && year && month) {
+            dataKey = metricConfig.monthQuery;
+            query = `{ ${dataKey}(year: ${year}, month: ${month}) { ${metricConfig.fields} } }`;
+          } else if (selectedPeriod === "day" && year && month && day) {
+            dataKey = metricConfig.dayQuery;
+            query = `{ ${dataKey}(year: ${year}, month: ${month}, day: ${day}) { ${metricConfig.fields} } }`;
+          } else {
+            dataKey = metricConfig.recentQuery;
+            query = `{ ${dataKey}(limit: 5000) { ${metricConfig.fields} } }`;
+          }
         } else {
+          // For metrics without time-based queries, always use recent with limit
           dataKey = metricConfig.recentQuery;
           query = `{ ${dataKey}(limit: 5000) { ${metricConfig.fields} } }`;
         }
