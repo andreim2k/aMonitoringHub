@@ -640,7 +640,7 @@
           </div>
 
           <!-- AQI Main Display -->
-          <div style="background: rgba(102,187,106,0.15); border-radius: 12px; padding: 16px; margin-bottom: 14px; text-align: center; border: 1px solid rgba(102,187,106,0.3);">
+          <div style="background: rgba(102,187,106,0.15); border-radius: 12px; padding: 16px; margin-bottom: 14px; text-align: center; border: 1px solid rgba(102,187,106,0.3); cursor: help;" title="Air Quality Index (AQI): Overall air quality score from 1-5. Lower values indicate better air quality. Calculated from CO₂, NH₃, and Alcohol levels.">
             <div style="font-size: 0.8rem; color: #b3b3b3; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Air Quality Index</div>
             <div id="currentAQI" style="font-size: 2.5rem; font-weight: 800; line-height: 1; margin-bottom: 6px; color: #66bb6a;">--</div>
             <div id="airQualityStatus" style="font-weight: 600; font-size: 0.85rem; padding: 6px 12px; border-radius: 6px; display: inline-block; background: rgba(255,255,255,0.08);">--</div>
@@ -648,15 +648,15 @@
 
           <!-- Gas Readings Row -->
           <div class="gas-grid" style="display: flex; gap: 10px; justify-content: space-between; align-items: stretch;">
-            <div style="background: rgba(239,83,80,0.15); border-radius: 8px; padding: 14px 10px; text-align: center; border: 1px solid rgba(239,83,80,0.3); flex: 1;">
+            <div style="background: rgba(239,83,80,0.15); border-radius: 8px; padding: 14px 10px; text-align: center; border: 1px solid rgba(239,83,80,0.3); flex: 1; cursor: help;" title="Carbon Dioxide (CO₂): Main indicator of air quality and ventilation. Levels above 1000 ppm indicate poor ventilation. Normal outdoor levels: 400 ppm. Good indoor: <800 ppm.">
               <div style="font-size: 0.75rem; color: #ef5350; font-weight: 600; margin-bottom: 6px;">CO₂</div>
               <div id="currentCO2" class="metric-value" style="font-size: 1.25rem; font-weight: 700;">-- ppm</div>
             </div>
-            <div style="background: rgba(66,165,245,0.15); border-radius: 8px; padding: 14px 10px; text-align: center; border: 1px solid rgba(66,165,245,0.3); flex: 1;">
+            <div style="background: rgba(66,165,245,0.15); border-radius: 8px; padding: 14px 10px; text-align: center; border: 1px solid rgba(66,165,245,0.3); flex: 1; cursor: help;" title="Ammonia (NH₃): Colorless gas with pungent smell. Common sources: cleaning products, fertilizers, human/pet waste. Levels above 50 ppm can cause irritation. Safe indoor: <25 ppm.">
               <div style="font-size: 0.75rem; color: #42a5f5; font-weight: 600; margin-bottom: 6px;">NH₃</div>
               <div id="currentNH3" class="metric-value" style="font-size: 1.25rem; font-weight: 700;">-- ppm</div>
             </div>
-            <div style="background: rgba(255,167,38,0.15); border-radius: 8px; padding: 14px 10px; text-align: center; border: 1px solid rgba(255,167,38,0.3); flex: 1;">
+            <div style="background: rgba(255,167,38,0.15); border-radius: 8px; padding: 14px 10px; text-align: center; border: 1px solid rgba(255,167,38,0.3); flex: 1; cursor: help;" title="Alcohol/VOCs: Volatile organic compounds from various sources including alcoholic beverages, solvents, paints, and cleaning products. High levels may indicate poor air circulation or chemical contamination.">
               <div style="font-size: 0.75rem; color: #ffa726; font-weight: 600; margin-bottom: 6px;">Alcohol</div>
               <div id="currentAlcohol" class="metric-value" style="font-size: 1.25rem; font-weight: 700;">-- ppm</div>
             </div>
