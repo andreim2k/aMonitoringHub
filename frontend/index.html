@@ -1892,53 +1892,32 @@ async function initialize() {
       const monthInput = document.getElementById("modalMonthInput");
       const dayInput = document.getElementById("modalDayInput");
 
-      // Check if current metric supports time-based queries
-      const supportsTimeQuery = currentChartKind === 'temperature';
-
-      // Disable period options for non-temperature metrics
-      document.querySelectorAll("input[name=\"chartPeriod\"]").forEach(radio => {
-        if (radio.value !== 'recent' && !supportsTimeQuery) {
-          radio.disabled = true;
-          radio.parentElement.style.opacity = '0.5';
-          radio.parentElement.style.pointerEvents = 'none';
-          radio.parentElement.style.cursor = 'not-allowed';
-        } else {
-          radio.disabled = false;
-          radio.parentElement.style.opacity = '1';
-          radio.parentElement.style.pointerEvents = 'auto';
-          radio.parentElement.style.cursor = 'pointer';
-        }
-      });
-
-      // If non-temperature metric, force "Recent" selection
-      if (!supportsTimeQuery && selectedPeriod !== 'recent') {
-        document.getElementById('periodRecent').checked = true;
-        return;
-      }
-
       // Hide all inputs first
       yearInput.style.display = "none";
       monthInput.style.display = "none";
       dayInput.style.display = "none";
       inputsContainer.style.display = "none";
 
-      if (selectedPeriod === "recent" || !supportsTimeQuery) {
-        return; // No inputs needed for recent or non-temperature metrics
+      if (selectedPeriod === "recent") {
+        return; // No inputs needed for recent
       }
 
       inputsContainer.style.display = "flex";
 
+      // Set default values to current date when switching periods
+      const now = new Date();
+
       if (selectedPeriod === "year" || selectedPeriod === "month" || selectedPeriod === "day") {
         yearInput.style.display = "inline-block";
-        if (!yearInput.value) yearInput.value = new Date().getFullYear();
+        yearInput.value = now.getFullYear();
       }
       if (selectedPeriod === "month" || selectedPeriod === "day") {
         monthInput.style.display = "inline-block";
-        if (!monthInput.value) monthInput.value = new Date().getMonth() + 1;
+        monthInput.value = now.getMonth() + 1;
       }
       if (selectedPeriod === "day") {
         dayInput.style.display = "inline-block";
-        if (!dayInput.value) dayInput.value = new Date().getDate();
+        dayInput.value = now.getDate();
       }
     }
     
@@ -1956,11 +1935,9 @@ async function initialize() {
         let historyField = "";
 
         // Determine which history query to use based on metric type
-        // NOTE: Only temperature supports year/month/day queries in backend
         const metricQueries = {
           'temperature': {
             fields: 'temperatureC timestampUnix sensorId',
-            supportsTimeQuery: true,
             yearQuery: 'temperatureHistoryByYear',
             monthQuery: 'temperatureHistoryByMonth',
             dayQuery: 'temperatureHistoryByDay',
@@ -1968,40 +1945,40 @@ async function initialize() {
           },
           'humidity': {
             fields: 'humidityPercent timestampUnix sensorId',
-            supportsTimeQuery: false,
+            yearQuery: 'humidityHistory',
+            monthQuery: 'humidityHistory',
+            dayQuery: 'humidityHistory',
             recentQuery: 'humidityHistory'
           },
           'pressure': {
             fields: 'pressureHpa timestampUnix sensorId sensorType',
-            supportsTimeQuery: false,
+            yearQuery: 'pressureHistory',
+            monthQuery: 'pressureHistory',
+            dayQuery: 'pressureHistory',
             recentQuery: 'pressureHistory'
           },
           'co2': {
             fields: 'co2Ppm nh3Ppm alcoholPpm aqi status timestampUnix',
-            supportsTimeQuery: false,
+            yearQuery: 'airQualityHistory',
+            monthQuery: 'airQualityHistory',
+            dayQuery: 'airQualityHistory',
             recentQuery: 'airQualityHistory'
           }
         };
 
         const metricConfig = metricQueries[currentChartKind] || metricQueries['temperature'];
 
-        // Build query based on whether metric supports time-based queries
-        if (metricConfig.supportsTimeQuery) {
-          if (selectedPeriod === "year" && year) {
-            dataKey = metricConfig.yearQuery;
-            query = `{ ${dataKey}(year: ${year}) { ${metricConfig.fields} } }`;
-          } else if (selectedPeriod === "month" && year && month) {
-            dataKey = metricConfig.monthQuery;
-            query = `{ ${dataKey}(year: ${year}, month: ${month}) { ${metricConfig.fields} } }`;
-          } else if (selectedPeriod === "day" && year && month && day) {
-            dataKey = metricConfig.dayQuery;
-            query = `{ ${dataKey}(year: ${year}, month: ${month}, day: ${day}) { ${metricConfig.fields} } }`;
-          } else {
-            dataKey = metricConfig.recentQuery;
-            query = `{ ${dataKey}(limit: 5000) { ${metricConfig.fields} } }`;
-          }
+        // Build query
+        if (selectedPeriod === "year" && year) {
+          dataKey = metricConfig.yearQuery;
+          query = `{ ${dataKey}(year: ${year}) { ${metricConfig.fields} } }`;
+        } else if (selectedPeriod === "month" && year && month) {
+          dataKey = metricConfig.monthQuery;
+          query = `{ ${dataKey}(year: ${year}, month: ${month}) { ${metricConfig.fields} } }`;
+        } else if (selectedPeriod === "day" && year && month && day) {
+          dataKey = metricConfig.dayQuery;
+          query = `{ ${dataKey}(year: ${year}, month: ${month}, day: ${day}) { ${metricConfig.fields} } }`;
         } else {
-          // For metrics without time-based queries, always use recent with limit
           dataKey = metricConfig.recentQuery;
           query = `{ ${dataKey}(limit: 5000) { ${metricConfig.fields} } }`;
         }
@@ -2031,11 +2008,6 @@ async function initialize() {
       // Add event listeners for radio buttons
       document.querySelectorAll("input[name=\"chartPeriod\"]").forEach(radio => {
         radio.addEventListener("change", function() {
-          // Prevent disabled options from being selected
-          if (this.disabled) {
-            document.getElementById('periodRecent').checked = true;
-            return;
-          }
           updateModalInputsVisibility();
           updateModalChartData();
         });
