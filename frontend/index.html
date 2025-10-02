@@ -250,6 +250,10 @@
       border-left: 4px solid #ff9800;
     }
 
+    .meter-card {
+      border-left: 4px solid #42a5f5;
+    }
+
     .chart-card {
       background: transparent;
       border: none;
@@ -627,6 +631,16 @@
           <div class="stat-subtitle" id="airQualityStatus" style="margin-top:6px; font-weight:600;">--</div>
         </div>
       </div>
+
+      <!-- Row 4: Meter Reading -->
+      <div class="metrics-row">
+<div class="metric-card glass meter-card">
+          <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Meter" role="img"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+          <div class="metric-label">Electricity Meter <span class="unit-badge">kWh</span></div>
+          <div class="metric-value" id="currentMeterReading">----</div>
+          <div class="metric-timestampUnix" id="meterTimestamp" style="font-size: 0.75rem; color: #888;">Last reading: --</div>
+        </div>
+      </div>
 <!-- Row 6: Electricity Meter - Compact Card -->
       <div class="charts-row electricity-container">
         <div class="electricity-card glass">
@@ -658,10 +672,6 @@
               </div>
             </div>
             <button id="captureSettingsBtn" class="btn" style="margin: 5px auto; background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%); display: none;">Snapshot</button>
-          </div>
-          <div style="text-align: center; width: 100%;">
-            <div id="ocrIndex" style="font-size: 1.5rem; font-weight: bold; color: #888; margin-bottom: 8px; display: none;"></div>
-            <div id="ocrStatus" style="font-size: 0.9rem; color: #888;"></div>
           </div>
         </div>
       </div>
@@ -740,6 +750,7 @@
       connected: false,
       pressureHistory: [],
       airQualityHistory: [],
+      meterHistory: [],
       nh3_ppm: null,
       alcohol_ppm: null,
       pressure_hpa: null,
@@ -902,6 +913,17 @@ function updateDisplay() {
       }
       const nh3El = document.getElementById('airNH3'); if (nh3El) nh3El.textContent = 'NH₃: ' + (currentData.nh3_ppm != null ? currentData.nh3_ppm.toFixed(1) + ' ppm' : '-- ppm');
       const alcEl = document.getElementById('airAlcohol'); if (alcEl) alcEl.textContent = 'Alcohol: ' + (currentData.alcohol_ppm != null ? currentData.alcohol_ppm.toFixed(1) + ' ppm' : '-- ppm');
+
+      // Update meter reading display
+      const meterEl = document.getElementById('currentMeterReading');
+      const meterTsEl = document.getElementById('meterTimestamp');
+      if (meterEl && currentData.meterValue != null) {
+        meterEl.textContent = currentData.meterValue;
+        meterEl.style.color = '#90caf9';
+      }
+      if (meterTsEl && currentData.meterTimestamp) {
+        meterTsEl.textContent = 'Last reading: ' + new Date(currentData.meterTimestamp * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
+      }
 
       // Sensor status is now managed by updateSensorStatus() function
       // Don't update it here to avoid overriding explicit status changes
@@ -1188,6 +1210,16 @@ function updateDisplay() {
           updateCO2HistoryChart();
         }
 
+        // Fetch current meter reading
+        console.log('Fetching current meter reading...');
+        const curMeter = await graphqlQuery('{ currentMeterReading { meterValue timestampUnix ocrEngine } }');
+        if (curMeter.data && curMeter.data.currentMeterReading) {
+          const meter = curMeter.data.currentMeterReading;
+          currentData.meterValue = meter.meterValue;
+          currentData.meterTimestamp = meter.timestampUnix;
+          console.log('Meter reading loaded:', meter.meterValue);
+        }
+
         if (humidityHistoryResponse.data && humidityHistoryResponse.data.humidityHistory) {
           currentData.humidityHistory = humidityHistoryResponse.data.humidityHistory;
           console.log('Humidity history loaded:', currentData.humidityHistory.length, 'points');
@@ -1416,9 +1448,7 @@ async function initialize() {
       const img = document.getElementById("webcamImage");
       const loading = document.getElementById("webcamLoading");
       const placeholder = document.getElementById("webcamPlaceholder");
-      const ocrBtn = document.getElementById("ocrBtn");
-      const statusEl = document.getElementById("ocrStatus");
-      
+
       // Show loading
       // Hide controls and button during capture
       const controls = document.getElementById("webcamControls");
@@ -1428,9 +1458,6 @@ async function initialize() {
       loading.style.display = "flex";
       placeholder.style.display = "none";
       img.style.display = "none";
-      
-      // statusEl.textContent = "Capturing image..."; // Removed
-      statusEl.style.color = "#ffa726";
       
       fetch("/webcam/capture", {
         method: "POST",
@@ -1449,9 +1476,6 @@ async function initialize() {
           if (btn) btn.style.display = "block";
           const capSetBtn = document.getElementById("captureSettingsBtn");
           if (capSetBtn) capSetBtn.style.display = "block";
-          // statusEl.textContent = "Image loaded - Ready for Reading Index"; // Removed
-          // statusEl.style.color = "#4caf50"; // Removed
-          // readIndexAfterCapture(latestWebcamOverrides);
         } else {
           placeholder.style.display = "flex";
           placeholder.innerHTML = "❌ Capture failed<br><small>" + (data.error || "Unknown error") + "</small>";
@@ -1468,51 +1492,6 @@ async function initialize() {
       });
     }
 
-    // Manual Index Reading Function
-    // OCR function refactored for reuse after snapshot
-    async function readIndexAfterCapture(overrides) {
-      const indexEl = document.getElementById("ocrIndex");
-      const statusEl = document.getElementById("ocrStatus");
-      // Show reading status in status field, hide index
-      indexEl.textContent = "";
-      indexEl.style.display = "none";
-      statusEl.textContent = "📖 Reading index...";
-      statusEl.style.color = "#2196F3";
-
-      const fetchOptions = { method: 'POST', headers: { 'Content-Type': 'application/json' } };
-      if (overrides) { fetchOptions.body = JSON.stringify(overrides); }
-
-      fetch("/webcam/ocr", fetchOptions)
-      .then(response => response.json())
-      .then(data => {
-        console.log('OCR Response:', data);
-        
-        // Clear reading status
-        statusEl.textContent = "";
-        
-        if (data.success && data.index !== "-----") {
-          // SUCCESS: Show index
-          indexEl.textContent = "Index: 1" + data.index;
-          indexEl.style.display = "block";
-          indexEl.style.color = "#4CAF50";
-          statusEl.textContent = "✓ " + (data.engine || "Success");
-          statusEl.style.color = "#4CAF50";
-        } else {
-          // FAILURE: Hide index, show error
-          indexEl.textContent = "";
-          indexEl.style.display = "none";
-          statusEl.textContent = "✗ " + (data.error || "Failed to read index!");
-          statusEl.style.color = "#f44336";
-        }
-      })
-      .catch(error => {
-        console.error('OCR Error:', error);
-        indexEl.textContent = "";
-        indexEl.style.display = "none";
-        statusEl.textContent = "✗ Network error: " + error.message;
-        statusEl.style.color = "#f44336";
-      });
-    }
 
     // Capture with settings button handler
     (function(){
@@ -1529,7 +1508,6 @@ async function initialize() {
           const img = document.getElementById("webcamImage");
           const loading = document.getElementById("webcamLoading");
           const placeholder = document.getElementById("webcamPlaceholder");
-          const statusEl = document.getElementById("ocrStatus");
           const gainSlider = document.getElementById("gainSlider");
           const gainVal = Number.isFinite(parseInt(gainSlider?.value, 10)) ? parseInt(gainSlider.value, 10) : 2;
           const flashToggle = document.getElementById("flashToggle");
@@ -1589,7 +1567,8 @@ async function initialize() {
       temp: { border: '#66bb6a', bg: 'rgba(102,187,106,0.15)' },
       humidity:{ border: '#9c27b0', bg: 'rgba(156,39,176,0.15)' },
       pressure:{ border: '#ffa726', bg: 'rgba(255,167,38,0.15)' },
-      co2:{ border: '#ef5350', bg: 'rgba(239,83,80,0.15)' }
+      co2:{ border: '#ef5350', bg: 'rgba(239,83,80,0.15)' },
+      meter:{ border: '#42a5f5', bg: 'rgba(66,165,245,0.15)' }
     };
 
     async function ensureHistory(kind) {
@@ -1598,6 +1577,7 @@ async function initialize() {
       if (kind === 'humidity' && currentData.humidityHistory && currentData.humidityHistory.length) return;
       if (kind === 'pressure' && currentData.pressureHistory && currentData.pressureHistory.length) return;
       if (kind === 'co2' && currentData.airQualityHistory && currentData.airQualityHistory.length) return;
+      if (kind === 'meter' && currentData.meterHistory && currentData.meterHistory.length) return;
       try {
         if (kind === 'temp') {
           const r = await graphqlQuery('{ temperatureHistory(limit: 5000) { temperatureC timestampUnix } }');
@@ -1611,6 +1591,9 @@ async function initialize() {
         } else if (kind === 'co2') {
           const r = await graphqlQuery('{ airQualityHistory(limit: 5000) { co2Ppm timestampUnix } }');
           if (r.data && r.data.airQualityHistory) currentData.airQualityHistory = r.data.airQualityHistory.map(i=>({co2Ppm:i.co2Ppm,timestampUnix:i.timestampUnix}));
+        } else if (kind === 'meter') {
+          const r = await graphqlQuery('{ meterHistory(limit: 5000) { meterValue timestampUnix } }');
+          if (r.data && r.data.meterHistory) currentData.meterHistory = r.data.meterHistory.map(i=>({meterValue:i.meterValue,timestampUnix:i.timestampUnix}));
         }
       } catch (e) { console.warn('ensureHistory failed for', kind, e); }
     }
@@ -1640,6 +1623,12 @@ async function initialize() {
         labels = arr.map(i=>new Date(i.timestampUnix * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false}));
         data = arr.map(i=>i.co2Ppm);
         return { labels, datasets: [{ label: 'CO₂ (ppm)', data, borderColor: c.border, backgroundColor: c.bg, borderWidth: 2, fill: true, pointRadius: 1 }] };
+      }
+      if (kind === 'meter') {
+        const arr = (currentData.meterHistory||[]).slice().sort((a,b)=>a.timestampUnix - b.timestampUnix); // Show all history data
+        labels = arr.map(i=>new Date(i.timestampUnix * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false}));
+        data = arr.map(i=>parseFloat(i.meterValue) || 0);
+        return { labels, datasets: [{ label: 'Electricity Meter (kWh)', data, borderColor: c.border, backgroundColor: c.bg, borderWidth: 2, fill: true, pointRadius: 2 }] };
       }
       return { labels: [], datasets: [] };
     }
@@ -1838,6 +1827,7 @@ async function initialize() {
       attach('currentPressure','pressure');
       attach('currentHumidity','humidity');
       attach('currentCO2','co2');
+      attach('currentMeterReading','meter');
 
       // Modal close handlers
       const overlay = document.getElementById('chartModalOverlay');

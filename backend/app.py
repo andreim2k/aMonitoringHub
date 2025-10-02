@@ -1324,7 +1324,7 @@ def capture_webcam():
 
 @app.route("/webcam/ocr", methods=['POST'])
 def run_ocr():
-    """Run OCR on a freshly captured image using Gemini API - Manual trigger only"""
+    """Run OCR on a freshly captured image using Gemini API - Used by scheduled daily task and can be called programmatically"""
     import base64
     import json
     import os
@@ -1340,8 +1340,7 @@ def run_ocr():
         if not cap_json.get('success'):
             return jsonify({
                 "success": False,
-                "error": "Failed to capture image for OCR",
-                "index": "-----"
+                "error": "Failed to capture image for OCR"
             }), 500
         
         # Decode base64
@@ -1406,7 +1405,6 @@ def run_ocr():
                 # Gemini wasn't confident - return the exact failure message
                 return jsonify({
                     "success": False,
-                    "index": "-----",
                     "engine": f"Google Gemini ({model})",
                     "image": cap_json['image'],
                     "timestamp": datetime.now().isoformat() + "Z",
@@ -1425,31 +1423,41 @@ def run_ocr():
                     break
             
             if four_digit:
+                # Prepend "1" to the successfully read 4-digit number
+                meter_value_with_prefix = "1" + four_digit
+
                 # Save successful reading to database
                 try:
                     db.add_meter_reading(
-                        meter_value=four_digit,
+                        meter_value=meter_value_with_prefix,
                         ocr_engine=f"Google Gemini ({model})",
                         raw_ocr_text=ocr_text,
                         sensor_type="esp32cam_ocr",
                         sensor_id="cabana1_meter"
                     )
-                    logger.info(f"Saved meter reading to database: {four_digit}")
+                    logger.info(f"Saved meter reading to database: {meter_value_with_prefix}")
+
+                    return jsonify({
+                        "success": True,
+                        "index": meter_value_with_prefix,
+                        "engine": f"Google Gemini ({model})",
+                        "image": cap_json['image'],
+                        "timestamp": datetime.now().isoformat() + "Z",
+                        "raw_ocr": ocr_text
+                    })
                 except Exception as db_err:
                     logger.error(f"Failed to save meter reading to database: {db_err}")
-
-                return jsonify({
-                    "success": True,
-                    "index": four_digit,
-                    "engine": f"Google Gemini ({model})",
-                    "image": cap_json['image'],
-                    "timestamp": datetime.now().isoformat() + "Z",
-                    "raw_ocr": ocr_text
-                })
+                    return jsonify({
+                        "success": False,
+                        "error": f"OCR succeeded but database save failed: {str(db_err)}",
+                        "engine": f"Google Gemini ({model})",
+                        "image": cap_json['image'],
+                        "timestamp": datetime.now().isoformat() + "Z",
+                        "raw_ocr": ocr_text
+                    }), 500
             else:
                 return jsonify({
                     "success": False,
-                    "index": "-----",
                     "engine": f"Google Gemini ({model})",
                     "image": cap_json['image'],
                     "timestamp": datetime.now().isoformat() + "Z",
@@ -1461,7 +1469,6 @@ def run_ocr():
             logger.error(f"Gemini OCR error: {ocr_error}")
             return jsonify({
                 "success": False,
-                "index": "-----",
                 "error": f"Reading index failed: {str(ocr_error)}",
                 "engine": "Gemini AI - Error",
                 "image": cap_json['image'],
@@ -1472,7 +1479,6 @@ def run_ocr():
         return jsonify({
             "success": False,
             "error": f"Reading index failed: {str(e)}",
-            "index": "-----",
             "engine": "Error"
         }), 500
 
