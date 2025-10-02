@@ -816,10 +816,14 @@
 
         <!-- Air Quality Information (shown only for CO2 chart) -->
         <div id="airQualityInfo" style="display: none; margin-top: 15px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 0.75rem; line-height: 1.6; color: #e0e0e0;">
-          <div style="margin-bottom: 6px;"><span style="color: #66bb6a; font-weight: 600;">AQI:</span> Score 1-5, lower is better</div>
-          <div style="margin-bottom: 6px;"><span style="color: #ef5350; font-weight: 600;">CO₂:</span> Ventilation indicator</div>
-          <div style="margin-bottom: 6px;"><span style="color: #42a5f5; font-weight: 600;">NH₃:</span> From cleaning, waste</div>
-          <div><span style="color: #ffa726; font-weight: 600;">Alcohol:</span> VOCs from solvents</div>
+          <div style="display: flex; gap: 20px; justify-content: center; margin-bottom: 6px;">
+            <div><span style="color: #66bb6a; font-weight: 600;">AQI:</span> Score 1-5, lower is better</div>
+            <div><span style="color: #ef5350; font-weight: 600;">CO₂:</span> Ventilation indicator</div>
+          </div>
+          <div style="display: flex; gap: 20px; justify-content: center;">
+            <div><span style="color: #42a5f5; font-weight: 600;">NH₃:</span> From cleaning, waste</div>
+            <div><span style="color: #ffa726; font-weight: 600;">Alcohol:</span> VOCs from solvents</div>
+          </div>
         </div>
       </div>
     </div>
