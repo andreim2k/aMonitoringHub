@@ -2094,10 +2094,10 @@ async function initialize() {
         }
         overlay.style.display = 'flex';
 
-        // Set default to "Days" with current date
-        document.getElementById('periodDay').checked = true;
+        // Set default to "Months" with current month
+        document.getElementById('periodMonth').checked = true;
 
-        // Set inputs to current date
+        // Set inputs to current month
         const now = new Date();
         document.getElementById('modalYearInput').value = now.getFullYear();
         document.getElementById('modalMonthInput').value = now.getMonth() + 1;
@@ -2109,7 +2109,7 @@ async function initialize() {
         modalChart = new Chart(canvas.getContext('2d'), { type: 'line', data: ds, options: buildLineOptions(kind) });
         currentModalChart = modalChart;
 
-        // Load current day's data
+        // Load current month's data
         await updateModalChartData();
         
         // Setup event listeners if not already done
