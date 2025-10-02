@@ -276,9 +276,8 @@
       border: none;
       border-radius: 12px;
       padding: 20px;
-      width: fit-content;
-      max-width: 400px;
-      margin: 0 auto;
+      width: 100%;
+      box-sizing: border-box;
       text-align: center;
     }
 
@@ -434,14 +433,53 @@
       box-shadow: 0 14px 40px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
     }
 
+    /* Air Quality grouped card styles */
+    .air-quality-card {
+      border-left: 4px solid #66bb6a !important;
+      transition: all 140ms ease;
+      padding: 20px !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
+    .air-quality-card:hover {
+      border-left-color: #81c784 !important;
+      transform: translateY(-3px) !important;
+      box-shadow: 0 16px 48px rgba(102,187,106,0.25), inset 0 1px 0 rgba(255,255,255,0.25) !important;
+    }
+
+    @media (max-width: 760px) {
+      .air-quality-card {
+        grid-column: span 1 !important;
+        min-width: auto !important;
+      }
+      .air-quality-card .gas-grid {
+        flex-wrap: wrap !important;
+      }
+      .air-quality-card .gas-grid > div {
+        min-width: calc(33.333% - 8px) !important;
+      }
+      .air-quality-card #currentAQI {
+        font-size: 2rem !important;
+      }
+      .electricity-card {
+        grid-column: span 1 !important;
+      }
+    }
+
+    .air-quality-card .gas-grid > div {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .air-quality-card .gas-grid > div:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
     /* Responsive grid */
     .metrics-row, .charts-row { display: grid; gap: 16px; }
-    .metrics-row { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-bottom: 18px; }
+    .metrics-row { grid-template-columns: repeat(2, 1fr); margin-bottom: 18px; }
     .charts-row { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); margin-bottom: 18px; }
-
-    @media (min-width: 1200px) {
-      .metrics-row { grid-template-columns: repeat(3, 1fr); }
-    }
     @media (max-width: 760px) {
       .metric-value { font-size: 1.4rem; }
       .charts-row { grid-template-columns: 1fr; }
@@ -585,23 +623,60 @@
   </div>
 
   <div class="container">
-      <!-- Row 1: Sensors Status & Total Readings -->
-      <div class="metrics-row">
-        <div class="metric-card-disabled glass">
+      <!-- Row 1-2: Sensors Status & Total Readings (top), Air Quality below (spans both) -->
+      <div class="metrics-row" style="display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: auto auto; gap: 16px;">
+        <div class="metric-card-disabled glass" style="grid-column: 1; grid-row: 1;">
           <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Status" role="img"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
           <div class="metric-label">Sensors Status</div>
           <div class="metric-value status-checking" id="sensorStatus">Checking...</div>
         </div>
-        <div class="metric-card-disabled glass">
+        <div class="metric-card-disabled glass" style="grid-column: 2; grid-row: 1;">
           <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Readings" role="img"><path fill="currentColor" d="M3 5h18v2H3zm0 6h12v2H3zm0 6h18v2H3z"/></svg></div>
           <div class="metric-label">Total Readings</div>
           <div class="metric-value" id="dataCount">--</div>
         </div>
+        <div class="metric-card glass air-quality-card" style="cursor: pointer; grid-column: 1 / 3; grid-row: 2;" onclick="showChartModal('co2', this)">
+          <!-- Header -->
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div class="metric-icon" style="width: 32px; height: 32px;">
+                <svg class="icon" viewBox="0 0 24 24" width="24" height="24" aria-label="Air Quality" role="img">
+                  <path fill="currentColor" d="M7 7h3v3H7zm7 0h3v3h-3zM7 14h10v3H7z"/>
+                </svg>
+              </div>
+              <div>
+                <div class="metric-label" style="font-size: 1.1rem; font-weight: 700; margin: 0;">Air Quality</div>
+              </div>
+            </div>
+            <div style="font-size: 1.2rem; opacity: 0.6;">📊</div>
+          </div>
+
+          <!-- AQI Main Display -->
+          <div style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 16px; margin-bottom: 14px; text-align: center; border: 1px solid rgba(255,255,255,0.1);">
+            <div style="font-size: 0.8rem; color: #b3b3b3; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Air Quality Index</div>
+            <div id="currentAQI" style="font-size: 2.5rem; font-weight: 800; line-height: 1; margin-bottom: 6px; color: #66bb6a;">--</div>
+            <div id="airQualityStatus" style="font-weight: 600; font-size: 0.85rem; padding: 6px 12px; border-radius: 6px; display: inline-block; background: rgba(255,255,255,0.08);">--</div>
+          </div>
+
+          <!-- Gas Readings Row -->
+          <div class="gas-grid" style="display: flex; gap: 10px; justify-content: space-between; align-items: center;">
+            <div style="background: rgba(239,83,80,0.15); border-radius: 8px; padding: 10px; text-align: center; border: 1px solid rgba(239,83,80,0.3); flex: 1;">
+              <div style="font-size: 0.7rem; color: #ef5350; font-weight: 600; margin-bottom: 4px;">CO₂</div>
+              <div id="currentCO2" style="font-size: 1.1rem; font-weight: 700; color: #fff;">-- ppm</div>
+            </div>
+            <div style="background: rgba(66,165,245,0.15); border-radius: 8px; padding: 10px; text-align: center; border: 1px solid rgba(66,165,245,0.3); flex: 1;">
+              <div style="font-size: 0.7rem; color: #42a5f5; font-weight: 600; margin-bottom: 4px;">NH₃</div>
+              <div id="currentNH3" style="font-size: 1.1rem; font-weight: 700; color: #fff;">-- ppm</div>
+            </div>
+            <div style="background: rgba(255,167,38,0.15); border-radius: 8px; padding: 10px; text-align: center; border: 1px solid rgba(255,167,38,0.3); flex: 1;">
+              <div style="font-size: 0.7rem; color: #ffa726; font-weight: 600; margin-bottom: 4px;">Alcohol</div>
+              <div id="currentAlcohol" style="font-size: 1.1rem; font-weight: 700; color: #fff;">-- ppm</div>
+            </div>
+          </div>
+        </div>
       </div>
 
-
-      <!-- Row 2: Temperature with Min/Max -->
-      <!-- Row 2: Temperature & Pressure -->
+      <!-- Row 3: Temperature & Pressure -->
       <div class="metrics-row">
 <div class="metric-card glass temperature-card">
           <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Temperature" role="img"><path fill="currentColor" d="M14 14.76V5a2 2 0 10-4 0v9.76A4 4 0 1014 14.76zM12 2a3 3 0 013 3v9.18a5 5 0 11-6 0V5a3 3 0 013-3z"/></svg></div>
@@ -615,35 +690,20 @@
         </div>
       </div>
 
-      <!-- Row 3: Humidity & CO₂ -->
-      <div class="metrics-row">
-<div class="metric-card glass humidity-card">
+      <!-- Row 4-5: Humidity & Electricity Index (top), Electricity Meter below (spans both) -->
+      <div class="metrics-row" style="display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: auto auto; gap: 16px;">
+<div class="metric-card glass humidity-card" style="grid-column: 1; grid-row: 1;">
           <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Humidity" role="img"><path fill="currentColor" d="M12 2s7 7.58 7 12a7 7 0 11-14 0c0-4.42 7-12 7-12z"/></svg></div>
           <div class="metric-label">Humidity <span class="unit-badge">%</span></div>
           <div class="metric-value" id="currentHumidity">--%</div>
         </div>
-<div class="metric-card glass">
-          <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="CO2" role="img"><path fill="currentColor" d="M7 7h3v3H7zm7 0h3v3h-3zM7 14h10v3H7z"/></svg></div>
-          <div class="metric-label">CO₂ <span class="unit-badge">ppm</span></div>
-          <div class="metric-value" id="currentCO2">-- ppm</div>
-          <div class="metric-timestampUnix" id="airNH3">NH₃: -- ppm</div>
-          <div class="metric-timestampUnix" id="airAlcohol">Alcohol: -- ppm</div>
-          <div class="stat-subtitle" id="airQualityStatus" style="margin-top:6px; font-weight:600;">--</div>
-        </div>
-      </div>
-
-      <!-- Row 4: Meter Reading -->
-      <div class="metrics-row">
-<div class="metric-card glass meter-card">
-          <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Meter" role="img"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
-          <div class="metric-label">Electricity Meter <span class="unit-badge">kWh</span></div>
+<div class="metric-card glass meter-card" style="grid-column: 2; grid-row: 1;">
+          <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Electricity" role="img"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+          <div class="metric-label">Electricity Index <span class="unit-badge">kWh</span></div>
           <div class="metric-value" id="currentMeterReading">----</div>
           <div class="metric-timestampUnix" id="meterTimestamp" style="font-size: 0.75rem; color: #888;">Last reading: --</div>
         </div>
-      </div>
-<!-- Row 6: Electricity Meter - Compact Card -->
-      <div class="charts-row electricity-container">
-        <div class="electricity-card glass">
+        <div class="electricity-card glass" style="grid-column: 1 / 3; grid-row: 2;">
           <h3>Electricity Meter</h3>
           <div style="position: relative; width: 320px; height: 240px; margin: 0 auto 15px; overflow: hidden;">
             <img id="webcamImage" style="display: none; object-fit: cover; width: 100%; height: 100%;" />
@@ -753,6 +813,7 @@
       meterHistory: [],
       nh3_ppm: null,
       alcohol_ppm: null,
+      aqi: null,
       pressure_hpa: null,
       pressureTimestamp: null,
       co2_ppm: null,
@@ -893,11 +954,25 @@ function updateDisplay() {
       const ptEl = document.getElementById('pressureTimestamp');
       if (ptEl) ptEl.textContent = 'Last reading: ' + new Date(currentData.pressureTimestamp * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
 
-      // Update air quality display
-      const co2El = document.getElementById('currentCO2');
-      if (co2El) { co2El.textContent = formatCO2(currentData.co2_ppm); setSeverity(co2El, severityFor('co2', currentData.co2_ppm)); }
-      const airTsEl = document.getElementById('airTimestamp');
-      
+      // Update air quality display - AQI with color coding
+      const aqiEl = document.getElementById('currentAQI');
+      if (aqiEl && currentData.aqi != null) {
+        aqiEl.textContent = currentData.aqi;
+
+        // Apply color based on AQI value
+        // Standard AQI ranges: 0-50 Good (Green), 51-100 Moderate (Yellow/Orange), 101-150 Unhealthy for Sensitive (Orange), 151+ Unhealthy (Red)
+        let aqiColor = '#66bb6a'; // Default green
+        if (currentData.aqi > 150) {
+          aqiColor = '#ef5350'; // Red - Unhealthy
+        } else if (currentData.aqi > 100) {
+          aqiColor = '#ff9800'; // Orange - Unhealthy for Sensitive Groups
+        } else if (currentData.aqi > 50) {
+          aqiColor = '#ffa726'; // Light Orange - Moderate
+        }
+        aqiEl.style.color = aqiColor;
+      }
+
+      // Update air quality status
       const airStatusEl = document.getElementById('airQualityStatus');
       if (airStatusEl) {
         const status = (currentData.airStatus || '--').toString();
@@ -911,8 +986,20 @@ function updateDisplay() {
         airStatusEl.style.color = color;
         airStatusEl.style.fontWeight = '700';
       }
-      const nh3El = document.getElementById('airNH3'); if (nh3El) nh3El.textContent = 'NH₃: ' + (currentData.nh3_ppm != null ? currentData.nh3_ppm.toFixed(1) + ' ppm' : '-- ppm');
-      const alcEl = document.getElementById('airAlcohol'); if (alcEl) alcEl.textContent = 'Alcohol: ' + (currentData.alcohol_ppm != null ? currentData.alcohol_ppm.toFixed(1) + ' ppm' : '-- ppm');
+
+      // Update individual gas readings
+      const co2El = document.getElementById('currentCO2');
+      if (co2El) { co2El.textContent = formatCO2(currentData.co2_ppm); setSeverity(co2El, severityFor('co2', currentData.co2_ppm)); }
+
+      const nh3El = document.getElementById('currentNH3');
+      if (nh3El) {
+        nh3El.textContent = currentData.nh3_ppm != null ? currentData.nh3_ppm.toFixed(1) + ' ppm' : '-- ppm';
+      }
+
+      const alcEl = document.getElementById('currentAlcohol');
+      if (alcEl) {
+        alcEl.textContent = currentData.alcohol_ppm != null ? currentData.alcohol_ppm.toFixed(1) + ' ppm' : '-- ppm';
+      }
 
       // Update meter reading display
       const meterEl = document.getElementById('currentMeterReading');
@@ -995,7 +1082,17 @@ function updateDisplay() {
       if (!window.historyCO2Chart || !window.historyCO2Chart.data || currentData.airQualityHistory.length === 0) return;
       const sorted = currentData.airQualityHistory.slice().sort(function(a,b){ return a.timestampUnix - b.timestampUnix; });
       window.historyCO2Chart.data.labels = sorted.map(function(i){ return new Date(i.timestampUnix * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false}); });
-      window.historyCO2Chart.data.datasets[0].data = sorted.map(function(i){ return i.co2Ppm; });
+
+      // Update all 4 datasets
+      if (window.historyCO2Chart.data.datasets.length >= 4) {
+        window.historyCO2Chart.data.datasets[0].data = sorted.map(function(i){ return i.aqi; });
+        window.historyCO2Chart.data.datasets[1].data = sorted.map(function(i){ return i.co2Ppm; });
+        window.historyCO2Chart.data.datasets[2].data = sorted.map(function(i){ return i.nh3Ppm; });
+        window.historyCO2Chart.data.datasets[3].data = sorted.map(function(i){ return i.alcoholPpm; });
+      } else {
+        // Fallback for old chart structure
+        window.historyCO2Chart.data.datasets[0].data = sorted.map(function(i){ return i.co2Ppm; });
+      }
       window.historyCO2Chart.update();
     }
 
@@ -1198,6 +1295,7 @@ function updateDisplay() {
           currentData.co2_ppm = aq.co2Ppm;
           currentData.nh3_ppm = aq.nh3Ppm;
           currentData.alcohol_ppm = aq.alcoholPpm;
+          currentData.aqi = aq.aqi;
           currentData.airStatus = aq.status;
           currentData.airTimestamp = aq.timestampUnix;
         }
@@ -1206,7 +1304,15 @@ function updateDisplay() {
         console.log('Fetching air quality history...');
         const aqHist = await graphqlQuery('{ airQualityHistory(limit: 5000) { co2Ppm nh3Ppm alcoholPpm aqi status timestampUnix } }');
         if (aqHist.data && aqHist.data.airQualityHistory) {
-          currentData.airQualityHistory = aqHist.data.airQualityHistory.map(function(r){ return { co2Ppm: r.co2Ppm, timestampUnix: r.timestampUnix }; });
+          currentData.airQualityHistory = aqHist.data.airQualityHistory.map(function(r){
+            return {
+              co2Ppm: r.co2Ppm,
+              nh3Ppm: r.nh3Ppm,
+              alcoholPpm: r.alcoholPpm,
+              aqi: r.aqi,
+              timestampUnix: r.timestampUnix
+            };
+          });
           updateCO2HistoryChart();
         }
 
@@ -1323,6 +1429,7 @@ function updateDisplay() {
               currentData.co2_ppm = aq.co2_ppm;
               currentData.nh3_ppm = aq.nh3_ppm;
               currentData.alcohol_ppm = aq.alcohol_ppm;
+              currentData.aqi = aq.aqi;
               currentData.airStatus = aq.status;
               currentData.airTimestamp = aq.timestamp;
               if (aq.co2_ppm != null) {
@@ -1330,7 +1437,13 @@ function updateDisplay() {
                 if (currentData.airQualityStats.maximum == null || aq.co2_ppm > currentData.airQualityStats.maximum) { currentData.airQualityStats.maximum = aq.co2_ppm; currentData.airQualityStats.max_timestamp = aq.timestamp; }
                 currentData.airQualityStats.count = (currentData.airQualityStats.count || 0) + 1;
               }
-              currentData.airQualityHistory.push({ co2Ppm: aq.co2_ppm, timestampUnix: aq.timestamp });
+              currentData.airQualityHistory.push({
+                co2Ppm: aq.co2_ppm,
+                nh3Ppm: aq.nh3_ppm,
+                alcoholPpm: aq.alcohol_ppm,
+                aqi: aq.aqi,
+                timestampUnix: aq.timestamp
+              });
               
               updateDisplay();
       updateUnifiedTimestamp();
@@ -1589,8 +1702,8 @@ async function initialize() {
           const r = await graphqlQuery('{ pressureHistory(limit: 5000) { pressureHpa timestampUnix } }');
           if (r.data && r.data.pressureHistory) currentData.pressureHistory = r.data.pressureHistory.map(i=>({pressureHpa:i.pressureHpa,timestampUnix:i.timestampUnix}));
         } else if (kind === 'co2') {
-          const r = await graphqlQuery('{ airQualityHistory(limit: 5000) { co2Ppm timestampUnix } }');
-          if (r.data && r.data.airQualityHistory) currentData.airQualityHistory = r.data.airQualityHistory.map(i=>({co2Ppm:i.co2Ppm,timestampUnix:i.timestampUnix}));
+          const r = await graphqlQuery('{ airQualityHistory(limit: 5000) { co2Ppm nh3Ppm alcoholPpm aqi timestampUnix } }');
+          if (r.data && r.data.airQualityHistory) currentData.airQualityHistory = r.data.airQualityHistory.map(i=>({co2Ppm:i.co2Ppm, nh3Ppm:i.nh3Ppm, alcoholPpm:i.alcoholPpm, aqi:i.aqi, timestampUnix:i.timestampUnix}));
         } else if (kind === 'meter') {
           const r = await graphqlQuery('{ meterHistory(limit: 5000) { meterValue timestampUnix } }');
           if (r.data && r.data.meterHistory) currentData.meterHistory = r.data.meterHistory.map(i=>({meterValue:i.meterValue,timestampUnix:i.timestampUnix}));
@@ -1621,8 +1734,22 @@ async function initialize() {
       if (kind === 'co2') {
         const arr = (currentData.airQualityHistory||[]).slice().sort((a,b)=>a.timestampUnix - b.timestampUnix); // Show all history data
         labels = arr.map(i=>new Date(i.timestampUnix * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false}));
-        data = arr.map(i=>i.co2Ppm);
-        return { labels, datasets: [{ label: 'CO₂ (ppm)', data, borderColor: c.border, backgroundColor: c.bg, borderWidth: 2, fill: true, pointRadius: 1 }] };
+
+        // Create datasets for all 4 components
+        const aqiData = arr.map(i=>i.aqi);
+        const co2Data = arr.map(i=>i.co2Ppm);
+        const nh3Data = arr.map(i=>i.nh3Ppm);
+        const alcoholData = arr.map(i=>i.alcoholPpm);
+
+        return {
+          labels,
+          datasets: [
+            { label: 'AQI', data: aqiData, borderColor: '#66bb6a', backgroundColor: 'rgba(102,187,106,0.15)', borderWidth: 2, fill: false, pointRadius: 1, yAxisID: 'y-aqi' },
+            { label: 'CO₂ (ppm)', data: co2Data, borderColor: '#ef5350', backgroundColor: 'rgba(239,83,80,0.15)', borderWidth: 2, fill: false, pointRadius: 1, yAxisID: 'y-gas' },
+            { label: 'NH₃ (ppm)', data: nh3Data, borderColor: '#42a5f5', backgroundColor: 'rgba(66,165,245,0.15)', borderWidth: 2, fill: false, pointRadius: 1, yAxisID: 'y-gas' },
+            { label: 'Alcohol (ppm)', data: alcoholData, borderColor: '#ffa726', backgroundColor: 'rgba(255,167,38,0.15)', borderWidth: 2, fill: false, pointRadius: 1, yAxisID: 'y-gas' }
+          ]
+        };
       }
       if (kind === 'meter') {
         const arr = (currentData.meterHistory||[]).slice().sort((a,b)=>a.timestampUnix - b.timestampUnix); // Show all history data
@@ -1633,11 +1760,58 @@ async function initialize() {
       return { labels: [], datasets: [] };
     }
 
-    function buildLineOptions() {
-      return { 
-        responsive: true, 
-        maintainAspectRatio: false, 
-        legend: { display: false }, 
+    function buildLineOptions(chartType) {
+      // For air quality chart, use dual Y-axes
+      if (chartType === 'co2') {
+        return {
+          responsive: true,
+          maintainAspectRatio: false,
+          legend: { display: true, position: 'top', labels: { fontColor: '#b3b3b3', boxWidth: 15, padding: 10 } },
+          tooltips: {
+            callbacks: {
+              label: function(tooltipItem, data) {
+                const datasetLabel = data.datasets[tooltipItem.datasetIndex].label || '';
+                const value = tooltipItem.yLabel;
+                return datasetLabel + ': ' + value;
+              },
+              title: function(tooltipItems, data) {
+                const label = data.labels[tooltipItems[0].index];
+                return label;
+              }
+            }
+          },
+          scales: {
+            xAxes: [{
+              gridLines: { color: 'rgba(255,255,255,0.1)' },
+              ticks: { fontColor: '#b3b3b3', maxTicksLimit: 8 }
+            }],
+            yAxes: [
+              {
+                id: 'y-aqi',
+                type: 'linear',
+                position: 'left',
+                gridLines: { color: 'rgba(102,187,106,0.2)' },
+                ticks: { fontColor: '#66bb6a', beginAtZero: true },
+                scaleLabel: { display: true, labelString: 'AQI', fontColor: '#66bb6a' }
+              },
+              {
+                id: 'y-gas',
+                type: 'linear',
+                position: 'right',
+                gridLines: { display: false },
+                ticks: { fontColor: '#b3b3b3', beginAtZero: true },
+                scaleLabel: { display: true, labelString: 'ppm', fontColor: '#b3b3b3' }
+              }
+            ]
+          }
+        };
+      }
+
+      // Default options for other charts
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
+        legend: { display: false },
         tooltips: {
           callbacks: {
             label: function(tooltipItem, data) {
@@ -1645,22 +1819,21 @@ async function initialize() {
               return value;
             },
             title: function(tooltipItems, data) {
-              // Use the same Bucharest timezone formatting as the labels
               const label = data.labels[tooltipItems[0].index];
-              return label; // This will use the already formatted timestamp from our labels
+              return label;
             }
           }
         },
-        scales: { 
-          xAxes: [{ 
-            gridLines: { color: 'rgba(255,255,255,0.1)' }, 
+        scales: {
+          xAxes: [{
+            gridLines: { color: 'rgba(255,255,255,0.1)' },
             ticks: { fontColor: '#b3b3b3', maxTicksLimit: 8 }
-          }], 
-          yAxes: [{ 
-            gridLines: { color: 'rgba(255,255,255,0.1)' }, 
-            ticks: { fontColor: '#b3b3b3' } 
-          }] 
-        } 
+          }],
+          yAxes: [{
+            gridLines: { color: 'rgba(255,255,255,0.1)' },
+            ticks: { fontColor: '#b3b3b3' }
+          }]
+        }
       };
     }
     // Chart Modal Time Period Logic
@@ -1773,7 +1946,12 @@ async function initialize() {
         const overlay = document.getElementById('chartModalOverlay');
         const title = document.getElementById('chartModalTitle');
         const canvas = document.getElementById('chartModalCanvas');
-        title.textContent = kind.toUpperCase() + ' History';
+        // Set better title for Air Quality
+        if (kind === 'co2') {
+          title.textContent = 'Air Quality History';
+        } else {
+          title.textContent = kind.toUpperCase() + ' History';
+        }
         overlay.style.display = 'flex';
         
         // Reset radio buttons to "Recent"
@@ -1781,7 +1959,7 @@ async function initialize() {
         updateModalInputsVisibility();
         
         if (modalChart) { modalChart.destroy(); }
-        modalChart = new Chart(canvas.getContext('2d'), { type: 'line', data: ds, options: buildLineOptions() });
+        modalChart = new Chart(canvas.getContext('2d'), { type: 'line', data: ds, options: buildLineOptions(kind) });
         currentModalChart = modalChart;
         
         // Setup event listeners if not already done
@@ -1802,7 +1980,7 @@ async function initialize() {
         pop.style.top = top + 'px'; pop.style.left = left + 'px';
         pop.style.display = 'block';
         if (popoverChart) { popoverChart.destroy(); }
-        popoverChart = new Chart(canvas.getContext('2d'), { type: 'line', data: ds, options: buildLineOptions() });
+        popoverChart = new Chart(canvas.getContext('2d'), { type: 'line', data: ds, options: buildLineOptions(kind) });
       }
     }
 
