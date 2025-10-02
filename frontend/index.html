@@ -2262,10 +2262,19 @@ async function initialize() {
 
     // === Mobile-friendly tooltips ===
     document.addEventListener('DOMContentLoaded', function() {
+      // Add click/tap handlers for info tooltips (prevent chart opening)
+      document.querySelectorAll('.info-tooltip').forEach(tooltipContainer => {
+        tooltipContainer.addEventListener('click', function(e) {
+          e.stopPropagation();
+          e.preventDefault();
+        });
+      });
+
       // Add click/tap handlers for info icons
       document.querySelectorAll('.info-icon').forEach(icon => {
         icon.addEventListener('click', function(e) {
           e.stopPropagation();
+          e.preventDefault();
           const tooltip = this.nextElementSibling;
           const wasVisible = tooltip.classList.contains('show');
 
@@ -2283,7 +2292,7 @@ async function initialize() {
 
       // Close tooltips when clicking outside
       document.addEventListener('click', function(e) {
-        if (!e.target.classList.contains('info-icon')) {
+        if (!e.target.closest('.info-tooltip')) {
           document.querySelectorAll('.tooltip-content.show').forEach(tooltip => {
             tooltip.classList.remove('show');
           });
