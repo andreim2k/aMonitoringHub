@@ -635,7 +635,7 @@
           <div class="metric-label">Total Readings</div>
           <div class="metric-value" id="dataCount">--</div>
         </div>
-        <div class="metric-card glass air-quality-card" style="cursor: pointer; grid-column: 1 / 3; grid-row: 2;" onclick="showChartModal('co2', this)">
+        <div class="air-quality-card glass" style="cursor: pointer; grid-column: 1 / 3; grid-row: 2;" onclick="showMetricChart('co2', 'modal', this)">
           <!-- Header -->
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
             <div style="display: flex; align-items: center; gap: 10px;">
@@ -970,6 +970,12 @@ function updateDisplay() {
           aqiColor = '#ffa726'; // Light Orange - Moderate
         }
         aqiEl.style.color = aqiColor;
+
+        // Update the Air Quality card border-left color to match AQI color
+        const aqiCard = document.querySelector('.air-quality-card');
+        if (aqiCard) {
+          aqiCard.style.borderLeftColor = aqiColor;
+        }
       }
 
       // Update air quality status
