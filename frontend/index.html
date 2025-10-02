@@ -9,8 +9,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>@MonitoringHub - Real-time Weather Monitoring</title>
 
-  <!-- Chart.js 2.x for better Safari compatibility -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+  <!-- Chart.js 4.x with modern features and better performance -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
     /* Simple inline styles - no external dependencies */
@@ -652,7 +652,7 @@
           </div>
 
           <!-- AQI Main Display -->
-          <div style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 16px; margin-bottom: 14px; text-align: center; border: 1px solid rgba(255,255,255,0.1);">
+          <div style="background: rgba(102,187,106,0.15); border-radius: 12px; padding: 16px; margin-bottom: 14px; text-align: center; border: 1px solid rgba(102,187,106,0.3);">
             <div style="font-size: 0.8rem; color: #b3b3b3; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Air Quality Index</div>
             <div id="currentAQI" style="font-size: 2.5rem; font-weight: 800; line-height: 1; margin-bottom: 6px; color: #66bb6a;">--</div>
             <div id="airQualityStatus" style="font-weight: 600; font-size: 0.85rem; padding: 6px 12px; border-radius: 6px; display: inline-block; background: rgba(255,255,255,0.08);">--</div>
@@ -662,15 +662,15 @@
           <div class="gas-grid" style="display: flex; gap: 10px; justify-content: space-between; align-items: center;">
             <div style="background: rgba(239,83,80,0.15); border-radius: 8px; padding: 10px; text-align: center; border: 1px solid rgba(239,83,80,0.3); flex: 1;">
               <div style="font-size: 0.7rem; color: #ef5350; font-weight: 600; margin-bottom: 4px;">CO₂</div>
-              <div id="currentCO2" style="font-size: 1.1rem; font-weight: 700; color: #fff;">-- ppm</div>
+              <div id="currentCO2" class="metric-value" style="font-size: 1.1rem; font-weight: 700;">-- ppm</div>
             </div>
             <div style="background: rgba(66,165,245,0.15); border-radius: 8px; padding: 10px; text-align: center; border: 1px solid rgba(66,165,245,0.3); flex: 1;">
               <div style="font-size: 0.7rem; color: #42a5f5; font-weight: 600; margin-bottom: 4px;">NH₃</div>
-              <div id="currentNH3" style="font-size: 1.1rem; font-weight: 700; color: #fff;">-- ppm</div>
+              <div id="currentNH3" class="metric-value" style="font-size: 1.1rem; font-weight: 700;">-- ppm</div>
             </div>
             <div style="background: rgba(255,167,38,0.15); border-radius: 8px; padding: 10px; text-align: center; border: 1px solid rgba(255,167,38,0.3); flex: 1;">
               <div style="font-size: 0.7rem; color: #ffa726; font-weight: 600; margin-bottom: 4px;">Alcohol</div>
-              <div id="currentAlcohol" style="font-size: 1.1rem; font-weight: 700; color: #fff;">-- ppm</div>
+              <div id="currentAlcohol" class="metric-value" style="font-size: 1.1rem; font-weight: 700;">-- ppm</div>
             </div>
           </div>
         </div>
@@ -872,6 +872,16 @@ function severityFor(metric, value) {
       if (value > 1000) return 'bad';
       if (value > 800) return 'warn';
       return 'ok';
+    case 'nh3':
+      // NH3 thresholds: <50 good, 50-100 warning, >100 bad
+      if (value > 100) return 'bad';
+      if (value > 50) return 'warn';
+      return 'ok';
+    case 'alcohol':
+      // Alcohol vapor thresholds: <100 good, 100-300 warning, >300 bad
+      if (value > 300) return 'bad';
+      if (value > 100) return 'warn';
+      return 'ok';
     default: return null;
   }
 }
@@ -1000,11 +1010,13 @@ function updateDisplay() {
       const nh3El = document.getElementById('currentNH3');
       if (nh3El) {
         nh3El.textContent = currentData.nh3_ppm != null ? currentData.nh3_ppm.toFixed(1) + ' ppm' : '-- ppm';
+        setSeverity(nh3El, severityFor('nh3', currentData.nh3_ppm));
       }
 
       const alcEl = document.getElementById('currentAlcohol');
       if (alcEl) {
         alcEl.textContent = currentData.alcohol_ppm != null ? currentData.alcohol_ppm.toFixed(1) + ' ppm' : '-- ppm';
+        setSeverity(alcEl, severityFor('alcohol', currentData.alcohol_ppm));
       }
 
       // Update meter reading display
