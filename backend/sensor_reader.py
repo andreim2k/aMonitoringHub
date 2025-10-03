@@ -1,34 +1,61 @@
 """
-Temperature sensor reader module for aMonitoringHub application.
+Sensor reader module for the aMonitoringHub application.
 
-Supports multiple sensor types:
-- System thermal zones (CPU temperature)
-- 1-Wire sensors (DS18B20)
-- Mock sensor for development and testing
+This module provides classes for reading data from various hardware sensors,
+including temperature and humidity sensors. It supports auto-detection of
+available sensors and provides a mock sensor for development and testing
+purposes.
 """
 
 import logging
 import random
 import time
 import os
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from dataclasses import dataclass
 
 
 @dataclass
 class SensorReading:
-    """Temperature sensor reading with metadata."""
+    """A dataclass to hold a single sensor reading with its metadata.
+
+    Attributes:
+        temperature_c: The temperature reading in degrees Celsius.
+        sensor_type: The type of the sensor (e.g., 'mock', 'w1_sensor').
+        sensor_id: The unique identifier for the sensor.
+        timestamp: The Unix timestamp when the reading was taken.
+        metadata: A dictionary for any extra sensor-specific information.
+    """
     temperature_c: float
     sensor_type: str
     sensor_id: str
     timestamp: float
-    metadata: Dict[str, Any] = None
+    metadata: Optional[Dict[str, Any]] = None
 
 
 class TemperatureSensorReader:
-    """Temperature sensor reader with multiple sensor support."""
+    """A class to read temperature from various supported sensor types.
+
+    This class can auto-detect available sensors (thermal zones, 1-Wire) or
+    can be configured to use a specific type, including a mock sensor for
+    development.
+
+    Attributes:
+        logger: The logger instance for this class.
+        sensor_config: A dictionary of configuration options for the sensor.
+        sensor_type: The type of sensor being used.
+        active_sensor: A dictionary containing details of the active sensor.
+    """
     
-    def __init__(self, sensor_type: str = "auto", sensor_config: Dict[str, Any] = None):
+    def __init__(self, sensor_type: str = "auto", sensor_config: Optional[Dict[str, Any]] = None):
+        """Initializes the TemperatureSensorReader.
+
+        Args:
+            sensor_type: The type of sensor to use ('auto', 'thermal_zone',
+                'w1_sensor', 'mock'). Defaults to 'auto'.
+            sensor_config: A dictionary with configuration for the sensor,
+                especially for the mock sensor.
+        """
         self.logger = logging.getLogger(__name__)
         self.sensor_config = sensor_config or {}
         
@@ -40,7 +67,14 @@ class TemperatureSensorReader:
         self._initialize_sensor()
         
     def _detect_sensor_type(self) -> str:
-        """Auto-detect available temperature sensor."""
+        """Auto-detects the first available hardware temperature sensor.
+
+        It checks for system thermal zones and 1-Wire devices in that order.
+        If no hardware is found, it falls back to the mock sensor.
+
+        Returns:
+            The detected sensor type as a string.
+        """
         # Check for system thermal zones
         thermal_zones = self._find_thermal_zones()
         if thermal_zones:
@@ -57,8 +91,15 @@ class TemperatureSensorReader:
         self.logger.warning("No hardware sensors detected, using mock sensor")
         return "mock"
         
-    def _find_thermal_zones(self) -> list:
-        """Find available system thermal zones."""
+    def _find_thermal_zones(self) -> List[Dict[str, str]]:
+        """Scans the system for available thermal zones.
+
+        Looks in '/sys/class/thermal' for directories representing thermal zones.
+
+        Returns:
+            A list of dictionaries, where each dictionary represents a found
+            thermal zone with its name, path, and type.
+        """
         thermal_zones = []
         thermal_base = "/sys/class/thermal"
         
@@ -83,8 +124,16 @@ class TemperatureSensorReader:
                             
         return thermal_zones
         
-    def _find_w1_devices(self) -> list:
-        """Find available 1-Wire temperature devices."""
+    def _find_w1_devices(self) -> List[Dict[str, str]]:
+        """Scans the system for available 1-Wire temperature devices.
+
+        Looks in '/sys/bus/w1/devices' for devices with common temperature
+        sensor prefixes (e.g., '28-').
+
+        Returns:
+            A list of dictionaries, where each dictionary represents a found
+            1-Wire device with its ID and path.
+        """
         w1_devices = []
         w1_base = "/sys/bus/w1/devices"
         
@@ -101,7 +150,7 @@ class TemperatureSensorReader:
         return w1_devices
         
     def _initialize_sensor(self):
-        """Initialize the selected sensor."""
+        """Initializes the sensor based on the determined sensor_type."""
         if self.sensor_type == "thermal_zone":
             self.thermal_zones = self._find_thermal_zones()
             if self.thermal_zones:
@@ -129,7 +178,12 @@ class TemperatureSensorReader:
             raise ValueError(f"Unsupported sensor type: {self.sensor_type}")
             
     def get_current_temp(self) -> Optional[float]:
-        """Get current temperature reading in Celsius."""
+        """Reads the current temperature from the active sensor.
+
+        Returns:
+            The temperature in degrees Celsius as a float, or None if the
+            reading fails.
+        """
         try:
             if self.sensor_type == "thermal_zone":
                 return self._read_thermal_zone()
@@ -146,7 +200,12 @@ class TemperatureSensorReader:
             return None
             
     def get_reading(self) -> Optional[SensorReading]:
-        """Get complete sensor reading with metadata."""
+        """Gets a complete sensor reading, including metadata.
+
+        Returns:
+            A SensorReading object containing the temperature and metadata,
+            or None if the reading fails.
+        """
         temp = self.get_current_temp()
         if temp is None:
             return None
@@ -181,14 +240,25 @@ class TemperatureSensorReader:
         )
         
     def _read_thermal_zone(self) -> float:
-        """Read temperature from system thermal zone."""
+        """Reads temperature from a sysfs thermal zone file.
+
+        Returns:
+            The temperature in degrees Celsius.
+        """
         with open(self.active_sensor['path'], 'r') as f:
             # Thermal zone temperature is in millidegrees Celsius
             temp_millidegrees = int(f.read().strip())
             return temp_millidegrees / 1000.0
             
     def _read_w1_sensor(self) -> float:
-        """Read temperature from 1-Wire sensor."""
+        """Reads temperature from a 1-Wire sensor device file.
+
+        Returns:
+            The temperature in degrees Celsius.
+
+        Raises:
+            ValueError: If the sensor data cannot be parsed.
+        """
         with open(self.active_sensor['path'], 'r') as f:
             content = f.read()
             
@@ -205,7 +275,14 @@ class TemperatureSensorReader:
         raise ValueError("Could not parse 1-Wire sensor data")
         
     def _read_mock_sensor(self) -> float:
-        """Generate mock temperature reading."""
+        """Generates a mock temperature reading.
+
+        The reading is based on a base temperature with some random variation
+        and a slow time-based drift to simulate realistic changes.
+
+        Returns:
+            The mock temperature in degrees Celsius.
+        """
         # Generate realistic temperature variation
         variation = random.uniform(-self.mock_variation, self.mock_variation)
         # Add some time-based slow drift
@@ -215,7 +292,12 @@ class TemperatureSensorReader:
         return self.mock_base_temp + variation + drift
         
     def get_sensor_info(self) -> Dict[str, Any]:
-        """Get information about the current sensor."""
+        """Retrieves information about the currently configured sensor.
+
+        Returns:
+            A dictionary containing details about the sensor type, its
+            initialization status, and available devices/zones.
+        """
         info = {
             "sensor_type": self.sensor_type,
             "initialized": True
@@ -236,9 +318,24 @@ class TemperatureSensorReader:
 
 
 class HumiditySensorReader:
-    """Humidity sensor reader with multiple sensor support."""
+    """A class to read humidity, currently supporting a mock sensor.
+
+    This class is designed for extensibility with real hardware but currently
+    only implements a mock sensor for development and testing.
+
+    Attributes:
+        logger: The logger instance for this class.
+        sensor_config: A dictionary of configuration options for the sensor.
+        sensor_type: The type of sensor being used (e.g., 'mock').
+    """
     
-    def __init__(self, sensor_type: str = "mock", sensor_config = None):
+    def __init__(self, sensor_type: str = "mock", sensor_config: Optional[Dict[str, Any]] = None):
+        """Initializes the HumiditySensorReader.
+
+        Args:
+            sensor_type: The type of sensor to use. Defaults to 'mock'.
+            sensor_config: A dictionary with configuration for the sensor.
+        """
         self.logger = logging.getLogger(__name__)
         self.sensor_config = sensor_config or {}
         self.sensor_type = sensor_type
@@ -250,7 +347,7 @@ class HumiditySensorReader:
         self._initialize_sensor()
         
     def _initialize_sensor(self):
-        """Initialize the selected sensor."""
+        """Initializes the sensor based on the selected type."""
         if self.sensor_type == "mock":
             self.mock_base_humidity = self.sensor_config.get('base_humidity', 45.0)  # Base 45% humidity
             self.mock_variation = self.sensor_config.get('variation', 15.0)  # ±15% variation
@@ -259,7 +356,11 @@ class HumiditySensorReader:
             raise ValueError(f"Unsupported humidity sensor type: {self.sensor_type}")
     
     def get_current_humidity(self) -> Optional[float]:
-        """Get current humidity reading."""
+        """Reads the current humidity from the active sensor.
+
+        Returns:
+            The relative humidity in percent, or None if the reading fails.
+        """
         try:
             if self.sensor_type == "mock":
                 return self._read_mock_sensor()
@@ -271,7 +372,14 @@ class HumiditySensorReader:
             return None
             
     def _read_mock_sensor(self) -> float:
-        """Generate mock humidity reading."""
+        """Generates a mock humidity reading.
+
+        The reading is based on a base humidity with random variation and
+        a slow time-based drift.
+
+        Returns:
+            The mock humidity in percent, clamped between 0 and 100.
+        """
         import random
         import time
         
@@ -285,8 +393,12 @@ class HumiditySensorReader:
         # Clamp between 0 and 100
         return max(0.0, min(100.0, humidity))
         
-    def get_sensor_info(self):
-        """Get information about the current sensor."""
+    def get_sensor_info(self) -> Dict[str, Any]:
+        """Retrieves information about the currently configured humidity sensor.
+
+        Returns:
+            A dictionary containing details about the sensor.
+        """
         info = {
             "sensor_type": self.sensor_type,
             "initialized": True
@@ -301,7 +413,17 @@ class HumiditySensorReader:
 
 # Convenience function for quick temperature reading
 def get_current_temp(sensor_type: str = "auto") -> Optional[float]:
-    """Quick function to get current temperature."""
+    """A convenience function to get a single temperature reading.
+
+    This creates a temporary TemperatureSensorReader instance to get the current
+    temperature.
+
+    Args:
+        sensor_type: The type of sensor to use. Defaults to 'auto'.
+
+    Returns:
+        The current temperature in degrees Celsius, or None on failure.
+    """
     try:
         sensor = TemperatureSensorReader(sensor_type=sensor_type)
         return sensor.get_current_temp()
@@ -314,7 +436,17 @@ def get_current_temp(sensor_type: str = "auto") -> Optional[float]:
 
 # Convenience function for quick humidity reading
 def get_current_humidity(sensor_type: str = "mock") -> Optional[float]:
-    """Quick function to get current humidity."""
+    """A convenience function to get a single humidity reading.
+
+    This creates a temporary HumiditySensorReader instance to get the current
+    humidity.
+
+    Args:
+        sensor_type: The type of sensor to use. Defaults to 'mock'.
+
+    Returns:
+        The current relative humidity in percent, or None on failure.
+    """
     try:
         sensor = HumiditySensorReader(sensor_type=sensor_type)
         return sensor.get_current_humidity()

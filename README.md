@@ -36,7 +36,7 @@
 
 ### Frontend Stack
 - **Vanilla HTML/CSS/JavaScript** - No framework dependencies
-- **Chart.js 2.x** for interactive charts
+- **Chart.js 4.x** for interactive charts
 - **Modern CSS Grid** with responsive design
 - **Progressive Enhancement** with graceful degradation
 
@@ -152,7 +152,7 @@ python3 -m venv venv
 source venv/bin/activate
 
 # Install dependencies
-pip install -r requirements.txt
+pip install -r backend/requirements.txt
 
 # Create logs directory
 mkdir -p backend/logs
@@ -239,16 +239,17 @@ eventSource.onmessage = function(event) {
 
 ## 🔧 Configuration Options
 
-### Environment Variables
+### Command-Line Arguments
+The application can be configured at runtime using the following command-line arguments:
 ```bash
 # Application settings
---host 0.0.0.0          # Bind to all interfaces
---port 5000              # Default port
---debug                  # Enable debug mode
+--host 0.0.0.0          # Host to bind to
+--port 5000             # Port to listen on
+--debug                 # Enable debug mode
 
 # Sensor settings
---threshold 0.1          # Temperature change threshold
---heartbeat 300          # Reading interval (seconds)
+--threshold 0.1         # Temperature change threshold for SSE
+--throttle 3600         # Throttle interval for all operations (seconds)
 ```
 
 ### Database Management
@@ -281,22 +282,33 @@ sudo systemctl status amonitoringhub.service
 journalctl -u amonitoringhub.service -f
 ```
 
+## Codebase Documentation
+This repository is thoroughly documented to aid developers.
+- **Backend (Python)**: All Python modules, classes, and functions include Google-style docstrings.
+- **Frontend (JavaScript)**: The JavaScript code within `index.html` is documented using JSDoc-style comments.
+
+Developers are encouraged to read the docstrings in the source code for a deeper understanding of the implementation details.
+
 ## 📁 Project Structure
 
 ```
 aMonitoringHub/
 ├── backend/
-│   ├── app.py              # Main Flask application
-│   ├── models.py           # Database models
-│   ├── sensor_reader.py    # Sensor abstraction
+│   ├── app.py              # Main Flask application, GraphQL schema, and routes
+│   ├── config.py           # Handles loading and saving of config.json
+│   ├── models.py           # SQLAlchemy database models and DB manager
+│   ├── sensor_reader.py    # Classes for reading from hardware or mock sensors
+│   ├── usb_json_reader.py  # Threaded reader for USB serial devices
+│   ├── wsgi.py             # WSGI entry point for Gunicorn
 │   ├── config.json         # ESP32-CAM & OCR settings
-│   ├── monitoringhub.db    # Current database
-│   └── logs/               # Application logs
+│   ├── requirements.txt    # Python package dependencies
+│   ├── database.db         # Default SQLite database file (created at runtime)
+│   └── logs/               # Directory for application logs
 ├── frontend/
-│   └── index.html          # Web interface
+│   └── index.html          # Main web interface (HTML, CSS, and JavaScript)
 ├── scripts/
-│   └── app.sh              # Process management
-└── README.md               # This documentation
+│   └── app.sh              # Process management script for the application
+└── README.md               # This documentation file
 ```
 
 ## 🔧 Troubleshooting
@@ -411,4 +423,3 @@ sudo kill -9 <PID>
 Endpoints:
 - GraphQL: http://<host>:5000/graphql
 - SSE: http://<host>:5000/events
-

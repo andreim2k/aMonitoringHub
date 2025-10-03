@@ -1,10 +1,16 @@
 """
 Optimized GraphQL + SSE Flask application for aMonitoringHub monitoring system.
 
+This module sets up a Flask web server that provides a GraphQL API for querying
+sensor data and a Server-Sent Events (SSE) stream for real-time updates.
+
 Features:
-- GraphQL API using pure graphene
-- Server-Sent Events for real-time updates (ONLY when temperature changes)
-- Temperature data collection service with change detection
+- GraphQL API using Graphene for flexible data querying.
+- Server-Sent Events for pushing real-time sensor updates to clients.
+- Background task scheduling with APScheduler for periodic jobs like OCR.
+- Integration with various sensor types, including a USB JSON reader.
+- Database management with SQLAlchemy for storing sensor readings.
+- Configurable throttling system to manage data ingestion rates.
 """
 
 import os
@@ -14,7 +20,7 @@ import time
 import logging
 import argparse
 from datetime import datetime, timezone
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Tuple, Optional
 from queue import Queue
 import threading
 
@@ -22,7 +28,18 @@ import threading
 # Helper to present timestamps in local system time
 from datetime import timezone as _tzmod, datetime as _dtmod
 
-def _to_local_iso_unix(dt):
+def _to_local_iso_unix(dt: Optional[datetime]) -> Tuple[Optional[str], Optional[float]]:
+    """Converts a datetime object to a local timezone ISO 8601 string and a Unix timestamp.
+
+    If the input datetime is naive, it is assumed to be in UTC.
+
+    Args:
+        dt: The datetime object to convert.
+
+    Returns:
+        A tuple containing the ISO 8601 formatted string and the Unix timestamp,
+        or (None, None) if the input is None.
+    """
     if dt is None:
         return None, None
     try:
@@ -101,29 +118,46 @@ sse_clients = Queue()
 THROTTLE_INTERVAL = 3600  # Default: 1 hour in seconds
 last_throttle_time = 0    # Global throttle timestamp
 
-def should_throttle():
-    """Check if we should throttle based on global interval setting"""
+def should_throttle() -> bool:
+    """Checks if an operation should be throttled based on the global interval.
+
+    Returns:
+        True if the time since the last throttled operation is less than
+        THROTTLE_INTERVAL, False otherwise.
+    """
     global last_throttle_time
     current_time = time.time()
     return current_time - last_throttle_time < THROTTLE_INTERVAL
 
 def update_throttle_time():
-    """Update the global throttle timestamp"""
+    """Updates the global throttle timestamp to the current time."""
     global last_throttle_time
     last_throttle_time = time.time()
 
-def get_throttle_interval():
-    """Get the current throttle interval"""
+def get_throttle_interval() -> int:
+    """Gets the current throttle interval in seconds.
+
+    Returns:
+        The value of THROTTLE_INTERVAL.
+    """
     return THROTTLE_INTERVAL
 
-def set_throttle_interval(seconds):
-    """Set the throttle interval (for configuration)"""
+def set_throttle_interval(seconds: int):
+    """Sets the global throttle interval.
+
+    Args:
+        seconds: The new throttle interval in seconds. Must be at least 1.
+    """
     global THROTTLE_INTERVAL
     THROTTLE_INTERVAL = max(1, int(seconds))  # Minimum 1 second
 
 
 def scheduled_ocr_task():
-    """Scheduled task to capture webcam and run OCR daily at 12:00"""
+    """Performs a scheduled OCR task by calling the /webcam/ocr endpoint.
+
+    This function is intended to be run by a scheduler (e.g., APScheduler)
+    to automatically read the electricity meter at a configured time.
+    """
     logger.info("Running scheduled OCR task...")
     try:
         # Use Flask test client to call the OCR endpoint
@@ -140,8 +174,9 @@ def scheduled_ocr_task():
 
 
 
-# GraphQL Types (same as before)
+# GraphQL Types
 class TemperatureReading(ObjectType):
+    """GraphQL type for a single temperature reading."""
     id = Int()
     temperature_c = Float()
     timestamp = String()
@@ -151,6 +186,7 @@ class TemperatureReading(ObjectType):
 
 
 class TemperatureStatistics(ObjectType):
+    """GraphQL type for temperature statistics over a given period."""
     count = Int()
     total_count = Int()
     average = Float()
@@ -161,9 +197,8 @@ class TemperatureStatistics(ObjectType):
     hours_back = Int()
 
 
-
-
 class HumidityReading(ObjectType):
+    """GraphQL type for a single humidity reading."""
     id = Int()
     humidity_percent = Float()
     timestamp = String()
@@ -173,6 +208,7 @@ class HumidityReading(ObjectType):
 
 
 class HumidityStatistics(ObjectType):
+    """GraphQL type for humidity statistics over a given period."""
     count = Int()
     average = Float()
     minimum = Float()
@@ -182,6 +218,7 @@ class HumidityStatistics(ObjectType):
     hours_back = Int()
 
 class PressureReading(ObjectType):
+    """GraphQL type for a single pressure reading."""
     id = Int()
     pressure_hpa = Float()
     timestamp = String()
@@ -190,6 +227,7 @@ class PressureReading(ObjectType):
     sensor_id = String()
 
 class PressureStatistics(ObjectType):
+    """GraphQL type for pressure statistics over a given period."""
     count = Int()
     average = Float()
     minimum = Float()
@@ -199,6 +237,7 @@ class PressureStatistics(ObjectType):
     hours_back = Int()
 
 class AirQualityReading(ObjectType):
+    """GraphQL type for a single air quality reading."""
     id = Int()
     co2_ppm = Float()
     nh3_ppm = Float()
@@ -211,6 +250,7 @@ class AirQualityReading(ObjectType):
     sensor_id = String()
 
 class AirQualityStatistics(ObjectType):
+    """GraphQL type for air quality statistics over a given period."""
     count = Int()
     average = Float()
     minimum = Float()
@@ -220,6 +260,7 @@ class AirQualityStatistics(ObjectType):
     hours_back = Int()
 
 class MeterReading(ObjectType):
+    """GraphQL type for a single electricity meter reading from OCR."""
     id = Int()
     meter_value = String()
     timestamp = String()
@@ -230,6 +271,7 @@ class MeterReading(ObjectType):
     sensor_id = String()
 
 class MeterStatistics(ObjectType):
+    """GraphQL type for meter reading statistics over a given period."""
     count = Int()
     first_value = String()
     last_value = String()
@@ -239,6 +281,7 @@ class MeterStatistics(ObjectType):
 
 
 class SensorInfo(ObjectType):
+    """GraphQL type for information about the active sensor."""
     sensor_type = String()
     sensor_id = String()
     initialized = String()
@@ -246,6 +289,7 @@ class SensorInfo(ObjectType):
 
 
 class HealthStatus(ObjectType):
+    """GraphQL type for the overall health status of the application."""
     status = String()
     timestamp = String()
     database = String()
@@ -255,6 +299,7 @@ class HealthStatus(ObjectType):
 
 # Time-based Statistics Types
 class YearlyStatistics(ObjectType):
+    """GraphQL type for statistics aggregated by year."""
     count = Int()
     average = Float()
     minimum = Float()
@@ -262,6 +307,7 @@ class YearlyStatistics(ObjectType):
     year = Int()
 
 class MonthlyStatistics(ObjectType):
+    """GraphQL type for statistics aggregated by month."""
     count = Int()
     average = Float()
     minimum = Float()
@@ -270,6 +316,7 @@ class MonthlyStatistics(ObjectType):
     month = Int()
 
 class DailyStatistics(ObjectType):
+    """GraphQL type for statistics aggregated by day."""
     count = Int()
     average = Float()
     minimum = Float()
@@ -281,6 +328,7 @@ class DailyStatistics(ObjectType):
 
 # GraphQL Queries
 class Query(ObjectType):
+    """Defines the root GraphQL queries for the application."""
     health = Field(HealthStatus)
     current_temperature = Field(TemperatureReading)
     temperature_history = GrapheneList(
@@ -389,7 +437,15 @@ class Query(ObjectType):
         day=Int(required=True)
     )
 
-    def resolve_health(self, info):
+    def resolve_health(self, info: Any) -> HealthStatus:
+        """Resolves the health check query.
+
+        Args:
+            info: The GraphQL resolve info object.
+
+        Returns:
+            A HealthStatus object with the current application status.
+        """
         try:
             stats = db.get_statistics(hours_back=1)
             sensor_info_dict = temperature_sensor.get_sensor_info() if temperature_sensor else {}
@@ -416,7 +472,15 @@ class Query(ObjectType):
                 recent_readings=0
             )
 
-    def resolve_current_temperature(self, info):
+    def resolve_current_temperature(self, info: Any) -> Optional[TemperatureReading]:
+        """Resolves the query for the most recent temperature reading.
+
+        Args:
+            info: The GraphQL resolve info object.
+
+        Returns:
+            A TemperatureReading object or None if no readings are available.
+        """
         try:
             recent_readings = db.get_recent_readings(limit=1)
             if not recent_readings:
@@ -435,7 +499,20 @@ class Query(ObjectType):
             logger.error(f"Error getting current temperature: {e}")
             return None
 
-    def resolve_temperature_history(self, info, range="daily", limit=1000, year=None, month=None, day=None):
+    def resolve_temperature_history(self, info: Any, range: str = "daily", limit: int = 1000, year: Optional[int] = None, month: Optional[int] = None, day: Optional[int] = None) -> List[TemperatureReading]:
+        """Resolves the query for historical temperature readings.
+
+        Args:
+            info: The GraphQL resolve info object.
+            range: The time range to query ("daily", "weekly", "recent").
+            limit: The maximum number of readings to return.
+            year: The year to query for historical data.
+            month: The month to query for historical data.
+            day: The day to query for historical data.
+
+        Returns:
+            A list of TemperatureReading objects.
+        """
         try:
             limit = min(limit, 5000)
             # Handle time-based queries first
@@ -479,7 +556,16 @@ class Query(ObjectType):
 
     
 
-    def resolve_temperature_statistics(self, info, hours=24):
+    def resolve_temperature_statistics(self, info: Any, hours: int = 24) -> TemperatureStatistics:
+        """Resolves the query for temperature statistics.
+
+        Args:
+            info: The GraphQL resolve info object.
+            hours: The number of hours to look back for statistics.
+
+        Returns:
+            A TemperatureStatistics object.
+        """
         try:
             stats = db.get_statistics(hours_back=hours)
             return TemperatureStatistics(
@@ -498,7 +584,15 @@ class Query(ObjectType):
                 count=0, total_count=0, average=0.0, minimum=0.0, maximum=0.0, hours_back=hours
             )
 
-    def resolve_sensor_info(self, info):
+    def resolve_sensor_info(self, info: Any) -> Optional[SensorInfo]:
+        """Resolves the query for information about the active sensor.
+
+        Args:
+            info: The GraphQL resolve info object.
+
+        Returns:
+            A SensorInfo object or None if no sensor is active.
+        """
         try:
             if temperature_sensor:
                 sensor_info_dict = temperature_sensor.get_sensor_info()
@@ -516,7 +610,15 @@ class Query(ObjectType):
 
 
     # Humidity resolvers
-    def resolve_current_humidity(self, info):
+    def resolve_current_humidity(self, info: Any) -> Optional[HumidityReading]:
+        """Resolves the query for the most recent humidity reading.
+
+        Args:
+            info: The GraphQL resolve info object.
+
+        Returns:
+            A HumidityReading object or None if no readings are available.
+        """
         try:
             recent_readings = db.get_recent_humidity_readings(limit=1)
             if not recent_readings:
@@ -535,7 +637,20 @@ class Query(ObjectType):
             logger.error(f'Error getting current humidity: {e}')
             return None
             
-    def resolve_humidity_history(self, info, range='daily', limit=1000, year=None, month=None, day=None):
+    def resolve_humidity_history(self, info: Any, range: str = 'daily', limit: int = 1000, year: Optional[int] = None, month: Optional[int] = None, day: Optional[int] = None) -> List[HumidityReading]:
+        """Resolves the query for historical humidity readings.
+
+        Args:
+            info: The GraphQL resolve info object.
+            range: The time range to query ("daily", "weekly", "recent").
+            limit: The maximum number of readings to return.
+            year: The year to query for historical data.
+            month: The month to query for historical data.
+            day: The day to query for historical data.
+
+        Returns:
+            A list of HumidityReading objects.
+        """
         try:
             # Handle time-based queries
             if year is not None:
@@ -569,7 +684,16 @@ class Query(ObjectType):
             logger.error(f'Error getting humidity history: {e}')
             return []
             
-    def resolve_humidity_statistics(self, info, hours=24):
+    def resolve_humidity_statistics(self, info: Any, hours: int = 24) -> HumidityStatistics:
+        """Resolves the query for humidity statistics.
+
+        Args:
+            info: The GraphQL resolve info object.
+            hours: The number of hours to look back for statistics.
+
+        Returns:
+            A HumidityStatistics object.
+        """
         try:
             stats = db.get_humidity_statistics(hours_back=hours)
             
@@ -594,7 +718,15 @@ class Query(ObjectType):
 
 
 
-    def resolve_current_pressure(self, info):
+    def resolve_current_pressure(self, info: Any) -> Optional[PressureReading]:
+        """Resolves the query for the most recent pressure reading.
+
+        Args:
+            info: The GraphQL resolve info object.
+
+        Returns:
+            A PressureReading object or None if no readings are available.
+        """
         try:
             readings = db.get_recent_pressure_readings(limit=1)
             if not readings:
@@ -612,7 +744,20 @@ class Query(ObjectType):
             logger.error(f"Error getting current pressure: {e}")
             return None
 
-    def resolve_pressure_history(self, info, range="daily", limit=1000, year=None, month=None, day=None):
+    def resolve_pressure_history(self, info: Any, range: str = "daily", limit: int = 1000, year: Optional[int] = None, month: Optional[int] = None, day: Optional[int] = None) -> List[PressureReading]:
+        """Resolves the query for historical pressure readings.
+
+        Args:
+            info: The GraphQL resolve info object.
+            range: The time range to query ("daily", "weekly", "recent").
+            limit: The maximum number of readings to return.
+            year: The year to query for historical data.
+            month: The month to query for historical data.
+            day: The day to query for historical data.
+
+        Returns:
+            A list of PressureReading objects.
+        """
         try:
             # Handle time-based queries
             if year is not None:
@@ -641,7 +786,16 @@ class Query(ObjectType):
             logger.error(f"Error getting pressure history: {e}")
             return []
 
-    def resolve_pressure_statistics(self, info, hours=24):
+    def resolve_pressure_statistics(self, info: Any, hours: int = 24) -> PressureStatistics:
+        """Resolves the query for pressure statistics.
+
+        Args:
+            info: The GraphQL resolve info object.
+            hours: The number of hours to look back for statistics.
+
+        Returns:
+            A PressureStatistics object.
+        """
         try:
             stats = db.get_pressure_statistics(hours_back=hours)
             return PressureStatistics(
@@ -657,7 +811,15 @@ class Query(ObjectType):
             logger.error(f"Error getting pressure statistics: {e}")
             return PressureStatistics(count=0, average=0.0, minimum=0.0, maximum=0.0, hours_back=hours)
 
-    def resolve_current_air_quality(self, info):
+    def resolve_current_air_quality(self, info: Any) -> Optional[AirQualityReading]:
+        """Resolves the query for the most recent air quality reading.
+
+        Args:
+            info: The GraphQL resolve info object.
+
+        Returns:
+            An AirQualityReading object or None if no readings are available.
+        """
         try:
             readings = db.get_recent_air_quality_readings(limit=1)
             if not readings:
@@ -679,7 +841,20 @@ class Query(ObjectType):
             logger.error(f"Error getting current air quality: {e}")
             return None
 
-    def resolve_air_quality_history(self, info, range="daily", limit=1000, year=None, month=None, day=None):
+    def resolve_air_quality_history(self, info: Any, range: str = "daily", limit: int = 1000, year: Optional[int] = None, month: Optional[int] = None, day: Optional[int] = None) -> List[AirQualityReading]:
+        """Resolves the query for historical air quality readings.
+
+        Args:
+            info: The GraphQL resolve info object.
+            range: The time range to query ("daily", "weekly", "recent").
+            limit: The maximum number of readings to return.
+            year: The year to query for historical data.
+            month: The month to query for historical data.
+            day: The day to query for historical data.
+
+        Returns:
+            A list of AirQualityReading objects.
+        """
         try:
             # Handle time-based queries
             if year is not None:
@@ -712,7 +887,16 @@ class Query(ObjectType):
             logger.error(f"Error getting air quality history: {e}")
             return []
 
-    def resolve_air_quality_statistics(self, info, hours=24):
+    def resolve_air_quality_statistics(self, info: Any, hours: int = 24) -> AirQualityStatistics:
+        """Resolves the query for air quality statistics.
+
+        Args:
+            info: The GraphQL resolve info object.
+            hours: The number of hours to look back for statistics.
+
+        Returns:
+            An AirQualityStatistics object.
+        """
         try:
             stats = db.get_air_quality_statistics(hours_back=hours)
             return AirQualityStatistics(
@@ -729,7 +913,15 @@ class Query(ObjectType):
             return AirQualityStatistics(count=0, average=0.0, minimum=0.0, maximum=0.0, hours_back=hours)
 
     # Meter reading resolvers
-    def resolve_current_meter_reading(self, info):
+    def resolve_current_meter_reading(self, info: Any) -> Optional[MeterReading]:
+        """Resolves the query for the most recent meter reading.
+
+        Args:
+            info: The GraphQL resolve info object.
+
+        Returns:
+            A MeterReading object or None if no readings are available.
+        """
         try:
             readings = db.get_recent_meter_readings(limit=1)
             if not readings:
@@ -749,7 +941,19 @@ class Query(ObjectType):
             logger.error(f"Error getting current meter reading: {e}")
             return None
 
-    def resolve_meter_history(self, info, limit=1000, year=None, month=None, day=None):
+    def resolve_meter_history(self, info: Any, limit: int = 1000, year: Optional[int] = None, month: Optional[int] = None, day: Optional[int] = None) -> List[MeterReading]:
+        """Resolves the query for historical meter readings.
+
+        Args:
+            info: The GraphQL resolve info object.
+            limit: The maximum number of readings to return.
+            year: The year to query for historical data.
+            month: The month to query for historical data.
+            day: The day to query for historical data.
+
+        Returns:
+            A list of MeterReading objects.
+        """
         try:
             # Handle time-based queries
             if year is not None:
@@ -780,7 +984,16 @@ class Query(ObjectType):
             logger.error(f"Error getting meter history: {e}")
             return []
 
-    def resolve_meter_statistics(self, info, hours=24):
+    def resolve_meter_statistics(self, info: Any, hours: int = 24) -> MeterStatistics:
+        """Resolves the query for meter reading statistics.
+
+        Args:
+            info: The GraphQL resolve info object.
+            hours: The number of hours to look back for statistics.
+
+        Returns:
+            A MeterStatistics object.
+        """
         try:
             stats = db.get_meter_statistics(hours_back=hours)
             return MeterStatistics(
@@ -796,7 +1009,16 @@ class Query(ObjectType):
             return MeterStatistics(count=0, hours_back=hours)
 
     # Time-based resolvers
-    def resolve_temperature_history_by_year(self, info, year):
+    def resolve_temperature_history_by_year(self, info: Any, year: int) -> List[TemperatureReading]:
+        """Resolves the query for temperature history for a specific year.
+
+        Args:
+            info: The GraphQL resolve info object.
+            year: The year to retrieve data for.
+
+        Returns:
+            A list of TemperatureReading objects for the specified year.
+        """
         try:
             readings = db.get_readings_by_year(year)
             result = []
@@ -815,7 +1037,17 @@ class Query(ObjectType):
             logger.error(f"Error getting temperature history for year {year}: {e}")
             return []
     
-    def resolve_temperature_history_by_month(self, info, year, month):
+    def resolve_temperature_history_by_month(self, info: Any, year: int, month: int) -> List[TemperatureReading]:
+        """Resolves the query for temperature history for a specific month.
+
+        Args:
+            info: The GraphQL resolve info object.
+            year: The year of the month to retrieve data for.
+            month: The month to retrieve data for.
+
+        Returns:
+            A list of TemperatureReading objects for the specified month.
+        """
         try:
             readings = db.get_readings_by_month(year, month)
             result = []
@@ -834,7 +1066,18 @@ class Query(ObjectType):
             logger.error(f"Error getting temperature history for {year}-{month}: {e}")
             return []
     
-    def resolve_temperature_history_by_day(self, info, year, month, day):
+    def resolve_temperature_history_by_day(self, info: Any, year: int, month: int, day: int) -> List[TemperatureReading]:
+        """Resolves the query for temperature history for a specific day.
+
+        Args:
+            info: The GraphQL resolve info object.
+            year: The year of the day to retrieve data for.
+            month: The month of the day to retrieve data for.
+            day: The day to retrieve data for.
+
+        Returns:
+            A list of TemperatureReading objects for the specified day.
+        """
         try:
             readings = db.get_readings_by_day(year, month, day)
             result = []
@@ -853,7 +1096,16 @@ class Query(ObjectType):
             logger.error(f"Error getting temperature history for {year}-{month}-{day}: {e}")
             return []
     
-    def resolve_yearly_statistics(self, info, year):
+    def resolve_yearly_statistics(self, info: Any, year: int) -> YearlyStatistics:
+        """Resolves the query for yearly temperature statistics.
+
+        Args:
+            info: The GraphQL resolve info object.
+            year: The year to calculate statistics for.
+
+        Returns:
+            A YearlyStatistics object.
+        """
         try:
             stats = db.get_yearly_statistics(year)
             return YearlyStatistics(
@@ -867,7 +1119,17 @@ class Query(ObjectType):
             logger.error(f"Error getting yearly statistics for {year}: {e}")
             return YearlyStatistics(count=0, average=0.0, minimum=0.0, maximum=0.0, year=year)
     
-    def resolve_monthly_statistics(self, info, year, month):
+    def resolve_monthly_statistics(self, info: Any, year: int, month: int) -> MonthlyStatistics:
+        """Resolves the query for monthly temperature statistics.
+
+        Args:
+            info: The GraphQL resolve info object.
+            year: The year of the month to calculate statistics for.
+            month: The month to calculate statistics for.
+
+        Returns:
+            A MonthlyStatistics object.
+        """
         try:
             stats = db.get_monthly_statistics(year, month)
             return MonthlyStatistics(
@@ -882,7 +1144,18 @@ class Query(ObjectType):
             logger.error(f"Error getting monthly statistics for {year}-{month}: {e}")
             return MonthlyStatistics(count=0, average=0.0, minimum=0.0, maximum=0.0, year=year, month=month)
     
-    def resolve_daily_statistics(self, info, year, month, day):
+    def resolve_daily_statistics(self, info: Any, year: int, month: int, day: int) -> DailyStatistics:
+        """Resolves the query for daily temperature statistics.
+
+        Args:
+            info: The GraphQL resolve info object.
+            year: The year of the day to calculate statistics for.
+            month: The month of the day to calculate statistics for.
+            day: The day to calculate statistics for.
+
+        Returns:
+            A DailyStatistics object.
+        """
         try:
             stats = db.get_daily_statistics(year, month, day)
             return DailyStatistics(
@@ -904,13 +1177,26 @@ schema = Schema(query=Query)
 
 # USB Data Processor - Handles real sensor data from USB device
 class USBDataProcessor:
-    def __init__(self, logger):
+    """Processes sensor data received from a USB JSON reader."""
+    def __init__(self, logger: logging.Logger):
+        """Initializes the USBDataProcessor.
+
+        Args:
+            logger: The logger instance to use for logging.
+        """
         self.logger = logger
         self.error_count = 0
         self.max_errors = 10
         
-    def process_sensor_data(self, data):
-        """Process incoming sensor data from USB and update system."""
+    def process_sensor_data(self, data: Dict[str, Any]):
+        """Processes a single data packet from the USB sensor.
+
+        This method throttles operations, sends SSE updates, and stores
+        the data in the database.
+
+        Args:
+            data: A dictionary containing the sensor data.
+        """
         try:
             # Use host wall-clock time; device timestamp is monotonic (ticks_ms), not epoch
             current_time = time.time()
@@ -1050,7 +1336,12 @@ class USBDataProcessor:
 
 # GraphQL endpoint
 @app.route('/graphql', methods=['POST'])
-def graphql_endpoint():
+def graphql_endpoint() -> Response:
+    """Handles incoming GraphQL queries.
+
+    Returns:
+        A Flask Response object containing the GraphQL query result.
+    """
     try:
         data = request.get_json()
         
@@ -1079,7 +1370,12 @@ def graphql_endpoint():
 
 # GraphiQL interface for development
 @app.route('/graphql', methods=['GET'])
-def graphiql():
+def graphiql() -> str:
+    """Serves the GraphiQL interactive API explorer.
+
+    Returns:
+        The HTML content for the GraphiQL interface.
+    """
     return '''
     <!DOCTYPE html>
     <html>
@@ -1113,8 +1409,14 @@ def graphiql():
 
 # Server-Sent Events (optimized)
 @app.route('/events')
-def events():
+def events() -> Response:
+    """Sets up a Server-Sent Events (SSE) stream for real-time updates.
+
+    Yields:
+        A stream of SSE-formatted data.
+    """
     def event_stream():
+        """Generator function for the SSE stream."""
         # Send immediate connection confirmation with latest data
         yield f"data: {json.dumps({'type': 'connected', 'timestamp': time.time()})}\n\n"
         
@@ -1180,18 +1482,38 @@ def events():
 
 # Static file serving
 @app.route('/')
-def serve_frontend():
+def serve_frontend() -> Response:
+    """Serves the main frontend HTML file.
+
+    Returns:
+        A Flask Response object containing the index.html file.
+    """
     frontend_path = os.path.join(os.path.dirname(__file__), '..', 'frontend')
     return send_from_directory(frontend_path, 'index.html')
 
 
 @app.route('/<path:filename>')
-def serve_static(filename):
+def serve_static(filename: str) -> Response:
+    """Serves static files for the frontend.
+
+    Args:
+        filename: The path to the static file.
+
+    Returns:
+        A Flask Response object containing the requested static file.
+    """
     frontend_path = os.path.join(os.path.dirname(__file__), '..', 'frontend')
     return send_from_directory(frontend_path, filename)
 
 
-def initialize_application():
+def initialize_application() -> bool:
+    """Initializes all application components.
+
+    This includes the database, sensor readers, and the background scheduler.
+
+    Returns:
+        True if initialization was successful, False otherwise.
+    """
     global temperature_sensor, humidity_sensor, scheduler, usb_reader
     
     try:
@@ -1235,6 +1557,7 @@ def initialize_application():
 
 
 def cleanup_application():
+    """Cleans up application resources on shutdown."""
     global scheduler, usb_reader
     
     logger.info("Cleaning up application...")
@@ -1254,8 +1577,12 @@ def cleanup_application():
 
 
 @app.route("/config")
-def get_config():
-    """Serve frontend configuration"""
+def get_config() -> Response:
+    """Serves a minimal frontend configuration.
+
+    Returns:
+        A JSON response with basic configuration for the webcam and OCR.
+    """
     try:
         import json
         import os
@@ -1277,8 +1604,16 @@ def get_config():
 
 
 @app.route("/webcam/capture", methods=['POST'])
-def capture_webcam():
-    """Capture image from ESP32-CAM using POST API - NO automatic OCR"""
+def capture_webcam() -> Response:
+    """Captures an image from the ESP32-CAM via a POST request.
+
+    This endpoint does not perform OCR automatically. It constructs a payload
+    with camera settings and sends it to the configured webcam URL.
+
+    Returns:
+        A JSON response containing the base64-encoded image and metadata,
+        or an error message if the capture fails.
+    """
     import base64
     import json
     import os
@@ -1353,8 +1688,17 @@ def capture_webcam():
 
 
 @app.route("/webcam/ocr", methods=['POST'])
-def run_ocr():
-    """Run OCR on a freshly captured image using Gemini API - Used by scheduled daily task and can be called programmatically"""
+def run_ocr() -> Response:
+    """Captures a fresh image and runs OCR on it using the Gemini API.
+
+    This endpoint is used by the scheduled daily task and can also be called
+    programmatically. It handles image capture, calls the Gemini API,
+    parses the result, and saves successful readings to the database.
+
+    Returns:
+        A JSON response with the OCR result, including the meter value,
+        or an error message if the process fails.
+    """
     import base64
     import json
     import os
@@ -1514,8 +1858,15 @@ def run_ocr():
 
 
 @app.route("/snapshot", methods=['GET', 'POST'])
-def snapshot():
-    """Snapshot endpoint - accessible via GET or POST for compatibility"""
+def snapshot() -> Response:
+    """A compatibility endpoint for capturing a snapshot.
+
+    This route supports both GET and POST requests and simply calls the
+    main `capture_webcam` function.
+
+    Returns:
+        The JSON response from the `capture_webcam` function.
+    """
     return capture_webcam()
 
 

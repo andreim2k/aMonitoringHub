@@ -1,11 +1,14 @@
-monitoringhub.db
-venv
-*.log
-*.bak
-__pycache__
-*.py[cod]
+# Log files
+logs/
+app_start.log
 
-*.db
-*.pid
-*.out
-backend/config.json
+# Python virtual environment
+backend/venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Database file
+backend/*.db
+!backend/database.db-example

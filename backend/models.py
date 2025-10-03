@@ -1,5 +1,10 @@
 """
-SQLAlchemy models for aMonitoringHub application.
+SQLAlchemy models for the aMonitoringHub application.
+
+This module defines the database schema using SQLAlchemy's ORM. It includes
+models for storing sensor readings (temperature, humidity, pressure, etc.)
+and a DatabaseManager class to handle all database interactions, such as
+session management, data insertion, and querying.
 """
 
 from datetime import datetime, timezone, timedelta
@@ -17,7 +22,16 @@ Base = declarative_base()
 
 
 class TemperatureReading(Base):
-    """Temperature reading model."""
+    """SQLAlchemy model for storing temperature readings.
+
+    Attributes:
+        id (int): The primary key for the reading.
+        timestamp (datetime): The UTC timestamp when the reading was taken.
+        timestamp_unix (float): The Unix timestamp of the reading.
+        temperature_c (float): The temperature in degrees Celsius.
+        sensor_type (str): The type of sensor that produced the reading.
+        sensor_id (str): The unique identifier of the sensor.
+    """
     
     __tablename__ = 'temperature_readings'
     
@@ -35,7 +49,11 @@ class TemperatureReading(Base):
     )
     
     def to_dict(self) -> Dict[str, Any]:
-        """Convert model to dictionary."""
+        """Converts the TemperatureReading model instance to a dictionary.
+
+        Returns:
+            A dictionary representation of the model.
+        """
         return {
             'id': self.id,
             'timestamp': self.timestamp.isoformat() if self.timestamp else None,
@@ -45,14 +63,24 @@ class TemperatureReading(Base):
             'sensor_id': self.sensor_id
         }
     
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """Provides a developer-friendly representation of the object."""
         return f"<TemperatureReading(id={self.id}, temp={self.temperature_c}°C, sensor={self.sensor_id}, time={self.timestamp})>"
 
 
 
 
 class HumidityReading(Base):
-    """Humidity reading model."""
+    """SQLAlchemy model for storing humidity readings.
+
+    Attributes:
+        id (int): The primary key for the reading.
+        timestamp (datetime): The UTC timestamp when the reading was taken.
+        timestamp_unix (float): The Unix timestamp of the reading.
+        humidity_percent (float): The relative humidity in percent.
+        sensor_type (str): The type of sensor that produced the reading.
+        sensor_id (str): The unique identifier of the sensor.
+    """
     
     __tablename__ = 'humidity_readings'
     
@@ -69,8 +97,12 @@ class HumidityReading(Base):
         Index('idx_humidity_sensor_timestamp', 'sensor_id', 'timestamp'),
     )
     
-    def to_dict(self):
-        """Convert model to dictionary."""
+    def to_dict(self) -> Dict[str, Any]:
+        """Converts the HumidityReading model instance to a dictionary.
+
+        Returns:
+            A dictionary representation of the model.
+        """
         return {
             'id': self.id,
             'timestamp': self.timestamp.isoformat() if self.timestamp else None,
@@ -80,20 +112,42 @@ class HumidityReading(Base):
             'sensor_id': self.sensor_id
         }
     
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """Provides a developer-friendly representation of the object."""
         return f'<HumidityReading(id={self.id}, humidity={self.humidity_percent}%, sensor={self.sensor_id}, time={self.timestamp})>'
 
 class DatabaseManager:
-    """Database connection and session management."""
+    """Manages all database interactions for the application.
+
+    This class handles the initialization of the database, session management,
+    and provides methods for adding, querying, and managing sensor data.
+
+    Attributes:
+        database_url (str): The connection URL for the database.
+        engine: The SQLAlchemy engine instance.
+        Session: The SQLAlchemy session factory.
+        logger: The logger instance for this class.
+    """
     
-    def __init__(self, database_url: str = None):
+    def __init__(self, database_url: Optional[str] = None):
+        """Initializes the DatabaseManager.
+
+        Args:
+            database_url: The SQLAlchemy database URL. If not provided, it
+                defaults to a local SQLite database named 'monitoringhub.db'.
+        """
         self.database_url = database_url or "sqlite:///monitoringhub.db"
         self.engine = None
         self.Session = None
         self.logger = logging.getLogger(__name__)
         
     def initialize(self):
-        """Initialize database connection and create tables."""
+        """Initializes the database engine and creates all tables.
+
+        This method sets up the SQLAlchemy engine and session factory based on the
+        configured database URL. It creates the database tables if they do not
+        already exist.
+        """
         try:
             self.engine = create_engine(
                 self.database_url,
@@ -114,18 +168,29 @@ class DatabaseManager:
             raise
             
     def get_session(self) -> Session:
-        """Get a new database session."""
+        """Provides a new database session.
+
+        Returns:
+            A new SQLAlchemy Session instance.
+
+        Raises:
+            RuntimeError: If the database has not been initialized.
+        """
         if not self.Session:
             raise RuntimeError("Database not initialized. Call initialize() first.")
         return self.Session()
         
     def close(self):
-        """Close database connections."""
+        """Disposes of the database engine's connection pool."""
         if self.engine:
             self.engine.dispose()
             
     def get_total_readings_count(self) -> int:
-        """Get total count of all readings (temperature + humidity)."""
+        """Calculates the total number of temperature and humidity readings.
+
+        Returns:
+            The combined count of all readings in the database.
+        """
         try:
             with self.get_session() as session:
                 temp_count = session.query(func.count(TemperatureReading.id)).scalar() or 0
@@ -136,7 +201,14 @@ class DatabaseManager:
             return 0
     
     def rollover_database(self) -> bool:
-        """Archive current database and create a new one."""
+        """Archives the current database file and creates a new one.
+
+        This is useful for managing database size. The current database file
+        is renamed with a timestamp, and a new, empty database is created.
+
+        Returns:
+            True if the rollover was successful, False otherwise.
+        """
         try:
             # Close current connections
             if self.engine:
@@ -172,7 +244,14 @@ class DatabaseManager:
             return False
     
     def check_and_rollover(self) -> bool:
-        """Check if rollover is needed and perform it."""
+        """Checks if the database needs to be rolled over and performs it.
+
+        The rollover is triggered if the total number of readings exceeds a
+        predefined threshold (10,000).
+
+        Returns:
+            True if a rollover was performed, False otherwise.
+        """
         try:
             total_readings = self.get_total_readings_count()
             self.logger.debug(f"Current total readings: {total_readings}")
@@ -188,8 +267,18 @@ class DatabaseManager:
             return False
             
     def add_temperature_reading(self, temperature_c: float, sensor_type: str = "unknown", 
-                               sensor_id: str = "default", timestamp: datetime = None) -> Optional[TemperatureReading]:
-        """Add a temperature reading to the database."""
+                               sensor_id: str = "default", timestamp: Optional[datetime] = None) -> Optional[TemperatureReading]:
+        """Adds a new temperature reading to the database.
+
+        Args:
+            temperature_c: The temperature in degrees Celsius.
+            sensor_type: The type of sensor.
+            sensor_id: The unique ID of the sensor.
+            timestamp: The timestamp of the reading. Defaults to now (UTC).
+
+        Returns:
+            The created TemperatureReading object, or None on failure.
+        """
         try:
             with self.get_session() as session:
                 reading_ts = timestamp or datetime.now(timezone.utc)
@@ -209,8 +298,16 @@ class DatabaseManager:
             self.logger.error(f"Error adding temperature reading: {e}")
             return None
 
-    def get_recent_readings(self, limit: int = 100, sensor_id: str = None) -> List[TemperatureReading]:
-        """Get recent temperature readings."""
+    def get_recent_readings(self, limit: int = 100, sensor_id: Optional[str] = None) -> List[TemperatureReading]:
+        """Retrieves the most recent temperature readings.
+
+        Args:
+            limit: The maximum number of readings to return.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A list of TemperatureReading objects.
+        """
         try:
             with self.get_session() as session:
                 query = session.query(TemperatureReading)
@@ -230,9 +327,18 @@ class DatabaseManager:
             self.logger.error(f"Error getting recent readings: {e}")
             return []
             
-    def get_readings_by_time_range(self, start_time: datetime, end_time: datetime = None,
-                                   sensor_id: str = None) -> List[TemperatureReading]:
-        """Get temperature readings within a time range."""
+    def get_readings_by_time_range(self, start_time: datetime, end_time: Optional[datetime] = None,
+                                   sensor_id: Optional[str] = None) -> List[TemperatureReading]:
+        """Retrieves temperature readings within a specific time range.
+
+        Args:
+            start_time: The start of the time range.
+            end_time: The end of the time range. Defaults to now.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A list of TemperatureReading objects.
+        """
         try:
             with self.get_session() as session:
                 query = session.query(TemperatureReading)
@@ -257,20 +363,45 @@ class DatabaseManager:
             self.logger.error(f"Error getting readings by time range: {e}")
             return []
             
-    def get_daily_readings(self, days_back: int = 1, sensor_id: str = None) -> List[TemperatureReading]:
-        """Get temperature readings from the last N days."""
+    def get_daily_readings(self, days_back: int = 1, sensor_id: Optional[str] = None) -> List[TemperatureReading]:
+        """Retrieves temperature readings from the last N days.
+
+        Args:
+            days_back: The number of days to look back.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A list of TemperatureReading objects.
+        """
         end_time = datetime.now(timezone.utc)
         start_time = end_time - timedelta(days=days_back)
         return self.get_readings_by_time_range(start_time, end_time, sensor_id)
         
-    def get_weekly_readings(self, weeks_back: int = 1, sensor_id: str = None) -> List[TemperatureReading]:
-        """Get temperature readings from the last N weeks."""
+    def get_weekly_readings(self, weeks_back: int = 1, sensor_id: Optional[str] = None) -> List[TemperatureReading]:
+        """Retrieves temperature readings from the last N weeks.
+
+        Args:
+            weeks_back: The number of weeks to look back.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A list of TemperatureReading objects.
+        """
         end_time = datetime.now(timezone.utc)
         start_time = end_time - timedelta(weeks=weeks_back)
         return self.get_readings_by_time_range(start_time, end_time, sensor_id)
         
-    def get_statistics(self, sensor_id: str = None, hours_back: int = 24) -> Dict[str, float]:
-        """Get temperature statistics for the last N hours."""
+    def get_statistics(self, sensor_id: Optional[str] = None, hours_back: int = 24) -> Dict[str, Any]:
+        """Calculates temperature statistics for a given period.
+
+        Args:
+            sensor_id: An optional sensor ID to filter by.
+            hours_back: The number of hours to look back for statistics.
+
+        Returns:
+            A dictionary containing the count, total count, average, minimum,
+            and maximum temperature, along with timestamps for min/max values.
+        """
         try:
             with self.get_session() as session:
                 # Calculate start time
@@ -322,7 +453,14 @@ class DatabaseManager:
             return {'count': 0, 'total_count': 0, 'average': 0, 'minimum': 0, 'maximum': 0, 'hours_back': hours_back, 'min_timestamp': None, 'max_timestamp': None}
             
     def cleanup_old_readings(self, days_to_keep: int = 30) -> int:
-        """Remove old temperature readings beyond retention period."""
+        """Removes old temperature readings from the database.
+
+        Args:
+            days_to_keep: The number of days of readings to retain.
+
+        Returns:
+            The number of readings that were deleted.
+        """
         try:
             with self.get_session() as session:
                 cutoff_date = datetime.now(timezone.utc) - timedelta(days=days_to_keep)
@@ -343,8 +481,18 @@ class DatabaseManager:
 
 
     def add_humidity_reading(self, humidity_percent: float, sensor_type: str = "unknown", 
-                            sensor_id: str = "default", timestamp: datetime = None):
-        """Add a humidity reading to the database."""
+                            sensor_id: str = "default", timestamp: Optional[datetime] = None) -> Optional[HumidityReading]:
+        """Adds a new humidity reading to the database.
+
+        Args:
+            humidity_percent: The relative humidity in percent.
+            sensor_type: The type of sensor.
+            sensor_id: The unique ID of the sensor.
+            timestamp: The timestamp of the reading. Defaults to now (UTC).
+
+        Returns:
+            The created HumidityReading object, or None on failure.
+        """
         try:
             with self.get_session() as session:
                 reading_ts = timestamp or datetime.now(timezone.utc)
@@ -364,8 +512,16 @@ class DatabaseManager:
             self.logger.error(f"Error adding humidity reading: {e}")
             return None
 
-    def get_recent_humidity_readings(self, limit: int = 100, sensor_id: str = None):
-        """Get recent humidity readings."""
+    def get_recent_humidity_readings(self, limit: int = 100, sensor_id: Optional[str] = None) -> List[HumidityReading]:
+        """Retrieves the most recent humidity readings.
+
+        Args:
+            limit: The maximum number of readings to return.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A list of HumidityReading objects.
+        """
         try:
             with self.get_session() as session:
                 query = session.query(HumidityReading)
@@ -380,8 +536,17 @@ class DatabaseManager:
             self.logger.error(f"Error getting recent humidity readings: {e}")
             return []
 
-    def get_humidity_statistics(self, sensor_id: str = None, hours_back: int = 24):
-        """Get humidity statistics."""
+    def get_humidity_statistics(self, sensor_id: Optional[str] = None, hours_back: int = 24) -> Dict[str, Any]:
+        """Calculates humidity statistics for a given period.
+
+        Args:
+            sensor_id: An optional sensor ID to filter by.
+            hours_back: The number of hours to look back for statistics.
+
+        Returns:
+            A dictionary containing the count, min, max, average, and latest
+            humidity values, along with timestamps for min/max values.
+        """
         try:
             with self.get_session() as session:
                 from datetime import timedelta
@@ -425,8 +590,16 @@ class DatabaseManager:
             self.logger.error(f"Error getting humidity statistics: {e}")
             return {'count': 0, 'error': str(e)}
 
-    def get_humidity_readings_by_year(self, year: int, sensor_id: str = None) -> List['HumidityReading']:
-        """Get humidity readings for a specific year."""
+    def get_humidity_readings_by_year(self, year: int, sensor_id: Optional[str] = None) -> List['HumidityReading']:
+        """Retrieves humidity readings for a specific year.
+
+        Args:
+            year: The year to retrieve data for.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A list of HumidityReading objects.
+        """
         try:
             with self.get_session() as session:
                 start_time = datetime(year, 1, 1, tzinfo=timezone.utc)
@@ -445,8 +618,17 @@ class DatabaseManager:
             self.logger.error(f"Error getting humidity readings for year {year}: {e}")
             return []
 
-    def get_humidity_readings_by_month(self, year: int, month: int, sensor_id: str = None) -> List['HumidityReading']:
-        """Get humidity readings for a specific month."""
+    def get_humidity_readings_by_month(self, year: int, month: int, sensor_id: Optional[str] = None) -> List['HumidityReading']:
+        """Retrieves humidity readings for a specific month.
+
+        Args:
+            year: The year of the month.
+            month: The month to retrieve data for.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A list of HumidityReading objects.
+        """
         try:
             with self.get_session() as session:
                 start_time = datetime(year, month, 1, tzinfo=timezone.utc)
@@ -468,8 +650,18 @@ class DatabaseManager:
             self.logger.error(f"Error getting humidity readings for {year}-{month}: {e}")
             return []
 
-    def get_humidity_readings_by_day(self, year: int, month: int, day: int, sensor_id: str = None) -> List['HumidityReading']:
-        """Get humidity readings for a specific day."""
+    def get_humidity_readings_by_day(self, year: int, month: int, day: int, sensor_id: Optional[str] = None) -> List['HumidityReading']:
+        """Retrieves humidity readings for a specific day.
+
+        Args:
+            year: The year of the day.
+            month: The month of the day.
+            day: The day to retrieve data for.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A list of HumidityReading objects.
+        """
         try:
             with self.get_session() as session:
                 start_time = datetime(year, month, day, tzinfo=timezone.utc)
@@ -491,7 +683,18 @@ class DatabaseManager:
 
 
 
-    def add_pressure_reading(self, pressure_hpa: float, sensor_type: str = "unknown", sensor_id: str = "default", timestamp: datetime = None):
+    def add_pressure_reading(self, pressure_hpa: float, sensor_type: str = "unknown", sensor_id: str = "default", timestamp: Optional[datetime] = None) -> Optional['PressureReading']:
+        """Adds a new pressure reading to the database.
+
+        Args:
+            pressure_hpa: The atmospheric pressure in hectopascals.
+            sensor_type: The type of sensor.
+            sensor_id: The unique ID of the sensor.
+            timestamp: The timestamp of the reading. Defaults to now (UTC).
+
+        Returns:
+            The created PressureReading object, or None on failure.
+        """
         try:
             with self.get_session() as session:
                 reading_ts = timestamp or datetime.now(timezone.utc)
@@ -510,7 +713,16 @@ class DatabaseManager:
             self.logger.error(f"Error adding pressure reading: {e}")
             return None
 
-    def get_recent_pressure_readings(self, limit: int = 100, sensor_id: str = None):
+    def get_recent_pressure_readings(self, limit: int = 100, sensor_id: Optional[str] = None) -> List['PressureReading']:
+        """Retrieves the most recent pressure readings.
+
+        Args:
+            limit: The maximum number of readings to return.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A list of PressureReading objects.
+        """
         try:
             with self.get_session() as session:
                 query = session.query(PressureReading)
@@ -521,7 +733,16 @@ class DatabaseManager:
             self.logger.error(f"Error getting recent pressure readings: {e}")
             return []
 
-    def get_pressure_statistics(self, sensor_id: str = None, hours_back: int = 24):
+    def get_pressure_statistics(self, sensor_id: Optional[str] = None, hours_back: int = 24) -> Dict[str, Any]:
+        """Calculates pressure statistics for a given period.
+
+        Args:
+            sensor_id: An optional sensor ID to filter by.
+            hours_back: The number of hours to look back for statistics.
+
+        Returns:
+            A dictionary containing the count, average, min, and max pressure.
+        """
         try:
             with self.get_session() as session:
                 end_time = datetime.now(timezone.utc)
@@ -568,8 +789,16 @@ class DatabaseManager:
             self.logger.error(f"Error getting pressure statistics: {e}")
             return {'count': 0, 'average': 0, 'minimum': 0, 'maximum': 0, 'hours_back': hours_back, 'min_timestamp': None, 'max_timestamp': None}
 
-    def get_pressure_readings_by_year(self, year: int, sensor_id: str = None) -> List['PressureReading']:
-        """Get pressure readings for a specific year."""
+    def get_pressure_readings_by_year(self, year: int, sensor_id: Optional[str] = None) -> List['PressureReading']:
+        """Retrieves pressure readings for a specific year.
+
+        Args:
+            year: The year to retrieve data for.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A list of PressureReading objects.
+        """
         try:
             with self.get_session() as session:
                 start_time = datetime(year, 1, 1, tzinfo=timezone.utc)
@@ -588,8 +817,17 @@ class DatabaseManager:
             self.logger.error(f"Error getting pressure readings for year {year}: {e}")
             return []
 
-    def get_pressure_readings_by_month(self, year: int, month: int, sensor_id: str = None) -> List['PressureReading']:
-        """Get pressure readings for a specific month."""
+    def get_pressure_readings_by_month(self, year: int, month: int, sensor_id: Optional[str] = None) -> List['PressureReading']:
+        """Retrieves pressure readings for a specific month.
+
+        Args:
+            year: The year of the month.
+            month: The month to retrieve data for.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A list of PressureReading objects.
+        """
         try:
             with self.get_session() as session:
                 start_time = datetime(year, month, 1, tzinfo=timezone.utc)
@@ -611,8 +849,18 @@ class DatabaseManager:
             self.logger.error(f"Error getting pressure readings for {year}-{month}: {e}")
             return []
 
-    def get_pressure_readings_by_day(self, year: int, month: int, day: int, sensor_id: str = None) -> List['PressureReading']:
-        """Get pressure readings for a specific day."""
+    def get_pressure_readings_by_day(self, year: int, month: int, day: int, sensor_id: Optional[str] = None) -> List['PressureReading']:
+        """Retrieves pressure readings for a specific day.
+
+        Args:
+            year: The year of the day.
+            month: The month of the day.
+            day: The day to retrieve data for.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A list of PressureReading objects.
+        """
         try:
             with self.get_session() as session:
                 start_time = datetime(year, month, day, tzinfo=timezone.utc)
@@ -631,7 +879,18 @@ class DatabaseManager:
             self.logger.error(f"Error getting pressure readings for {year}-{month}-{day}: {e}")
             return []
 
-    def add_air_quality_reading(self, data: dict, sensor_type: str = "unknown", sensor_id: str = "default", timestamp: datetime = None):
+    def add_air_quality_reading(self, data: dict, sensor_type: str = "unknown", sensor_id: str = "default", timestamp: Optional[datetime] = None) -> Optional['AirQualityReading']:
+        """Adds a new air quality reading to the database.
+
+        Args:
+            data: A dictionary containing the air quality data points.
+            sensor_type: The type of sensor.
+            sensor_id: The unique ID of the sensor.
+            timestamp: The timestamp of the reading. Defaults to now (UTC).
+
+        Returns:
+            The created AirQualityReading object, or None on failure.
+        """
         try:
             with self.get_session() as session:
                 reading_ts = timestamp or datetime.now(timezone.utc)
@@ -658,7 +917,16 @@ class DatabaseManager:
             self.logger.error(f"Error adding air quality reading: {e}")
             return None
 
-    def get_recent_air_quality_readings(self, limit: int = 100, sensor_id: str = None):
+    def get_recent_air_quality_readings(self, limit: int = 100, sensor_id: Optional[str] = None) -> List['AirQualityReading']:
+        """Retrieves the most recent air quality readings.
+
+        Args:
+            limit: The maximum number of readings to return.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A list of AirQualityReading objects.
+        """
         try:
             with self.get_session() as session:
                 query = session.query(AirQualityReading)
@@ -669,7 +937,16 @@ class DatabaseManager:
             self.logger.error(f"Error getting recent AQ readings: {e}")
             return []
 
-    def get_air_quality_statistics(self, sensor_id: str = None, hours_back: int = 24):
+    def get_air_quality_statistics(self, sensor_id: Optional[str] = None, hours_back: int = 24) -> Dict[str, Any]:
+        """Calculates air quality statistics for a given period.
+
+        Args:
+            sensor_id: An optional sensor ID to filter by.
+            hours_back: The number of hours to look back for statistics.
+
+        Returns:
+            A dictionary containing the count, average, min, and max CO2 levels.
+        """
         try:
             with self.get_session() as session:
                 end_time = datetime.now(timezone.utc)
@@ -702,8 +979,16 @@ class DatabaseManager:
             self.logger.error(f"Error getting AQ statistics: {e}")
             return {'count': 0, 'average': 0, 'minimum': 0, 'maximum': 0, 'hours_back': hours_back, 'min_timestamp': None, 'max_timestamp': None}
 
-    def get_air_quality_readings_by_year(self, year: int, sensor_id: str = None) -> List['AirQualityReading']:
-        """Get air quality readings for a specific year."""
+    def get_air_quality_readings_by_year(self, year: int, sensor_id: Optional[str] = None) -> List['AirQualityReading']:
+        """Retrieves air quality readings for a specific year.
+
+        Args:
+            year: The year to retrieve data for.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A list of AirQualityReading objects.
+        """
         try:
             with self.get_session() as session:
                 start_time = datetime(year, 1, 1, tzinfo=timezone.utc)
@@ -722,8 +1007,17 @@ class DatabaseManager:
             self.logger.error(f"Error getting air quality readings for year {year}: {e}")
             return []
 
-    def get_air_quality_readings_by_month(self, year: int, month: int, sensor_id: str = None) -> List['AirQualityReading']:
-        """Get air quality readings for a specific month."""
+    def get_air_quality_readings_by_month(self, year: int, month: int, sensor_id: Optional[str] = None) -> List['AirQualityReading']:
+        """Retrieves air quality readings for a specific month.
+
+        Args:
+            year: The year of the month.
+            month: The month to retrieve data for.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A list of AirQualityReading objects.
+        """
         try:
             with self.get_session() as session:
                 start_time = datetime(year, month, 1, tzinfo=timezone.utc)
@@ -745,8 +1039,18 @@ class DatabaseManager:
             self.logger.error(f"Error getting air quality readings for {year}-{month}: {e}")
             return []
 
-    def get_air_quality_readings_by_day(self, year: int, month: int, day: int, sensor_id: str = None) -> List['AirQualityReading']:
-        """Get air quality readings for a specific day."""
+    def get_air_quality_readings_by_day(self, year: int, month: int, day: int, sensor_id: Optional[str] = None) -> List['AirQualityReading']:
+        """Retrieves air quality readings for a specific day.
+
+        Args:
+            year: The year of the day.
+            month: The month of the day.
+            day: The day to retrieve data for.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A list of AirQualityReading objects.
+        """
         try:
             with self.get_session() as session:
                 start_time = datetime(year, month, day, tzinfo=timezone.utc)
@@ -765,10 +1069,22 @@ class DatabaseManager:
             self.logger.error(f"Error getting air quality readings for {year}-{month}-{day}: {e}")
             return []
 
-    def add_meter_reading(self, meter_value: str, ocr_engine: str = None, raw_ocr_text: str = None,
+    def add_meter_reading(self, meter_value: str, ocr_engine: Optional[str] = None, raw_ocr_text: Optional[str] = None,
                          sensor_type: str = "esp32cam_ocr", sensor_id: str = "cabana1_meter",
-                         timestamp: datetime = None):
-        """Add a meter reading to the database."""
+                         timestamp: Optional[datetime] = None) -> Optional['MeterReading']:
+        """Adds a new meter reading to the database.
+
+        Args:
+            meter_value: The value read from the meter.
+            ocr_engine: The name of the OCR engine used.
+            raw_ocr_text: The raw text output from the OCR engine.
+            sensor_type: The type of sensor.
+            sensor_id: The unique ID of the sensor.
+            timestamp: The timestamp of the reading. Defaults to now (UTC).
+
+        Returns:
+            The created MeterReading object, or None on failure.
+        """
         try:
             with self.get_session() as session:
                 reading_ts = timestamp or datetime.now(timezone.utc)
@@ -790,8 +1106,16 @@ class DatabaseManager:
             self.logger.error(f"Error adding meter reading: {e}")
             return None
 
-    def get_recent_meter_readings(self, limit: int = 100, sensor_id: str = None):
-        """Get recent meter readings."""
+    def get_recent_meter_readings(self, limit: int = 100, sensor_id: Optional[str] = None) -> List['MeterReading']:
+        """Retrieves the most recent meter readings.
+
+        Args:
+            limit: The maximum number of readings to return.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A list of MeterReading objects.
+        """
         try:
             with self.get_session() as session:
                 query = session.query(MeterReading)
@@ -805,8 +1129,16 @@ class DatabaseManager:
             self.logger.error(f"Error getting recent meter readings: {e}")
             return []
 
-    def get_meter_readings_by_year(self, year: int, sensor_id: str = None):
-        """Get meter readings for a specific year."""
+    def get_meter_readings_by_year(self, year: int, sensor_id: Optional[str] = None) -> List['MeterReading']:
+        """Retrieves meter readings for a specific year.
+
+        Args:
+            year: The year to retrieve data for.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A list of MeterReading objects.
+        """
         try:
             with self.get_session() as session:
                 start_time = datetime(year, 1, 1, tzinfo=timezone.utc)
@@ -825,8 +1157,17 @@ class DatabaseManager:
             self.logger.error(f"Error getting meter readings for year {year}: {e}")
             return []
 
-    def get_meter_readings_by_month(self, year: int, month: int, sensor_id: str = None):
-        """Get meter readings for a specific month."""
+    def get_meter_readings_by_month(self, year: int, month: int, sensor_id: Optional[str] = None) -> List['MeterReading']:
+        """Retrieves meter readings for a specific month.
+
+        Args:
+            year: The year of the month.
+            month: The month to retrieve data for.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A list of MeterReading objects.
+        """
         try:
             with self.get_session() as session:
                 start_time = datetime(year, month, 1, tzinfo=timezone.utc)
@@ -848,8 +1189,18 @@ class DatabaseManager:
             self.logger.error(f"Error getting meter readings for {year}-{month}: {e}")
             return []
 
-    def get_meter_readings_by_day(self, year: int, month: int, day: int, sensor_id: str = None):
-        """Get meter readings for a specific day."""
+    def get_meter_readings_by_day(self, year: int, month: int, day: int, sensor_id: Optional[str] = None) -> List['MeterReading']:
+        """Retrieves meter readings for a specific day.
+
+        Args:
+            year: The year of the day.
+            month: The month of the day.
+            day: The day to retrieve data for.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A list of MeterReading objects.
+        """
         try:
             with self.get_session() as session:
                 start_time = datetime(year, month, day, tzinfo=timezone.utc)
@@ -868,8 +1219,17 @@ class DatabaseManager:
             self.logger.error(f"Error getting meter readings for {year}-{month}-{day}: {e}")
             return []
 
-    def get_meter_statistics(self, sensor_id: str = None, hours_back: int = 24):
-        """Get meter reading statistics."""
+    def get_meter_statistics(self, sensor_id: Optional[str] = None, hours_back: int = 24) -> Dict[str, Any]:
+        """Calculates meter reading statistics for a given period.
+
+        Args:
+            sensor_id: An optional sensor ID to filter by.
+            hours_back: The number of hours to look back for statistics.
+
+        Returns:
+            A dictionary containing the count, first and last values, and
+            their corresponding timestamps.
+        """
         try:
             with self.get_session() as session:
                 end_time = datetime.now(timezone.utc)
@@ -899,8 +1259,16 @@ class DatabaseManager:
             return {'count': 0, 'hours_back': hours_back}
 
     # Time-based aggregation methods for charts
-    def get_readings_by_year(self, year: int, sensor_id: str = None) -> List[TemperatureReading]:
-        """Get temperature readings for a specific year."""
+    def get_readings_by_year(self, year: int, sensor_id: Optional[str] = None) -> List[TemperatureReading]:
+        """Retrieves temperature readings for a specific year.
+
+        Args:
+            year: The year to retrieve data for.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A list of TemperatureReading objects.
+        """
         try:
             with self.get_session() as session:
                 start_time = datetime(year, 1, 1, tzinfo=timezone.utc)
@@ -919,8 +1287,17 @@ class DatabaseManager:
             self.logger.error(f"Error getting readings for year {year}: {e}")
             return []
     
-    def get_readings_by_month(self, year: int, month: int, sensor_id: str = None) -> List[TemperatureReading]:
-        """Get temperature readings for a specific month."""
+    def get_readings_by_month(self, year: int, month: int, sensor_id: Optional[str] = None) -> List[TemperatureReading]:
+        """Retrieves temperature readings for a specific month.
+
+        Args:
+            year: The year of the month.
+            month: The month to retrieve data for.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A list of TemperatureReading objects.
+        """
         try:
             with self.get_session() as session:
                 start_time = datetime(year, month, 1, tzinfo=timezone.utc)
@@ -942,8 +1319,18 @@ class DatabaseManager:
             self.logger.error(f"Error getting readings for {year}-{month}: {e}")
             return []
     
-    def get_readings_by_day(self, year: int, month: int, day: int, sensor_id: str = None) -> List[TemperatureReading]:
-        """Get temperature readings for a specific day."""
+    def get_readings_by_day(self, year: int, month: int, day: int, sensor_id: Optional[str] = None) -> List[TemperatureReading]:
+        """Retrieves temperature readings for a specific day.
+
+        Args:
+            year: The year of the day.
+            month: The month of the day.
+            day: The day to retrieve data for.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A list of TemperatureReading objects.
+        """
         try:
             with self.get_session() as session:
                 start_time = datetime(year, month, day, tzinfo=timezone.utc)
@@ -962,8 +1349,16 @@ class DatabaseManager:
             self.logger.error(f"Error getting readings for {year}-{month}-{day}: {e}")
             return []
     
-    def get_yearly_statistics(self, year: int, sensor_id: str = None) -> Dict[str, Any]:
-        """Get temperature statistics for a specific year."""
+    def get_yearly_statistics(self, year: int, sensor_id: Optional[str] = None) -> Dict[str, Any]:
+        """Calculates temperature statistics for a specific year.
+
+        Args:
+            year: The year to calculate statistics for.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A dictionary containing yearly statistics.
+        """
         try:
             with self.get_session() as session:
                 start_time = datetime(year, 1, 1, tzinfo=timezone.utc)
@@ -995,8 +1390,17 @@ class DatabaseManager:
             self.logger.error(f"Error getting yearly statistics for {year}: {e}")
             return {"count": 0, "average": 0, "minimum": 0, "maximum": 0, "year": year}
     
-    def get_monthly_statistics(self, year: int, month: int, sensor_id: str = None) -> Dict[str, Any]:
-        """Get temperature statistics for a specific month."""
+    def get_monthly_statistics(self, year: int, month: int, sensor_id: Optional[str] = None) -> Dict[str, Any]:
+        """Calculates temperature statistics for a specific month.
+
+        Args:
+            year: The year of the month.
+            month: The month to calculate statistics for.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A dictionary containing monthly statistics.
+        """
         try:
             with self.get_session() as session:
                 start_time = datetime(year, month, 1, tzinfo=timezone.utc)
@@ -1032,8 +1436,18 @@ class DatabaseManager:
             self.logger.error(f"Error getting monthly statistics for {year}-{month}: {e}")
             return {"count": 0, "average": 0, "minimum": 0, "maximum": 0, "year": year, "month": month}
     
-    def get_daily_statistics(self, year: int, month: int, day: int, sensor_id: str = None) -> Dict[str, Any]:
-        """Get temperature statistics for a specific day."""
+    def get_daily_statistics(self, year: int, month: int, day: int, sensor_id: Optional[str] = None) -> Dict[str, Any]:
+        """Calculates temperature statistics for a specific day.
+
+        Args:
+            year: The year of the day.
+            month: The month of the day.
+            day: The day to calculate statistics for.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A dictionary containing daily statistics.
+        """
         try:
             with self.get_session() as session:
                 start_time = datetime(year, month, day, tzinfo=timezone.utc)
@@ -1072,6 +1486,16 @@ class DatabaseManager:
 db = DatabaseManager()
 
 class PressureReading(Base):
+    """SQLAlchemy model for storing atmospheric pressure readings.
+
+    Attributes:
+        id (int): The primary key for the reading.
+        timestamp (datetime): The UTC timestamp when the reading was taken.
+        timestamp_unix (float): The Unix timestamp of the reading.
+        pressure_hpa (float): The pressure in hectopascals (hPa).
+        sensor_type (str): The type of sensor that produced the reading.
+        sensor_id (str): The unique identifier of the sensor.
+    """
     __tablename__ = 'pressure_readings'
     id = Column(Integer, primary_key=True, autoincrement=True)
     timestamp = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
@@ -1085,6 +1509,24 @@ class PressureReading(Base):
     )
 
 class AirQualityReading(Base):
+    """SQLAlchemy model for storing air quality readings.
+
+    Attributes:
+        id (int): The primary key for the reading.
+        timestamp (datetime): The UTC timestamp when the reading was taken.
+        timestamp_unix (float): The Unix timestamp of the reading.
+        co2_ppm (float): CO2 concentration in parts per million.
+        nh3_ppm (float): NH3 (ammonia) concentration in parts per million.
+        alcohol_ppm (float): Alcohol vapor concentration in parts per million.
+        aqi (int): The calculated Air Quality Index.
+        status (str): A descriptive status of the air quality (e.g., "Good").
+        raw_adc (int): The raw ADC value from the sensor.
+        voltage_v (float): The voltage reading from the sensor.
+        resistance_ohm (float): The calculated resistance of the sensor.
+        ratio_rs_r0 (float): The ratio of sensor resistance to base resistance.
+        sensor_type (str): The type of sensor that produced the reading.
+        sensor_id (str): The unique identifier of the sensor.
+    """
     __tablename__ = 'air_quality_readings'
     id = Column(Integer, primary_key=True, autoincrement=True)
     timestamp = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
@@ -1105,7 +1547,12 @@ class AirQualityReading(Base):
         Index('idx_aq_sensor_timestamp', 'sensor_id', 'timestamp'),
     )
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
+        """Converts the AirQualityReading model instance to a dictionary.
+
+        Returns:
+            A dictionary representation of the model.
+        """
         return {
             'id': self.id,
             'timestamp': self.timestamp.isoformat() if self.timestamp else None,
@@ -1124,7 +1571,18 @@ class AirQualityReading(Base):
         }
 
 class MeterReading(Base):
-    """Meter reading model for OCR-captured electricity meter values."""
+    """SQLAlchemy model for storing electricity meter readings from OCR.
+
+    Attributes:
+        id (int): The primary key for the reading.
+        timestamp (datetime): The UTC timestamp when the reading was taken.
+        timestamp_unix (float): The Unix timestamp of the reading.
+        meter_value (str): The value read from the meter.
+        ocr_engine (str): The name of the OCR engine used for the reading.
+        raw_ocr_text (str): The raw text output from the OCR engine.
+        sensor_type (str): The type of sensor (e.g., 'esp32cam_ocr').
+        sensor_id (str): The unique identifier of the meter.
+    """
 
     __tablename__ = 'meter_readings'
 
@@ -1142,7 +1600,12 @@ class MeterReading(Base):
         Index('idx_meter_sensor_timestamp', 'sensor_id', 'timestamp'),
     )
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
+        """Converts the MeterReading model instance to a dictionary.
+
+        Returns:
+            A dictionary representation of the model.
+        """
         return {
             'id': self.id,
             'timestamp': self.timestamp.isoformat() if self.timestamp else None,
@@ -1154,11 +1617,19 @@ class MeterReading(Base):
             'sensor_id': self.sensor_id,
         }
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """Provides a developer-friendly representation of the object."""
         return f'<MeterReading(id={self.id}, value={self.meter_value}, sensor={self.sensor_id}, time={self.timestamp})>'
 
-def init_database(database_url: str = None):
-    """Initialize the global database instance."""
+def init_database(database_url: Optional[str] = None):
+    """Initializes the global database instance.
+
+    This function creates and initializes the global `db` object which is an
+    instance of DatabaseManager.
+
+    Args:
+        database_url: An optional database URL to use for initialization.
+    """
     global db
     if database_url:
         db = DatabaseManager(database_url)
