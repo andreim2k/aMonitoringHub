@@ -1,4 +1,5 @@
 import json
+import logging
 import threading
 import time
 from typing import Callable, Optional, Dict, Any
@@ -6,19 +7,24 @@ from typing import Callable, Optional, Dict, Any
 try:
     import serial  # type: ignore
     from serial.tools import list_ports  # type: ignore
-except Exception as e:
+except ImportError:
     serial = None
     list_ports = None
 
 
 class USBJSONReader:
-    """
-    Reads line-delimited JSON from a USB CDC serial device (e.g., MicroPython on RP2040).
-    Expects JSON once per second with fields like:
+    """Reads line-delimited JSON from a USB CDC serial device.
+
+    This class runs in a separate thread to continuously read data from a
+    serial device, such as a MicroPython board. It auto-detects the device,
+    parses incoming JSON lines, normalizes the data, and invokes a callback
+    with the processed data.
+
+    Expected JSON format:
       {
         "timestamp": <seconds>,
-        "bme280": {"temperature_c": 23.4, "humidity_percent": 55.0, "pressure_hpa": 1008.3},
-        "mq135": {"co2_ppm": 560.0, "air_quality_index": 3, "air_quality_status": "Fair", ...}
+        "bme280": {"temperature_c": 23.4, "humidity_percent": 55.0, ...},
+        "mq135": {"co2_ppm": 560.0, "air_quality_index": 3, ...}
       }
     """
 
@@ -27,8 +33,17 @@ class USBJSONReader:
         device: Optional[str] = None,
         baudrate: int = 115200,
         callback: Optional[Callable[[Dict[str, Any]], None]] = None,
-        logger=None,
+        logger: Optional[logging.Logger] = None,
     ) -> None:
+        """Initializes the USBJSONReader.
+
+        Args:
+            device: The path to the serial device (e.g., '/dev/ttyACM0').
+                If None, the device will be auto-detected.
+            baudrate: The baud rate for the serial connection.
+            callback: A function to call with each normalized data packet.
+            logger: A logger instance for logging messages.
+        """
         self.device = device
         self.baudrate = baudrate
         self.callback = callback
@@ -37,6 +52,14 @@ class USBJSONReader:
         self._stop = threading.Event()
 
     def detect_device(self) -> Optional[str]:
+        """Auto-detects the serial device.
+
+        It prioritizes devices with the Raspberry Pi VID and then common
+        Linux device names like 'ttyACM' and 'ttyUSB'.
+
+        Returns:
+            The path to the detected device, or None if no device is found.
+        """
         # Prefer PySerial enumeration with VID/PID 0x2e8a:0005 (Raspberry Pi)
         try:
             if list_ports is not None:
@@ -65,6 +88,7 @@ class USBJSONReader:
         return None
 
     def start(self) -> None:
+        """Starts the reader thread."""
         if self._thread and self._thread.is_alive():
             return
         self._stop.clear()
@@ -72,11 +96,18 @@ class USBJSONReader:
         self._thread.start()
 
     def stop(self) -> None:
+        """Stops the reader thread."""
         self._stop.set()
         if self._thread:
             self._thread.join(timeout=2)
 
     def _run(self) -> None:
+        """The main loop for the reader thread.
+
+        This method handles connecting to the serial port, reading lines,
+        parsing JSON, and calling the callback. It includes error handling
+        and a backoff mechanism for reconnection.
+        """
         if serial is None:
             if self.logger:
                 self.logger.error('pyserial not installed; cannot read USB JSON')
@@ -141,6 +172,14 @@ class USBJSONReader:
             pass
 
     def _normalize(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        """Normalizes the raw JSON payload into a standardized dictionary format.
+
+        Args:
+            payload: The raw dictionary parsed from the JSON line.
+
+        Returns:
+            A standardized dictionary containing sensor data.
+        """
         ts = payload.get('timestamp', time.time())
         bme = payload.get('bme280', {})
         mq = payload.get('mq135', {})
