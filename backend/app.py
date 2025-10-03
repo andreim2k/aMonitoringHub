@@ -1300,7 +1300,7 @@ def capture_webcam():
             "contrast": 0,
             "saturation": 0,
             "exposure": 300,
-            "gain": 2,
+            "gain": 5,
             "special_effect": 1,
             "wb_mode": 0,
             "hmirror": False,
@@ -1365,7 +1365,7 @@ def run_ocr():
     try:
         # Capture a fresh image (no auto-OCR elsewhere)
         with app.test_client() as client:
-            cap_resp = client.post('/webcam/capture')
+            cap_resp = client.post('/webcam/capture', json={"gain": 5})
             cap_json = cap_resp.get_json()
         if not cap_json.get('success'):
             return jsonify({
