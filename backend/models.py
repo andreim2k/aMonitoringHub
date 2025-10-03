@@ -277,16 +277,22 @@ class DatabaseManager:
                 end_time = datetime.now(timezone.utc)
                 start_time = end_time - timedelta(hours=hours_back)
                 
+                # Get total count of all readings (not filtered by time)
+                total_count_query = session.query(func.count(TemperatureReading.id))
+                if sensor_id:
+                    total_count_query = total_count_query.filter(TemperatureReading.sensor_id == sensor_id)
+                total_count = total_count_query.scalar() or 0
+
                 query = session.query(
                     func.count(TemperatureReading.id).label('count'),
                     func.avg(TemperatureReading.temperature_c).label('avg'),
                     func.min(TemperatureReading.temperature_c).label('min'),
                     func.max(TemperatureReading.temperature_c).label('max')
                 ).filter(TemperatureReading.timestamp >= start_time)
-                
+
                 if sensor_id:
                     query = query.filter(TemperatureReading.sensor_id == sensor_id)
-                    
+
                 result = query.first()
                 
                 # Find timestamps for min and max within window
@@ -302,6 +308,7 @@ class DatabaseManager:
 
                 return {
                     'count': result.count or 0,
+                    'total_count': total_count,
                     'average': round(result.avg or 0, 2),
                     'minimum': round(result.min or 0, 2),
                     'maximum': round(result.max or 0, 2),
@@ -309,10 +316,10 @@ class DatabaseManager:
                     'min_timestamp': min_ts,
                     'max_timestamp': max_ts
                 }
-                
+
         except Exception as e:
             self.logger.error(f"Error getting statistics: {e}")
-            return {'count': 0, 'average': 0, 'minimum': 0, 'maximum': 0, 'hours_back': hours_back, 'min_timestamp': None, 'max_timestamp': None}
+            return {'count': 0, 'total_count': 0, 'average': 0, 'minimum': 0, 'maximum': 0, 'hours_back': hours_back, 'min_timestamp': None, 'max_timestamp': None}
             
     def cleanup_old_readings(self, days_to_keep: int = 30) -> int:
         """Remove old temperature readings beyond retention period."""

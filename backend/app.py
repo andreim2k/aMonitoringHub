@@ -152,6 +152,7 @@ class TemperatureReading(ObjectType):
 
 class TemperatureStatistics(ObjectType):
     count = Int()
+    total_count = Int()
     average = Float()
     minimum = Float()
     maximum = Float()
@@ -483,6 +484,7 @@ class Query(ObjectType):
             stats = db.get_statistics(hours_back=hours)
             return TemperatureStatistics(
                 count=stats['count'],
+                total_count=stats['total_count'],
                 average=stats['average'],
                 minimum=stats['minimum'],
                 maximum=stats['maximum'],
@@ -493,7 +495,7 @@ class Query(ObjectType):
         except Exception as e:
             logger.error(f"Error getting temperature statistics: {e}")
             return TemperatureStatistics(
-                count=0, average=0.0, minimum=0.0, maximum=0.0, hours_back=hours
+                count=0, total_count=0, average=0.0, minimum=0.0, maximum=0.0, hours_back=hours
             )
 
     def resolve_sensor_info(self, info):
