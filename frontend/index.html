@@ -542,14 +542,15 @@
   .chart-modal { width: min(92vw, 680px); height: min(70vh, 490px); background: linear-gradient(135deg, rgba(20,18,35,.98) 0%, rgba(35,30,70,.95) 50%, rgba(25,25,45,.98) 100%); border-radius: 14px; padding: 16px; box-shadow: 0 12px 40px rgba(0,0,0,.5); position: relative; display: flex; flex-direction: column; }
   .chart-modal h3 { margin: 0 0 16px 0; color: #ffffff; font-size: 1.4rem; font-weight: 600; text-align: center; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
   .chart-modal .close-btn { position: absolute; top: 8px; right: 10px; background: transparent; border: none; color: #ccc; font-size: 20px; cursor: pointer; }
-  .chart-modal .time-period-selector { display: flex; justify-content: center; margin: 0 auto; gap: 20px; margin: 12px 0; flex-wrap: nowrap; }
+  .chart-modal .time-period-container { display: flex; flex-direction: column; align-items: center; gap: 12px; margin: 12px auto; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 16px; padding: 16px 24px; width: fit-content; }
+  .chart-modal .time-period-selector { display: flex; justify-content: center; gap: 20px; flex-wrap: nowrap; }
   .chart-modal .time-period-option { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
   .chart-modal .time-period-option input[type="radio"] { appearance: none; width: 18px; height: 18px; border: 2px solid #7cb8ff; border-radius: 50%; background: rgba(255,255,255,0.05); cursor: pointer; position: relative; flex-shrink: 0; transition: all 0.2s ease; }
   .chart-modal .time-period-option input[type="radio"]:hover { border-color: #90caf9; background: rgba(144,202,249,0.1); }
   .chart-modal .time-period-option input[type="radio"]:checked { background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%); border-color: #64b5f6; box-shadow: 0 0 8px rgba(100,181,246,0.4); }
   .chart-modal .time-period-option input[type="radio"]:checked::after { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 8px; height: 8px; background: white; border-radius: 50%; }
   .chart-modal .time-period-option label { color: #ffffff; font-size: 0.95rem; font-weight: 500; cursor: pointer; user-select: none; }
-  .chart-modal .time-period-inputs { display: flex; justify-content: center; margin: 0 auto; gap: 12px; margin: 12px 0; flex-wrap: wrap; }
+  .chart-modal .time-period-inputs { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
   .chart-modal .time-period-inputs input, .chart-modal .time-period-inputs select { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.25); color: white; padding: 6px 12px; border-radius: 6px; font-size: 0.9rem; font-weight: 500; transition: all 0.2s ease; }
   .chart-modal .time-period-inputs input:hover, .chart-modal .time-period-inputs select:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.35); }
   .chart-modal .time-period-inputs input:focus, .chart-modal .time-period-inputs select:focus { outline: none; background: rgba(255,255,255,0.15); border-color: #64b5f6; box-shadow: 0 0 0 2px rgba(100,181,246,0.2); }
@@ -789,32 +790,34 @@
       <div class="chart-modal">
         <button class="close-btn" id="chartModalClose" aria-label="Close">×</button>
         <h3 id="chartModalTitle">History</h3>
-        <div class="time-period-selector">
-          <div class="time-period-option">
-            <input type="radio" id="periodRecent" name="chartPeriod" value="recent" checked>
-            <label for="periodRecent">Recent</label>
+        <div class="time-period-container">
+          <div class="time-period-selector">
+            <div class="time-period-option">
+              <input type="radio" id="periodRecent" name="chartPeriod" value="recent" checked>
+              <label for="periodRecent">Recent</label>
+            </div>
+            <div class="time-period-option">
+              <input type="radio" id="periodYear" name="chartPeriod" value="year">
+              <label for="periodYear">Years</label>
+            </div>
+            <div class="time-period-option">
+              <input type="radio" id="periodMonth" name="chartPeriod" value="month">
+              <label for="periodMonth">Months</label>
+            </div>
+            <div class="time-period-option">
+              <input type="radio" id="periodDay" name="chartPeriod" value="day">
+              <label for="periodDay">Days</label>
+            </div>
           </div>
-          <div class="time-period-option">
-            <input type="radio" id="periodYear" name="chartPeriod" value="year">
-            <label for="periodYear">Years</label>
+          <div class="time-period-inputs" id="timePeriodInputs" style="display: none;">
+            <input type="number" id="modalYearInput" placeholder="Year" min="2020" max="2030" style="display: none;">
+            <select id="modalMonthInput" style="display: none;">
+              <option value="1">Jan</option><option value="2">Feb</option><option value="3">Mar</option><option value="4">Apr</option>
+              <option value="5">May</option><option value="6">Jun</option><option value="7">Jul</option><option value="8">Aug</option>
+              <option value="9">Sep</option><option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option>
+            </select>
+            <input type="number" id="modalDayInput" placeholder="Day" min="1" max="31" style="display: none;">
           </div>
-          <div class="time-period-option">
-            <input type="radio" id="periodMonth" name="chartPeriod" value="month">
-            <label for="periodMonth">Months</label>
-          </div>
-          <div class="time-period-option">
-            <input type="radio" id="periodDay" name="chartPeriod" value="day">
-            <label for="periodDay">Days</label>
-          </div>
-        </div>
-        <div class="time-period-inputs" id="timePeriodInputs" style="display: none;">
-          <input type="number" id="modalYearInput" placeholder="Year" min="2020" max="2030" style="display: none;">
-          <select id="modalMonthInput" style="display: none;">
-            <option value="1">Jan</option><option value="2">Feb</option><option value="3">Mar</option><option value="4">Apr</option>
-            <option value="5">May</option><option value="6">Jun</option><option value="7">Jul</option><option value="8">Aug</option>
-            <option value="9">Sep</option><option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option>
-          </select>
-          <input type="number" id="modalDayInput" placeholder="Day" min="1" max="31" style="display: none;">
         </div>
         <div class="chart-canvas-wrap"><canvas id="chartModalCanvas"></canvas></div>
 
