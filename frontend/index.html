@@ -874,32 +874,59 @@
 
     // Utility functions
 
-    // Timezone-aware formatting (Europe/Bucharest) using epoch seconds when available
+    /**
+     * @type {Intl.DateTimeFormat}
+     * A pre-configured formatter for displaying timestamps in Europe/Bucharest timezone.
+     */
     const BUCHAREST_FMT = new Intl.DateTimeFormat('ro-RO', { timeZone: 'Europe/Bucharest', dateStyle: 'short', timeStyle: 'medium' });
     
-
+    /**
+     * Formats a temperature value into a string with one decimal place and a degree Celsius symbol.
+     * @param {number | null | undefined} value - The temperature value.
+     * @returns {string} The formatted temperature string (e.g., "23.5°C").
+     */
     function formatTemperature(value) {
       if (value === null || value === undefined) return '--°C';
       return parseFloat(value).toFixed(1) + '°C';
     }
 
-    
+    /**
+     * Formats a pressure value into a string with one decimal place and "hPa".
+     * @param {number | null | undefined} value - The pressure value.
+     * @returns {string} The formatted pressure string (e.g., "1013.3 hPa").
+     */
     function formatPressure(value) {
       if (value === null || value === undefined) return '-- hPa';
       return parseFloat(value).toFixed(1) + ' hPa';
     }
 
+    /**
+     * Formats a CO2 value into a string with no decimal places and "ppm".
+     * @param {number | null | undefined} value - The CO2 value.
+     * @returns {string} The formatted CO2 string (e.g., "450 ppm").
+     */
     function formatCO2(value) {
       if (value === null || value === undefined) return '-- ppm';
       return parseFloat(value).toFixed(0) + ' ppm';
     }
 
+    /**
+     * Sets a CSS severity class on an element.
+     * @param {HTMLElement} el - The DOM element to modify.
+     * @param {string | null} level - The severity level ('ok', 'warn', 'bad').
+     */
     function setSeverity(el, level) {
   if (!el) return;
   el.classList.remove('ok','warn','bad');
   if (level) el.classList.add(level);
 }
 
+/**
+ * Determines the severity level based on a metric and its value.
+ * @param {string} metric - The type of metric (e.g., 'temp', 'humidity').
+ * @param {number | null} value - The value of the metric.
+ * @returns {string | null} The severity level ('ok', 'warn', 'bad') or null.
+ */
 function severityFor(metric, value) {
   if (value == null) return null;
   switch (metric) {
@@ -933,11 +960,20 @@ function severityFor(metric, value) {
   }
 }
 
+/**
+ * Formats a humidity value into a string with one decimal place and a percent symbol.
+ * @param {number | null | undefined} value - The humidity value.
+ * @returns {string} The formatted humidity string (e.g., "55.1%").
+ */
 function formatHumidity(value) {
       if (value === null || value === undefined) return '--%';
       return parseFloat(value).toFixed(1) + '%';
     }
 
+    /**
+     * Displays an error message on the UI for a short duration.
+     * @param {string} message - The error message to display.
+     */
     function showError(message) {
       const errorDiv = document.getElementById('errorDisplay');
       errorDiv.innerHTML = '<div class="error"><strong>Error:</strong> ' + message + '</div>';
@@ -947,12 +983,22 @@ function formatHumidity(value) {
       }, 5000);
     }
 
+    /**
+     * Updates the connection status in the global state.
+     * @deprecated This function is legacy and is now handled by updateSensorStatus.
+     * @param {string} status - The connection status ('online' or 'offline').
+     * @param {string} text - The descriptive text for the status.
+     */
     function updateConnectionStatus(status, text) {
       // Legacy function - now handled by updateSensorStatus
       currentData.connected = (status === 'online');
       updateDisplay(); // Trigger display update to reflect sensor status
     }
 
+    /**
+     * Updates the sensor status indicator on the UI.
+     * @param {string} status - The sensor status ('online', 'offline', 'checking').
+     */
     function updateSensorStatus(status) {
       const sensorStatusEl = document.getElementById('sensorStatus');
 
@@ -970,6 +1016,10 @@ function formatHumidity(value) {
         currentData.connected = false;
       }
     }
+
+    /**
+     * Updates the "Last reading time" display in the header with the most recent timestamp from all sensors.
+     */
     function updateUnifiedTimestamp() {
       const lastReadingEl = document.getElementById('lastReadingTime');
       
@@ -990,10 +1040,10 @@ function formatHumidity(value) {
       }
     }
 
-
-
-
-function updateDisplay() {
+    /**
+     * Updates all the metric displays on the page with the latest data from the `currentData` global state.
+     */
+    function updateDisplay() {
       console.log('Updating display with currentData:', currentData);
 
       // Update unified timestamp in header
