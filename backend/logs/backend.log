@@ -10394,3 +10394,1145 @@ Traceback (most recent call last):
   File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
     self.response.close()
 RuntimeError: generator ignored GeneratorExit
+2025-10-05 19:14:40,637 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-06 09:14:48,162 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-06 15:55:31,677 - werkzeug - ERROR - 100.125.144.107 - - [06/Oct/2025 15:55:31] code 400, message Bad request version ('\x00*ÊÊ\x13\x02\x13\x03\x13\x01À,À+Ì©À0À/Ì¨À')
+2025-10-06 15:55:31,873 - werkzeug - ERROR - 100.125.144.107 - - [06/Oct/2025 15:55:31] code 400, message Bad request version ('%$;x{û\\TNÌ%-\x94\x80ÐV}\x83éO¯OÃ\x00*zz\x13\x02\x13\x03\x13\x01À,À+Ì©À0À/Ì¨À')
+2025-10-06 15:55:32,065 - werkzeug - ERROR - 100.125.144.107 - - [06/Oct/2025 15:55:32] code 400, message Bad request syntax ('\x16\x03\x01\x05ø\x01\x00\x05ô\x03\x03Ú4')
+2025-10-06 15:55:32,303 - werkzeug - ERROR - 100.125.144.107 - - [06/Oct/2025 15:55:32] code 400, message Bad request version ('ãtçÚÅ\x07iD\x8dzpß\x90ú(\x9bSð·w»\x99^N\x00*ÊÊ\x13\x02\x13\x03\x13\x01À,À+Ì©À0À/Ì¨À')
+2025-10-08 08:23:09,642 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ff7381c4bc0>: Failed to establish a new connection: [Errno 113] No route to host'))
+2025-10-08 08:23:14,506 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ff7381fa270>: Failed to establish a new connection: [Errno 113] No route to host'))
+2025-10-08 08:23:19,114 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ff7381c5310>: Failed to establish a new connection: [Errno 113] No route to host'))
+2025-10-08 08:23:22,314 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ff7381faf30>: Failed to establish a new connection: [Errno 113] No route to host'))
+2025-10-08 08:23:48,618 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ff7381e58e0>: Failed to establish a new connection: [Errno 113] No route to host'))
+2025-10-08 08:24:30,922 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ff7381c70e0>: Failed to establish a new connection: [Errno 113] No route to host'))
+2025-10-08 08:25:00,938 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ff7381e4560>: Failed to establish a new connection: [Errno 113] No route to host'))
+2025-10-08 09:03:59,868 - __main__ - ERROR - USBJSONReader error: device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2025-10-08 09:04:00,869 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:01,871 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:02,872 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:03,873 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:04,873 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:05,874 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:06,875 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:07,876 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:08,877 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:09,878 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:10,879 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:11,879 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:12,880 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:13,881 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:14,882 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:15,883 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:16,883 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:17,884 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:18,885 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:19,886 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:20,886 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:21,887 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:22,889 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:23,890 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:24,890 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:25,891 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:26,892 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:27,893 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:28,894 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:29,895 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:30,895 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:31,896 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:32,897 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:04:33,898 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:07:36,103 - __main__ - ERROR - USBJSONReader error: device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2025-10-08 09:07:37,104 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:07:38,105 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:07:39,106 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:07:40,107 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:07:41,107 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:07:42,109 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:07:43,110 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:07:44,110 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:07:45,111 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:07:46,112 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:07:47,114 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:07:48,114 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:07:49,115 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:07:50,116 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:07:51,117 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:07:52,118 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:07:53,119 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:07:54,120 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:07:55,121 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:07:56,121 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:07:57,123 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:07:58,123 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:07:59,124 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:00,125 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:01,126 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:02,127 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:03,128 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:04,128 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:05,129 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:06,130 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:07,131 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:08,132 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:09,133 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:10,134 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:11,134 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:12,136 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:13,137 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:14,137 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:15,138 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:16,139 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:17,140 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:18,141 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:19,142 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:20,142 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:21,143 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:22,145 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:23,145 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:24,146 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:25,147 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:26,148 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:27,149 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:28,150 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:29,151 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:30,151 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:31,152 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:32,153 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:33,154 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:34,155 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:35,156 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:36,157 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:37,158 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:38,159 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:39,159 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:40,160 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:41,161 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:42,162 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:43,163 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:44,164 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:45,164 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:46,165 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:47,166 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:48,167 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:49,168 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:08:50,169 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 09:09:46,570 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ff7381c7cb0>: Failed to establish a new connection: [Errno 113] No route to host'))
+2025-10-08 10:12:07,305 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ff7381fb080>: Failed to establish a new connection: [Errno 113] No route to host'))
+2025-10-08 10:15:15,279 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-08 10:15:15,284 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-08 10:15:15,286 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-08 10:15:15,289 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-08 11:29:40,490 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ff7381fbc20>: Failed to establish a new connection: [Errno 113] No route to host'))
+2025-10-08 11:29:49,703 - __main__ - ERROR - USBJSONReader error: device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2025-10-08 11:29:50,704 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:29:51,705 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:29:52,706 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:29:53,707 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:29:54,707 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:29:55,708 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:29:56,709 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:29:57,710 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:29:58,710 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:29:59,711 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:00,713 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:01,714 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:02,715 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:03,715 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:04,716 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:05,717 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:06,718 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:07,719 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:08,720 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:09,721 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:10,722 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:11,723 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:12,724 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:13,724 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:14,725 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:15,726 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:16,727 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:17,728 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:18,729 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:19,730 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:20,731 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:21,732 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:22,733 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:23,733 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:24,734 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:25,736 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:26,737 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:27,737 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:28,738 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:29,739 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:30,740 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:31,741 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:32,742 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:33,743 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:34,744 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:35,745 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:36,746 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:37,747 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:38,748 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:39,748 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:40,750 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:41,751 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:42,751 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:43,752 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:44,753 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:45,754 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:46,755 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:47,756 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:48,757 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:49,758 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:50,759 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:51,760 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:52,760 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:53,761 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:54,762 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:55,763 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:56,764 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:57,765 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:58,766 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:30:59,766 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:00,768 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:01,768 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:02,769 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:03,770 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:04,771 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:05,772 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:06,773 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:07,774 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:08,775 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:09,776 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:10,777 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:11,778 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:12,779 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:13,779 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:14,780 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:15,781 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:16,782 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:17,783 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:18,784 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:19,785 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:20,785 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:21,786 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:22,787 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:23,788 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:24,789 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:25,790 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:26,791 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:27,792 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:28,793 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:29,793 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:30,794 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:31,796 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:32,796 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:33,797 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:34,798 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:35,799 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:36,800 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:37,801 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:38,802 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:39,803 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:40,803 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:41,804 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:42,805 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:43,806 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:44,807 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:45,808 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:46,809 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:47,810 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:48,810 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:49,811 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:50,812 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:51,814 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:52,814 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:53,815 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:54,816 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:55,817 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:56,818 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:57,819 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:58,820 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:31:59,821 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:00,822 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:01,823 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:02,824 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:03,825 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:04,825 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:05,826 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:06,828 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:07,828 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:08,829 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:09,830 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:10,831 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:11,832 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:12,833 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:13,834 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:14,834 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:15,835 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:16,837 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:17,838 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:18,838 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:19,839 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:20,840 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:21,841 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:22,842 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:23,843 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:24,844 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:25,844 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:26,846 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:27,846 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:28,847 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:29,848 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:30,849 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:31,850 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:32,851 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:33,852 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:34,853 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:35,853 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:36,855 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:37,855 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:38,856 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:39,857 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:40,858 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:41,859 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:42,860 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:43,861 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:44,861 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:45,862 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:46,864 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:47,864 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:48,865 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:49,866 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:50,867 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:51,868 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:52,869 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:53,869 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:54,870 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:55,871 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:56,872 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:57,873 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:58,874 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:32:59,875 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:00,876 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:01,877 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:02,878 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:03,878 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:04,879 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:05,880 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:06,881 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:07,882 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:08,883 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:09,883 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:10,884 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:11,886 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:12,886 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:13,887 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:14,888 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:15,889 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:16,890 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:17,891 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:18,891 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:19,892 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:20,893 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:21,894 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:22,895 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:23,896 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:24,897 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:25,897 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:26,899 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:27,899 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:28,900 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:29,901 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:30,902 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:31,903 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:32,904 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:33,905 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:34,905 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:35,906 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:36,907 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:37,908 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:38,919 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:39,530 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ff7381e7ef0>: Failed to establish a new connection: [Errno 113] No route to host'))
+2025-10-08 11:33:39,920 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:40,921 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:41,922 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:42,923 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:43,924 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:44,924 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:45,925 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:46,926 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:47,927 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:48,928 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:49,929 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:50,930 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:51,931 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:52,932 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:53,933 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:54,933 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:55,934 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:56,936 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:57,936 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:58,937 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:33:59,938 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:00,939 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:01,940 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:02,941 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:03,942 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:04,942 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:05,943 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:06,944 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:07,945 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:08,946 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:09,947 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:10,948 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:11,948 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:12,950 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:13,950 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:14,951 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:15,952 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:16,953 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:17,954 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:18,954 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:19,955 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:20,956 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:21,957 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:22,958 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:23,958 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:24,959 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:25,961 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:26,961 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:27,962 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:28,963 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:29,964 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:30,965 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:31,966 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:32,967 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:33,967 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:34,968 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:35,969 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:36,970 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:37,971 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:38,972 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:39,972 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:40,974 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:41,974 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:42,975 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:43,976 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:44,977 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:45,978 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:46,979 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:47,979 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:48,980 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:49,987 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:50,990 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:51,991 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:52,298 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ff7382b8c20>: Failed to establish a new connection: [Errno 113] No route to host'))
+2025-10-08 11:34:52,992 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:53,992 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:54,993 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:55,995 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:56,995 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:57,996 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:58,997 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:34:59,998 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:35:00,999 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:35:02,000 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:35:03,001 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:35:04,001 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:35:05,002 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:35:06,003 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:35:07,004 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:35:08,005 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:35:09,005 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:35:10,006 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:35:11,007 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:35:12,008 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:35:13,009 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:35:14,010 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:35:15,011 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:35:16,011 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:35:17,012 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:35:18,013 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:35:19,014 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:35:20,015 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:35:21,016 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:35:22,017 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:35:23,018 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 11:35:24,019 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-08 12:00:03,082 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ff738169610>: Failed to establish a new connection: [Errno 113] No route to host'))
+2025-10-08 12:15:16,475 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-08 12:19:06,954 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ff7382bb110>: Failed to establish a new connection: [Errno 113] No route to host'))
+2025-10-08 12:19:21,613 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ff7382d4740>: Failed to establish a new connection: [Errno 113] No route to host'))
+2025-10-08 12:19:26,794 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ff7382ba7b0>: Failed to establish a new connection: [Errno 113] No route to host'))
+2025-10-08 13:15:17,086 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-08 16:55:59,690 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ff7381fbf20>: Failed to establish a new connection: [Errno 113] No route to host'))
+2025-10-08 17:15:19,995 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-09 08:19:20,266 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ff73817c320>: Failed to establish a new connection: [Errno 113] No route to host'))
+2025-10-09 08:59:54,186 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ff7381d3fe0>: Failed to establish a new connection: [Errno 113] No route to host'))
+2025-10-09 09:15:32,370 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-09 09:15:32,371 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-09 09:15:32,374 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-09 09:15:32,376 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-09 10:04:03,018 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ff7381c41d0>: Failed to establish a new connection: [Errno 113] No route to host'))
+2025-10-09 10:25:19,839 - werkzeug - ERROR - 100.125.144.107 - - [09/Oct/2025 10:25:19] code 400, message Bad request version ('x~ú¾ô½¼è\x00*')
+2025-10-09 10:25:20,003 - werkzeug - ERROR - 100.125.144.107 - - [09/Oct/2025 10:25:20] code 400, message Bad request version ('O=1*ëõb\x8a\x8ef1u3×\x18¿/z3')
+2025-10-09 10:25:20,166 - werkzeug - ERROR - 100.125.144.107 - - [09/Oct/2025 10:25:20] code 400, message Bad request version ('çMûKJ¢¹\x05¤')
+2025-10-09 10:25:20,345 - werkzeug - ERROR - 100.125.144.107 - - [09/Oct/2025 10:25:20] code 400, message Bad request version ('ëa\x14òøoTlZ5\x90\x8c\x00*JJ\x13\x02\x13\x03\x13\x01À,À+Ì©À0À/Ì¨À')
+2025-10-09 10:25:23,786 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ff7381e4200>: Failed to establish a new connection: [Errno 113] No route to host'))
+2025-10-09 11:15:33,646 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-09 12:00:03,082 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ff7381c7860>: Failed to establish a new connection: [Errno 113] No route to host'))
+2025-10-09 12:15:33,653 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-09 12:50:19,146 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ff7381c4bf0>: Failed to establish a new connection: [Errno 113] No route to host'))
+2025-10-09 13:15:34,439 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-09 13:15:34,441 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-09 14:36:37,066 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ff7381c70b0>: Failed to establish a new connection: [Errno 113] No route to host'))
+2025-10-09 15:15:35,878 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-10 10:50:33,035 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ff738554e60>: Failed to establish a new connection: [Errno 113] No route to host'))
+2025-10-10 11:15:48,496 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-10 12:00:03,083 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Max retries exceeded with url: /snapshot (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ff73817d970>: Failed to establish a new connection: [Errno 113] No route to host'))
+2025-10-10 16:56:56,260 - __main__ - ERROR - USBJSONReader error: device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2025-10-10 16:56:57,261 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-10 16:56:58,262 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-10 16:56:59,263 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-10 16:57:00,264 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-10 16:57:01,264 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-10 16:57:02,266 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-10 16:57:03,266 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-10 16:57:04,267 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-10 16:57:05,268 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-10 16:57:06,269 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-10 16:57:07,270 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-10 16:57:08,271 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-10 16:57:09,272 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-10 17:37:41,005 - __main__ - ERROR - USBJSONReader error: device reports readiness to read but returned no data (device disconnected or multiple access on port?)
+2025-10-10 17:37:42,006 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-10 17:37:43,007 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-10 17:37:44,008 - __main__ - ERROR - USBJSONReader error: [Errno 2] could not open port /dev/ttyACM0: [Errno 2] No such file or directory: '/dev/ttyACM0'
+2025-10-10 17:40:12,729 - __main__ - ERROR - Webcam capture failed: HTTPConnectionPool(host='192.168.50.3', port=80): Read timed out. (read timeout=20)
+2025-10-10 17:40:21,025 - __main__ - ERROR - Webcam capture failed: ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+2025-10-10 17:40:21,031 - __main__ - ERROR - Webcam capture failed: ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+2025-10-10 18:15:53,271 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-10 18:15:53,274 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-10 18:15:53,276 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-10 18:15:53,280 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-11 10:16:01,926 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-11 10:16:01,914 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-11 10:16:01,963 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-12 10:02:17,203 - werkzeug - ERROR - 100.125.144.107 - - [12/Oct/2025 10:02:17] code 400, message Bad request version ('\x7f¼CBc¢\\§ÍÿÅ9\x03C\x16»\x91Üþ>=s\\Ënèýô\x97\x00*JJ\x13\x02\x13\x03\x13\x01À,À+Ì©À0À/Ì¨À')
+2025-10-12 10:02:17,446 - werkzeug - ERROR - 100.125.144.107 - - [12/Oct/2025 10:02:17] code 400, message Bad request version ('Ô\x00*\x1a\x1a\x13\x02\x13\x03\x13\x01À,À+Ì©À0À/Ì¨À')
+2025-10-12 10:02:17,462 - werkzeug - ERROR - 100.125.144.107 - - [12/Oct/2025 10:02:17] code 400, message Bad request version ('5ß@\x00*ZZ\x13\x02\x13\x03\x13\x01À,À+Ì©À0À/Ì¨À')
+2025-10-12 10:02:17,476 - werkzeug - ERROR - 100.125.144.107 - - [12/Oct/2025 10:02:17] code 400, message Bad request version ('Þô¿\x94;Ú\x16\xadi\x00*::\x13\x02\x13\x03\x13\x01À,À+Ì©À0À/Ì¨À')
+2025-10-12 10:16:16,021 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-12 11:16:16,579 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit
+2025-10-12 15:16:19,199 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 334, in execute
+    write(data)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 306, in write
+    self.wfile.write(hex(len(data))[2:].encode())
+  File "/usr/lib/python3.12/socketserver.py", line 840, in write
+    self._sock.sendall(b)
+ConnectionResetError: [Errno 104] Connection reset by peer
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 367, in execute
+    application_iter.close()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wsgi.py", line 260, in close
+    callback()
+  File "/home/andrei/aMonitoringHub/backend/venv/lib/python3.12/site-packages/werkzeug/wrappers/response.py", line 403, in close
+    self.response.close()
+RuntimeError: generator ignored GeneratorExit

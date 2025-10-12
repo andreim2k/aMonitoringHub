@@ -760,8 +760,8 @@
               </div>
               <div style="display:flex; align-items:center; gap:10px; width:260px;">
                 <label for="gainSlider" style="color:#b3b3b3; font-size:0.9rem;">Gain</label>
-                <input id="gainSlider" type="range" min="0" max="10" step="1" value="2" style="flex:1; accent-color:#4caf50;">
-                <span id="gainValue" class="unit-badge">2</span>
+                 <input id="gainSlider" type="range" min="0" max="10" step="1" value="6" style="flex:1; accent-color:#4caf50;">
+                 <span id="gainValue" class="unit-badge">6</span>
               </div>
             </div>
             <button id="captureSettingsBtn" class="btn" style="margin: 5px auto; background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%); display: none;">Snapshot</button>
@@ -1687,7 +1687,7 @@ async function initialize() {
       placeholder.style.display = "none";
       img.style.display = "none";
       const gainSlider = document.getElementById("gainSlider");
-      const gainVal = Number.isFinite(parseInt(gainSlider?.value, 10)) ? parseInt(gainSlider.value, 10) : 2;
+      const gainVal = Number.isFinite(parseInt(gainSlider?.value, 10)) ? parseInt(gainSlider.value, 10) : 6;
       const flashToggle = document.getElementById("flashToggle");
       const flashVal = !!(flashToggle && flashToggle.checked);
       latestWebcamOverrides = { gain: gainVal, flash: flashVal };
@@ -1742,7 +1742,7 @@ async function initialize() {
           const loading = document.getElementById("webcamLoading");
           const placeholder = document.getElementById("webcamPlaceholder");
           const gainSlider = document.getElementById("gainSlider");
-          const gainVal = Number.isFinite(parseInt(gainSlider?.value, 10)) ? parseInt(gainSlider.value, 10) : 2;
+          const gainVal = Number.isFinite(parseInt(gainSlider?.value, 10)) ? parseInt(gainSlider.value, 10) : 6;
           const flashToggle = document.getElementById("flashToggle");
           const flashVal = !!(flashToggle && flashToggle.checked);
           latestWebcamOverrides = { gain: gainVal, flash: flashVal };
