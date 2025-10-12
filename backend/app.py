@@ -123,7 +123,7 @@ def set_throttle_interval(seconds):
 
 
 def scheduled_ocr_task():
-    """Scheduled task to capture webcam and run OCR daily at 12:00"""
+    """Scheduled task to capture webcam and run OCR daily at 23:59"""
     logger.info("Running scheduled OCR task...")
     try:
         # Use Flask test client to call the OCR endpoint
@@ -1213,18 +1213,18 @@ def initialize_application():
         from sensor_reader import HumiditySensorReader
         humidity_sensor = HumiditySensorReader("mock")
 
-        # Initialize scheduler for daily OCR task at 12:00
+        # Initialize scheduler for daily OCR task at 23:59
         scheduler = BackgroundScheduler()
         scheduler.add_job(
             scheduled_ocr_task,
             'cron',
-            hour=12,
-            minute=0,
+            hour=23,
+            minute=59,
             id='daily_ocr_task',
-            name='Daily OCR Meter Reading at 12:00'
+            name='Daily OCR Meter Reading at 23:59'
         )
         scheduler.start()
-        logger.info("Scheduler started - OCR task will run daily at 12:00")
+        logger.info("Scheduler started - OCR task will run daily at 23:59")
 
         logger.info("Application initialized with USB sensor data")
         return True
@@ -1300,7 +1300,7 @@ def capture_webcam():
             "contrast": 0,
             "saturation": 0,
             "exposure": 300,
-            "gain": 5,
+            "gain": 2,
             "special_effect": 1,
             "wb_mode": 0,
             "hmirror": False,
