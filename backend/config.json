@@ -10,7 +10,7 @@
       "gemini": {
         "enabled": true,
         "api_key": "AIzaSyB1Stx5-UA9GrvpROHaT2dUE92BTQRkGrc",
-        "model": "gemini-2.5-flash",
+        "model": "gemini-2.5-flash-lite",
         "prompt": "Pay attention and look very carefully: extract me the number ONLY from the image! number is made from 4 digits! If you are not sure which is the last digit, just return exactly this text: 'Failed to read index!', else return only the number without any comment!"
       }
     },
