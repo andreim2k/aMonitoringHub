@@ -1731,7 +1731,7 @@ def run_ocr() -> Response:
         try:
             gemini_config = config.get('ocr', {}).get('engines', {}).get('gemini', {})
             api_key = gemini_config.get('api_key')
-            model = gemini_config.get('model', 'gemini-2.0-flash-exp')
+            model = gemini_config.get('model', 'gemini-2.5-flash')
             prompt = gemini_config.get('prompt', 'Extract only the numbers from this image.')
             
             if not api_key:
