@@ -19,6 +19,7 @@ import json
 import time
 import logging
 import argparse
+import re
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Tuple, Optional
 from queue import Queue
@@ -1703,7 +1704,6 @@ def run_ocr() -> Response:
     import json
     import os
     import requests
-    import re
     from datetime import datetime
     
     try:

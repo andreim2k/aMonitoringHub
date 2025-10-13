@@ -7,10 +7,6 @@
   "ocr": {
     "enabled": true,
     "engines": {
-      "tesseract": {
-        "enabled": true,
-        "config": "--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789"
-      },
       "gemini": {
         "enabled": true,
         "api_key": "AIzaSyB1Stx5-UA9GrvpROHaT2dUE92BTQRkGrc",
