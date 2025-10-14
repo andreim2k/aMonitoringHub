@@ -12,7 +12,7 @@ VENV_PATH="$PROJECT_ROOT/backend/venv"
 BACKEND_PATH="$PROJECT_ROOT/backend"
 LOGS_PATH="$PROJECT_ROOT/logs"
 PID_FILE="$LOGS_PATH/app.pid"
-LOG_FILE="$LOGS_PATH/backend.out"
+LOG_FILE="$LOGS_PATH/backend.log"
 
 # Colors for output
 RED='\033[0;31m'

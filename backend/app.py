@@ -1437,57 +1437,65 @@ def events() -> Response:
     """
     def event_stream():
         """Generator function for the SSE stream."""
-        # Send immediate connection confirmation with latest data
-        yield f"data: {json.dumps({'type': 'connected', 'timestamp': time.time()})}\n\n"
-        
-        # Immediately send latest temperature from database
         try:
-            with db.get_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute("SELECT temperature_c, timestamp, sensor_type, sensor_id FROM temperature_readings ORDER BY timestamp DESC LIMIT 1")
-                temp_row = cursor.fetchone()
-                if temp_row:
-                    temp_data = {
-                        'temperature_c': temp_row[0],
-                        'timestamp_iso': temp_row[1],
-                        'sensor_type': temp_row[2],
-                        'sensor_id': temp_row[3]
-                    }
-                    sse_message = {
-                        'type': 'temperature_update',
-                        'data': temp_data,
-                        'timestamp': temp_row[1]
-                    }
-                    yield f"data: {json.dumps(sse_message)}\n\n"
-                
-                # Also send latest humidity
-                cursor.execute("SELECT humidity_percent, timestamp, sensor_type, sensor_id FROM humidity_readings ORDER BY timestamp DESC LIMIT 1")
-                humidity_row = cursor.fetchone()
-                if humidity_row:
-                    humidity_data = {
-                        'humidity_percent': humidity_row[0],
-                        'timestamp_iso': humidity_row[1],
-                        'sensor_type': humidity_row[2],
-                        'sensor_id': humidity_row[3]
-                    }
-                    sse_message = {
-                        'type': 'humidity_update',
-                        'data': humidity_data,
-                        'timestamp': humidity_row[1]
-                    }
-                    yield f"data: {json.dumps(sse_message)}\n\n"
-        except Exception as e:
-            print(f"Error sending initial data: {e}")
-        
-        while True:
+            # Send immediate connection confirmation with latest data
+            yield f"data: {json.dumps({'type': 'connected', 'timestamp': time.time()})}\n\n"
+
+            # Immediately send latest temperature from database
             try:
-                data = sse_clients.get(timeout=get_throttle_interval())  # Much shorter timeout
-                yield f"data: {json.dumps(data)}\n\n"
-                sse_clients.task_done()
-            except:
-                # Send heartbeat to keep connection alive
-                yield f"data: {json.dumps({'type': 'heartbeat', 'timestamp': time.time()})}\n\n"
-    
+                with db.get_connection() as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("SELECT temperature_c, timestamp, sensor_type, sensor_id FROM temperature_readings ORDER BY timestamp DESC LIMIT 1")
+                    temp_row = cursor.fetchone()
+                    if temp_row:
+                        temp_data = {
+                            'temperature_c': temp_row[0],
+                            'timestamp_iso': temp_row[1],
+                            'sensor_type': temp_row[2],
+                            'sensor_id': temp_row[3]
+                        }
+                        sse_message = {
+                            'type': 'temperature_update',
+                            'data': temp_data,
+                            'timestamp': temp_row[1]
+                        }
+                        yield f"data: {json.dumps(sse_message)}\n\n"
+
+                    # Also send latest humidity
+                    cursor.execute("SELECT humidity_percent, timestamp, sensor_type, sensor_id FROM humidity_readings ORDER BY timestamp DESC LIMIT 1")
+                    humidity_row = cursor.fetchone()
+                    if humidity_row:
+                        humidity_data = {
+                            'humidity_percent': humidity_row[0],
+                            'timestamp_iso': humidity_row[1],
+                            'sensor_type': humidity_row[2],
+                            'sensor_id': humidity_row[3]
+                        }
+                        sse_message = {
+                            'type': 'humidity_update',
+                            'data': humidity_data,
+                            'timestamp': humidity_row[1]
+                        }
+                        yield f"data: {json.dumps(sse_message)}\n\n"
+            except Exception as e:
+                print(f"Error sending initial data: {e}")
+
+            while True:
+                try:
+                    data = sse_clients.get(timeout=get_throttle_interval())  # Much shorter timeout
+                    yield f"data: {json.dumps(data)}\n\n"
+                    sse_clients.task_done()
+                except:
+                    # Send heartbeat to keep connection alive
+                    yield f"data: {json.dumps({'type': 'heartbeat', 'timestamp': time.time()})}\n\n"
+        except GeneratorExit:
+            # Handle client disconnect gracefully
+            logger.debug("SSE generator exiting due to client disconnect")
+            return
+        except Exception as e:
+            logger.error(f"SSE generator error: {e}")
+            return
+
     return Response(
         event_stream(),
         mimetype='text/event-stream',
