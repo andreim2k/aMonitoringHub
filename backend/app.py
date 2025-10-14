@@ -159,19 +159,34 @@ def scheduled_ocr_task():
     This function is intended to be run by a scheduler (e.g., APScheduler)
     to automatically read the electricity meter at a configured time.
     """
-    logger.info("Running scheduled OCR task...")
+    import traceback
+    logger.info("=== SCHEDULED OCR TASK STARTED ===")
+    logger.info(f"Current time: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+    
     try:
         # Use Flask test client to call the OCR endpoint
         with app.test_client() as client:
+            logger.info("Making POST request to /webcam/ocr endpoint...")
             response = client.post('/webcam/ocr')
+            logger.info(f"Response status code: {response.status_code}")
+            
+            if response.status_code != 200:
+                logger.error(f"OCR endpoint returned status {response.status_code}")
+                return
+                
             result = response.get_json()
+            logger.info(f"OCR response: {result}")
 
             if result and result.get('success'):
-                logger.info(f"Scheduled OCR succeeded: {result.get('index')}")
+                logger.info(f"✅ SCHEDULED OCR SUCCEEDED: {result.get('index')}")
             else:
-                logger.warning(f"Scheduled OCR failed or no value recognized: {result.get('error', 'Unknown error')}")
+                logger.error(f"❌ SCHEDULED OCR FAILED: {result.get('error', 'Unknown error')}")
+                logger.error(f"Full OCR response: {result}")
     except Exception as e:
-        logger.error(f"Scheduled OCR task error: {e}")
+        logger.error(f"❌ SCHEDULED OCR TASK EXCEPTION: {e}")
+        logger.error(f"Exception traceback: {traceback.format_exc()}")
+    
+    logger.info("=== SCHEDULED OCR TASK COMPLETED ===")
 
 
 

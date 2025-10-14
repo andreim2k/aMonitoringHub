@@ -1,6 +1,7 @@
 # Log files
 logs/
 app_start.log
+*.log
 
 # Python virtual environment
 backend/venv/
@@ -12,3 +13,6 @@ __pycache__/
 # Database file
 backend/*.db
 !backend/database.db-example
+
+# Environment variables
+.env
