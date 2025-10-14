@@ -102,6 +102,9 @@ Edit `backend/config.json`:
         "model": "gemini-1.5-flash"
       }
     }
+  },
+  "app": {
+    "log_level": "INFO"
   }
 }
 ```
@@ -162,6 +165,7 @@ mkdir -p backend/logs
 1. **Edit ESP32-CAM URL** in `backend/config.json`
 2. **Add Gemini API Key** for OCR functionality
 3. **Configure network settings** if needed
+4. **Set application settings** in `backend/config.json` (log level, etc.)
 
 ### Start Application
 ```bash
@@ -400,9 +404,16 @@ sudo kill -9 <PID>
 
 ### Logging
 
-- Set log level via environment variable:
-  export LOG_LEVEL=INFO
-- Default is INFO.
+- Set log level in `backend/config.json` under `app.log_level`:
+  ```json
+  {
+    "app": {
+      "log_level": "INFO"
+    }
+  }
+  ```
+- Available levels: DEBUG, INFO, WARNING, ERROR, CRITICAL
+- Default is ERROR
 
 ### Run in development
 

@@ -62,6 +62,9 @@ from graphql.execution import ExecutionResult
 
 import graphene
 from config import get_config as load_app_config
+
+# Load application configuration
+app_config = load_app_config()
 from graphene import ObjectType, String, Float, List as GrapheneList, Field, Int, Schema
 
 # Import our modules
@@ -69,9 +72,10 @@ from models import init_database, db, TemperatureReading as DBTemperatureReading
 from sensor_reader import TemperatureSensorReader, HumiditySensorReader
 from usb_json_reader import USBJSONReader
 
-# Configure logging (force ERROR by default)
+# Configure logging (use config.json instead of .env)
+log_level = app_config.get('app', {}).get('log_level', 'ERROR').upper()
 logging.basicConfig(
-    level=getattr(logging, os.getenv('LOG_LEVEL', 'ERROR').upper(), logging.ERROR),
+    level=getattr(logging, log_level, logging.ERROR),
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler('logs/backend.log'),
