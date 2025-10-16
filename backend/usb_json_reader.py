@@ -50,6 +50,9 @@ class USBJSONReader:
         self.logger = logger
         self._thread: Optional[threading.Thread] = None
         self._stop = threading.Event()
+        self._connected = False
+        self._last_error = None
+        self._last_success_time = None
 
     def detect_device(self) -> Optional[str]:
         """Auto-detects the serial device.
@@ -101,6 +104,26 @@ class USBJSONReader:
         if self._thread:
             self._thread.join(timeout=2)
 
+    def is_connected(self) -> bool:
+        """Returns True if the USB device is currently connected and reading data.
+
+        Returns:
+            bool: Connection status.
+        """
+        return self._connected
+
+    def get_status(self) -> Dict[str, Any]:
+        """Returns the current status of the USB reader.
+
+        Returns:
+            dict: Status information including connection state, last error, and last success time.
+        """
+        return {
+            'connected': self._connected,
+            'last_error': self._last_error,
+            'last_success_time': self._last_success_time
+        }
+
     def _run(self) -> None:
         """The main loop for the reader thread.
 
@@ -117,6 +140,8 @@ class USBJSONReader:
         if not port:
             if self.logger:
                 self.logger.error('No serial device found for USB JSON reader')
+            self._connected = False
+            self._last_error = 'No serial device found'
             return
 
         if self.logger:
@@ -129,6 +154,10 @@ class USBJSONReader:
                     ser = serial.Serial(port=port, baudrate=self.baudrate, timeout=2)
                     # Give device a moment
                     time.sleep(0.2)
+                    self._connected = True
+                    self._last_error = None
+                    if self.logger:
+                        self.logger.info(f'USBJSONReader connected to {port}')
 
                 line = ser.readline()
                 if not line:
@@ -152,8 +181,11 @@ class USBJSONReader:
                 normalized = self._normalize(payload)
                 if normalized and self.callback:
                     self.callback(normalized)
+                    self._last_success_time = time.time()
 
             except Exception as e:
+                self._connected = False
+                self._last_error = str(e)
                 if self.logger:
                     self.logger.error(f'USBJSONReader error: {e}')
                 # Backoff and try to reopen

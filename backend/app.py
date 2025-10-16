@@ -308,6 +308,15 @@ class SensorInfo(ObjectType):
     active_sensor = String()
 
 
+class USBSensorStatus(ObjectType):
+    """GraphQL type for USB sensor status information."""
+    name = String()
+    connected = String()
+    last_reading = Float()
+    seconds_since_last_reading = Float()
+    error = String()
+
+
 class HealthStatus(ObjectType):
     """GraphQL type for the overall health status of the application."""
     status = String()
@@ -315,6 +324,9 @@ class HealthStatus(ObjectType):
     database = String()
     sensor = Field(SensorInfo)
     recent_readings = Int()
+    usb_connection = String()
+    bme280_status = Field(USBSensorStatus)
+    mq135_status = Field(USBSensorStatus)
 
 
 # Time-based Statistics Types
@@ -469,7 +481,40 @@ class Query(ObjectType):
         try:
             stats = db.get_statistics(hours_back=1)
             sensor_info_dict = temperature_sensor.get_sensor_info() if temperature_sensor else {}
-            
+
+            # Get USB connection status
+            global usb_reader
+            usb_status = usb_reader.get_status() if usb_reader else {'connected': False, 'last_error': 'Not initialized', 'last_success_time': None}
+
+            # USB is truly connected only if we have successful readings
+            usb_truly_connected = usb_status['connected'] and usb_status['last_success_time'] is not None
+            usb_connected = "connected" if usb_truly_connected else "disconnected"
+
+            # Get BME280 sensor status
+            current_time = time.time()
+            bme280_last_reading = None
+            bme280_seconds_ago = None
+            bme280_connected_str = "disconnected"
+
+            if hasattr(app, 'usb_data_processor') and app.usb_data_processor:
+                if app.usb_data_processor.last_bme280_reading:
+                    bme280_last_reading = app.usb_data_processor.last_bme280_reading
+                    bme280_seconds_ago = current_time - bme280_last_reading
+                    # Consider online if reading within last 120 seconds
+                    bme280_connected_str = "online" if bme280_seconds_ago < 120 else "stale"
+
+            # Get MQ135 sensor status
+            mq135_last_reading = None
+            mq135_seconds_ago = None
+            mq135_connected_str = "disconnected"
+
+            if hasattr(app, 'usb_data_processor') and app.usb_data_processor:
+                if app.usb_data_processor.last_mq135_reading:
+                    mq135_last_reading = app.usb_data_processor.last_mq135_reading
+                    mq135_seconds_ago = current_time - mq135_last_reading
+                    # Consider online if reading within last 120 seconds
+                    mq135_connected_str = "online" if mq135_seconds_ago < 120 else "stale"
+
             return HealthStatus(
                 status="ok",
                 timestamp=datetime.now().astimezone().isoformat(),
@@ -480,7 +525,22 @@ class Query(ObjectType):
                     initialized="true" if sensor_info_dict.get('initialized') else "false",
                     active_sensor=str(sensor_info_dict.get('active_sensor', {}))
                 ),
-                recent_readings=stats.get('count', 0)
+                recent_readings=stats.get('count', 0),
+                usb_connection=usb_connected,
+                bme280_status=USBSensorStatus(
+                    name="BME280 (Temp/Humidity/Pressure)",
+                    connected=bme280_connected_str,
+                    last_reading=bme280_last_reading,
+                    seconds_since_last_reading=bme280_seconds_ago,
+                    error=usb_status['last_error'] if not usb_status['connected'] else None
+                ),
+                mq135_status=USBSensorStatus(
+                    name="MQ135 (Air Quality)",
+                    connected=mq135_connected_str,
+                    last_reading=mq135_last_reading,
+                    seconds_since_last_reading=mq135_seconds_ago,
+                    error=usb_status['last_error'] if not usb_status['connected'] else None
+                )
             )
         except Exception as e:
             logger.error(f"Health check failed: {e}")
@@ -489,7 +549,10 @@ class Query(ObjectType):
                 timestamp=datetime.now().astimezone().isoformat(),
                 database="error",
                 sensor=None,
-                recent_readings=0
+                recent_readings=0,
+                usb_connection="error",
+                bme280_status=None,
+                mq135_status=None
             )
 
     def resolve_current_temperature(self, info: Any) -> Optional[TemperatureReading]:
@@ -1207,6 +1270,8 @@ class USBDataProcessor:
         self.logger = logger
         self.error_count = 0
         self.max_errors = 10
+        self.last_bme280_reading = None  # Track last BME280 (temp/humidity/pressure) reading time
+        self.last_mq135_reading = None   # Track last MQ135 (air quality) reading time
         
     def process_sensor_data(self, data: Dict[str, Any]):
         """Processes a single data packet from the USB sensor.
@@ -1313,6 +1378,9 @@ class USBDataProcessor:
                     pass
 
             # Store to database (controlled by unified throttling)
+            if temp_c is not None or humidity_pct is not None or pressure_hpa is not None:
+                self.last_bme280_reading = current_time
+
             if temp_c is not None:
                 db.add_temperature_reading(
                     temperature_c=temp_c,
@@ -1337,7 +1405,8 @@ class USBDataProcessor:
                     timestamp=timestamp
                 )
 
-            if air_data:
+            if air_data and air_data.get('co2_ppm') is not None:
+                self.last_mq135_reading = current_time
                 db.add_air_quality_reading(
                     data=air_data,
                     sensor_type='mq135_usb',
@@ -1346,7 +1415,7 @@ class USBDataProcessor:
                 )
 
             self.logger.info("Stored readings to database")
-            
+
             self.error_count = 0  # Reset error count on success
             
         except Exception as e:
@@ -1480,14 +1549,65 @@ def events() -> Response:
             except Exception as e:
                 print(f"Error sending initial data: {e}")
 
+            # Track last sensor status update
+            last_sensor_status_time = 0
+            sensor_status_interval = 1  # Send sensor status every 1 second
+
             while True:
                 try:
-                    data = sse_clients.get(timeout=get_throttle_interval())  # Much shorter timeout
+                    data = sse_clients.get(timeout=1)  # Check every 1 second for sensor status updates
                     yield f"data: {json.dumps(data)}\n\n"
                     sse_clients.task_done()
                 except:
                     # Send heartbeat to keep connection alive
-                    yield f"data: {json.dumps({'type': 'heartbeat', 'timestamp': time.time()})}\n\n"
+                    current_time = time.time()
+
+                    # Periodically send sensor status
+                    if current_time - last_sensor_status_time >= sensor_status_interval:
+                        try:
+                            global usb_reader
+                            usb_status = usb_reader.get_status() if usb_reader else {'connected': False, 'last_error': 'Not initialized', 'last_success_time': None}
+
+                            # Get sensor status
+                            bme280_connected = "disconnected"
+                            mq135_connected = "disconnected"
+                            bme280_seconds_ago = None
+                            mq135_seconds_ago = None
+
+                            if hasattr(app, 'usb_data_processor') and app.usb_data_processor:
+                                if app.usb_data_processor.last_bme280_reading:
+                                    bme280_seconds_ago = current_time - app.usb_data_processor.last_bme280_reading
+                                    bme280_connected = "online" if bme280_seconds_ago < 120 else "stale"
+
+                                if app.usb_data_processor.last_mq135_reading:
+                                    mq135_seconds_ago = current_time - app.usb_data_processor.last_mq135_reading
+                                    mq135_connected = "online" if mq135_seconds_ago < 120 else "stale"
+
+                            sensor_status_message = {
+                                'type': 'sensor_status',
+                                'timestamp': current_time,
+                                'data': {
+                                    'usb_connected': usb_status['connected'],
+                                    'usb_error': str(usb_status['last_error']) if usb_status['last_error'] else None,
+                                    'bme280': {
+                                        'status': bme280_connected,
+                                        'seconds_since_reading': bme280_seconds_ago
+                                    },
+                                    'mq135': {
+                                        'status': mq135_connected,
+                                        'seconds_since_reading': mq135_seconds_ago
+                                    }
+                                }
+                            }
+                            yield f"data: {json.dumps(sensor_status_message)}\n\n"
+                            last_sensor_status_time = current_time
+                        except Exception as e:
+                            logger.error(f"Error sending sensor status: {e}")
+                            import traceback
+                            logger.error(traceback.format_exc())
+                    else:
+                        # Regular heartbeat
+                        yield f"data: {json.dumps({'type': 'heartbeat', 'timestamp': current_time})}\n\n"
         except GeneratorExit:
             # Handle client disconnect gracefully
             logger.debug("SSE generator exiting due to client disconnect")
@@ -1543,16 +1663,17 @@ def initialize_application() -> bool:
         True if initialization was successful, False otherwise.
     """
     global temperature_sensor, humidity_sensor, scheduler, usb_reader
-    
+
     try:
         logger.info("Initializing database...")
         init_database()
-        
+
         # Initialize USB reader instead of mock sensors
         logger.info("Initializing USB JSON reader...")
         cfg = load_app_config()
         usb_cfg = cfg.get('usb', {})
         processor = USBDataProcessor(logger)
+        app.usb_data_processor = processor  # Store globally for health checks
         usb_reader = USBJSONReader(device=usb_cfg.get('port'), baudrate=usb_cfg.get('baudrate', 115200), callback=processor.process_sensor_data, logger=logger)
         usb_reader.start()
         logger.info("USB JSON reader started")

@@ -110,6 +110,28 @@
       50% { opacity: 0.5; }
     }
 
+    /* Dim data cards when sensors are offline */
+    .sensor-offline {
+      opacity: 0.5;
+      filter: grayscale(30%);
+      position: relative;
+    }
+
+    .sensor-offline::before {
+      content: '⚠ Last Known';
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(244, 67, 54, 0.8);
+      color: white;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      z-index: 10;
+    }
+
     .header {
       background: rgba(0, 0, 0, 0.3);
       padding: 20px;
@@ -617,19 +639,19 @@
   </div>
 
   <div class="container">
-      <!-- Row 1-2: Sensors Status & Total Readings (top), Air Quality below (spans both) -->
+      <!-- Row 1-2: BME280 & MQ135 Status (top), Air Quality below (spans both) -->
       <div class="metrics-row" style="grid-template-rows: auto auto;">
         <div class="metric-card-disabled glass" style="grid-column: 1; grid-row: 1;">
-          <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Status" role="img"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
-          <div class="metric-label">Sensors Status</div>
-          <div class="metric-value status-checking" id="sensorStatus">Checking...</div>
+          <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Ambiental" role="img"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+          <div class="metric-label" style="font-size: 0.85rem;">Ambiental</div>
+          <div class="metric-value status-checking" id="bme280Status" style="font-size: 0.9rem;">Checking...</div>
         </div>
         <div class="metric-card-disabled glass" style="grid-column: 2; grid-row: 1;">
-          <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Readings" role="img"><path fill="currentColor" d="M3 5h18v2H3zm0 6h12v2H3zm0 6h18v2H3z"/></svg></div>
-          <div class="metric-label">Total Readings</div>
-          <div class="metric-value" id="dataCount">--</div>
+          <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Air Quality" role="img"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
+          <div class="metric-label" style="font-size: 0.85rem;">Air Quality</div>
+          <div class="metric-value status-checking" id="mq135Status" style="font-size: 0.9rem;">Checking...</div>
         </div>
-        <div class="air-quality-card glass" style="cursor: pointer; grid-column: 1 / 3; grid-row: 2;" onclick="showMetricChart('co2', 'modal', this)">
+        <div class="air-quality-card glass" id="airQualityCard" style="cursor: pointer; grid-column: 1 / 3; grid-row: 2;" onclick="showMetricChart('co2', 'modal', this)">
           <!-- Header -->
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
             <div style="display: flex; align-items: center; gap: 10px;">
@@ -711,12 +733,12 @@
 
       <!-- Row 3: Temperature & Pressure -->
       <div class="metrics-row">
-<div class="metric-card glass temperature-card">
+<div class="metric-card glass temperature-card" id="temperatureCard">
           <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Temperature" role="img"><path fill="currentColor" d="M14 14.76V5a2 2 0 10-4 0v9.76A4 4 0 1014 14.76zM12 2a3 3 0 013 3v9.18a5 5 0 11-6 0V5a3 3 0 013-3z"/></svg></div>
           <div class="metric-label">Temperature <span class="unit-badge">°C</span></div>
           <div class="metric-value" id="currentTemp">--°C</div>
         </div>
-<div class="metric-card glass">
+<div class="metric-card glass" id="pressureCard">
           <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Pressure" role="img"><path fill="currentColor" d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm1 5h-2v6l5 3 1-1.73-4-2.27z"/></svg></div>
           <div class="metric-label">Pressure <span class="unit-badge">hPa</span></div>
           <div class="metric-value" id="currentPressure">-- hPa</div>
@@ -725,18 +747,18 @@
 
       <!-- Row 4-5: Humidity & Electricity Index (top), Electricity Meter below (spans both) -->
       <div class="metrics-row" style="grid-template-rows: auto auto;">
-<div class="metric-card glass humidity-card" style="grid-column: 1; grid-row: 1;">
+<div class="metric-card glass humidity-card" id="humidityCard" style="grid-column: 1; grid-row: 1;">
           <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Humidity" role="img"><path fill="currentColor" d="M12 2s7 7.58 7 12a7 7 0 11-14 0c0-4.42 7-12 7-12z"/></svg></div>
           <div class="metric-label">Humidity <span class="unit-badge">%</span></div>
           <div class="metric-value" id="currentHumidity">--%</div>
         </div>
-<div class="metric-card glass meter-card" style="grid-column: 2; grid-row: 1;">
+<div class="metric-card glass meter-card" id="electricityIndexCard" style="grid-column: 2; grid-row: 1;">
           <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Electricity" role="img"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
           <div class="metric-label">Electricity <span class="unit-badge">kWh</span></div>
           <div class="metric-value" id="currentMeterReading">----</div>
           <div class="metric-timestampUnix" id="meterTimestamp" style="font-size: 0.75rem; color: #888;">Last reading: --</div>
         </div>
-        <div class="electricity-card glass" style="grid-column: 1 / 3; grid-row: 2;">
+        <div class="electricity-card glass" id="electricityMeterCard" style="grid-column: 1 / 3; grid-row: 2;">
           <h3>Electricity Meter</h3>
           <div style="position: relative; width: 320px; height: 240px; margin: 0 auto 15px; overflow: hidden;">
             <img id="webcamImage" style="display: none; object-fit: cover; width: 100%; height: 100%;" />
@@ -745,7 +767,7 @@
               <div class="spinner-text">Capturing image...</div>
             </div>
             <div id="webcamPlaceholder" style="display: none; align-items: center; justify-content: center; width: fit-content; margin: 0 auto; width: 100%; height: 100%; background: rgba(255,255,255,0.1); color: #888; font-size: 0.9rem;">
-              📷 Capture failed
+              📷 Offline
             </div>
           </div>
           <div style="text-align: center; width: 100%; margin-bottom: 15px;">
@@ -996,24 +1018,78 @@ function formatHumidity(value) {
     }
 
     /**
-     * Updates the sensor status indicator on the UI.
-     * @param {string} status - The sensor status ('online', 'offline', 'checking').
+     * Updates individual sensor status indicators on the UI.
+     * @param {string} sensorId - The sensor element ID ('bme280Status' or 'mq135Status').
+     * @param {string} status - The sensor status ('online', 'offline', 'stale', 'disconnected', 'checking').
+     * @param {number} secondsSince - Seconds since last reading (optional).
      */
-    function updateSensorStatus(status) {
-      const sensorStatusEl = document.getElementById('sensorStatus');
+    function updateIndividualSensorStatus(sensorId, status, secondsSince) {
+      const sensorEl = document.getElementById(sensorId);
+      if (!sensorEl) return;
+
+      let displayText = '';
+      let className = 'metric-value';
 
       if (status === 'checking') {
-        sensorStatusEl.textContent = 'Checking...';
-        sensorStatusEl.className = 'metric-value status-checking';
-        currentData.connected = false;
+        displayText = 'Checking...';
+        className += ' status-checking';
       } else if (status === 'online') {
-        sensorStatusEl.textContent = 'Online';
-        sensorStatusEl.className = 'metric-value status-online';
-        currentData.connected = true;
+        displayText = 'Online';
+        className += ' status-online';
+      } else if (status === 'stale') {
+        displayText = secondsSince ? `Stale (${Math.floor(secondsSince)}s)` : 'Stale';
+        className += ' status-offline';
+      } else if (status === 'disconnected') {
+        displayText = 'Offline';
+        className += ' status-offline';
       } else {
-        sensorStatusEl.textContent = 'Offline';
-        sensorStatusEl.className = 'metric-value status-offline';
-        currentData.connected = false;
+        displayText = 'Offline';
+        className += ' status-offline';
+      }
+
+      sensorEl.textContent = displayText;
+      sensorEl.className = className + ' ' + (sensorId === 'bme280Status' ? 'bme280' : 'mq135');
+    }
+
+    /**
+     * Updates both sensor status indicators.
+     * @param {object} sensorData - Object containing bme280 and mq135 status data.
+     */
+    function updateSensorStatus(sensorData) {
+      if (sensorData.bme280) {
+        updateIndividualSensorStatus('bme280Status', sensorData.bme280.status, sensorData.bme280.seconds_since_reading);
+      }
+      if (sensorData.mq135) {
+        updateIndividualSensorStatus('mq135Status', sensorData.mq135.status, sensorData.mq135.seconds_since_reading);
+      }
+
+      // Update global connected state based on either sensor being online
+      const bme280Online = sensorData.bme280 && sensorData.bme280.status === 'online';
+      const mq135Online = sensorData.mq135 && sensorData.mq135.status === 'online';
+      currentData.connected = bme280Online || mq135Online;
+
+      // Apply visual styling to data cards based on sensor status
+      const tempCard = document.getElementById('temperatureCard');
+      const humidityCard = document.getElementById('humidityCard');
+      const pressureCard = document.getElementById('pressureCard');
+      const airQualityCard = document.getElementById('airQualityCard');
+
+      // BME280 controls temperature, humidity, and pressure
+      if (bme280Online) {
+        if (tempCard) tempCard.classList.remove('sensor-offline');
+        if (humidityCard) humidityCard.classList.remove('sensor-offline');
+        if (pressureCard) pressureCard.classList.remove('sensor-offline');
+      } else {
+        if (tempCard) tempCard.classList.add('sensor-offline');
+        if (humidityCard) humidityCard.classList.add('sensor-offline');
+        if (pressureCard) pressureCard.classList.add('sensor-offline');
+      }
+
+      // MQ135 controls air quality
+      if (mq135Online) {
+        if (airQualityCard) airQualityCard.classList.remove('sensor-offline');
+      } else {
+        if (airQualityCard) airQualityCard.classList.add('sensor-offline');
       }
     }
 
@@ -1050,10 +1126,18 @@ function formatHumidity(value) {
       updateUnifiedTimestamp();
 
       // Update main temperature display
-      var elT = document.getElementById('currentTemp'); elT.textContent = formatTemperature(currentData.temperature); setSeverity(elT, severityFor('temp', currentData.temperature));
+      var elT = document.getElementById('currentTemp');
+      if (elT) {
+        elT.textContent = formatTemperature(currentData.temperature);
+        setSeverity(elT, severityFor('temp', currentData.temperature));
+      }
 
       // Update main humidity display
-      var elH = document.getElementById('currentHumidity'); elH.textContent = formatHumidity(currentData.humidity); setSeverity(elH, severityFor('humidity', currentData.humidity));
+      var elH = document.getElementById('currentHumidity');
+      if (elH) {
+        elH.textContent = formatHumidity(currentData.humidity);
+        setSeverity(elH, severityFor('humidity', currentData.humidity));
+      }
 
       // Update pressure display
       const pEl = document.getElementById('currentPressure');
@@ -1133,7 +1217,10 @@ function formatHumidity(value) {
       // Update stats
       var miT = document.getElementById('minTemp'); if (miT) { miT.textContent = formatTemperature(currentData.stats.minimum); setSeverity(miT, severityFor('temp', currentData.stats.minimum)); }
       var mxT = document.getElementById('maxTemp'); if (mxT) { mxT.textContent = formatTemperature(currentData.stats.maximum); setSeverity(mxT, severityFor('temp', currentData.stats.maximum)); }
-      document.getElementById('dataCount').textContent = currentData.stats.total_count || 0;
+      var dataCountEl = document.getElementById('dataCount');
+      if (dataCountEl) {
+        dataCountEl.textContent = currentData.stats.total_count || 0;
+      }
 
       // Update humidity stats
       var miH = document.getElementById('minHumidity'); if (miH) { miH.textContent = formatHumidity(currentData.humidityStats.minimum); setSeverity(miH, severityFor('humidity', currentData.humidityStats.minimum)); }
@@ -1474,19 +1561,20 @@ function formatHumidity(value) {
 
     function connectSSE() {
       console.log('Connecting to SSE...');
-      updateSensorStatus('checking');
+      // Set both sensors to checking status
+      updateIndividualSensorStatus('bme280Status', 'checking');
+      updateIndividualSensorStatus('mq135Status', 'checking');
+
       if (eventSource) {
         eventSource.close();
       }
-
-      updateSensorStatus('checking');
 
       try {
         eventSource = new EventSource('/events');
 
         eventSource.onopen = function() {
-          console.log('SSE connection opened');
-          updateSensorStatus('online');
+          console.log('SSE connection opened - waiting for sensor status updates...');
+          // Don't immediately mark as online - wait for actual sensor_status messages
         };
 
         eventSource.onmessage = function(event) {
@@ -1595,6 +1683,13 @@ function formatHumidity(value) {
               updateDisplay();
       updateUnifiedTimestamp();
 
+            } else if (data.type === 'sensor_status' && data.data) {
+              // Handle sensor status updates from backend
+              console.log('Sensor status update:', data.data);
+              updateSensorStatus(data.data);
+            } else if (data.type === 'connected' || data.type === 'heartbeat') {
+              // Connection established or heartbeat - sensors are checking
+              // Status will be updated by sensor_status messages
             }
 
           } catch (error) {
@@ -1605,7 +1700,9 @@ function formatHumidity(value) {
         eventSource.onerror = function(error) {
           console.error('SSE error:', error);
           console.log('SSE readyState:', eventSource.readyState);
-          updateSensorStatus('offline');
+          // Mark both sensors as offline when SSE connection fails
+          updateIndividualSensorStatus('bme280Status', 'disconnected');
+          updateIndividualSensorStatus('mq135Status', 'disconnected');
 
           // Attempt to reconnect after 3 seconds
           setTimeout(function() {
@@ -1618,7 +1715,8 @@ function formatHumidity(value) {
 
       } catch (error) {
         console.error('Failed to create SSE connection:', error);
-        updateSensorStatus('offline');
+        updateIndividualSensorStatus('bme280Status', 'disconnected');
+        updateIndividualSensorStatus('mq135Status', 'disconnected');
         updateDisplay();
       updateUnifiedTimestamp();
       }
@@ -1709,19 +1807,30 @@ async function initialize() {
           if (btn) btn.style.display = "block";
           const capSetBtn = document.getElementById("captureSettingsBtn");
           if (capSetBtn) capSetBtn.style.display = "block";
+          // Remove offline class when capture succeeds
+          const electricityIndexCard = document.getElementById('electricityIndexCard');
+          const electricityMeterCard = document.getElementById('electricityMeterCard');
+          if (electricityIndexCard) electricityIndexCard.classList.remove('sensor-offline');
+          if (electricityMeterCard) electricityMeterCard.classList.remove('sensor-offline');
         } else {
           placeholder.style.display = "flex";
-          placeholder.innerHTML = "❌ Capture failed<br><small>" + (data.error || "Unknown error") + "</small>";
-          // statusEl.textContent = "Capture failed"; // Removed
-          // statusEl.style.color = "#f44336"; // Removed
+          placeholder.innerHTML = "📷 Offline";
+          // Mark electricity cards as offline
+          const electricityIndexCard = document.getElementById('electricityIndexCard');
+          const electricityMeterCard = document.getElementById('electricityMeterCard');
+          if (electricityIndexCard) electricityIndexCard.classList.add('sensor-offline');
+          if (electricityMeterCard) electricityMeterCard.classList.add('sensor-offline');
         }
       })
       .catch(error => {
         loading.style.display = "none";
         placeholder.style.display = "flex";
-        placeholder.innerHTML = "❌ Connection error";
-        // statusEl.textContent = "Network error" + error; // Removed
-        // statusEl.style.color = "#f44336"; // Removed
+        placeholder.innerHTML = "📷 Offline";
+        // Mark electricity cards as offline
+        const electricityIndexCard = document.getElementById('electricityIndexCard');
+        const electricityMeterCard = document.getElementById('electricityMeterCard');
+        if (electricityIndexCard) electricityIndexCard.classList.add('sensor-offline');
+        if (electricityMeterCard) electricityMeterCard.classList.add('sensor-offline');
       });
     }
 
@@ -1768,19 +1877,30 @@ async function initialize() {
             if (data.success && data.image) {
               img.src = data.image;
               img.style.display = "block";
+              // Remove offline class when capture succeeds
+              const electricityIndexCard = document.getElementById('electricityIndexCard');
+              const electricityMeterCard = document.getElementById('electricityMeterCard');
+              if (electricityIndexCard) electricityIndexCard.classList.remove('sensor-offline');
+              if (electricityMeterCard) electricityMeterCard.classList.remove('sensor-offline');
             } else {
               placeholder.style.display = "flex";
-              placeholder.innerHTML = "❌ Capture failed<br><small>" + (data.error || "Unknown error") + "</small>";
-              // statusEl.textContent = "Capture with settings failed"; // Removed
-              // statusEl.style.color = "#f44336"; // Removed
+              placeholder.innerHTML = "📷 Offline";
+              // Mark electricity cards as offline
+              const electricityIndexCard = document.getElementById('electricityIndexCard');
+              const electricityMeterCard = document.getElementById('electricityMeterCard');
+              if (electricityIndexCard) electricityIndexCard.classList.add('sensor-offline');
+              if (electricityMeterCard) electricityMeterCard.classList.add('sensor-offline');
             }
           })
           .catch(err => {
             loading.style.display = "none";
             placeholder.style.display = "flex";
-            placeholder.innerHTML = "❌ Connection error";
-            // statusEl.textContent = "Network error during capture"; // Removed
-            // statusEl.style.color = "#f44336"; // Removed
+            placeholder.innerHTML = "📷 Offline";
+            // Mark electricity cards as offline
+            const electricityIndexCard = document.getElementById('electricityIndexCard');
+            const electricityMeterCard = document.getElementById('electricityMeterCard');
+            if (electricityIndexCard) electricityIndexCard.classList.add('sensor-offline');
+            if (electricityMeterCard) electricityMeterCard.classList.add('sensor-offline');
           });
         });
       }
