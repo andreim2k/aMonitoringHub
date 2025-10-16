@@ -2021,28 +2021,24 @@ async function initialize() {
             }
           },
           scales: {
-            xAxes: [{
-              gridLines: { color: 'rgba(255,255,255,0.1)' },
-              ticks: { fontColor: '#b3b3b3', maxTicksLimit: 8 }
-            }],
-            yAxes: [
-              {
-                id: 'y-aqi',
-                type: 'linear',
-                position: 'left',
-                gridLines: { color: 'rgba(102,187,106,0.2)' },
-                ticks: { fontColor: '#66bb6a', beginAtZero: true },
-                scaleLabel: { display: true, labelString: 'AQI', fontColor: '#66bb6a' }
-              },
-              {
-                id: 'y-gas',
-                type: 'linear',
-                position: 'right',
-                gridLines: { display: false },
-                ticks: { fontColor: '#b3b3b3', beginAtZero: true },
-                scaleLabel: { display: true, labelString: 'ppm', fontColor: '#b3b3b3' }
-              }
-            ]
+            x: {
+              grid: { color: 'rgba(255,255,255,0.1)' },
+              ticks: { color: '#b3b3b3', maxTicksLimit: 8 }
+            },
+            'y-aqi': {
+              type: 'linear',
+              position: 'left',
+              grid: { color: 'rgba(102,187,106,0.2)' },
+              ticks: { color: '#66bb6a', beginAtZero: true },
+              title: { display: true, text: 'AQI', color: '#66bb6a' }
+            },
+            'y-gas': {
+              type: 'linear',
+              position: 'right',
+              grid: { display: false },
+              ticks: { color: '#b3b3b3', beginAtZero: true },
+              title: { display: true, text: 'ppm', color: '#b3b3b3' }
+            }
           }
         };
       }
@@ -2065,14 +2061,14 @@ async function initialize() {
           }
         },
         scales: {
-          xAxes: [{
-            gridLines: { color: 'rgba(255,255,255,0.1)' },
-            ticks: { fontColor: '#b3b3b3', maxTicksLimit: 8 }
-          }],
-          yAxes: [{
-            gridLines: { color: 'rgba(255,255,255,0.1)' },
-            ticks: { fontColor: '#b3b3b3' }
-          }]
+          x: {
+            grid: { color: 'rgba(255,255,255,0.1)' },
+            ticks: { color: '#b3b3b3', maxTicksLimit: 8 }
+          },
+          y: {
+            grid: { color: 'rgba(255,255,255,0.1)' },
+            ticks: { color: '#b3b3b3' }
+          }
         }
       };
     }
