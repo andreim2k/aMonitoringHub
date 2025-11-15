@@ -102,14 +102,18 @@ logger = logging.getLogger(__name__)
 
 # Flask application setup
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'temperature-monitoring-graphql-2025'
+# Use environment variable for secret key, generate secure fallback if not set
+app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', os.urandom(32).hex())
 
-# Enable CORS
+# Enable CORS with restricted origins
+allowed_origins = os.environ.get('ALLOWED_ORIGINS', 'http://localhost:5000').split(',')
 CORS(app, resources={
     r"/*": {
-        "origins": "*",
+        "origins": allowed_origins,
         "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization", "Cache-Control"]
+        "allow_headers": ["Content-Type", "Authorization", "Cache-Control"],
+        "supports_credentials": True,
+        "max_age": 3600
     }
 })
 
@@ -1784,7 +1788,7 @@ def capture_webcam() -> Response:
             "contrast": 0,
             "saturation": 0,
             "exposure": 300,
-            "gain": 6,
+            "gain": 8,
             "special_effect": 1,
             "wb_mode": 0,
             "hmirror": False,
@@ -1878,12 +1882,13 @@ def run_ocr() -> Response:
         # Try Gemini OCR
         try:
             gemini_config = config.get('ocr', {}).get('engines', {}).get('gemini', {})
-            api_key = gemini_config.get('api_key')
+            # Prioritize environment variable over config file for security
+            api_key = os.environ.get('GEMINI_API_KEY') or gemini_config.get('api_key')
             model = gemini_config.get('model', 'gemini-2.5-flash-lite')
             prompt = gemini_config.get('prompt', 'Extract only the numbers from this image.')
             
             if not api_key:
-                raise Exception("Gemini API key not configured")
+                raise Exception("Gemini API key not configured. Set GEMINI_API_KEY environment variable.")
             
             # Prepare Gemini API request
             url = f'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}'
