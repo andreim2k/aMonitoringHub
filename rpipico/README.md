@@ -4,10 +4,21 @@ This directory contains MicroPython scripts to test BME280 and MQ135 sensors wit
 
 ## Files
 
-- `sensor_test.py` - Basic sensor connectivity test
+### Main Scripts
+- `main.py` - Auto-boot JSON sensor monitor (runs automatically on Pico boot)
 - `advanced_sensor_test.py` - Complete functionality test with detailed readings
-- `bme280.py` - Full BME280 sensor library
-- `README.md` - This file
+- `sensor_test.py` - Basic sensor connectivity test
+- `json_monitor.py` - Manual JSON monitoring script
+- `i2c_scanner.py` - I2C bus scanner utility
+
+### Library Modules (`lib/` directory)
+- `lib/bme280.py` - BME280 sensor driver library
+- `lib/mq135.py` - MQ135 air quality sensor driver library
+- `lib/config.py` - Centralized configuration constants (I2C pins, calibration values)
+- `lib/__init__.py` - Library package initialization
+
+### Configuration
+All sensor configuration (I2C pins, calibration values) is centralized in `lib/config.py`. The canonical I2C configuration uses I2C1 with SDA=GP2 and SCL=GP3.
 
 ## Hardware Requirements
 
@@ -24,12 +35,22 @@ This directory contains MicroPython scripts to test BME280 and MQ135 sensors wit
 ## Wiring Connections
 
 ### BME280 (I2C)
+**Canonical Configuration (I2C1):**
 ```
 BME280    Raspberry Pi Pico
 VCC   →   3.3V (Pin 36)
 GND   →   GND (Pin 38)
-SDA   →   GP4 (Pin 6)
-SCL   →   GP5 (Pin 7)
+SDA   →   GP2 (Pin 4) - I2C1 SDA
+SCL   →   GP3 (Pin 5) - I2C1 SCL
+```
+
+**Alternative Configuration (I2C0):**
+```
+BME280    Raspberry Pi Pico
+VCC   →   3.3V (Pin 36)
+GND   →   GND (Pin 38)
+SDA   →   GP4 (Pin 6) - I2C0 SDA
+SCL   →   GP5 (Pin 7) - I2C0 SCL
 ```
 
 ### MQ135 (Analog)
@@ -39,6 +60,8 @@ VCC   →   5V (Pin 40) or 3.3V (Pin 36)
 GND   →   GND (Pin 38)
 A0    →   GP28 (Pin 34) - ADC2
 ```
+
+**Note:** The canonical I2C configuration uses I2C1 with SDA=GP2 and SCL=GP3. This is the standard configuration used in `main.py` and documented in `lib/config.py`.
 
 ## Running the Tests
 

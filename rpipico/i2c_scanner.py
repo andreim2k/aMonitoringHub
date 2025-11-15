@@ -92,7 +92,9 @@ for config_num, (bus, sda, scl, description) in enumerate(i2c_configs, 1):
                                     print(f"           >>> CONFIRMED BMP280! Chip ID: 0x{chip_id:02X}")
                                 else:
                                     print(f"           >>> Unknown chip ID: 0x{chip_id:02X}")
-                            except:
+                            except OSError:
+                                print(f"           >>> Cannot read chip ID (I/O error)")
+                            except Exception:
                                 print(f"           >>> Cannot read chip ID")
                         
                         found_devices.append((bus, sda, scl, addr, device_name, freq))

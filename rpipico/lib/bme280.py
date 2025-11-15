@@ -1,10 +1,13 @@
 """
-Corrected BME280 Library for I2C1
-Fixed for actual wiring: SDA=GP2, SCL=GP3 using I2C1
+BME280 MicroPython Library
+Simple library for reading temperature, humidity, and pressure from BME280 sensor
 """
 
 import time
 from machine import I2C
+
+# Float comparison epsilon
+EPSILON = 1e-6
 
 class BME280:
     def __init__(self, i2c, address=0x76):
@@ -14,7 +17,7 @@ class BME280:
         # Verify chip ID
         chip_id = self._read_register(0xD0)
         if chip_id != 0x60:
-            raise Exception(f"Invalid chip ID: 0x{chip_id:02X}, expected 0x60")
+            raise ValueError(f"Invalid chip ID: 0x{chip_id:02X}, expected 0x60")
         
         # Reset sensor
         self._write_register(0xE0, 0xB6)
@@ -114,7 +117,8 @@ class BME280:
         var1 = (self.dig_P3 * var1 * var1 / 524288.0 + self.dig_P2 * var1) / 524288.0
         var1 = (1.0 + var1 / 32768.0) * self.dig_P1
         
-        if var1 == 0:
+        # Fix float comparison: use epsilon instead of == 0
+        if abs(var1) < EPSILON:
             pressure = 0
         else:
             pressure = 1048576.0 - raw_press
@@ -155,3 +159,4 @@ class BME280:
     def read_all(self):
         """Read all sensor values"""
         return self.read_compensated_data()
+

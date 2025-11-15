@@ -126,7 +126,9 @@ print(f"BME280 (I2C):     {bme280_status}")
 try:
     test_read = mq135_adc.read_u16()
     mq135_status = "✓ Connected"
-except:
+except OSError:
+    mq135_status = "✗ Not Found (I/O error)"
+except Exception:
     mq135_status = "✗ Not Found"
 print(f"MQ135 (ADC):      {mq135_status}")
 
