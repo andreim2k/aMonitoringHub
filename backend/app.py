@@ -74,6 +74,7 @@ from usb_json_reader import USBJSONReader
 
 # Configure logging (use config.json instead of .env)
 log_level = app_config.get('app', {}).get('log_level', 'ERROR').upper()
+# Ensure USBJSONReader health checks are visible (use WARNING level minimum for health checks)
 logging.basicConfig(
     level=getattr(logging, log_level, logging.ERROR),
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -82,6 +83,13 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
+
+# Set USBJSONReader logger to WARNING level to ensure health check messages are visible
+# This ensures health check warnings are logged even when app log level is ERROR
+_usb_logger = logging.getLogger(__name__ if '__main__' in __name__ else 'usb_json_reader')
+_usb_logger.setLevel(logging.WARNING)
+# Also set for the module name
+logging.getLogger('usb_json_reader').setLevel(logging.WARNING)
 
 # Enforce ERROR level on root and common noisy libraries
 _root_logger = logging.getLogger()
@@ -1678,9 +1686,12 @@ def initialize_application() -> bool:
         usb_cfg = cfg.get('usb', {})
         processor = USBDataProcessor(logger)
         app.usb_data_processor = processor  # Store globally for health checks
-        usb_reader = USBJSONReader(device=usb_cfg.get('port'), baudrate=usb_cfg.get('baudrate', 115200), callback=processor.process_sensor_data, logger=logger)
+        # Create USB reader with logger that has WARNING level set
+        usb_logger = logging.getLogger('USBJSONReader')
+        usb_logger.setLevel(logging.WARNING)
+        usb_reader = USBJSONReader(device=usb_cfg.get('port'), baudrate=usb_cfg.get('baudrate', 115200), callback=processor.process_sensor_data, logger=usb_logger)
         usb_reader.start()
-        logger.info("USB JSON reader started")
+        logger.info("USB JSON reader started with health check monitoring")
         
         # Keep original sensor objects for compatibility but they won't be used
         logger.info("Initializing fallback sensors...")
