@@ -1299,18 +1299,30 @@ class USBDataProcessor:
             current_time = time.time()
             timestamp = datetime.fromtimestamp(current_time, tz=timezone.utc)
 
-            # Use unified throttling system
-            if should_throttle():
-                return
-
-            # Update throttle time for all operations
-            update_throttle_time()
-
-            # Extract data
+            # IMPORTANT: Update timestamps FIRST, even if throttled
+            # This ensures health checks reflect data reception, not just processing
+            # Extract data to check what sensors are present
             temp_c = data.get('temperature_c')
             humidity_pct = data.get('humidity_percent')
             pressure_hpa = data.get('pressure_hpa')
             air_data = data.get('air', {})
+            
+            # Update timestamps immediately when data is received (before throttling check)
+            # This prevents false stale detection when data is throttled
+            if temp_c is not None or humidity_pct is not None or pressure_hpa is not None:
+                self.last_bme280_reading = current_time
+            
+            if air_data and air_data.get('co2_ppm') is not None:
+                self.last_mq135_reading = current_time
+
+            # Use unified throttling system
+            if should_throttle():
+                return  # Skip processing but timestamps already updated above
+
+            # Update throttle time for all operations
+            update_throttle_time()
+
+            # Data already extracted above for timestamp updates
             
             # Send SSE updates for temperature
             if temp_c is not None:
@@ -1390,8 +1402,8 @@ class USBDataProcessor:
                     pass
 
             # Store to database (controlled by unified throttling)
-            if temp_c is not None or humidity_pct is not None or pressure_hpa is not None:
-                self.last_bme280_reading = current_time
+            # Note: Timestamps already updated above (before throttling check)
+            # This ensures health checks work even when data is throttled
 
             if temp_c is not None:
                 db.add_temperature_reading(
@@ -1418,7 +1430,7 @@ class USBDataProcessor:
                 )
 
             if air_data and air_data.get('co2_ppm') is not None:
-                self.last_mq135_reading = current_time
+                # Note: last_mq135_reading already updated above (before throttling check)
                 db.add_air_quality_reading(
                     data=air_data,
                     sensor_type='mq135_usb',
@@ -1689,7 +1701,12 @@ def initialize_application() -> bool:
         # Create USB reader with logger that has WARNING level set
         usb_logger = logging.getLogger('USBJSONReader')
         usb_logger.setLevel(logging.WARNING)
-        usb_reader = USBJSONReader(device=usb_cfg.get('port'), baudrate=usb_cfg.get('baudrate', 115200), callback=processor.process_sensor_data, logger=usb_logger)
+        # Ensure handlers are added if not present
+        if not usb_logger.handlers:
+            handler = logging.StreamHandler()
+            handler.setLevel(logging.WARNING)
+            usb_logger.addHandler(handler)
+        usb_reader = USBJSONReader(device=usb_cfg.get('port'), baudrate=usb_cfg.get('baudrate', 115200), callback=processor.process_sensor_data, logger=usb_logger, processor=processor)
         usb_reader.start()
         logger.info("USB JSON reader started with health check monitoring")
         

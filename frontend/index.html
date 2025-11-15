@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
@@ -94,20 +95,34 @@
       margin-right: 8px;
     }
 
-    .metric-value.status-online { color: #4caf50 !important; }
-    .metric-value.status-offline { color: #f44336 !important; }
+    .metric-value.status-online {
+      color: #4caf50 !important;
+    }
+
+    .metric-value.status-offline {
+      color: #f44336 !important;
+    }
+
     .metric-value.status-checking {
       color: #ff9800 !important;
       animation: pulse 1.5s infinite;
     }
+
     .status-connecting {
       color: #ffa726;
       animation: pulse 1.5s infinite;
     }
 
     @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.5;
+      }
     }
 
     /* Dim data cards when sensors are offline */
@@ -197,15 +212,22 @@
     }
 
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
     }
 
     .spinner-container {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center; width: fit-content; margin: 0 auto;
+      justify-content: center;
+      width: fit-content;
+      margin: 0 auto;
       position: absolute;
       top: 50%;
       left: 50%;
@@ -220,7 +242,8 @@
     }
 
     /* Row-based Layout Styles */
-    .metrics-row, .charts-row {
+    .metrics-row,
+    .charts-row {
       display: flex;
       margin-bottom: 20px;
       gap: 20px;
@@ -228,15 +251,21 @@
     }
 
     .metrics-row {
-      justify-content: center; width: fit-content; margin: 0 auto;
+      justify-content: center;
+      width: fit-content;
+      margin: 0 auto;
     }
 
     .charts-row {
-      justify-content: center; width: fit-content; margin: 0 auto;
+      justify-content: center;
+      width: fit-content;
+      margin: 0 auto;
     }
 
     .stats-row {
-      justify-content: center; width: fit-content; margin: 0 auto;
+      justify-content: center;
+      width: fit-content;
+      margin: 0 auto;
     }
 
     .metric-card {
@@ -245,8 +274,9 @@
       border-radius: 12px;
       padding: 20px;
       text-align: center;
-      
+
     }
+
     .metric-card-disabled {
       background: transparent;
       border: none;
@@ -254,9 +284,10 @@
       padding: 20px;
       text-align: center;
     }
+
     .stat-card {
       min-width: 0;
-      
+
     }
 
     .temperature-card {
@@ -276,7 +307,7 @@
       border: none;
       border-radius: 12px;
       padding: 20px;
-      
+
       min-width: 300px;
     }
 
@@ -306,7 +337,9 @@
     }
 
     .electricity-container {
-      justify-content: center; width: fit-content; margin: 0 auto;
+      justify-content: center;
+      width: fit-content;
+      margin: 0 auto;
     }
 
     .metric-icon {
@@ -315,21 +348,36 @@
     }
 
     .metric-label {
-      display: flex; align-items: center; gap: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
-    .unit-badge { display:inline-block; padding:2px 6px; font-size: 0.75rem; border-radius: 8px; background: rgba(255,255,255,0.1); color:#b3b3b3; }
+
+    .unit-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      font-size: 0.75rem;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #b3b3b3;
+    }
+
     .metric-label {
-      display: flex; align-items: center; gap: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
       font-size: 0.9rem;
       color: #b3b3b3;
       margin-bottom: 5px;
     }
+
     .metric-value {
       font-size: 1.5rem;
       font-weight: bold;
       color: #ffffff;
       margin-bottom: 3px;
     }
+
     .metric-timestampUnix {
       font-size: 0.7rem;
       color: #888;
@@ -338,9 +386,18 @@
     .metric-value {
       transition: color 0.2s ease-in-out;
     }
-    .metric-value.ok { color: #66bb6a; }
-    .metric-value.warn { color: #ffa726; }
-    .metric-value.bad { color: #ef5350; }
+
+    .metric-value.ok {
+      color: #66bb6a;
+    }
+
+    .metric-value.warn {
+      color: #ffa726;
+    }
+
+    .metric-value.bad {
+      color: #ef5350;
+    }
 
     .metric-value {
       font-size: 1.5rem;
@@ -356,7 +413,9 @@
 
     /* Responsive adjustments */
     @media (max-width: 768px) {
-      .metrics-row:nth-child(n+3), .charts-row {
+
+      .metrics-row:nth-child(n+3),
+      .charts-row {
         flex-direction: column;
         gap: 15px;
       }
@@ -367,13 +426,18 @@
         gap: 15px;
       }
 
-      .metric-card, .metric-card-disabled, .chart-card, .electricity-card {
+      .metric-card,
+      .metric-card-disabled,
+      .chart-card,
+      .electricity-card {
         max-width: none;
         min-width: auto;
       }
 
       .electricity-container {
-        justify-content: center; width: fit-content; margin: 0 auto;
+        justify-content: center;
+        width: fit-content;
+        margin: 0 auto;
       }
     }
 
@@ -385,7 +449,9 @@
 
     .chart-header {
       display: flex;
-      justify-content: center; width: fit-content; margin: 0 auto;
+      justify-content: center;
+      width: fit-content;
+      margin: 0 auto;
       align-items: center;
       margin-bottom: 15px;
     }
@@ -407,47 +473,101 @@
     .weather-metrics {
       display: flex;
       gap: 20px;
-      justify-content: center; width: fit-content; margin: 0 auto;
+      justify-content: center;
+      width: fit-content;
+      margin: 0 auto;
       flex-wrap: wrap;
     }
 
     .weather-metrics .card {
-      
+
       min-width: 250px;
       max-width: 350px;
     }
 
-    
-    .icon { display:inline-block; vertical-align:middle; opacity: 0.9; }
-    .metric-icon { display:flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:10px; background: linear-gradient(180deg, rgba(255,255,255,0.25), rgba(255,255,255,0.08)); box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 6px 20px rgba(0,0,0,0.25); margin-bottom: 8px; }
+
+    .icon {
+      display: inline-block;
+      vertical-align: middle;
+      opacity: 0.9;
+    }
+
+    .metric-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 10px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.08));
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25);
+      margin-bottom: 8px;
+    }
 
     /* Glass theme */
     .glass {
-      background: linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.06));
-      border: 1px solid rgba(255,255,255,0.15);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.06));
+      border: 1px solid rgba(255, 255, 255, 0.15);
       backdrop-filter: blur(16px) saturate(120%);
       -webkit-backdrop-filter: blur(16px) saturate(120%);
       border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.25);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.25);
     }
 
-    .metric-card, .metric-card-disabled, .stat-card, .chart-card, .electricity-card { position: relative; overflow:hidden; }
-    .metric-card::after, .metric-card-disabled::after, .stat-card::after, .chart-card::after, .electricity-card::after {
-      content: ""; position:absolute; inset:0; pointer-events:none;
-      background: radial-gradient(1200px 400px at -10% -20%, rgba(255,255,255,0.08), transparent 60%),
-                  radial-gradient(800px 300px at 110% 120%, rgba(255,255,255,0.06), transparent 60%);
+    .metric-card,
+    .metric-card-disabled,
+    .stat-card,
+    .chart-card,
+    .electricity-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric-card::after,
+    .metric-card-disabled::after,
+    .stat-card::after,
+    .chart-card::after,
+    .electricity-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(1200px 400px at -10% -20%, rgba(255, 255, 255, 0.08), transparent 60%),
+        radial-gradient(800px 300px at 110% 120%, rgba(255, 255, 255, 0.06), transparent 60%);
       mix-blend-mode: screen;
     }
 
-    .metric-card, .metric-card-disabled, .stat-card { padding: 18px; }
-    .metric-label { font-weight: 600; color: #d9d9e3; letter-spacing: 0.2px; }
-    .metric-value { font-size: 1.6rem; font-weight: 800; letter-spacing: 0.3px; }
-    .metric-timestampUnix { margin-top: 6px; color: #9aa0a6; font-size: 0.78rem; }
+    .metric-card,
+    .metric-card-disabled,
+    .stat-card {
+      padding: 18px;
+    }
 
-    .metric-card:hover, .stat-card:hover, .chart-card:hover, .electricity-card:hover {
+    .metric-label {
+      font-weight: 600;
+      color: #d9d9e3;
+      letter-spacing: 0.2px;
+    }
+
+    .metric-value {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+    }
+
+    .metric-timestampUnix {
+      margin-top: 6px;
+      color: #9aa0a6;
+      font-size: 0.78rem;
+    }
+
+    .metric-card:hover,
+    .stat-card:hover,
+    .chart-card:hover,
+    .electricity-card:hover {
       transform: translateY(-2px);
       transition: transform 140ms ease, box-shadow 140ms ease;
-      box-shadow: 0 14px 40px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
     }
 
     /* Air Quality grouped card styles */
@@ -462,7 +582,7 @@
     .air-quality-card:hover {
       border-left-color: #81c784 !important;
       transform: translateY(-3px) !important;
-      box-shadow: 0 16px 48px rgba(102,187,106,0.25), inset 0 1px 0 rgba(255,255,255,0.25) !important;
+      box-shadow: 0 16px 48px rgba(102, 187, 106, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
     }
 
     @media (max-width: 600) {
@@ -470,397 +590,851 @@
         grid-column: span 1 !important;
         min-width: auto !important;
       }
+
       .air-quality-card #currentAQI {
         font-size: 2rem !important;
       }
+
       .electricity-card {
         grid-column: span 1 !important;
       }
     }
 
-    .air-quality-card .gas-grid > div {
+    .air-quality-card .gas-grid>div {
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .air-quality-card .gas-grid > div:hover {
+    .air-quality-card .gas-grid>div:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
 
     /* Responsive grid */
-    .metrics-row, .charts-row { display: grid; gap: 16px; }
-    .metrics-row { grid-template-columns: repeat(2, 150px); margin-bottom: 18px; justify-content: center; max-width: 316px; margin-left: auto; margin-right: auto; }
-    .charts-row { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); margin-bottom: 18px; }
+    .metrics-row,
+    .charts-row {
+      display: grid;
+      gap: 16px;
+    }
+
+    .metrics-row {
+      grid-template-columns: repeat(2, 150px);
+      margin-bottom: 18px;
+      justify-content: center;
+      max-width: 316px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .charts-row {
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      margin-bottom: 18px;
+    }
+
     @media (max-width: 600px) {
-      .metric-value { font-size: 1.4rem; }
-      .charts-row { grid-template-columns: 1fr; }
+      .metric-value {
+        font-size: 1.4rem;
+      }
+
+      .charts-row {
+        grid-template-columns: 1fr;
+      }
     }
 
     /* Unify card background via .glass class */
-    .metric-card, .metric-card-disabled, .stat-card { background: none; border: none; }
-    .chart-card, .electricity-card { background: none; border: none; }
+    .metric-card,
+    .metric-card-disabled,
+    .stat-card {
+      background: none;
+      border: none;
+    }
 
-    .focus-ring:focus { outline: 2px solid rgba(255,255,255,0.35); outline-offset: 2px; }
+    .chart-card,
+    .electricity-card {
+      background: none;
+      border: none;
+    }
 
-/* Responsive/mobile fixes and alignment */
-.metric-card, .stat-card { min-width: 0; display: grid; grid-template-rows: auto auto auto; row-gap: 6px; }
-.metric-card .metric-icon, .metric-card .metric-label { display: inline-flex; align-items: center; }
-.metric-card .metric-icon { margin-bottom: 0; }
-.metric-card .metric-label { margin-left: 8px; }
-.metric-card .metric-value { align-self: start; }
-.metric-card .metric-timestampUnix { align-self: start; }
+    .focus-ring:focus {
+      outline: 2px solid rgba(255, 255, 255, 0.35);
+      outline-offset: 2px;
+    }
 
-.metric-card-disabled, .stat-card { min-width: 0; display: grid; grid-template-rows: auto auto auto; row-gap: 6px; }
-.metric-card-disabled .metric-icon, .metric-card .metric-label { display: inline-flex; align-items: center; }
-.metric-card-disabled .metric-icon { margin-bottom: 0; }
-.metric-card-disabled .metric-label { margin-left: 8px; }
-.metric-card-disabled .metric-value { align-self: start; }
-.metric-card-disabled .metric-timestampUnix { align-self: start; }
+    /* Responsive/mobile fixes and alignment */
+    .metric-card,
+    .stat-card {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: auto auto auto;
+      row-gap: 6px;
+    }
 
-/* Ensure uniform padding on small screens */
-@media (max-width: 600px) {
-  .container { padding: 10px; }
-  .metrics-row { grid-template-columns: 1fr; gap: 12px; }
-  .charts-row { grid-template-columns: 1fr; gap: 12px; }
-  .metric-card, .metric-card-disabled, .stat-card { padding: 14px; }
-}
+    .metric-card .metric-icon,
+    .metric-card .metric-label {
+      display: inline-flex;
+      align-items: center;
+    }
 
-/* Tablet two columns */
-@media (min-width: 600px) and (max-width: 1024px) {
-  .metrics-row { grid-template-columns: repeat(2, 1fr); }
-}
+    .metric-card .metric-icon {
+      margin-bottom: 0;
+    }
+
+    .metric-card .metric-label {
+      margin-left: 8px;
+    }
+
+    .metric-card .metric-value {
+      align-self: start;
+    }
+
+    .metric-card .metric-timestampUnix {
+      align-self: start;
+    }
+
+    .metric-card-disabled,
+    .stat-card {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: auto auto auto;
+      row-gap: 6px;
+    }
+
+    .metric-card-disabled .metric-icon,
+    .metric-card .metric-label {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .metric-card-disabled .metric-icon {
+      margin-bottom: 0;
+    }
+
+    .metric-card-disabled .metric-label {
+      margin-left: 8px;
+    }
+
+    .metric-card-disabled .metric-value {
+      align-self: start;
+    }
+
+    .metric-card-disabled .metric-timestampUnix {
+      align-self: start;
+    }
+
+    /* Ensure uniform padding on small screens */
+    @media (max-width: 600px) {
+      .container {
+        padding: 10px;
+      }
+
+      .metrics-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .charts-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .metric-card,
+      .metric-card-disabled,
+      .stat-card {
+        padding: 14px;
+      }
+    }
+
+    /* Tablet two columns */
+    @media (min-width: 600px) and (max-width: 1024px) {
+      .metrics-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
 
 
-/* Mobile: show three cards per row for triple rows (temp/humidity/pressure/CO2) */
-@media (max-width: 600px) {
-  .metrics-row.triple-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-  .metrics-row.triple-row .metric-card,
-  .metrics-row.triple-row .stat-card { padding: 10px; }
-  .metrics-row.triple-row .metric-label { font-size: 0.95rem; }
-  .metrics-row.triple-row .metric-value { font-size: 1.2rem; }
-  .metrics-row.triple-row .metric-timestampUnix { font-size: 0.7rem; }
-  .metrics-row.triple-row .metric-icon { width: 24px; height: 24px; }
-}
+    /* Mobile: show three cards per row for triple rows (temp/humidity/pressure/CO2) */
+    @media (max-width: 600px) {
+      .metrics-row.triple-row {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .metrics-row.triple-row .metric-card,
+      .metrics-row.triple-row .stat-card {
+        padding: 10px;
+      }
+
+      .metrics-row.triple-row .metric-label {
+        font-size: 0.95rem;
+      }
+
+      .metrics-row.triple-row .metric-value {
+        font-size: 1.2rem;
+      }
+
+      .metrics-row.triple-row .metric-timestampUnix {
+        font-size: 0.7rem;
+      }
+
+      .metrics-row.triple-row .metric-icon {
+        width: 24px;
+        height: 24px;
+      }
+    }
 
 
-/* Center content within metric cards */
-.metric-card, .stat-card { display: flex !important; flex-direction: column; align-items: center; text-align: center; }
-.metric-card .metric-icon { margin: 0 0 8px 0; align-self: center; }
-.metric-card .metric-label { margin-left: 0 !important; display: flex; align-items: center; gap: 8px; justify-content: center; width: fit-content; margin: 0 auto; width: 100%; }
-.metric-card .metric-value { align-self: center; }
-.metric-card .metric-timestampUnix { align-self: center; }
+    /* Center content within metric cards */
+    .metric-card,
+    .stat-card {
+      display: flex !important;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
 
-.metric-card-disabled, .stat-card { display: flex !important; flex-direction: column; align-items: center; text-align: center; }
-.metric-card-disabled .metric-icon { margin: 0 0 8px 0; align-self: center; }
-.metric-card-disabled .metric-label { margin-left: 0 !important; display: flex; align-items: center; gap: 8px; justify-content: center; width: fit-content; margin: 0 auto; width: 100%; }
-.metric-card-disabled .metric-value { align-self: center; }
-.metric-card-disabled .metric-timestampUnix { align-self: center; }
-/* Ensure badges sit nicely when centered */
-.unit-badge { align-self: center; }
+    .metric-card .metric-icon {
+      margin: 0 0 8px 0;
+      align-self: center;
+    }
+
+    .metric-card .metric-label {
+      margin-left: 0 !important;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: center;
+      width: fit-content;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .metric-card .metric-value {
+      align-self: center;
+    }
+
+    .metric-card .metric-timestampUnix {
+      align-self: center;
+    }
+
+    .metric-card-disabled,
+    .stat-card {
+      display: flex !important;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .metric-card-disabled .metric-icon {
+      margin: 0 0 8px 0;
+      align-self: center;
+    }
+
+    .metric-card-disabled .metric-label {
+      margin-left: 0 !important;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: center;
+      width: fit-content;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .metric-card-disabled .metric-value {
+      align-self: center;
+    }
+
+    .metric-card-disabled .metric-timestampUnix {
+      align-self: center;
+    }
+
+    /* Ensure badges sit nicely when centered */
+    .unit-badge {
+      align-self: center;
+    }
 
 
-  /* popup charts */
-  .chart-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; width: fit-content; margin: 0 auto; z-index: 9999; }
-  .chart-modal { width: min(92vw, 680px); height: min(70vh, 490px); background: linear-gradient(135deg, rgba(20,18,35,.98) 0%, rgba(35,30,70,.95) 50%, rgba(25,25,45,.98) 100%); border-radius: 14px; padding: 16px; box-shadow: 0 12px 40px rgba(0,0,0,.5); position: relative; display: flex; flex-direction: column; }
-  .chart-modal h3 { margin: 0 0 16px 0; color: #ffffff; font-size: 1.4rem; font-weight: 600; text-align: center; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-  .chart-modal .close-btn { position: absolute; top: 8px; right: 10px; background: transparent; border: none; color: #ccc; font-size: 20px; cursor: pointer; }
-  .chart-modal .time-period-container { display: flex; flex-direction: column; align-items: center; gap: 12px; margin: 12px auto; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 16px; padding: 16px 24px; width: fit-content; }
-  .chart-modal .time-period-selector { display: flex; justify-content: center; gap: 20px; flex-wrap: nowrap; }
-  .chart-modal .time-period-option { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
-  .chart-modal .time-period-option input[type="radio"] { appearance: none; width: 18px; height: 18px; border: 2px solid #7cb8ff; border-radius: 50%; background: rgba(255,255,255,0.05); cursor: pointer; position: relative; flex-shrink: 0; transition: all 0.2s ease; }
-  .chart-modal .time-period-option input[type="radio"]:hover { border-color: #90caf9; background: rgba(144,202,249,0.1); }
-  .chart-modal .time-period-option input[type="radio"]:checked { background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%); border-color: #64b5f6; box-shadow: 0 0 8px rgba(100,181,246,0.4); }
-  .chart-modal .time-period-option input[type="radio"]:checked::after { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 8px; height: 8px; background: white; border-radius: 50%; }
-  .chart-modal .time-period-option label { color: #ffffff; font-size: 0.95rem; font-weight: 500; cursor: pointer; user-select: none; }
-  .chart-modal .time-period-inputs { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
-  .chart-modal .time-period-inputs input, .chart-modal .time-period-inputs select { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.25); color: white; padding: 6px 12px; border-radius: 6px; font-size: 0.9rem; font-weight: 500; transition: all 0.2s ease; }
-  .chart-modal .time-period-inputs input:hover, .chart-modal .time-period-inputs select:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.35); }
-  .chart-modal .time-period-inputs input:focus, .chart-modal .time-period-inputs select:focus { outline: none; background: rgba(255,255,255,0.15); border-color: #64b5f6; box-shadow: 0 0 0 2px rgba(100,181,246,0.2); }
-  .chart-modal .time-period-inputs input { width: 70px; text-align: center; }
-  .chart-modal .time-period-inputs select { cursor: pointer; }
-  .chart-canvas-wrap { position: relative;  min-height: 240px; }
-  .chart-popover { position: fixed; display: none; pointer-events: none; z-index: 9998; width: 320px; height: 200px; background: rgba(20,18,35,.96); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 8px; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
-  .chart-popover h4 { margin: 0 0 4px 0; font-size: .9rem; color: #e0e0e0; text-align: center; }
-  .chart-popover .chart-canvas-wrap { width: 100%; height: calc(100% - 22px); }
-  @media (max-width: 600px) { .chart-popover { width: 280px; height: 180px; } }
+    /* popup charts */
+    .chart-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: fit-content;
+      margin: 0 auto;
+      z-index: 9999;
+    }
 
-  
-  /* pair grid tweak */
-  @media (min-width: 600px) { .metrics-row { grid-template-columns: repeat(2, minmax(200px, 280px)); } }
-  @media (min-width: 1100px) { .metrics-row { grid-template-columns: repeat(2, minmax(200px, 280px)); } }
+    .chart-modal {
+      width: min(92vw, 680px);
+      height: min(70vh, 490px);
+      background: linear-gradient(135deg, rgba(20, 18, 35, .98) 0%, rgba(35, 30, 70, .95) 50%, rgba(25, 25, 45, .98) 100%);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, .5);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chart-modal h3 {
+      margin: 0 0 16px 0;
+      color: #ffffff;
+      font-size: 1.4rem;
+      font-weight: 600;
+      text-align: center;
+      letter-spacing: 0.5px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .chart-modal .close-btn {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      background: transparent;
+      border: none;
+      color: #ccc;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .chart-modal .time-period-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin: 12px auto;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      padding: 16px 24px;
+      width: fit-content;
+    }
+
+    .chart-modal .time-period-selector {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: nowrap;
+    }
+
+    .chart-modal .time-period-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .chart-modal .time-period-option input[type="radio"] {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid #7cb8ff;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .chart-modal .time-period-option input[type="radio"]:hover {
+      border-color: #90caf9;
+      background: rgba(144, 202, 249, 0.1);
+    }
+
+    .chart-modal .time-period-option input[type="radio"]:checked {
+      background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%);
+      border-color: #64b5f6;
+      box-shadow: 0 0 8px rgba(100, 181, 246, 0.4);
+    }
+
+    .chart-modal .time-period-option input[type="radio"]:checked::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 8px;
+      height: 8px;
+      background: white;
+      border-radius: 50%;
+    }
+
+    .chart-modal .time-period-option label {
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .chart-modal .time-period-inputs {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .chart-modal .time-period-inputs input,
+    .chart-modal .time-period-inputs select {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .chart-modal .time-period-inputs input:hover,
+    .chart-modal .time-period-inputs select:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.35);
+    }
+
+    .chart-modal .time-period-inputs input:focus,
+    .chart-modal .time-period-inputs select:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.15);
+      border-color: #64b5f6;
+      box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.2);
+    }
+
+    .chart-modal .time-period-inputs input {
+      width: 70px;
+      text-align: center;
+    }
+
+    .chart-modal .time-period-inputs select {
+      cursor: pointer;
+    }
+
+    .chart-canvas-wrap {
+      position: relative;
+      min-height: 240px;
+    }
+
+    .chart-popover {
+      position: fixed;
+      display: none;
+      pointer-events: none;
+      z-index: 9998;
+      width: 320px;
+      height: 200px;
+      background: rgba(20, 18, 35, .96);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 8px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .4);
+    }
+
+    .chart-popover h4 {
+      margin: 0 0 4px 0;
+      font-size: .9rem;
+      color: #e0e0e0;
+      text-align: center;
+    }
+
+    .chart-popover .chart-canvas-wrap {
+      width: 100%;
+      height: calc(100% - 22px);
+    }
+
+    @media (max-width: 600px) {
+      .chart-popover {
+        width: 280px;
+        height: 180px;
+      }
+    }
 
 
-  /* compact mobile two-up overrides */
-  .chart-popover { display: none !important; }
-  @media (max-width: 420px) {
-    .container { padding: 8px; }
-    .metrics-row { grid-template-columns: 1fr; gap: 10px; }
-    .metric-card, .stat-card { padding: 12px; }
-    .metric-label { font-size: 1rem; }
-    .metric-value { font-size: 1.25rem; }
-    .metric-timestampUnix { font-size: 0.72rem; }
-    .icon { width: 18px; height: 18px; }
-  }
-  @media (min-width: 421px) and (max-width: 600px) {
-    .metrics-row { grid-template-columns: repeat(2, minmax(180px, 250px)); gap: 10px; }
-    .metric-card, .metric-card-disabled, .stat-card { padding: 12px; }
-    .metric-label { font-size: 1.05rem; }
-    .metric-value { font-size: 1.35rem; }
-    .metric-timestampUnix { font-size: 0.76rem; }
-  }
+    /* pair grid tweak */
+    @media (min-width: 600px) {
+      .metrics-row {
+        grid-template-columns: repeat(2, minmax(200px, 280px));
+      }
+    }
 
+    @media (min-width: 1100px) {
+      .metrics-row {
+        grid-template-columns: repeat(2, minmax(200px, 280px));
+      }
+    }
+
+
+    /* compact mobile two-up overrides */
+    .chart-popover {
+      display: none !important;
+    }
+
+    @media (max-width: 420px) {
+      .container {
+        padding: 8px;
+      }
+
+      .metrics-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .metric-card,
+      .stat-card {
+        padding: 12px;
+      }
+
+      .metric-label {
+        font-size: 1rem;
+      }
+
+      .metric-value {
+        font-size: 1.25rem;
+      }
+
+      .metric-timestampUnix {
+        font-size: 0.72rem;
+      }
+
+      .icon {
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    @media (min-width: 421px) and (max-width: 600px) {
+      .metrics-row {
+        grid-template-columns: repeat(2, minmax(180px, 250px));
+        gap: 10px;
+      }
+
+      .metric-card,
+      .metric-card-disabled,
+      .stat-card {
+        padding: 12px;
+      }
+
+      .metric-label {
+        font-size: 1.05rem;
+      }
+
+      .metric-value {
+        font-size: 1.35rem;
+      }
+
+      .metric-timestampUnix {
+        font-size: 0.76rem;
+      }
+    }
   </style>
-<style id="no-hover-status-readings">
-/* Conservative approach: Only disable hover effects for Status and Readings cards */
+  <style id="no-hover-status-readings">
+    /* Conservative approach: Only disable hover effects for Status and Readings cards */
 
 
-.electricity-card:hover,
-.electricity-card:active {
-    transform: none !important;
-    transition: none !important;
-}
-</style>
-<style id="kill-pressed-effect">
-/* KILL PRESSED BUTTON EFFECT FOR STATUS AND READINGS CARDS */
+    .electricity-card:hover,
+    .electricity-card:active {
+      transform: none !important;
+      transition: none !important;
+    }
+  </style>
+  <style id="kill-pressed-effect">
+    /* KILL PRESSED BUTTON EFFECT FOR STATUS AND READINGS CARDS */
 
-/* Force these cards to never move or change appearance */
-</style>
+    /* Force these cards to never move or change appearance */
+  </style>
 </head>
 
 <body>
   <div class="header">
     <h1>@MonitoringHub</h1>
     <p style="font-style: italic; color: #888; font-size: 0.9em;">Environmental sensors & climate insights</p>
-    <p style="font-style: italic; color: #666; font-size: 0.85em; margin-top: 4px;">Cabanele Mânz, Nr 326, Clopotiva, Râu de Mori, Hunedoara</p>
-    <div id="lastReadingTime" style="margin-top:8px;color:#90caf9;font-size:1.0rem;font-weight:600;">Last reading time: --</div>
+    <p style="font-style: italic; color: #666; font-size: 0.85em; margin-top: 4px;">Cabanele Mânz, Nr 326, Clopotiva,
+      Râu de Mori, Hunedoara</p>
+    <div id="lastReadingTime" style="margin-top:8px;color:#90caf9;font-size:1.0rem;font-weight:600;">Last reading time:
+      --</div>
     <!-- Connection status removed - using sensor status instead -->
   </div>
-    </div>
+  </div>
   </div>
 
   <div class="container">
-      <!-- Row 1-2: BME280 & MQ135 Status (top), Air Quality below (spans both) -->
-      <div class="metrics-row" style="grid-template-rows: auto auto;">
-        <div class="metric-card-disabled glass" style="grid-column: 1; grid-row: 1;">
-          <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Ambiental" role="img"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
-          <div class="metric-label" style="font-size: 0.85rem;">Ambiental</div>
-          <div class="metric-value status-checking" id="bme280Status" style="font-size: 0.9rem;">Checking...</div>
-        </div>
-        <div class="metric-card-disabled glass" style="grid-column: 2; grid-row: 1;">
-          <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Air Quality" role="img"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
-          <div class="metric-label" style="font-size: 0.85rem;">Air Quality</div>
-          <div class="metric-value status-checking" id="mq135Status" style="font-size: 0.9rem;">Checking...</div>
-        </div>
-        <div class="air-quality-card glass" id="airQualityCard" style="cursor: pointer; grid-column: 1 / 3; grid-row: 2;" onclick="showMetricChart('co2', 'modal', this)">
-          <!-- Header -->
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <div class="metric-icon" style="width: 32px; height: 32px;">
-                <svg class="icon" viewBox="0 0 24 24" width="24" height="24" aria-label="Air Quality" role="img">
-                  <path fill="currentColor" d="M7 7h3v3H7zm7 0h3v3h-3zM7 14h10v3H7z"/>
-                </svg>
-              </div>
-              <div>
-                <div class="metric-label" style="font-size: 1.1rem; font-weight: 700; margin: 0;">Air Quality</div>
-              </div>
-            </div>
-            <div style="font-size: 1.2rem; opacity: 0.6;">📊</div>
-          </div>
-
-          <!-- AQI Main Display -->
-          <div style="background: rgba(102,187,106,0.15); border-radius: 12px; padding: 16px; margin-bottom: 14px; text-align: center; border: 1px solid rgba(102,187,106,0.3);">
-            <div style="font-size: 0.8rem; color: #b3b3b3; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Air Quality Index</div>
-            <div id="currentAQI" style="font-size: 2.5rem; font-weight: 800; line-height: 1; margin-bottom: 6px; color: #66bb6a;">--</div>
-            <div id="airQualityStatus" style="font-weight: 600; font-size: 0.85rem; padding: 6px 12px; border-radius: 6px; display: inline-block; background: rgba(255,255,255,0.08);">--</div>
-          </div>
-
-          <!-- Gas Readings Row -->
-          <div class="gas-grid" style="display: flex; gap: 10px; justify-content: space-between; align-items: stretch;">
-            <div style="background: rgba(239,83,80,0.15); border-radius: 8px; padding: 14px 10px; text-align: center; border: 1px solid rgba(239,83,80,0.3); flex: 1;">
-              <div style="font-size: 0.75rem; color: #ef5350; font-weight: 600; margin-bottom: 6px;">CO₂</div>
-              <div id="currentCO2" class="metric-value" style="font-size: 1.25rem; font-weight: 700;">-- ppm</div>
-            </div>
-            <div style="background: rgba(66,165,245,0.15); border-radius: 8px; padding: 14px 10px; text-align: center; border: 1px solid rgba(66,165,245,0.3); flex: 1;">
-              <div style="font-size: 0.75rem; color: #42a5f5; font-weight: 600; margin-bottom: 6px;">NH₃</div>
-              <div id="currentNH3" class="metric-value" style="font-size: 1.25rem; font-weight: 700;">-- ppm</div>
-            </div>
-            <div style="background: rgba(255,167,38,0.15); border-radius: 8px; padding: 14px 10px; text-align: center; border: 1px solid rgba(255,167,38,0.3); flex: 1;">
-              <div style="font-size: 0.75rem; color: #ffa726; font-weight: 600; margin-bottom: 6px;">Alcohol</div>
-              <div id="currentAlcohol" class="metric-value" style="font-size: 1.25rem; font-weight: 700;">-- ppm</div>
-            </div>
-          </div>
-
-          <!-- Air Quality Legend -->
-          <div style="margin-top: 12px; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
-            <div style="font-size: 0.7rem; color: #b3b3b3; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; text-align: center;">Air Quality Thresholds</div>
-            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; font-size: 0.65rem; line-height: 1.4;">
-              <div style="text-align: center;">
-                <div style="color: #ef5350; font-weight: 600; margin-bottom: 2px;">CO₂</div>
-                <div style="color: #66bb6a;">≤800</div>
-                <div style="color: #ffa726;">800-1000</div>
-                <div style="color: #ef5350;">&gt;1000</div>
-              </div>
-              <div style="text-align: center;">
-                <div style="color: #42a5f5; font-weight: 600; margin-bottom: 2px;">NH₃</div>
-                <div style="color: #66bb6a;">≤50</div>
-                <div style="color: #ffa726;">50-100</div>
-                <div style="color: #ef5350;">&gt;100</div>
-              </div>
-              <div style="text-align: center;">
-                <div style="color: #ffa726; font-weight: 600; margin-bottom: 2px;">Alcohol</div>
-                <div style="color: #66bb6a;">≤100</div>
-                <div style="color: #ffa726;">100-300</div>
-                <div style="color: #ef5350;">&gt;300</div>
-              </div>
-            </div>
-            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 8px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.05);">
-              <div style="display: flex; align-items: center; gap: 3px;">
-                <div style="width: 10px; height: 10px; border-radius: 2px; background: #66bb6a;"></div>
-                <span style="font-size: 0.65rem; color: #e0e0e0;">Good</span>
-              </div>
-              <div style="display: flex; align-items: center; gap: 3px;">
-                <div style="width: 10px; height: 10px; border-radius: 2px; background: #ffa726;"></div>
-                <span style="font-size: 0.65rem; color: #e0e0e0;">Warning</span>
-              </div>
-              <div style="display: flex; align-items: center; gap: 3px;">
-                <div style="width: 10px; height: 10px; border-radius: 2px; background: #ef5350;"></div>
-                <span style="font-size: 0.65rem; color: #e0e0e0;">Bad</span>
-              </div>
-            </div>
-          </div>
-        </div>
+    <!-- Row 1-2: BME280 & MQ135 Status (top), Air Quality below (spans both) -->
+    <div class="metrics-row" style="grid-template-rows: auto auto;">
+      <div class="metric-card-disabled glass" style="grid-column: 1; grid-row: 1;">
+        <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Ambiental"
+            role="img">
+            <path fill="currentColor"
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+          </svg></div>
+        <div class="metric-label" style="font-size: 0.85rem;">Ambiental</div>
+        <div class="metric-value status-checking" id="bme280Status" style="font-size: 0.9rem;">Checking...</div>
       </div>
-
-      <!-- Row 3: Temperature & Pressure -->
-      <div class="metrics-row">
-<div class="metric-card glass temperature-card" id="temperatureCard">
-          <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Temperature" role="img"><path fill="currentColor" d="M14 14.76V5a2 2 0 10-4 0v9.76A4 4 0 1014 14.76zM12 2a3 3 0 013 3v9.18a5 5 0 11-6 0V5a3 3 0 013-3z"/></svg></div>
-          <div class="metric-label">Temperature <span class="unit-badge">°C</span></div>
-          <div class="metric-value" id="currentTemp">--°C</div>
-        </div>
-<div class="metric-card glass" id="pressureCard">
-          <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Pressure" role="img"><path fill="currentColor" d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm1 5h-2v6l5 3 1-1.73-4-2.27z"/></svg></div>
-          <div class="metric-label">Pressure <span class="unit-badge">hPa</span></div>
-          <div class="metric-value" id="currentPressure">-- hPa</div>
-        </div>
+      <div class="metric-card-disabled glass" style="grid-column: 2; grid-row: 1;">
+        <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Air Quality"
+            role="img">
+            <path fill="currentColor"
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+          </svg></div>
+        <div class="metric-label" style="font-size: 0.85rem;">Air Quality</div>
+        <div class="metric-value status-checking" id="mq135Status" style="font-size: 0.9rem;">Checking...</div>
       </div>
-
-      <!-- Row 4-5: Humidity & Electricity Index (top), Electricity Meter below (spans both) -->
-      <div class="metrics-row" style="grid-template-rows: auto auto;">
-<div class="metric-card glass humidity-card" id="humidityCard" style="grid-column: 1; grid-row: 1;">
-          <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Humidity" role="img"><path fill="currentColor" d="M12 2s7 7.58 7 12a7 7 0 11-14 0c0-4.42 7-12 7-12z"/></svg></div>
-          <div class="metric-label">Humidity <span class="unit-badge">%</span></div>
-          <div class="metric-value" id="currentHumidity">--%</div>
-        </div>
-<div class="metric-card glass meter-card" id="electricityIndexCard" style="grid-column: 2; grid-row: 1;">
-          <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Electricity" role="img"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
-          <div class="metric-label">Electricity <span class="unit-badge">kWh</span></div>
-          <div class="metric-value" id="currentMeterReading">----</div>
-          <div class="metric-timestampUnix" id="meterTimestamp" style="font-size: 0.75rem; color: #888;">Last reading: --</div>
-        </div>
-        <div class="electricity-card glass" id="electricityMeterCard" style="grid-column: 1 / 3; grid-row: 2;">
-          <h3>Electricity Meter</h3>
-          <div style="position: relative; width: 320px; height: 240px; margin: 0 auto 15px; overflow: hidden;">
-            <img id="webcamImage" style="display: none; object-fit: cover; width: 100%; height: 100%;" />
-            <div id="webcamLoading" class="spinner-container" style="display: flex;">
-              <div class="spinner"></div>
-              <div class="spinner-text">Capturing image...</div>
+      <div class="air-quality-card glass" id="airQualityCard" style="cursor: pointer; grid-column: 1 / 3; grid-row: 2;"
+        onclick="showMetricChart('co2', 'modal', this)">
+        <!-- Header -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="metric-icon" style="width: 32px; height: 32px;">
+              <svg class="icon" viewBox="0 0 24 24" width="24" height="24" aria-label="Air Quality" role="img">
+                <path fill="currentColor" d="M7 7h3v3H7zm7 0h3v3h-3zM7 14h10v3H7z" />
+              </svg>
             </div>
-            <div id="webcamPlaceholder" style="display: none; align-items: center; justify-content: center; width: fit-content; margin: 0 auto; width: 100%; height: 100%; background: rgba(255,255,255,0.1); color: #888; font-size: 0.9rem;">
-              📷 Offline
+            <div>
+              <div class="metric-label" style="font-size: 1.1rem; font-weight: 700; margin: 0;">Air Quality</div>
             </div>
           </div>
-          <div style="text-align: center; width: 100%; margin-bottom: 15px;">
-            <div id="webcamControls" class="em-controls" style="display:flex; flex-direction:column; gap:10px; align-items:center; justify-content:center; margin: 0 auto 10px;">
-              <div style="display:flex; align-items:center; gap:10px;">
-                <label for="flashToggle" style="color:#b3b3b3; font-size:0.9rem;">Flash</label>
-                <label style="position:relative; display:inline-block; width:46px; height:24px;">
-                  <input id="flashToggle" type="checkbox" checked style="opacity:0; width:0; height:0;">
-                  <span class="slider" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#777; transition:.2s; border-radius:24px;"></span>
-                  <span class="knob" style="position:absolute; left:2px; top:2px; width:20px; height:20px; background:#fff; border-radius:50%; transition:.2s;"></span>
-                </label>
-              </div>
-              <div style="display:flex; align-items:center; gap:10px; width:260px;">
-                <label for="gainSlider" style="color:#b3b3b3; font-size:0.9rem;">Gain</label>
-                 <input id="gainSlider" type="range" min="0" max="10" step="1" value="6" style="flex:1; accent-color:#4caf50;">
-                 <span id="gainValue" class="unit-badge">6</span>
-              </div>
+          <div style="font-size: 1.2rem; opacity: 0.6;">📊</div>
+        </div>
+
+        <!-- AQI Main Display -->
+        <div
+          style="background: rgba(102,187,106,0.15); border-radius: 12px; padding: 16px; margin-bottom: 14px; text-align: center; border: 1px solid rgba(102,187,106,0.3);">
+          <div
+            style="font-size: 0.8rem; color: #b3b3b3; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">
+            Air Quality Index</div>
+          <div id="currentAQI"
+            style="font-size: 2.5rem; font-weight: 800; line-height: 1; margin-bottom: 6px; color: #66bb6a;">--</div>
+          <div id="airQualityStatus"
+            style="font-weight: 600; font-size: 0.85rem; padding: 6px 12px; border-radius: 6px; display: inline-block; background: rgba(255,255,255,0.08);">
+            --</div>
+        </div>
+
+        <!-- Gas Readings Row -->
+        <div class="gas-grid" style="display: flex; gap: 10px; justify-content: space-between; align-items: stretch;">
+          <div
+            style="background: rgba(239,83,80,0.15); border-radius: 8px; padding: 14px 10px; text-align: center; border: 1px solid rgba(239,83,80,0.3); flex: 1;">
+            <div style="font-size: 0.75rem; color: #ef5350; font-weight: 600; margin-bottom: 6px;">CO₂</div>
+            <div id="currentCO2" class="metric-value" style="font-size: 1.25rem; font-weight: 700;">-- ppm</div>
+          </div>
+          <div
+            style="background: rgba(66,165,245,0.15); border-radius: 8px; padding: 14px 10px; text-align: center; border: 1px solid rgba(66,165,245,0.3); flex: 1;">
+            <div style="font-size: 0.75rem; color: #42a5f5; font-weight: 600; margin-bottom: 6px;">NH₃</div>
+            <div id="currentNH3" class="metric-value" style="font-size: 1.25rem; font-weight: 700;">-- ppm</div>
+          </div>
+          <div
+            style="background: rgba(255,167,38,0.15); border-radius: 8px; padding: 14px 10px; text-align: center; border: 1px solid rgba(255,167,38,0.3); flex: 1;">
+            <div style="font-size: 0.75rem; color: #ffa726; font-weight: 600; margin-bottom: 6px;">Alcohol</div>
+            <div id="currentAlcohol" class="metric-value" style="font-size: 1.25rem; font-weight: 700;">-- ppm</div>
+          </div>
+        </div>
+
+        <!-- Air Quality Legend -->
+        <div
+          style="margin-top: 12px; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
+          <div
+            style="font-size: 0.7rem; color: #b3b3b3; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; text-align: center;">
+            Air Quality Thresholds</div>
+          <div
+            style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; font-size: 0.65rem; line-height: 1.4;">
+            <div style="text-align: center;">
+              <div style="color: #ef5350; font-weight: 600; margin-bottom: 2px;">CO₂</div>
+              <div style="color: #66bb6a;">≤800</div>
+              <div style="color: #ffa726;">800-1000</div>
+              <div style="color: #ef5350;">&gt;1000</div>
             </div>
-            <button id="captureSettingsBtn" class="btn" style="margin: 5px auto; background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%); display: none;">Snapshot</button>
+            <div style="text-align: center;">
+              <div style="color: #42a5f5; font-weight: 600; margin-bottom: 2px;">NH₃</div>
+              <div style="color: #66bb6a;">≤50</div>
+              <div style="color: #ffa726;">50-100</div>
+              <div style="color: #ef5350;">&gt;100</div>
+            </div>
+            <div style="text-align: center;">
+              <div style="color: #ffa726; font-weight: 600; margin-bottom: 2px;">Alcohol</div>
+              <div style="color: #66bb6a;">≤100</div>
+              <div style="color: #ffa726;">100-300</div>
+              <div style="color: #ef5350;">&gt;300</div>
+            </div>
+          </div>
+          <div
+            style="display: flex; gap: 10px; justify-content: center; margin-top: 8px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.05);">
+            <div style="display: flex; align-items: center; gap: 3px;">
+              <div style="width: 10px; height: 10px; border-radius: 2px; background: #66bb6a;"></div>
+              <span style="font-size: 0.65rem; color: #e0e0e0;">Good</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 3px;">
+              <div style="width: 10px; height: 10px; border-radius: 2px; background: #ffa726;"></div>
+              <span style="font-size: 0.65rem; color: #e0e0e0;">Warning</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 3px;">
+              <div style="width: 10px; height: 10px; border-radius: 2px; background: #ef5350;"></div>
+              <span style="font-size: 0.65rem; color: #e0e0e0;">Bad</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-
-    <!-- Error Display -->
-    <div id="errorDisplay" style="display: none;"></div>
-
-    <!-- Loading Display -->
-    <div id="loadingDisplay" class="loading" style="display: none;">
-      Loading temperature data...
+    <!-- Row 3: Temperature & Pressure -->
+    <div class="metrics-row">
+      <div class="metric-card glass temperature-card" id="temperatureCard">
+        <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Temperature"
+            role="img">
+            <path fill="currentColor"
+              d="M14 14.76V5a2 2 0 10-4 0v9.76A4 4 0 1014 14.76zM12 2a3 3 0 013 3v9.18a5 5 0 11-6 0V5a3 3 0 013-3z" />
+          </svg></div>
+        <div class="metric-label">Temperature <span class="unit-badge">°C</span></div>
+        <div class="metric-value" id="currentTemp">--°C</div>
+      </div>
+      <div class="metric-card glass" id="pressureCard">
+        <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Pressure"
+            role="img">
+            <path fill="currentColor" d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm1 5h-2v6l5 3 1-1.73-4-2.27z" />
+          </svg></div>
+        <div class="metric-label">Pressure <span class="unit-badge">hPa</span></div>
+        <div class="metric-value" id="currentPressure">-- hPa</div>
+      </div>
     </div>
 
-    <!-- Footer -->
-    <footer style="text-align: center; padding-top: 0p; color: #888; font-size: 0.8rem; margin-top: 0px;">
-      <p>@MonitoringHub &copy; 2025. All rights reserved.</p>
-    </footer>
+    <!-- Row 4-5: Humidity & Electricity Index (top), Electricity Meter below (spans both) -->
+    <div class="metrics-row" style="grid-template-rows: auto auto;">
+      <div class="metric-card glass humidity-card" id="humidityCard" style="grid-column: 1; grid-row: 1;">
+        <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Humidity"
+            role="img">
+            <path fill="currentColor" d="M12 2s7 7.58 7 12a7 7 0 11-14 0c0-4.42 7-12 7-12z" />
+          </svg></div>
+        <div class="metric-label">Humidity <span class="unit-badge">%</span></div>
+        <div class="metric-value" id="currentHumidity">--%</div>
+      </div>
+      <div class="metric-card glass meter-card" id="electricityIndexCard" style="grid-column: 2; grid-row: 1;">
+        <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Electricity"
+            role="img">
+            <path fill="currentColor"
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+          </svg></div>
+        <div class="metric-label">Electricity <span class="unit-badge">kWh</span></div>
+        <div class="metric-value" id="currentMeterReading">----</div>
+        <div class="metric-timestampUnix" id="meterTimestamp" style="font-size: 0.75rem; color: #888;">Last reading: --
+        </div>
+      </div>
+      <div class="electricity-card glass" id="electricityMeterCard" style="grid-column: 1 / 3; grid-row: 2;">
+        <h3>Electricity Meter</h3>
+        <div style="position: relative; width: 320px; height: 240px; margin: 0 auto 15px; overflow: hidden;">
+          <img id="webcamImage" style="display: none; object-fit: cover; width: 100%; height: 100%;" />
+          <div id="webcamLoading" class="spinner-container" style="display: flex;">
+            <div class="spinner"></div>
+            <div class="spinner-text">Capturing image...</div>
+          </div>
+          <div id="webcamPlaceholder"
+            style="display: none; align-items: center; justify-content: center; width: fit-content; margin: 0 auto; width: 100%; height: 100%; background: rgba(255,255,255,0.1); color: #888; font-size: 0.9rem;">
+            📷 Offline
+          </div>
+        </div>
+        <div style="text-align: center; width: 100%; margin-bottom: 15px;">
+          <div id="webcamControls" class="em-controls"
+            style="display:flex; flex-direction:column; gap:10px; align-items:center; justify-content:center; margin: 0 auto 10px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <label for="flashToggle" style="color:#b3b3b3; font-size:0.9rem;">Flash</label>
+              <label style="position:relative; display:inline-block; width:46px; height:24px;">
+                <input id="flashToggle" type="checkbox" checked style="opacity:0; width:0; height:0;">
+                <span class="slider"
+                  style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:#777; transition:.2s; border-radius:24px;"></span>
+                <span class="knob"
+                  style="position:absolute; left:2px; top:2px; width:20px; height:20px; background:#fff; border-radius:50%; transition:.2s;"></span>
+              </label>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px; width:260px;">
+              <label for="gainSlider" style="color:#b3b3b3; font-size:0.9rem;">Gain</label>
+              <input id="gainSlider" type="range" min="0" max="10" step="1" value="8"
+                style="flex:1; accent-color:#4caf50;">
+              <span id="gainValue" class="unit-badge">8</span>
+            </div>
+          </div>
+          <button id="captureSettingsBtn" class="btn"
+            style="margin: 5px auto; background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%); display: none;">Snapshot</button>
+        </div>
+      </div>
+    </div>
   </div>
 
 
-    <!-- Popup containers -->
-    <div id="chartModalOverlay" class="chart-modal-overlay" role="dialog" aria-modal="true">
-      <div class="chart-modal">
-        <button class="close-btn" id="chartModalClose" aria-label="Close">×</button>
-        <h3 id="chartModalTitle">History</h3>
-        <div class="time-period-container">
-          <div class="time-period-selector">
-            <div class="time-period-option">
-              <input type="radio" id="periodRecent" name="chartPeriod" value="recent" checked>
-              <label for="periodRecent">Recent</label>
-            </div>
-            <div class="time-period-option">
-              <input type="radio" id="periodYear" name="chartPeriod" value="year">
-              <label for="periodYear">Years</label>
-            </div>
-            <div class="time-period-option">
-              <input type="radio" id="periodMonth" name="chartPeriod" value="month">
-              <label for="periodMonth">Months</label>
-            </div>
-            <div class="time-period-option">
-              <input type="radio" id="periodDay" name="chartPeriod" value="day">
-              <label for="periodDay">Days</label>
-            </div>
+  <!-- Error Display -->
+  <div id="errorDisplay" style="display: none;"></div>
+
+  <!-- Loading Display -->
+  <div id="loadingDisplay" class="loading" style="display: none;">
+    Loading temperature data...
+  </div>
+
+  <!-- Footer -->
+  <footer style="text-align: center; padding-top: 0p; color: #888; font-size: 0.8rem; margin-top: 0px;">
+    <p>@MonitoringHub &copy; 2025. All rights reserved.</p>
+  </footer>
+  </div>
+
+
+  <!-- Popup containers -->
+  <div id="chartModalOverlay" class="chart-modal-overlay" role="dialog" aria-modal="true">
+    <div class="chart-modal">
+      <button class="close-btn" id="chartModalClose" aria-label="Close">×</button>
+      <h3 id="chartModalTitle">History</h3>
+      <div class="time-period-container">
+        <div class="time-period-selector">
+          <div class="time-period-option">
+            <input type="radio" id="periodRecent" name="chartPeriod" value="recent" checked>
+            <label for="periodRecent">Recent</label>
           </div>
-          <div class="time-period-inputs" id="timePeriodInputs" style="display: none;">
-            <input type="number" id="modalYearInput" placeholder="Year" min="2020" max="2030" style="display: none;">
-            <select id="modalMonthInput" style="display: none;">
-              <option value="1">Jan</option><option value="2">Feb</option><option value="3">Mar</option><option value="4">Apr</option>
-              <option value="5">May</option><option value="6">Jun</option><option value="7">Jul</option><option value="8">Aug</option>
-              <option value="9">Sep</option><option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option>
-            </select>
-            <input type="number" id="modalDayInput" placeholder="Day" min="1" max="31" style="display: none;">
+          <div class="time-period-option">
+            <input type="radio" id="periodYear" name="chartPeriod" value="year">
+            <label for="periodYear">Years</label>
+          </div>
+          <div class="time-period-option">
+            <input type="radio" id="periodMonth" name="chartPeriod" value="month">
+            <label for="periodMonth">Months</label>
+          </div>
+          <div class="time-period-option">
+            <input type="radio" id="periodDay" name="chartPeriod" value="day">
+            <label for="periodDay">Days</label>
           </div>
         </div>
-        <div class="chart-canvas-wrap"><canvas id="chartModalCanvas"></canvas></div>
+        <div class="time-period-inputs" id="timePeriodInputs" style="display: none;">
+          <input type="number" id="modalYearInput" placeholder="Year" min="2020" max="2030" style="display: none;">
+          <select id="modalMonthInput" style="display: none;">
+            <option value="1">Jan</option>
+            <option value="2">Feb</option>
+            <option value="3">Mar</option>
+            <option value="4">Apr</option>
+            <option value="5">May</option>
+            <option value="6">Jun</option>
+            <option value="7">Jul</option>
+            <option value="8">Aug</option>
+            <option value="9">Sep</option>
+            <option value="10">Oct</option>
+            <option value="11">Nov</option>
+            <option value="12">Dec</option>
+          </select>
+          <input type="number" id="modalDayInput" placeholder="Day" min="1" max="31" style="display: none;">
+        </div>
+      </div>
+      <div class="chart-canvas-wrap"><canvas id="chartModalCanvas"></canvas></div>
 
-        <!-- Air Quality Information (shown only for CO2 chart) -->
-        <div id="airQualityInfo" style="display: none; margin-top: 15px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 0.75rem; line-height: 1.6; color: #e0e0e0;">
-          <div style="display: flex; gap: 20px; justify-content: center; margin-bottom: 6px;">
-            <div><span style="color: #66bb6a; font-weight: 600;">AQI:</span> Score 1-5, lower is better</div>
-            <div><span style="color: #ef5350; font-weight: 600;">CO₂:</span> Ventilation indicator</div>
-          </div>
-          <div style="display: flex; gap: 20px; justify-content: center;">
-            <div><span style="color: #42a5f5; font-weight: 600;">NH₃:</span> From cleaning, waste</div>
-            <div><span style="color: #ffa726; font-weight: 600;">Alcohol:</span> VOCs from solvents</div>
-          </div>
+      <!-- Air Quality Information (shown only for CO2 chart) -->
+      <div id="airQualityInfo"
+        style="display: none; margin-top: 15px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 0.75rem; line-height: 1.6; color: #e0e0e0;">
+        <div style="display: flex; gap: 20px; justify-content: center; margin-bottom: 6px;">
+          <div><span style="color: #66bb6a; font-weight: 600;">AQI:</span> Score 1-5, lower is better</div>
+          <div><span style="color: #ef5350; font-weight: 600;">CO₂:</span> Ventilation indicator</div>
+        </div>
+        <div style="display: flex; gap: 20px; justify-content: center;">
+          <div><span style="color: #42a5f5; font-weight: 600;">NH₃:</span> From cleaning, waste</div>
+          <div><span style="color: #ffa726; font-weight: 600;">Alcohol:</span> VOCs from solvents</div>
         </div>
       </div>
     </div>
-    <div id="hoverPopover" class="chart-popover" aria-hidden="true">
-      <h4 id="hoverPopoverTitle">History</h4>
-      <div class="chart-canvas-wrap"><canvas id="hoverPopoverCanvas"></canvas></div>
-    </div>
+  </div>
+  <div id="hoverPopover" class="chart-popover" aria-hidden="true">
+    <h4 id="hoverPopoverTitle">History</h4>
+    <div class="chart-canvas-wrap"><canvas id="hoverPopoverCanvas"></canvas></div>
+  </div>
 
   <script>
     // Global state
@@ -901,7 +1475,7 @@
      * A pre-configured formatter for displaying timestamps in Europe/Bucharest timezone.
      */
     const BUCHAREST_FMT = new Intl.DateTimeFormat('ro-RO', { timeZone: 'Europe/Bucharest', dateStyle: 'short', timeStyle: 'medium' });
-    
+
     /**
      * Formats a temperature value into a string with one decimal place and a degree Celsius symbol.
      * @param {number | null | undefined} value - The temperature value.
@@ -938,56 +1512,56 @@
      * @param {string | null} level - The severity level ('ok', 'warn', 'bad').
      */
     function setSeverity(el, level) {
-  if (!el) return;
-  el.classList.remove('ok','warn','bad');
-  if (level) el.classList.add(level);
-}
+      if (!el) return;
+      el.classList.remove('ok', 'warn', 'bad');
+      if (level) el.classList.add(level);
+    }
 
-/**
- * Determines the severity level based on a metric and its value.
- * @param {string} metric - The type of metric (e.g., 'temp', 'humidity').
- * @param {number | null} value - The value of the metric.
- * @returns {string | null} The severity level ('ok', 'warn', 'bad') or null.
- */
-function severityFor(metric, value) {
-  if (value == null) return null;
-  switch (metric) {
-    case 'temp':
-      if (value < 18) return 'warn';
-      if (value > 27) return 'bad';
-      return 'ok';
-    case 'humidity':
-      if (value < 30) return 'warn';
-      if (value > 60) return 'warn';
-      return 'ok';
-    case 'pressure':
-      if (value < 990) return 'warn';
-      if (value > 1030) return 'warn';
-      return 'ok';
-    case 'co2':
-      if (value > 1000) return 'bad';
-      if (value > 800) return 'warn';
-      return 'ok';
-    case 'nh3':
-      // NH3 thresholds: <50 good, 50-100 warning, >100 bad
-      if (value > 100) return 'bad';
-      if (value > 50) return 'warn';
-      return 'ok';
-    case 'alcohol':
-      // Alcohol vapor thresholds: <100 good, 100-300 warning, >300 bad
-      if (value > 300) return 'bad';
-      if (value > 100) return 'warn';
-      return 'ok';
-    default: return null;
-  }
-}
+    /**
+     * Determines the severity level based on a metric and its value.
+     * @param {string} metric - The type of metric (e.g., 'temp', 'humidity').
+     * @param {number | null} value - The value of the metric.
+     * @returns {string | null} The severity level ('ok', 'warn', 'bad') or null.
+     */
+    function severityFor(metric, value) {
+      if (value == null) return null;
+      switch (metric) {
+        case 'temp':
+          if (value < 18) return 'warn';
+          if (value > 27) return 'bad';
+          return 'ok';
+        case 'humidity':
+          if (value < 30) return 'warn';
+          if (value > 60) return 'warn';
+          return 'ok';
+        case 'pressure':
+          if (value < 990) return 'warn';
+          if (value > 1030) return 'warn';
+          return 'ok';
+        case 'co2':
+          if (value > 1000) return 'bad';
+          if (value > 800) return 'warn';
+          return 'ok';
+        case 'nh3':
+          // NH3 thresholds: <50 good, 50-100 warning, >100 bad
+          if (value > 100) return 'bad';
+          if (value > 50) return 'warn';
+          return 'ok';
+        case 'alcohol':
+          // Alcohol vapor thresholds: <100 good, 100-300 warning, >300 bad
+          if (value > 300) return 'bad';
+          if (value > 100) return 'warn';
+          return 'ok';
+        default: return null;
+      }
+    }
 
-/**
- * Formats a humidity value into a string with one decimal place and a percent symbol.
- * @param {number | null | undefined} value - The humidity value.
- * @returns {string} The formatted humidity string (e.g., "55.1%").
- */
-function formatHumidity(value) {
+    /**
+     * Formats a humidity value into a string with one decimal place and a percent symbol.
+     * @param {number | null | undefined} value - The humidity value.
+     * @returns {string} The formatted humidity string (e.g., "55.1%").
+     */
+    function formatHumidity(value) {
       if (value === null || value === undefined) return '--%';
       return parseFloat(value).toFixed(1) + '%';
     }
@@ -1000,7 +1574,7 @@ function formatHumidity(value) {
       const errorDiv = document.getElementById('errorDisplay');
       errorDiv.innerHTML = '<div class="error"><strong>Error:</strong> ' + message + '</div>';
       errorDiv.style.display = 'block';
-      setTimeout(function() {
+      setTimeout(function () {
         errorDiv.style.display = 'none';
       }, 5000);
     }
@@ -1098,19 +1672,19 @@ function formatHumidity(value) {
      */
     function updateUnifiedTimestamp() {
       const lastReadingEl = document.getElementById('lastReadingTime');
-      
+
       // Find the most recent timestamp from all sensors
       let latestTimestamp = null;
       const timestamps = [
         currentData.timestamp,
-        currentData.humidityTimestamp, 
+        currentData.humidityTimestamp,
         currentData.pressureTimestamp,
         currentData.airTimestamp
       ].filter(ts => ts != null);
-      
+
       if (timestamps.length > 0) {
         latestTimestamp = Math.max(...timestamps);
-        lastReadingEl.textContent = 'Last reading time: ' + new Date(latestTimestamp * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
+        lastReadingEl.textContent = 'Last reading time: ' + new Date(latestTimestamp * 1000).toLocaleString("en-GB", { timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
       } else {
         lastReadingEl.textContent = 'Last reading time: --';
       }
@@ -1143,7 +1717,7 @@ function formatHumidity(value) {
       const pEl = document.getElementById('currentPressure');
       if (pEl) { pEl.textContent = formatPressure(currentData.pressure_hpa); setSeverity(pEl, severityFor('pressure', currentData.pressure_hpa)); }
       const ptEl = document.getElementById('pressureTimestamp');
-      if (ptEl) ptEl.textContent = 'Last reading: ' + new Date(currentData.pressureTimestamp * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
+      if (ptEl) ptEl.textContent = 'Last reading: ' + new Date(currentData.pressureTimestamp * 1000).toLocaleString("en-GB", { timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
 
       // Update air quality display - AQI with color coding
       const aqiEl = document.getElementById('currentAQI');
@@ -1208,7 +1782,7 @@ function formatHumidity(value) {
         meterEl.style.color = '#ffffff';
       }
       if (meterTsEl && currentData.meterTimestamp) {
-        meterTsEl.textContent = 'Last reading: ' + new Date(currentData.meterTimestamp * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
+        meterTsEl.textContent = 'Last reading: ' + new Date(currentData.meterTimestamp * 1000).toLocaleString("en-GB", { timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
       }
 
       // Sensor status is now managed by updateSensorStatus() function
@@ -1225,14 +1799,14 @@ function formatHumidity(value) {
       // Update humidity stats
       var miH = document.getElementById('minHumidity'); if (miH) { miH.textContent = formatHumidity(currentData.humidityStats.minimum); setSeverity(miH, severityFor('humidity', currentData.humidityStats.minimum)); }
       var mxH = document.getElementById('maxHumidity'); if (mxH) { mxH.textContent = formatHumidity(currentData.humidityStats.maximum); setSeverity(mxH, severityFor('humidity', currentData.humidityStats.maximum)); }
-      var mtts = document.getElementById('minTempTs'); if (mtts) mtts.textContent = new Date(currentData.stats.min_timestamp * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
-      var mxts = document.getElementById('maxTempTs'); if (mxts) mxts.textContent = new Date(currentData.stats.max_timestamp * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
-      var mhts = document.getElementById('minHumidityTs'); if (mhts) mhts.textContent = new Date(currentData.humidityStats.min_timestamp * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
-      var mHxTs = document.getElementById('maxHumidityTs'); if (mHxTs) mHxTs.textContent = new Date(currentData.humidityStats.max_timestamp * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
-      var mpts = document.getElementById('minPressureTs'); if (mpts) mpts.textContent = new Date(currentData.pressureStats.min_timestamp * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
-      var mpxts = document.getElementById('maxPressureTs'); if (mpxts) mpxts.textContent = new Date(currentData.pressureStats.max_timestamp * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
-      var mcts = document.getElementById('minCO2Ts'); if (mcts) mcts.textContent = new Date(currentData.airQualityStats.min_timestamp * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
-      var mcxts = document.getElementById('maxCO2Ts'); if (mcxts) mcxts.textContent = new Date(currentData.airQualityStats.max_timestamp * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
+      var mtts = document.getElementById('minTempTs'); if (mtts) mtts.textContent = new Date(currentData.stats.min_timestamp * 1000).toLocaleString("en-GB", { timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+      var mxts = document.getElementById('maxTempTs'); if (mxts) mxts.textContent = new Date(currentData.stats.max_timestamp * 1000).toLocaleString("en-GB", { timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+      var mhts = document.getElementById('minHumidityTs'); if (mhts) mhts.textContent = new Date(currentData.humidityStats.min_timestamp * 1000).toLocaleString("en-GB", { timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+      var mHxTs = document.getElementById('maxHumidityTs'); if (mHxTs) mHxTs.textContent = new Date(currentData.humidityStats.max_timestamp * 1000).toLocaleString("en-GB", { timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+      var mpts = document.getElementById('minPressureTs'); if (mpts) mpts.textContent = new Date(currentData.pressureStats.min_timestamp * 1000).toLocaleString("en-GB", { timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+      var mpxts = document.getElementById('maxPressureTs'); if (mpxts) mpxts.textContent = new Date(currentData.pressureStats.max_timestamp * 1000).toLocaleString("en-GB", { timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+      var mcts = document.getElementById('minCO2Ts'); if (mcts) mcts.textContent = new Date(currentData.airQualityStats.min_timestamp * 1000).toLocaleString("en-GB", { timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+      var mcxts = document.getElementById('maxCO2Ts'); if (mcxts) mcxts.textContent = new Date(currentData.airQualityStats.max_timestamp * 1000).toLocaleString("en-GB", { timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
 
       // Update pressure stats
       var minP = document.getElementById('minPressure'); if (minP) { minP.textContent = formatPressure(currentData.pressureStats.minimum); setSeverity(minP, severityFor('pressure', currentData.pressureStats.minimum)); }
@@ -1244,8 +1818,8 @@ function formatHumidity(value) {
     }
 
     function initCharts() {
-  // No-op: history canvases removed; charts now shown via hover/click popups.
-}
+      // No-op: history canvases removed; charts now shown via hover/click popups.
+    }
 
 
 
@@ -1253,15 +1827,15 @@ function formatHumidity(value) {
     function updateHistoryChart() {
       if (!historyChart || currentData.history.length === 0) return;
 
-      const sortedHistory = currentData.history.slice().sort(function(a, b) {
+      const sortedHistory = currentData.history.slice().sort(function (a, b) {
         return a.timestampUnix - b.timestampUnix;
       });
 
-      historyChart.data.labels = sortedHistory.map(function(item) {
-        return new Date(item.timestampUnix * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
+      historyChart.data.labels = sortedHistory.map(function (item) {
+        return new Date(item.timestampUnix * 1000).toLocaleString("en-GB", { timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
       });
 
-      historyChart.data.datasets[0].data = sortedHistory.map(function(item) {
+      historyChart.data.datasets[0].data = sortedHistory.map(function (item) {
         return item.temperatureC;
       });
 
@@ -1270,30 +1844,30 @@ function formatHumidity(value) {
 
 
 
-    
+
 
     function updatePressureHistoryChart() {
       if (!window.historyPressureChart || !window.historyPressureChart.data || currentData.pressureHistory.length === 0) return;
-      const sorted = currentData.pressureHistory.slice().sort(function(a,b){ return a.timestampUnix - b.timestampUnix; });
-      window.historyPressureChart.data.labels = sorted.map(function(i){ return new Date(i.timestampUnix * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false}); });
-      window.historyPressureChart.data.datasets[0].data = sorted.map(function(i){ return i.pressureHpa; });
+      const sorted = currentData.pressureHistory.slice().sort(function (a, b) { return a.timestampUnix - b.timestampUnix; });
+      window.historyPressureChart.data.labels = sorted.map(function (i) { return new Date(i.timestampUnix * 1000).toLocaleString("en-GB", { timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }); });
+      window.historyPressureChart.data.datasets[0].data = sorted.map(function (i) { return i.pressureHpa; });
       window.historyPressureChart.update();
     }
 
     function updateCO2HistoryChart() {
       if (!window.historyCO2Chart || !window.historyCO2Chart.data || currentData.airQualityHistory.length === 0) return;
-      const sorted = currentData.airQualityHistory.slice().sort(function(a,b){ return a.timestampUnix - b.timestampUnix; });
-      window.historyCO2Chart.data.labels = sorted.map(function(i){ return new Date(i.timestampUnix * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false}); });
+      const sorted = currentData.airQualityHistory.slice().sort(function (a, b) { return a.timestampUnix - b.timestampUnix; });
+      window.historyCO2Chart.data.labels = sorted.map(function (i) { return new Date(i.timestampUnix * 1000).toLocaleString("en-GB", { timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }); });
 
       // Update all 4 datasets
       if (window.historyCO2Chart.data.datasets.length >= 4) {
-        window.historyCO2Chart.data.datasets[0].data = sorted.map(function(i){ return i.aqi; });
-        window.historyCO2Chart.data.datasets[1].data = sorted.map(function(i){ return i.co2Ppm; });
-        window.historyCO2Chart.data.datasets[2].data = sorted.map(function(i){ return i.nh3Ppm; });
-        window.historyCO2Chart.data.datasets[3].data = sorted.map(function(i){ return i.alcoholPpm; });
+        window.historyCO2Chart.data.datasets[0].data = sorted.map(function (i) { return i.aqi; });
+        window.historyCO2Chart.data.datasets[1].data = sorted.map(function (i) { return i.co2Ppm; });
+        window.historyCO2Chart.data.datasets[2].data = sorted.map(function (i) { return i.nh3Ppm; });
+        window.historyCO2Chart.data.datasets[3].data = sorted.map(function (i) { return i.alcoholPpm; });
       } else {
         // Fallback for old chart structure
-        window.historyCO2Chart.data.datasets[0].data = sorted.map(function(i){ return i.co2Ppm; });
+        window.historyCO2Chart.data.datasets[0].data = sorted.map(function (i) { return i.co2Ppm; });
       }
       window.historyCO2Chart.update();
     }
@@ -1301,15 +1875,15 @@ function formatHumidity(value) {
     function updateHumidityHistoryChart() {
       if (!historyHumidityChart || currentData.humidityHistory.length === 0) return;
 
-      const sortedHistory = currentData.humidityHistory.slice().sort(function(a, b) {
+      const sortedHistory = currentData.humidityHistory.slice().sort(function (a, b) {
         return a.timestampUnix - b.timestampUnix;
       });
 
-      historyHumidityChart.data.labels = sortedHistory.map(function(item) {
-        return new Date(item.timestampUnix * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
+      historyHumidityChart.data.labels = sortedHistory.map(function (item) {
+        return new Date(item.timestampUnix * 1000).toLocaleString("en-GB", { timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
       });
 
-      historyHumidityChart.data.datasets[0].data = sortedHistory.map(function(item) {
+      historyHumidityChart.data.datasets[0].data = sortedHistory.map(function (item) {
         return item.humidityPercent;
       });
 
@@ -1402,7 +1976,7 @@ function formatHumidity(value) {
           };
           console.log('Temperature stats loaded:', currentData.stats);
           updateDisplay();
-      updateUnifiedTimestamp();
+          updateUnifiedTimestamp();
         }
 
         // Fetch humidity stats
@@ -1414,7 +1988,7 @@ function formatHumidity(value) {
           currentData.humidityStats = {
             ...currentData.humidityStats,
             count: hs.count,
-            average: (hs.average != null ? hs.average : (hs.avg != null ? Math.round(hs.avg*100)/100 : null)),
+            average: (hs.average != null ? hs.average : (hs.avg != null ? Math.round(hs.avg * 100) / 100 : null)),
             minimum: (hs.minimum != null ? hs.minimum : hs.min),
             maximum: (hs.maximum != null ? hs.maximum : hs.max),
             min_timestamp: hs.minTimestamp || null,
@@ -1423,39 +1997,39 @@ function formatHumidity(value) {
           console.log('Humidity stats loaded:', currentData.humidityStats);
           updateDisplay();
 
-        // Fetch pressure stats
-        console.log('Fetching pressure statistics...');
-        try {
-          const pStats = await graphqlQuery('{ pressureStatistics { count average minimum maximum minTimestamp maxTimestamp } }');
-          if (pStats.data && pStats.data.pressureStatistics) {
-            const ps = pStats.data.pressureStatistics;
-            currentData.pressureStats = {
-              ...currentData.pressureStats,
-              count: ps.count, average: ps.average, minimum: ps.minimum, maximum: ps.maximum,
-              min_timestamp: ps.minTimestamp || null, max_timestamp: ps.maxTimestamp || null
-            };
-            console.log('Pressure stats loaded:', currentData.pressureStats);
-            updateDisplay();
-      updateUnifiedTimestamp();
-          }
-        } catch (e) { console.warn('Pressure stats query failed:', e); }
+          // Fetch pressure stats
+          console.log('Fetching pressure statistics...');
+          try {
+            const pStats = await graphqlQuery('{ pressureStatistics { count average minimum maximum minTimestamp maxTimestamp } }');
+            if (pStats.data && pStats.data.pressureStatistics) {
+              const ps = pStats.data.pressureStatistics;
+              currentData.pressureStats = {
+                ...currentData.pressureStats,
+                count: ps.count, average: ps.average, minimum: ps.minimum, maximum: ps.maximum,
+                min_timestamp: ps.minTimestamp || null, max_timestamp: ps.maxTimestamp || null
+              };
+              console.log('Pressure stats loaded:', currentData.pressureStats);
+              updateDisplay();
+              updateUnifiedTimestamp();
+            }
+          } catch (e) { console.warn('Pressure stats query failed:', e); }
 
-        // Fetch air quality (CO2) stats
-        console.log('Fetching air quality statistics...');
-        try {
-          const aqStats = await graphqlQuery('{ airQualityStatistics { count average minimum maximum minTimestamp maxTimestamp } }');
-          if (aqStats.data && aqStats.data.airQualityStatistics) {
-            const aqs = aqStats.data.airQualityStatistics;
-            currentData.airQualityStats = {
-              ...currentData.airQualityStats,
-              count: aqs.count, average: aqs.average, minimum: aqs.minimum, maximum: aqs.maximum,
-              min_timestamp: aqs.minTimestamp || null, max_timestamp: aqs.maxTimestamp || null
-            };
-            console.log('Air quality stats loaded:', currentData.airQualityStats);
-            updateDisplay();
-      updateUnifiedTimestamp();
-          }
-        } catch (e) { console.warn('Air quality stats query failed:', e); }
+          // Fetch air quality (CO2) stats
+          console.log('Fetching air quality statistics...');
+          try {
+            const aqStats = await graphqlQuery('{ airQualityStatistics { count average minimum maximum minTimestamp maxTimestamp } }');
+            if (aqStats.data && aqStats.data.airQualityStatistics) {
+              const aqs = aqStats.data.airQualityStatistics;
+              currentData.airQualityStats = {
+                ...currentData.airQualityStats,
+                count: aqs.count, average: aqs.average, minimum: aqs.minimum, maximum: aqs.maximum,
+                min_timestamp: aqs.minTimestamp || null, max_timestamp: aqs.maxTimestamp || null
+              };
+              console.log('Air quality stats loaded:', currentData.airQualityStats);
+              updateDisplay();
+              updateUnifiedTimestamp();
+            }
+          } catch (e) { console.warn('Air quality stats query failed:', e); }
 
         }
 
@@ -1485,7 +2059,7 @@ function formatHumidity(value) {
         console.log('Fetching pressure history...');
         const pHist = await graphqlQuery('{ pressureHistory(limit: 5000) { pressureHpa timestampUnix } }');
         if (pHist.data && pHist.data.pressureHistory) {
-          currentData.pressureHistory = pHist.data.pressureHistory.map(function(r){ return { pressureHpa: r.pressureHpa, timestampUnix: r.timestampUnix }; });
+          currentData.pressureHistory = pHist.data.pressureHistory.map(function (r) { return { pressureHpa: r.pressureHpa, timestampUnix: r.timestampUnix }; });
           updatePressureHistoryChart();
         }
 
@@ -1506,7 +2080,7 @@ function formatHumidity(value) {
         console.log('Fetching air quality history...');
         const aqHist = await graphqlQuery('{ airQualityHistory(limit: 5000) { co2Ppm nh3Ppm alcoholPpm aqi status timestampUnix } }');
         if (aqHist.data && aqHist.data.airQualityHistory) {
-          currentData.airQualityHistory = aqHist.data.airQualityHistory.map(function(r){
+          currentData.airQualityHistory = aqHist.data.airQualityHistory.map(function (r) {
             return {
               co2Ppm: r.co2Ppm,
               nh3Ppm: r.nh3Ppm,
@@ -1537,20 +2111,20 @@ function formatHumidity(value) {
         // Initialize real-time chart with recent data
         if (currentData.history.length > 0) {
           const recentPoints = currentData.history.slice(-10);
-          recentPoints.forEach(function(reading) {
+          recentPoints.forEach(function (reading) {
           });
         }
 
         // Initialize humidity charts with recent data
         if (currentData.humidityHistory.length > 0) {
           const recentHumidityPoints = currentData.humidityHistory.slice(-10);
-          recentHumidityPoints.forEach(function(reading) {
+          recentHumidityPoints.forEach(function (reading) {
           });
         }
 
         console.log('Initial data fetch complete, updating display...');
         updateDisplay();
-      updateUnifiedTimestamp();
+        updateUnifiedTimestamp();
 
       } catch (error) {
         console.error('Failed to fetch initial data:', error);
@@ -1572,12 +2146,12 @@ function formatHumidity(value) {
       try {
         eventSource = new EventSource('/events');
 
-        eventSource.onopen = function() {
+        eventSource.onopen = function () {
           console.log('SSE connection opened - waiting for sensor status updates...');
           // Don't immediately mark as online - wait for actual sensor_status messages
         };
 
-        eventSource.onmessage = function(event) {
+        eventSource.onmessage = function (event) {
           console.log('SSE message received:', event.data);
           try {
             const data = JSON.parse(event.data);
@@ -1609,11 +2183,11 @@ function formatHumidity(value) {
 
               // Add to history (keep full)
               currentData.history.push(reading);
-              
+
 
               // Update display and charts
               updateDisplay();
-      updateUnifiedTimestamp();
+              updateUnifiedTimestamp();
 
             } else if (data.type === 'pressure_update' && data.data) {
               const p = data.data;
@@ -1625,7 +2199,7 @@ function formatHumidity(value) {
                 currentData.pressureStats.count = (currentData.pressureStats.count || 0) + 1;
               }
               updateDisplay();
-      updateUnifiedTimestamp();
+              updateUnifiedTimestamp();
 
             } else if (data.type === 'air_quality_update' && data.data) {
               const aq = data.data;
@@ -1647,9 +2221,9 @@ function formatHumidity(value) {
                 aqi: aq.aqi,
                 timestampUnix: aq.timestamp
               });
-              
+
               updateDisplay();
-      updateUnifiedTimestamp();
+              updateUnifiedTimestamp();
 
             } else if (data.type === 'humidity_update' && data.data) {
               const humidityData = data.data;
@@ -1677,11 +2251,11 @@ function formatHumidity(value) {
 
               // Add to history (keep full)
               currentData.humidityHistory.push(reading);
-              
+
 
               // Update display and charts
               updateDisplay();
-      updateUnifiedTimestamp();
+              updateUnifiedTimestamp();
 
             } else if (data.type === 'sensor_status' && data.data) {
               // Handle sensor status updates from backend
@@ -1697,7 +2271,7 @@ function formatHumidity(value) {
           }
         };
 
-        eventSource.onerror = function(error) {
+        eventSource.onerror = function (error) {
           console.error('SSE error:', error);
           console.log('SSE readyState:', eventSource.readyState);
           // Mark both sensors as offline when SSE connection fails
@@ -1705,7 +2279,7 @@ function formatHumidity(value) {
           updateIndividualSensorStatus('mq135Status', 'disconnected');
 
           // Attempt to reconnect after 3 seconds
-          setTimeout(function() {
+          setTimeout(function () {
             if (eventSource.readyState === EventSource.CLOSED) {
               console.log('Attempting to reconnect SSE...');
               connectSSE();
@@ -1718,13 +2292,13 @@ function formatHumidity(value) {
         updateIndividualSensorStatus('bme280Status', 'disconnected');
         updateIndividualSensorStatus('mq135Status', 'disconnected');
         updateDisplay();
-      updateUnifiedTimestamp();
+        updateUnifiedTimestamp();
       }
     }
 
     // Initialize the application
-    
-async function initialize() {
+
+    async function initialize() {
       console.log('Initializing application...');
       try {
         // Initialize charts first
@@ -1745,8 +2319,8 @@ async function initialize() {
     // Start the application when page loads
     document.addEventListener('DOMContentLoaded', initialize);
 
-    
-  
+
+
     // Automatic Webcam Capture on Page Load
     let latestWebcamOverrides = null;
 
@@ -1791,28 +2365,39 @@ async function initialize() {
       latestWebcamOverrides = { gain: gainVal, flash: flashVal };
       fetch("/webcam/capture", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(latestWebcamOverrides)
       })
-      .then(response => response.json())
-      .then(data => {
-        loading.style.display = "none";
-        if (data.success && data.image) {
-          img.src = data.image;
-          img.style.display = "block";
-          // Show controls after image loads
-          const controls = document.getElementById("webcamControls");
-          const btn = document.getElementById("captureSettingsBtn");
-          if (controls) controls.style.display = "flex";
-          if (btn) btn.style.display = "block";
-          const capSetBtn = document.getElementById("captureSettingsBtn");
-          if (capSetBtn) capSetBtn.style.display = "block";
-          // Remove offline class when capture succeeds
-          const electricityIndexCard = document.getElementById('electricityIndexCard');
-          const electricityMeterCard = document.getElementById('electricityMeterCard');
-          if (electricityIndexCard) electricityIndexCard.classList.remove('sensor-offline');
-          if (electricityMeterCard) electricityMeterCard.classList.remove('sensor-offline');
-        } else {
+        .then(response => response.json())
+        .then(data => {
+          loading.style.display = "none";
+          if (data.success && data.image) {
+            img.src = data.image;
+            img.style.display = "block";
+            // Show controls after image loads
+            const controls = document.getElementById("webcamControls");
+            const btn = document.getElementById("captureSettingsBtn");
+            if (controls) controls.style.display = "flex";
+            if (btn) btn.style.display = "block";
+            const capSetBtn = document.getElementById("captureSettingsBtn");
+            if (capSetBtn) capSetBtn.style.display = "block";
+            // Remove offline class when capture succeeds
+            const electricityIndexCard = document.getElementById('electricityIndexCard');
+            const electricityMeterCard = document.getElementById('electricityMeterCard');
+            if (electricityIndexCard) electricityIndexCard.classList.remove('sensor-offline');
+            if (electricityMeterCard) electricityMeterCard.classList.remove('sensor-offline');
+          } else {
+            placeholder.style.display = "flex";
+            placeholder.innerHTML = "📷 Offline";
+            // Mark electricity cards as offline
+            const electricityIndexCard = document.getElementById('electricityIndexCard');
+            const electricityMeterCard = document.getElementById('electricityMeterCard');
+            if (electricityIndexCard) electricityIndexCard.classList.add('sensor-offline');
+            if (electricityMeterCard) electricityMeterCard.classList.add('sensor-offline');
+          }
+        })
+        .catch(error => {
+          loading.style.display = "none";
           placeholder.style.display = "flex";
           placeholder.innerHTML = "📷 Offline";
           // Mark electricity cards as offline
@@ -1820,33 +2405,22 @@ async function initialize() {
           const electricityMeterCard = document.getElementById('electricityMeterCard');
           if (electricityIndexCard) electricityIndexCard.classList.add('sensor-offline');
           if (electricityMeterCard) electricityMeterCard.classList.add('sensor-offline');
-        }
-      })
-      .catch(error => {
-        loading.style.display = "none";
-        placeholder.style.display = "flex";
-        placeholder.innerHTML = "📷 Offline";
-        // Mark electricity cards as offline
-        const electricityIndexCard = document.getElementById('electricityIndexCard');
-        const electricityMeterCard = document.getElementById('electricityMeterCard');
-        if (electricityIndexCard) electricityIndexCard.classList.add('sensor-offline');
-        if (electricityMeterCard) electricityMeterCard.classList.add('sensor-offline');
-      });
+        });
     }
 
 
     // Capture with settings button handler
-    (function(){
-        console.log('I AM HEREEEEEEEEEEEEE');   
+    (function () {
+      console.log('I AM HEREEEEEEEEEEEEE');
       const captureSettingsBtn = document.getElementById("captureSettingsBtn");
       if (captureSettingsBtn) {
-        captureSettingsBtn.addEventListener("click", function() {
+        captureSettingsBtn.addEventListener("click", function () {
           // Hide controls and snapshot button while capturing
           const controls = document.getElementById("webcamControls");
           const btn = document.getElementById("captureSettingsBtn");
           if (controls) controls.style.display = "none";
           if (btn) btn.style.display = "none";
-          
+
           const img = document.getElementById("webcamImage");
           const loading = document.getElementById("webcamLoading");
           const placeholder = document.getElementById("webcamPlaceholder");
@@ -1863,26 +2437,37 @@ async function initialize() {
           // statusEl.textContent = "Capturing with settings..."; // Removed
           fetch("/webcam/capture", {
             method: "POST",
-            headers: {"Content-Type": "application/json"},
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(latestWebcamOverrides)
           })
-          .then(r => r.json())
-          .then(data => {
-            loading.style.display = "none";
-            // Show controls and snapshot button
-            const controls = document.getElementById("webcamControls");
-            const btn = document.getElementById("captureSettingsBtn");
-            if (controls) controls.style.display = "flex";
-            if (btn) btn.style.display = "block";
-            if (data.success && data.image) {
-              img.src = data.image;
-              img.style.display = "block";
-              // Remove offline class when capture succeeds
-              const electricityIndexCard = document.getElementById('electricityIndexCard');
-              const electricityMeterCard = document.getElementById('electricityMeterCard');
-              if (electricityIndexCard) electricityIndexCard.classList.remove('sensor-offline');
-              if (electricityMeterCard) electricityMeterCard.classList.remove('sensor-offline');
-            } else {
+            .then(r => r.json())
+            .then(data => {
+              loading.style.display = "none";
+              // Show controls and snapshot button
+              const controls = document.getElementById("webcamControls");
+              const btn = document.getElementById("captureSettingsBtn");
+              if (controls) controls.style.display = "flex";
+              if (btn) btn.style.display = "block";
+              if (data.success && data.image) {
+                img.src = data.image;
+                img.style.display = "block";
+                // Remove offline class when capture succeeds
+                const electricityIndexCard = document.getElementById('electricityIndexCard');
+                const electricityMeterCard = document.getElementById('electricityMeterCard');
+                if (electricityIndexCard) electricityIndexCard.classList.remove('sensor-offline');
+                if (electricityMeterCard) electricityMeterCard.classList.remove('sensor-offline');
+              } else {
+                placeholder.style.display = "flex";
+                placeholder.innerHTML = "📷 Offline";
+                // Mark electricity cards as offline
+                const electricityIndexCard = document.getElementById('electricityIndexCard');
+                const electricityMeterCard = document.getElementById('electricityMeterCard');
+                if (electricityIndexCard) electricityIndexCard.classList.add('sensor-offline');
+                if (electricityMeterCard) electricityMeterCard.classList.add('sensor-offline');
+              }
+            })
+            .catch(err => {
+              loading.style.display = "none";
               placeholder.style.display = "flex";
               placeholder.innerHTML = "📷 Offline";
               // Mark electricity cards as offline
@@ -1890,24 +2475,13 @@ async function initialize() {
               const electricityMeterCard = document.getElementById('electricityMeterCard');
               if (electricityIndexCard) electricityIndexCard.classList.add('sensor-offline');
               if (electricityMeterCard) electricityMeterCard.classList.add('sensor-offline');
-            }
-          })
-          .catch(err => {
-            loading.style.display = "none";
-            placeholder.style.display = "flex";
-            placeholder.innerHTML = "📷 Offline";
-            // Mark electricity cards as offline
-            const electricityIndexCard = document.getElementById('electricityIndexCard');
-            const electricityMeterCard = document.getElementById('electricityMeterCard');
-            if (electricityIndexCard) electricityIndexCard.classList.add('sensor-offline');
-            if (electricityMeterCard) electricityMeterCard.classList.add('sensor-offline');
-          });
+            });
         });
       }
     })();
 
-    
-    
+
+
     // Auto-capture image when page loads (immediately)
     setTimeout(() => {
       captureWebcamImage();
@@ -1918,10 +2492,10 @@ async function initialize() {
 
     const chartColors = {
       temp: { border: '#66bb6a', bg: 'rgba(102,187,106,0.15)' },
-      humidity:{ border: '#9c27b0', bg: 'rgba(156,39,176,0.15)' },
-      pressure:{ border: '#ffa726', bg: 'rgba(255,167,38,0.15)' },
-      co2:{ border: '#ef5350', bg: 'rgba(239,83,80,0.15)' },
-      meter:{ border: '#42a5f5', bg: 'rgba(66,165,245,0.15)' }
+      humidity: { border: '#9c27b0', bg: 'rgba(156,39,176,0.15)' },
+      pressure: { border: '#ffa726', bg: 'rgba(255,167,38,0.15)' },
+      co2: { border: '#ef5350', bg: 'rgba(239,83,80,0.15)' },
+      meter: { border: '#42a5f5', bg: 'rgba(66,165,245,0.15)' }
     };
 
     async function ensureHistory(kind) {
@@ -1940,46 +2514,46 @@ async function initialize() {
           if (r.data && r.data.humidityHistory) currentData.humidityHistory = r.data.humidityHistory;
         } else if (kind === 'pressure') {
           const r = await graphqlQuery('{ pressureHistory(limit: 5000) { pressureHpa timestampUnix } }');
-          if (r.data && r.data.pressureHistory) currentData.pressureHistory = r.data.pressureHistory.map(i=>({pressureHpa:i.pressureHpa,timestampUnix:i.timestampUnix}));
+          if (r.data && r.data.pressureHistory) currentData.pressureHistory = r.data.pressureHistory.map(i => ({ pressureHpa: i.pressureHpa, timestampUnix: i.timestampUnix }));
         } else if (kind === 'co2') {
           const r = await graphqlQuery('{ airQualityHistory(limit: 5000) { co2Ppm nh3Ppm alcoholPpm aqi timestampUnix } }');
-          if (r.data && r.data.airQualityHistory) currentData.airQualityHistory = r.data.airQualityHistory.map(i=>({co2Ppm:i.co2Ppm, nh3Ppm:i.nh3Ppm, alcoholPpm:i.alcoholPpm, aqi:i.aqi, timestampUnix:i.timestampUnix}));
+          if (r.data && r.data.airQualityHistory) currentData.airQualityHistory = r.data.airQualityHistory.map(i => ({ co2Ppm: i.co2Ppm, nh3Ppm: i.nh3Ppm, alcoholPpm: i.alcoholPpm, aqi: i.aqi, timestampUnix: i.timestampUnix }));
         } else if (kind === 'meter') {
           const r = await graphqlQuery('{ meterHistory(limit: 5000) { meterValue timestampUnix } }');
-          if (r.data && r.data.meterHistory) currentData.meterHistory = r.data.meterHistory.map(i=>({meterValue:i.meterValue,timestampUnix:i.timestampUnix}));
+          if (r.data && r.data.meterHistory) currentData.meterHistory = r.data.meterHistory.map(i => ({ meterValue: i.meterValue, timestampUnix: i.timestampUnix }));
         }
       } catch (e) { console.warn('ensureHistory failed for', kind, e); }
     }
 
     function chartDataFor(kind) {
-      let labels = [], data = [], c = chartColors[kind] || {border:'#90caf9', bg:'rgba(144,202,249,0.15)'};
+      let labels = [], data = [], c = chartColors[kind] || { border: '#90caf9', bg: 'rgba(144,202,249,0.15)' };
       if (kind === 'temp') {
-        const arr = (currentData.history||[]).slice().sort((a,b)=>a.timestampUnix - b.timestampUnix); // Show all history data
-        labels = arr.map(i=>new Date(i.timestampUnix * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false}));
-        data = arr.map(i=>i.temperatureC);
+        const arr = (currentData.history || []).slice().sort((a, b) => a.timestampUnix - b.timestampUnix); // Show all history data
+        labels = arr.map(i => new Date(i.timestampUnix * 1000).toLocaleString("en-GB", { timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }));
+        data = arr.map(i => i.temperatureC);
         return { labels, datasets: [{ label: 'Temperature (°C)', data, borderColor: c.border, backgroundColor: c.bg, borderWidth: 2, fill: true, pointRadius: 1 }] };
       }
       if (kind === 'humidity') {
-        const arr = (currentData.humidityHistory||[]).slice().sort((a,b)=>a.timestampUnix - b.timestampUnix); // Show all history data
-        labels = arr.map(i=>new Date(i.timestampUnix * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false}));
-        data = arr.map(i=>i.humidityPercent);
+        const arr = (currentData.humidityHistory || []).slice().sort((a, b) => a.timestampUnix - b.timestampUnix); // Show all history data
+        labels = arr.map(i => new Date(i.timestampUnix * 1000).toLocaleString("en-GB", { timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }));
+        data = arr.map(i => i.humidityPercent);
         return { labels, datasets: [{ label: 'Humidity (%)', data, borderColor: c.border, backgroundColor: c.bg, borderWidth: 2, fill: true, pointRadius: 1 }] };
       }
       if (kind === 'pressure') {
-        const arr = (currentData.pressureHistory||[]).slice().sort((a,b)=>a.timestampUnix - b.timestampUnix); // Show all history data
-        labels = arr.map(i=>new Date(i.timestampUnix * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false}));
-        data = arr.map(i=>i.pressureHpa);
+        const arr = (currentData.pressureHistory || []).slice().sort((a, b) => a.timestampUnix - b.timestampUnix); // Show all history data
+        labels = arr.map(i => new Date(i.timestampUnix * 1000).toLocaleString("en-GB", { timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }));
+        data = arr.map(i => i.pressureHpa);
         return { labels, datasets: [{ label: 'Pressure (hPa)', data, borderColor: c.border, backgroundColor: c.bg, borderWidth: 2, fill: true, pointRadius: 1 }] };
       }
       if (kind === 'co2') {
-        const arr = (currentData.airQualityHistory||[]).slice().sort((a,b)=>a.timestampUnix - b.timestampUnix); // Show all history data
-        labels = arr.map(i=>new Date(i.timestampUnix * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false}));
+        const arr = (currentData.airQualityHistory || []).slice().sort((a, b) => a.timestampUnix - b.timestampUnix); // Show all history data
+        labels = arr.map(i => new Date(i.timestampUnix * 1000).toLocaleString("en-GB", { timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }));
 
         // Create datasets for all 4 components
-        const aqiData = arr.map(i=>i.aqi);
-        const co2Data = arr.map(i=>i.co2Ppm);
-        const nh3Data = arr.map(i=>i.nh3Ppm);
-        const alcoholData = arr.map(i=>i.alcoholPpm);
+        const aqiData = arr.map(i => i.aqi);
+        const co2Data = arr.map(i => i.co2Ppm);
+        const nh3Data = arr.map(i => i.nh3Ppm);
+        const alcoholData = arr.map(i => i.alcoholPpm);
 
         return {
           labels,
@@ -1992,9 +2566,9 @@ async function initialize() {
         };
       }
       if (kind === 'meter') {
-        const arr = (currentData.meterHistory||[]).slice().sort((a,b)=>a.timestampUnix - b.timestampUnix); // Show all history data
-        labels = arr.map(i=>new Date(i.timestampUnix * 1000).toLocaleString("en-GB", {timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false}));
-        data = arr.map(i=>parseFloat(i.meterValue) || 0);
+        const arr = (currentData.meterHistory || []).slice().sort((a, b) => a.timestampUnix - b.timestampUnix); // Show all history data
+        labels = arr.map(i => new Date(i.timestampUnix * 1000).toLocaleString("en-GB", { timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }));
+        data = arr.map(i => parseFloat(i.meterValue) || 0);
         return { labels, datasets: [{ label: 'Electricity Meter (kWh)', data, borderColor: c.border, backgroundColor: c.bg, borderWidth: 2, fill: true, pointRadius: 2 }] };
       }
       return { labels: [], datasets: [] };
@@ -2009,12 +2583,12 @@ async function initialize() {
           legend: { display: true, position: 'top', labels: { fontColor: '#b3b3b3', boxWidth: 15, padding: 10 } },
           tooltips: {
             callbacks: {
-              label: function(tooltipItem, data) {
+              label: function (tooltipItem, data) {
                 const datasetLabel = data.datasets[tooltipItem.datasetIndex].label || '';
                 const value = tooltipItem.yLabel;
                 return datasetLabel + ': ' + value;
               },
-              title: function(tooltipItems, data) {
+              title: function (tooltipItems, data) {
                 const label = data.labels[tooltipItems[0].index];
                 return label;
               }
@@ -2050,11 +2624,11 @@ async function initialize() {
         legend: { display: false },
         tooltips: {
           callbacks: {
-            label: function(tooltipItem, data) {
+            label: function (tooltipItem, data) {
               const value = tooltipItem.yLabel;
               return value;
             },
-            title: function(tooltipItems, data) {
+            title: function (tooltipItems, data) {
               const label = data.labels[tooltipItems[0].index];
               return label;
             }
@@ -2075,7 +2649,7 @@ async function initialize() {
     // Chart Modal Time Period Logic
     let currentChartKind = null;
     let currentModalChart = null;
-    
+
     function updateModalInputsVisibility() {
       const selectedPeriod = document.querySelector("input[name=\"chartPeriod\"]:checked")?.value;
       const inputsContainer = document.getElementById("timePeriodInputs");
@@ -2117,7 +2691,7 @@ async function initialize() {
         }
       }
     }
-    
+
     async function updateModalChartData() {
       if (!currentChartKind) return;
 
@@ -2250,11 +2824,11 @@ async function initialize() {
         console.error("Error updating modal chart data:", error);
       }
     }
-    
+
     function setupModalEventListeners() {
       // Add event listeners for radio buttons
       document.querySelectorAll("input[name=\"chartPeriod\"]").forEach(radio => {
-        radio.addEventListener("change", function() {
+        radio.addEventListener("change", function () {
           updateModalInputsVisibility();
           updateModalChartData();
         });
@@ -2311,7 +2885,7 @@ async function initialize() {
 
         // Load current month's data
         await updateModalChartData();
-        
+
         // Setup event listeners if not already done
         if (!overlay.hasAttribute('data-listeners-setup')) {
           setupModalEventListeners();
@@ -2326,7 +2900,7 @@ async function initialize() {
         const r = anchorEl.getBoundingClientRect();
         const w = pop.offsetWidth || 320; const h = pop.offsetHeight || 200;
         let top = r.top - h - 8; if (top < 8) top = r.bottom + 8;
-        let left = r.left + (r.width/2) - (w/2); left = Math.max(8, Math.min(left, (window.innerWidth - w - 8)));
+        let left = r.left + (r.width / 2) - (w / 2); left = Math.max(8, Math.min(left, (window.innerWidth - w - 8)));
         pop.style.top = top + 'px'; pop.style.left = left + 'px';
         pop.style.display = 'block';
         if (popoverChart) { popoverChart.destroy(); }
@@ -2337,34 +2911,35 @@ async function initialize() {
     function hideHoverPopoverSoon() {
       const pop = document.getElementById('hoverPopover');
       if (hoverHideTimer) clearTimeout(hoverHideTimer);
-      hoverHideTimer = setTimeout(()=>{ pop.style.display = 'none'; if (popoverChart) { popoverChart.destroy(); popoverChart = null; } }, 250);
+      hoverHideTimer = setTimeout(() => { pop.style.display = 'none'; if (popoverChart) { popoverChart.destroy(); popoverChart = null; } }, 250);
     }
 
 
     // Attach listeners once DOM is ready
-    (function attachChartListeners(){
+    (function attachChartListeners() {
       function attach(id, kind) {
         const valEl = document.getElementById(id); if (!valEl) return;
         const card = valEl.closest('.metric-card'); if (!card) return;
         card.style.cursor = 'pointer';
         // hover disabled
         // hover disabled
-        card.addEventListener('click', ()=> showMetricChart(kind, 'modal', card));
+        card.addEventListener('click', () => showMetricChart(kind, 'modal', card));
       }
-      attach('currentTemp','temp');
-      attach('currentPressure','pressure');
-      attach('currentHumidity','humidity');
-      attach('currentCO2','co2');
-      attach('currentMeterReading','meter');
+      attach('currentTemp', 'temp');
+      attach('currentPressure', 'pressure');
+      attach('currentHumidity', 'humidity');
+      attach('currentCO2', 'co2');
+      attach('currentMeterReading', 'meter');
 
       // Modal close handlers
       const overlay = document.getElementById('chartModalOverlay');
       const closeBtn = document.getElementById('chartModalClose');
-      if (overlay) overlay.addEventListener('click', (e)=>{ if (e.target === overlay) { overlay.style.display = 'none'; if (modalChart) { modalChart.destroy(); modalChart = null; } currentChartKind = null; currentModalChart = null; } });
-      if (closeBtn) closeBtn.addEventListener('click', ()=>{ overlay.style.display = 'none'; if (modalChart) { modalChart.destroy(); modalChart = null; } currentChartKind = null; currentModalChart = null; });
+      if (overlay) overlay.addEventListener('click', (e) => { if (e.target === overlay) { overlay.style.display = 'none'; if (modalChart) { modalChart.destroy(); modalChart = null; } currentChartKind = null; currentModalChart = null; } });
+      if (closeBtn) closeBtn.addEventListener('click', () => { overlay.style.display = 'none'; if (modalChart) { modalChart.destroy(); modalChart = null; } currentChartKind = null; currentModalChart = null; });
     })();
     // === End popup charts ===
 
   </script>
 </body>
+
 </html>

@@ -36,6 +36,7 @@ class USBJSONReader:
         logger: Optional[logging.Logger] = None,
         max_silence_seconds: float = 300.0,  # 5 minutes without data triggers reconnect
         health_check_interval: float = 60.0,  # Check health every 60 seconds
+        processor: Optional[Any] = None,  # USBDataProcessor instance for checking actual reading times
     ) -> None:
         """Initializes the USBJSONReader.
 
@@ -52,6 +53,7 @@ class USBJSONReader:
         self.baudrate = baudrate
         self.callback = callback
         self.logger = logger
+        self.processor = processor  # Store processor reference for health checks
         self.max_silence_seconds = max_silence_seconds
         self.health_check_interval = health_check_interval
         self._thread: Optional[threading.Thread] = None
@@ -163,7 +165,7 @@ class USBJSONReader:
     def _health_check_loop(self) -> None:
         """Periodic health check loop that monitors connection health."""
         if self.logger:
-            self.logger.info(f'USBJSONReader health check thread started (interval: {self.health_check_interval}s, threshold: {self.max_silence_seconds}s)')
+            self.logger.warning(f'USBJSONReader health check thread started (interval: {self.health_check_interval}s, threshold: {self.max_silence_seconds}s)')
         
         while not self._stop.is_set():
             try:
@@ -174,18 +176,33 @@ class USBJSONReader:
                 
                 current_time = time.time()
                 with self._lock:
-                    last_data = self._last_data_time
                     connected = self._connected
-                    last_success = self._last_success_time
-                
-                # Use last_success_time if last_data_time is not available (for backward compatibility)
-                check_time = last_data if last_data is not None else last_success
                 
                 # Check if we're connected but haven't received data recently
                 if connected:
+                    # Use processor timestamps if available (same as health endpoint uses)
+                    # Otherwise fall back to USBJSONReader timestamps
+                    check_time = None
+                    silence_duration = None
+                    
+                    if self.processor:
+                        # Check processor timestamps (same source as health endpoint)
+                        if hasattr(self.processor, 'last_bme280_reading') and self.processor.last_bme280_reading:
+                            check_time = self.processor.last_bme280_reading
+                        elif hasattr(self.processor, 'last_mq135_reading') and self.processor.last_mq135_reading:
+                            check_time = self.processor.last_mq135_reading
+                    
+                    # Fallback to USBJSONReader timestamps if processor timestamps not available
+                    if check_time is None:
+                        with self._lock:
+                            last_data = self._last_data_time
+                            last_success = self._last_success_time
+                        check_time = last_data if last_data is not None else last_success
+                    
                     if check_time is not None:
                         silence_duration = current_time - check_time
                         if silence_duration > self.max_silence_seconds:
+                            # CRITICAL: Force reconnection - exceeded threshold
                             if self.logger:
                                 self.logger.warning(
                                     f'USBJSONReader health check: No data for {silence_duration:.1f}s '
@@ -202,11 +219,11 @@ class USBJSONReader:
                         # Connected but never received data - suspicious, but give it some time
                         # Check if we've been connected for a while without data
                         if self.logger:
-                            self.logger.debug('USBJSONReader health check: Connected but no data received yet')
+                            self.logger.warning('USBJSONReader health check: Connected but no data received yet')
                 elif not connected:
                     # Not connected - main loop should be trying to reconnect
                     if self.logger:
-                        self.logger.debug(f'USBJSONReader health check: Not connected, main loop should reconnect')
+                        self.logger.warning(f'USBJSONReader health check: Not connected, main loop should reconnect')
                         
             except Exception as e:
                 if self.logger:
@@ -243,7 +260,7 @@ class USBJSONReader:
         
         while not self._stop.is_set():
             try:
-                # Check if health check forced a reconnection
+                # Check if health check forced a reconnection BEFORE attempting to read
                 should_reconnect = False
                 with self._lock:
                     if not self._connected and ser is not None:
@@ -252,18 +269,19 @@ class USBJSONReader:
                 
                 if should_reconnect:
                     # Close current connection immediately
+                    if self.logger:
+                        self.logger.warning('USBJSONReader: Health check forced disconnect - closing connection and reconnecting...')
                     try:
                         if ser:
                             ser.close()
-                            if self.logger:
-                                self.logger.info('USBJSONReader: Closed stale connection, reconnecting...')
                     except Exception as close_error:
                         if self.logger:
                             self.logger.debug(f'USBJSONReader: Error closing connection: {close_error}')
                     ser = None
                     consecutive_empty_reads = 0
                     backoff_seconds = 1.0  # Reset backoff for immediate reconnect attempt
-                    time.sleep(0.5)  # Brief pause before reconnecting
+                    # Don't sleep - reconnect immediately
+                    continue  # Go back to top of loop to reconnect
                 
                 if ser is None:
                     # Try to detect device again in case it changed
@@ -283,6 +301,9 @@ class USBJSONReader:
                         backoff_seconds = min(backoff_seconds * 1.5, max_backoff)
                         continue
                     
+                    if self.logger:
+                        self.logger.warning(f'USBJSONReader: Attempting to reconnect to {port}...')
+                    
                     try:
                         ser = serial.Serial(port=port, baudrate=self.baudrate, timeout=2)
                         # Give device a moment to initialize
@@ -296,22 +317,63 @@ class USBJSONReader:
                             self._last_error = None
                             consecutive_empty_reads = 0
                             backoff_seconds = 1.0  # Reset backoff on successful connection
+                            # Reset timestamps to prevent immediate stale detection
+                            # The health check will use processor timestamps, but reset these too
+                            self._last_data_time = None
+                            self._last_success_time = None
+                        
+                        # Reset processor timestamps if available to prevent immediate stale detection
+                        if self.processor:
+                            if hasattr(self.processor, 'last_bme280_reading'):
+                                self.processor.last_bme280_reading = None
+                            if hasattr(self.processor, 'last_mq135_reading'):
+                                self.processor.last_mq135_reading = None
                         
                         if self.logger:
-                            self.logger.info(f'USBJSONReader connected to {port} @ {self.baudrate} baud')
+                            self.logger.warning(f'USBJSONReader: Successfully reconnected to {port} @ {self.baudrate} baud')
                     except Exception as e:
                         with self._lock:
                             self._connected = False
                             self._last_error = str(e)
                         if self.logger:
-                            self.logger.error(f'USBJSONReader connection error: {e}')
+                            self.logger.error(f'USBJSONReader: Reconnection failed: {e}')
                         ser = None
                         time.sleep(backoff_seconds)
                         backoff_seconds = min(backoff_seconds * 1.5, max_backoff)
                         continue
 
+                # Check again if health check forced disconnect (before blocking read)
+                with self._lock:
+                    if not self._connected and ser is not None:
+                        # Health check forced disconnect during read attempt
+                        if self.logger:
+                            self.logger.warning('USBJSONReader: Health check forced disconnect during read - closing connection')
+                        try:
+                            if ser:
+                                ser.close()
+                        except Exception:
+                            pass
+                        ser = None
+                        consecutive_empty_reads = 0
+                        continue  # Go back to reconnect
+                
                 # Read with timeout
                 line = ser.readline()
+                
+                # Check again after read if health check forced disconnect
+                with self._lock:
+                    if not self._connected and ser is not None:
+                        # Health check forced disconnect - close and reconnect
+                        if self.logger:
+                            self.logger.warning('USBJSONReader: Health check forced disconnect after read - closing connection')
+                        try:
+                            if ser:
+                                ser.close()
+                        except Exception:
+                            pass
+                        ser = None
+                        consecutive_empty_reads = 0
+                        continue  # Go back to reconnect
                 
                 if not line:
                     consecutive_empty_reads += 1
@@ -337,7 +399,7 @@ class USBJSONReader:
                 # Reset empty read counter on successful read
                 consecutive_empty_reads = 0
                 
-                # Update last data time
+                # Update last data time immediately when data is read
                 current_time = time.time()
                 with self._lock:
                     self._last_data_time = current_time
@@ -365,8 +427,12 @@ class USBJSONReader:
                 if normalized and self.callback:
                     try:
                         self.callback(normalized)
+                        # Update success timestamp on successful callback
                         with self._lock:
                             self._last_success_time = current_time
+                            # Ensure last_data_time is set (should already be set above, but double-check)
+                            if self._last_data_time is None:
+                                self._last_data_time = current_time
                     except Exception as callback_error:
                         if self.logger:
                             self.logger.error(f'USBJSONReader callback error: {callback_error}')
