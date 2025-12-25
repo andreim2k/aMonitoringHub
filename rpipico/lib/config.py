@@ -4,8 +4,8 @@ Centralized configuration for I2C pins, sensor addresses, and calibration values
 """
 
 # I2C Configuration
-# Canonical I2C configuration: I2C1 with SDA=GP2, SCL=GP3
-# This is the standard configuration used across all scripts
+# I2C1 configuration: SDA=GP2, SCL=GP3
+# This configuration uses I2C1 bus with GPIO 2 and 3
 I2C_BUS = 1
 I2C_SDA_PIN = 2  # GPIO 2 (Pin 4)
 I2C_SCL_PIN = 3  # GPIO 3 (Pin 5)
