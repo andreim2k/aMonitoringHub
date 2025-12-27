@@ -6,18 +6,48 @@ Simple library for reading temperature, humidity, and pressure from BME280 senso
 import time
 from machine import I2C
 
+try:
+    from lib.config import BME280_DEFAULT_ADDRESS, BME280_CHIP_ID, VALID_I2C_ADDRESSES
+except ImportError:
+    # Fallback defaults if config not available
+    BME280_DEFAULT_ADDRESS = 0x76
+    BME280_CHIP_ID = 0x60
+    VALID_I2C_ADDRESSES = list(range(0x08, 0x78))
+
 # Float comparison epsilon
 EPSILON = 1e-6
 
 class BME280:
-    def __init__(self, i2c, address=0x76):
+    def __init__(self, i2c, address=None):
+        """
+        Initialize BME280 sensor
+        
+        Args:
+            i2c: I2C bus object
+            address: I2C address (default from config, typically 0x76 or 0x77)
+        
+        Raises:
+            ValueError: If address is invalid or chip ID doesn't match
+            OSError: If I2C communication fails
+        """
+        if i2c is None:
+            raise ValueError("I2C bus object cannot be None")
+        
+        # Use default address if not provided
+        if address is None:
+            address = BME280_DEFAULT_ADDRESS
+        
+        # Validate I2C address
+        if address not in VALID_I2C_ADDRESSES:
+            raise ValueError(f"Invalid I2C address: 0x{address:02X}. Must be between 0x08 and 0x77")
+        
         self.i2c = i2c
         self.address = address
         
         # Verify chip ID
         chip_id = self._read_register(0xD0)
-        if chip_id != 0x60:
-            raise ValueError(f"Invalid chip ID: 0x{chip_id:02X}, expected 0x60")
+        if chip_id != BME280_CHIP_ID:
+            raise ValueError(f"Invalid chip ID: 0x{chip_id:02X}, expected 0x{BME280_CHIP_ID:02X}")
         
         # Reset sensor
         self._write_register(0xE0, 0xB6)

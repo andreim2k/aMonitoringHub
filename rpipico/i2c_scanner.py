@@ -121,6 +121,9 @@ print("\n" + "=" * 50)
 print("SCAN RESULTS SUMMARY")
 print("=" * 50)
 
+# Initialize bme280_devices before conditional blocks
+bme280_devices = []
+
 if found_devices:
     print(f"Found {len(found_devices)} device(s) across {len(set((d[0], d[1], d[2]) for d in found_devices))} configuration(s):")
     print()

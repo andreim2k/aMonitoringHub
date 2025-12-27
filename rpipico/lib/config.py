@@ -26,10 +26,42 @@ MQ135_PIN = 28  # GPIO 28 (ADC2, Pin 34)
 MQ135_R_LOAD = 10000  # 10kΩ load resistor
 MQ135_R_ZERO = 42304.5  # Calibrated resistance in clean air (adjust based on your sensor)
 
+# MQ135 Gas Calculation Constants
+MQ135_CO2_A = 116.6020682
+MQ135_CO2_B = -2.769034857
+MQ135_NH3_A = 102.694
+MQ135_NH3_B = -2.815
+MQ135_ALCOHOL_A = 77.255
+MQ135_ALCOHOL_B = -3.18
+
+# MQ135 PPM Limits
+MQ135_CO2_MAX = 10000
+MQ135_NH3_MAX = 500
+MQ135_ALCOHOL_MAX = 1000
+
 # Air Quality Thresholds (CO2 ppm)
 AQ_EXCELLENT = 400
 AQ_GOOD = 600
 AQ_FAIR = 1000
 AQ_POOR = 1500
 AQ_VERY_POOR = 2500
+
+# Timing Configuration
+BOOT_DELAY_SEC = 2.0  # Delay after boot to ensure USB is ready
+BME280_RETRY_DELAY_SEC = 2.0  # Delay between BME280 retry attempts
+SENSOR_READ_INTERVAL_SEC = 1.0  # Interval between sensor readings
+GC_COLLECT_INTERVAL = 60  # Garbage collection every N iterations
+
+# ADC Configuration
+ADC_MAX_VALUE = 65535
+VOLTAGE_REFERENCE = 3.3
+MIN_VOLTAGE_THRESHOLD = 0.01  # Minimum voltage threshold for resistance calculation
+
+# Validation Constants
+VALID_ADC_PINS = list(range(26, 30))  # Valid ADC pins on Pico: GP26-GP29
+MIN_R_ZERO = 1000.0  # Minimum valid R0 value
+MAX_R_ZERO = 1000000.0  # Maximum valid R0 value
+MIN_R_LOAD = 100.0  # Minimum valid load resistor value
+MAX_R_LOAD = 1000000.0  # Maximum valid load resistor value
+VALID_I2C_ADDRESSES = list(range(0x08, 0x78))  # Valid I2C addresses (excluding reserved)
 
