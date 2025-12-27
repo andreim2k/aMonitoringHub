@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mpremote connect:*)",
+      "Bash(mpremote mount:*)",
+      "Bash(mpremote cp:*)",
+      "Bash(mpremote ls:*)",
+      "Bash(ioreg:*)",
+      "Bash(python3:*)",
+      "Bash(lsof:*)"
+    ]
+  }
+}

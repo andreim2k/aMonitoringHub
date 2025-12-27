@@ -77,7 +77,7 @@ for config_num, (bus, sda, scl, description) in enumerate(i2c_configs, 1):
                 devices = i2c.scan()
                 
                 if devices:
-                    print(f"         ✓ DEVICES FOUND at {freq}Hz!")
+                    print(f"         [OK] DEVICES FOUND at {freq}Hz!")
                     for addr in devices:
                         device_name = known_devices.get(addr, "Unknown Device")
                         print(f"           Address 0x{addr:02X} ({addr:3d}) - {device_name}")
@@ -94,15 +94,18 @@ for config_num, (bus, sda, scl, description) in enumerate(i2c_configs, 1):
                                     print(f"           >>> Unknown chip ID: 0x{chip_id:02X}")
                             except OSError:
                                 print(f"           >>> Cannot read chip ID (I/O error)")
-                            except Exception:
-                                print(f"           >>> Cannot read chip ID")
+                            except Exception as e:
+                                print(f"           >>> Cannot read chip ID: {str(e)}")
                         
                         found_devices.append((bus, sda, scl, addr, device_name, freq))
                     break  # Found devices, no need to try other frequencies
                 
-            except Exception as e:
-                # Try next frequency
+            except OSError as e:
+                # Try next frequency on I/O error
                 pass
+            except Exception as e:
+                # Log other errors but continue
+                print(f"         Unexpected error: {str(e)}")
         
         # If no devices found at any frequency
         if not any(d[0] == bus and d[1] == sda and d[2] == scl for d in found_devices):
@@ -133,27 +136,27 @@ if found_devices:
     for (bus, sda, scl), devices in configs_with_devices.items():
         print(f"I2C{bus} - GP{sda}(SDA)/GP{scl}(SCL):")
         for addr, name, freq in devices:
-            print(f"  • 0x{addr:02X} ({addr:3d}) - {name} @ {freq}Hz")
+            print(f"  - 0x{addr:02X} ({addr:3d}) - {name} @ {freq}Hz")
         print()
     
     # BME280 specific results
     bme280_devices = [d for d in found_devices if d[3] in [0x76, 0x77]]
     if bme280_devices:
-        print("🎉 BME280/BMP280 ENVIRONMENTAL SENSOR(S) DETECTED!")
+        print("[SUCCESS] BME280/BMP280 ENVIRONMENTAL SENSOR(S) DETECTED!")
         for bus, sda, scl, addr, name, freq in bme280_devices:
-            print(f"   → Use I2C{bus} with SDA=GP{sda}, SCL=GP{scl}")
-            print(f"   → Device address: 0x{addr:02X}")
-            print(f"   → Working frequency: {freq}Hz")
+            print(f"   -> Use I2C{bus} with SDA=GP{sda}, SCL=GP{scl}")
+            print(f"   -> Device address: 0x{addr:02X}")
+            print(f"   -> Working frequency: {freq}Hz")
     else:
-        print("❌ No BME280/BMP280 sensors found")
-        
+        print("[FAIL] No BME280/BMP280 sensors found")
+
 else:
-    print("❌ NO I2C DEVICES FOUND")
+    print("[FAIL] NO I2C DEVICES FOUND")
     print("\nPossible issues:")
-    print("• No devices connected")
-    print("• Wrong wiring connections") 
-    print("• Power supply problems")
-    print("• Damaged sensors (especially if 5V was applied to 3.3V sensors)")
+    print("- No devices connected")
+    print("- Wrong wiring connections")
+    print("- Power supply problems")
+    print("- Damaged sensors (especially if 5V was applied to 3.3V sensors)")
 
 print("\n" + "=" * 50)
 print("RECOMMENDED NEXT STEPS")
@@ -161,17 +164,17 @@ print("=" * 50)
 
 if bme280_devices:
     bus, sda, scl, addr, name, freq = bme280_devices[0]
-    print("✓ BME280 found! Update your code to use:")
+    print("[OK] BME280 found! Update your code to use:")
     print(f"    i2c = I2C({bus}, sda=Pin({sda}), scl=Pin({scl}), freq={freq})")
     print(f"    bme280 = BME280(i2c, address=0x{addr:02X})")
 elif found_devices:
-    print("✓ Other I2C devices found, but no BME280")
-    print("• Check BME280 wiring and power (3.3V only!)")
-    print("• Try a different BME280 module")
+    print("[OK] Other I2C devices found, but no BME280")
+    print("- Check BME280 wiring and power (3.3V only!)")
+    print("- Try a different BME280 module")
 else:
-    print("• Check all wiring connections")
-    print("• Verify 3.3V power supply")
-    print("• Test with a known working I2C device")
-    print("• Consider that sensors may be damaged")
+    print("- Check all wiring connections")
+    print("- Verify 3.3V power supply")
+    print("- Test with a known working I2C device")
+    print("- Consider that sensors may be damaged")
 
 print("\nScan completed!")
