@@ -12,20 +12,21 @@ print("=== Raspberry Pi Pico Sensor Test ===")
 print("Testing BME280 and MQ135 sensors...")
 print("=" * 40)
 
-# BME280 I2C Configuration
-# Default I2C pins for Pico: SDA=GP4, SCL=GP5
-# Alternative pins: SDA=GP6, SCL=GP7 or SDA=GP16, SCL=GP17
-I2C_SDA = 4  # GPIO 4
-I2C_SCL = 5  # GPIO 5
-
-# MQ135 ADC Configuration
-# MQ135 analog output connected to ADC pin
-MQ135_PIN = 28  # GPIO 28 (ADC2)
+# Import configuration from lib/config
+try:
+    from lib.config import I2C_BUS, I2C_SDA_PIN, I2C_SCL_PIN, I2C_FREQ, MQ135_PIN
+except ImportError:
+    # Fallback defaults from lib/config
+    I2C_BUS = 1
+    I2C_SDA_PIN = 2
+    I2C_SCL_PIN = 3
+    I2C_FREQ = 400000
+    MQ135_PIN = 28
 
 # Initialize I2C for BME280
 try:
-    i2c = I2C(0, sda=Pin(I2C_SDA), scl=Pin(I2C_SCL), freq=400000)
-    print(f"✓ I2C initialized on SDA={I2C_SDA}, SCL={I2C_SCL}")
+    i2c = I2C(I2C_BUS, sda=Pin(I2C_SDA_PIN), scl=Pin(I2C_SCL_PIN), freq=I2C_FREQ)
+    print(f"✓ I2C{I2C_BUS} initialized on SDA=GP{I2C_SDA_PIN}, SCL=GP{I2C_SCL_PIN}")
 except Exception as e:
     print(f"✗ Failed to initialize I2C: {e}")
     sys.exit(1)
@@ -136,8 +137,8 @@ print("\n--- Wiring Guide ---")
 print("BME280 Connections:")
 print(f"  VCC → 3.3V")
 print(f"  GND → GND")
-print(f"  SDA → GP{I2C_SDA}")
-print(f"  SCL → GP{I2C_SCL}")
+print(f"  SDA → GP{I2C_SDA_PIN}")
+print(f"  SCL → GP{I2C_SCL_PIN}")
 
 print("MQ135 Connections:")
 print(f"  VCC → 5V (or 3.3V)")

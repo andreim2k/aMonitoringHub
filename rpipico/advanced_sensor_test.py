@@ -22,19 +22,18 @@ except ImportError:
     try:
         from bme280 import BME280
         USE_LIB_MODULES = False
-        BME280 = BME280
     except ImportError:
         print("Warning: BME280 library not found, using basic communication test only")
         BME280 = None
         USE_LIB_MODULES = False
-    
-    # Default config values
-    I2C_BUS = 0
-    I2C_SDA_PIN = 4
-    I2C_SCL_PIN = 5
+
+    # Default config values - MUST match lib/config.py!
+    I2C_BUS = 1
+    I2C_SDA_PIN = 2
+    I2C_SCL_PIN = 3
     I2C_FREQ = 400000
     MQ135_PIN = 28
-    MQ135_R_ZERO = 76.63
+    MQ135_R_ZERO = 42304.5  # Corrected value from lib/config
     MQ135_R_LOAD = 10000
 
 print("=== Advanced Raspberry Pi Pico Sensor Test ===")
