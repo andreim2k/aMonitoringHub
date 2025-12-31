@@ -20,6 +20,11 @@ I2C_FREQ = 400000  # 400kHz
 BME280_ADDRESSES = [0x76, 0x77]  # Common addresses (try both)
 BME280_DEFAULT_ADDRESS = 0x76
 BME280_CHIP_ID = 0x60
+BME280_STATUS_REGISTER = 0xF3  # Status register address
+BME280_DATA_READY_BIT = 3  # Bit 3 indicates data ready
+BME280_MEASURING_BIT = 0  # Bit 0 indicates measuring in progress
+BME280_RESET_REGISTER = 0xE0  # Reset register address
+BME280_RESET_VALUE = 0xB6  # Reset command value
 
 # MQ135 Configuration
 MQ135_PIN = 28  # GPIO 28 (ADC2, Pin 34)
@@ -51,6 +56,12 @@ BOOT_DELAY_SEC = 2.0  # Delay after boot to ensure USB is ready
 BME280_RETRY_DELAY_SEC = 2.0  # Delay between BME280 retry attempts
 SENSOR_READ_INTERVAL_SEC = 5.0  # Interval between sensor readings
 GC_COLLECT_INTERVAL = 60  # Garbage collection every N iterations
+BME280_RESET_INTERVAL = 100  # Reset sensor every N readings (0 = disabled)
+
+# I2C Recovery Configuration
+I2C_RECOVERY_RETRIES = 3  # Number of retries for I2C operations
+I2C_OPERATION_TIMEOUT_MS = 100  # Timeout for I2C operations in milliseconds
+I2C_STATUS_CHECK_TIMEOUT_MS = 500  # Timeout for waiting for sensor status
 
 # ADC Configuration
 ADC_MAX_VALUE = 65535

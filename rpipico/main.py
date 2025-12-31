@@ -18,7 +18,8 @@ try:
         MQ135_PIN, MQ135_R_ZERO, MQ135_R_LOAD,
         BME280_ADDRESSES, BME280_DEFAULT_ADDRESS,
         BOOT_DELAY_SEC, BME280_RETRY_DELAY_SEC,
-        SENSOR_READ_INTERVAL_SEC, GC_COLLECT_INTERVAL
+        SENSOR_READ_INTERVAL_SEC, GC_COLLECT_INTERVAL,
+        I2C_RECOVERY_RETRIES, BME280_RESET_INTERVAL
     )
 except ImportError as e:
     # Library modules are required - fail fast with clear error
@@ -29,6 +30,117 @@ except ImportError as e:
     }
     print(json.dumps(error_msg))
     raise
+
+
+# I2C and sensor recovery functions
+def reinitialize_i2c(max_retries=None):
+    """
+    Reinitialize the I2C bus with exponential backoff retry logic
+    Returns: I2C object or None if failed
+    """
+    if max_retries is None:
+        max_retries = I2C_RECOVERY_RETRIES
+    
+    for attempt in range(max_retries):
+        try:
+            # Try to create a new I2C bus
+            i2c = I2C(I2C_BUS, sda=Pin(I2C_SDA_PIN), scl=Pin(I2C_SCL_PIN), freq=I2C_FREQ)
+            # Verify bus is working by scanning
+            devices = i2c.scan()
+            if len(devices) > 0:
+                return i2c
+        except Exception as e:
+            if attempt < max_retries - 1:
+                # Exponential backoff: 2^attempt * 0.1 seconds
+                delay = (2 ** attempt) * 0.1
+                time.sleep(delay)
+            else:
+                error_msg = {
+                    "timestamp": time.ticks_ms() / 1000.0,
+                    "status": "error",
+                    "error": "I2C reinitialization failed",
+                    "details": str(e),
+                    "attempts": max_retries
+                }
+                print(json.dumps(error_msg))
+    
+    return None
+
+
+def recover_bme280(i2c, current_bme280=None, max_retries=None):
+    """
+    Attempt to recover BME280 sensor
+    Returns: BME280 object or None if recovery failed
+    """
+    if max_retries is None:
+        max_retries = I2C_RECOVERY_RETRIES
+    
+    if i2c is None:
+        return None
+    
+    # Step 1: Try to reset existing sensor if available
+    if current_bme280 is not None:
+        try:
+            current_bme280.reset()
+            # Verify sensor is responding
+            _ = current_bme280.check_status()
+            recovery_msg = {
+                "timestamp": time.ticks_ms() / 1000.0,
+                "status": "recovered",
+                "sensor": "bme280",
+                "method": "reset"
+            }
+            print(json.dumps(recovery_msg))
+            return current_bme280
+        except Exception:
+            pass  # Reset failed, try reinitializing
+    
+    # Step 2: Try to reinitialize sensor with exponential backoff
+    for address in BME280_ADDRESSES:
+        for attempt in range(max_retries):
+            try:
+                bme280 = BME280(i2c, address=address)
+                recovery_msg = {
+                    "timestamp": time.ticks_ms() / 1000.0,
+                    "status": "recovered",
+                    "sensor": "bme280",
+                    "method": "reinitialize",
+                    "address": f"0x{address:02X}",
+                    "attempt": attempt + 1
+                }
+                print(json.dumps(recovery_msg))
+                return bme280
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    # Exponential backoff: 2^attempt * base delay
+                    delay = (2 ** attempt) * BME280_RETRY_DELAY_SEC
+                    time.sleep(delay)
+                else:
+                    error_msg = {
+                        "timestamp": time.ticks_ms() / 1000.0,
+                        "status": "error",
+                        "error": "BME280 recovery failed",
+                        "address": f"0x{address:02X}",
+                        "details": str(e),
+                        "attempts": max_retries
+                    }
+                    print(json.dumps(error_msg))
+    
+    return None
+
+
+def check_i2c_bus_health(i2c):
+    """
+    Check if I2C bus is healthy by scanning for devices
+    Returns: True if bus is healthy, False otherwise
+    """
+    if i2c is None:
+        return False
+    try:
+        devices = i2c.scan()
+        return len(devices) > 0
+    except Exception:
+        return False
 
 
 # Auto-start monitoring function
@@ -178,6 +290,7 @@ def auto_start_monitoring():
     import gc
     gc.collect()
     iteration_count = 0
+    bme280_read_count = 0  # Counter for periodic reset
 
     while True:
         try:
@@ -191,6 +304,51 @@ def auto_start_monitoring():
             # Read BME280 if available
             if bme280 is not None:
                 try:
+                    # Check I2C bus health before reading
+                    if not check_i2c_bus_health(i2c):
+                        bus_error_msg = {
+                            "timestamp": timestamp,
+                            "status": "warning",
+                            "sensor": "bme280",
+                            "message": "I2C bus unhealthy, attempting recovery"
+                        }
+                        print(json.dumps(bus_error_msg))
+                        # Try to reinitialize I2C bus
+                        new_i2c = reinitialize_i2c()
+                        if new_i2c is not None:
+                            i2c = new_i2c
+                            # Try to recover BME280 with new bus
+                            bme280 = recover_bme280(i2c, current_bme280=bme280)
+                            if bme280 is None:
+                                # Recovery failed, skip this reading
+                                continue
+                        else:
+                            # I2C recovery failed, skip this reading
+                            continue
+                    
+                    # Periodic sensor reset (if enabled)
+                    if BME280_RESET_INTERVAL > 0 and bme280_read_count > 0 and bme280_read_count % BME280_RESET_INTERVAL == 0:
+                        try:
+                            bme280.reset()
+                            reset_msg = {
+                                "timestamp": timestamp,
+                                "status": "info",
+                                "sensor": "bme280",
+                                "message": "Periodic reset performed",
+                                "read_count": bme280_read_count
+                            }
+                            print(json.dumps(reset_msg))
+                        except Exception as reset_error:
+                            reset_error_msg = {
+                                "timestamp": timestamp,
+                                "status": "warning",
+                                "sensor": "bme280",
+                                "error": "Periodic reset failed",
+                                "details": str(reset_error)
+                            }
+                            print(json.dumps(reset_error_msg))
+                    
+                    # Read sensor data
                     temp_c, pressure_pa, humidity_pct = bme280.read_compensated_data()
                     pressure_hpa = pressure_pa / 100.0
                     sensor_data["bme280"] = {
@@ -199,16 +357,59 @@ def auto_start_monitoring():
                         "pressure_hpa": round(pressure_hpa, 1),
                         "pressure_pa": round(pressure_pa, 0)
                     }
+                    bme280_read_count += 1
                 except Exception as e:
-                    # BME280 error, but continue with MQ135 - output as JSON
+                    # BME280 error - attempt recovery
                     error_data = {
                         "timestamp": timestamp,
                         "status": "error",
                         "sensor": "bme280",
                         "error": "BME280 read error",
-                        "details": str(e)
+                        "details": str(e),
+                        "attempting_recovery": True
                     }
                     print(json.dumps(error_data))
+                    
+                    # Attempt recovery: first try reset, then reinitialize bus if needed
+                    recovery_successful = False
+                    
+                    # Step 1: Try to reset sensor
+                    try:
+                        if bme280 is not None:
+                            bme280.reset()
+                            # Verify sensor responds
+                            _ = bme280.check_status()
+                            recovery_successful = True
+                            recovery_msg = {
+                                "timestamp": timestamp,
+                                "status": "recovered",
+                                "sensor": "bme280",
+                                "method": "reset"
+                            }
+                            print(json.dumps(recovery_msg))
+                    except Exception:
+                        pass  # Reset failed, try bus recovery
+                    
+                    # Step 2: If reset failed, try reinitializing I2C bus
+                    if not recovery_successful:
+                        new_i2c = reinitialize_i2c()
+                        if new_i2c is not None:
+                            i2c = new_i2c
+                            # Step 3: Try to recover BME280 with new bus
+                            recovered_bme280 = recover_bme280(i2c, current_bme280=bme280)
+                            if recovered_bme280 is not None:
+                                bme280 = recovered_bme280
+                                recovery_successful = True
+                    
+                    if not recovery_successful:
+                        # Recovery failed - sensor unavailable for this cycle
+                        unavailable_msg = {
+                            "timestamp": timestamp,
+                            "status": "warning",
+                            "sensor": "bme280",
+                            "message": "BME280 unavailable after recovery attempts"
+                        }
+                        print(json.dumps(unavailable_msg))
 
             # Always try to read MQ135
             if mq135 is not None:

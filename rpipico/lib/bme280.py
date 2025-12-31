@@ -7,12 +7,25 @@ import time
 from machine import I2C
 
 try:
-    from lib.config import BME280_DEFAULT_ADDRESS, BME280_CHIP_ID, VALID_I2C_ADDRESSES
+    from lib.config import (
+        BME280_DEFAULT_ADDRESS, BME280_CHIP_ID, VALID_I2C_ADDRESSES,
+        BME280_STATUS_REGISTER, BME280_DATA_READY_BIT, BME280_MEASURING_BIT,
+        BME280_RESET_REGISTER, BME280_RESET_VALUE,
+        I2C_RECOVERY_RETRIES, I2C_OPERATION_TIMEOUT_MS, I2C_STATUS_CHECK_TIMEOUT_MS
+    )
 except ImportError:
     # Fallback defaults if config not available
     BME280_DEFAULT_ADDRESS = 0x76
     BME280_CHIP_ID = 0x60
     VALID_I2C_ADDRESSES = list(range(0x08, 0x78))
+    BME280_STATUS_REGISTER = 0xF3
+    BME280_DATA_READY_BIT = 3
+    BME280_MEASURING_BIT = 0
+    BME280_RESET_REGISTER = 0xE0
+    BME280_RESET_VALUE = 0xB6
+    I2C_RECOVERY_RETRIES = 3
+    I2C_OPERATION_TIMEOUT_MS = 100
+    I2C_STATUS_CHECK_TIMEOUT_MS = 500
 
 # Float comparison epsilon
 EPSILON = 1e-6
@@ -50,8 +63,7 @@ class BME280:
             raise ValueError(f"Invalid chip ID: 0x{chip_id:02X}, expected 0x{BME280_CHIP_ID:02X}")
         
         # Reset sensor
-        self._write_register(0xE0, 0xB6)
-        time.sleep(0.01)
+        self.reset()
         
         # Read calibration data
         self._read_calibration_data()
@@ -60,16 +72,61 @@ class BME280:
         self._configure_sensor()
     
     def _read_register(self, reg):
-        """Read a single register"""
-        return self.i2c.readfrom_mem(self.address, reg, 1)[0]
+        """Read a single register with retry logic"""
+        last_error = None
+        for attempt in range(I2C_RECOVERY_RETRIES):
+            try:
+                start_time = time.ticks_ms()
+                result = self.i2c.readfrom_mem(self.address, reg, 1)[0]
+                # Check for timeout
+                if time.ticks_diff(time.ticks_ms(), start_time) > I2C_OPERATION_TIMEOUT_MS:
+                    raise OSError("I2C read timeout")
+                return result
+            except (OSError, ValueError) as e:
+                last_error = e
+                if attempt < I2C_RECOVERY_RETRIES - 1:
+                    time.sleep(0.01)  # Short delay before retry
+                else:
+                    raise last_error
+        raise last_error
     
     def _read_registers(self, reg, count):
-        """Read multiple registers"""
-        return self.i2c.readfrom_mem(self.address, reg, count)
+        """Read multiple registers with retry logic"""
+        last_error = None
+        for attempt in range(I2C_RECOVERY_RETRIES):
+            try:
+                start_time = time.ticks_ms()
+                result = self.i2c.readfrom_mem(self.address, reg, count)
+                # Check for timeout
+                if time.ticks_diff(time.ticks_ms(), start_time) > I2C_OPERATION_TIMEOUT_MS:
+                    raise OSError("I2C read timeout")
+                return result
+            except (OSError, ValueError) as e:
+                last_error = e
+                if attempt < I2C_RECOVERY_RETRIES - 1:
+                    time.sleep(0.01)  # Short delay before retry
+                else:
+                    raise last_error
+        raise last_error
     
     def _write_register(self, reg, value):
-        """Write to a register"""
-        self.i2c.writeto_mem(self.address, reg, bytes([value]))
+        """Write to a register with retry logic"""
+        last_error = None
+        for attempt in range(I2C_RECOVERY_RETRIES):
+            try:
+                start_time = time.ticks_ms()
+                self.i2c.writeto_mem(self.address, reg, bytes([value]))
+                # Check for timeout
+                if time.ticks_diff(time.ticks_ms(), start_time) > I2C_OPERATION_TIMEOUT_MS:
+                    raise OSError("I2C write timeout")
+                return
+            except (OSError, ValueError) as e:
+                last_error = e
+                if attempt < I2C_RECOVERY_RETRIES - 1:
+                    time.sleep(0.01)  # Short delay before retry
+                else:
+                    raise last_error
+        raise last_error
     
     def _read_calibration_data(self):
         """Read calibration coefficients"""
@@ -117,8 +174,54 @@ class BME280:
         # Set config: standby 1000ms, filter off
         self._write_register(0xF5, 0xA0)
     
+    def reset(self):
+        """Reset the BME280 sensor"""
+        try:
+            self._write_register(BME280_RESET_REGISTER, BME280_RESET_VALUE)
+            time.sleep(0.01)  # Wait for reset to complete
+            # Wait for sensor to be ready after reset
+            time.sleep(0.01)
+        except Exception as e:
+            raise OSError(f"BME280 reset failed: {e}")
+    
+    def check_status(self):
+        """Read the status register"""
+        try:
+            return self._read_register(BME280_STATUS_REGISTER)
+        except Exception as e:
+            raise OSError(f"Failed to read status register: {e}")
+    
+    def is_ready(self):
+        """Check if sensor data is ready (not measuring and data ready)"""
+        try:
+            status = self.check_status()
+            # Bit 0 = measuring, Bit 3 = data ready
+            # Data is ready when measuring bit is 0 and data ready bit is 1
+            measuring = (status >> BME280_MEASURING_BIT) & 0x01
+            data_ready = (status >> BME280_DATA_READY_BIT) & 0x01
+            return measuring == 0 and data_ready == 1
+        except Exception:
+            return False
+    
+    def wait_for_ready(self, timeout_ms=None):
+        """Wait for sensor to be ready with timeout"""
+        if timeout_ms is None:
+            timeout_ms = I2C_STATUS_CHECK_TIMEOUT_MS
+        
+        start_time = time.ticks_ms()
+        while time.ticks_diff(time.ticks_ms(), start_time) < timeout_ms:
+            if self.is_ready():
+                return True
+            time.sleep(0.01)  # Small delay between checks
+        
+        return False
+    
     def read_raw_data(self):
         """Read raw sensor data"""
+        # Wait for sensor to be ready before reading
+        if not self.wait_for_ready():
+            raise OSError("BME280 sensor not ready - timeout waiting for data")
+        
         # Read pressure, temperature, and humidity data
         data = self._read_registers(0xF7, 8)
         
