@@ -26,6 +26,10 @@ BME280_MEASURING_BIT = 0  # Bit 0 indicates measuring in progress
 BME280_RESET_REGISTER = 0xE0  # Reset register address
 BME280_RESET_VALUE = 0xB6  # Reset command value
 
+# LED Configuration
+LED_PIN = 25  # GPIO 25 (onboard green LED on Pico)
+LED_BLINK_DURATION_MS = 100  # LED on duration in milliseconds
+
 # MQ135 Configuration
 MQ135_PIN = 28  # GPIO 28 (ADC2, Pin 34)
 MQ135_R_LOAD = 10000  # 10kΩ load resistor

@@ -19,7 +19,8 @@ try:
         BME280_ADDRESSES, BME280_DEFAULT_ADDRESS,
         BOOT_DELAY_SEC, BME280_RETRY_DELAY_SEC,
         SENSOR_READ_INTERVAL_SEC, GC_COLLECT_INTERVAL,
-        I2C_RECOVERY_RETRIES, BME280_RESET_INTERVAL
+        I2C_RECOVERY_RETRIES, BME280_RESET_INTERVAL,
+        LED_PIN, LED_BLINK_DURATION_MS
     )
 except ImportError as e:
     # Library modules are required - fail fast with clear error
@@ -143,6 +144,52 @@ def check_i2c_bus_health(i2c):
         return False
 
 
+def blink_led(led_pin, duration_ms=LED_BLINK_DURATION_MS):
+    """
+    Single blink of the LED for a specified duration
+    """
+    try:
+        led_pin.on()
+        time.sleep(duration_ms / 1000.0)
+        led_pin.off()
+    except Exception:
+        pass  # Silently fail if LED operation fails
+
+
+def blink_pattern(led_pin, count, duration_ms=LED_BLINK_DURATION_MS, pause_ms=150):
+    """
+    Blink the LED multiple times with pauses between blinks
+    count: number of blinks (1=BME280 only, 2=MQ135 only, 3=both sensors)
+    """
+    if led_pin is None:
+        return
+    try:
+        for i in range(count):
+            led_pin.on()
+            time.sleep(duration_ms / 1000.0)
+            led_pin.off()
+            if i < count - 1:  # Pause between blinks, not after last
+                time.sleep(pause_ms / 1000.0)
+    except Exception:
+        pass  # Silently fail if LED operation fails
+
+
+def blink_error(led_pin, duration_ms=200):
+    """
+    Slow continuous blinks (error state)
+    """
+    if led_pin is None:
+        return
+    try:
+        for _ in range(3):  # 3 slow blinks
+            led_pin.on()
+            time.sleep(duration_ms / 1000.0)
+            led_pin.off()
+            time.sleep(duration_ms / 1000.0)
+    except Exception:
+        pass  # Silently fail if LED operation fails
+
+
 # Auto-start monitoring function
 def auto_start_monitoring():
     """Auto-start monitoring on boot"""
@@ -158,7 +205,27 @@ def auto_start_monitoring():
     
     # Delay to ensure USB is ready (from config)
     time.sleep(BOOT_DELAY_SEC)
-    
+
+    # Initialize LED
+    led = None
+    try:
+        led = Pin(LED_PIN, Pin.OUT)
+        led.off()
+        led_msg = {
+            "timestamp": time.ticks_ms() / 1000.0,
+            "status": "led_initialized",
+            "pin": LED_PIN
+        }
+        print(json.dumps(led_msg))
+    except Exception as e:
+        led_error_msg = {
+            "timestamp": time.ticks_ms() / 1000.0,
+            "status": "warning",
+            "message": "LED initialization failed",
+            "details": str(e)
+        }
+        print(json.dumps(led_error_msg))
+
     # Initialize I2C bus once (do not create in loop)
     i2c = None
     try:
@@ -273,7 +340,37 @@ def auto_start_monitoring():
             "message": "Check all connections"
         }
         print(json.dumps(error_msg))
+        # Blink error pattern
+        blink_error(led)
         return
+
+    # Diagnostic blink pattern to show which sensors are available
+    # 1 blink = BME280 only, 2 blinks = MQ135 only, 3 blinks = both
+    time.sleep(0.5)  # Pause before diagnostic
+    if bme280 is not None and mq135 is not None:
+        diagnostic_msg = {
+            "timestamp": time.ticks_ms() / 1000.0,
+            "status": "diagnostic",
+            "message": "Both sensors available (3 blinks)"
+        }
+        print(json.dumps(diagnostic_msg))
+        blink_pattern(led, 3)  # Both sensors
+    elif bme280 is not None:
+        diagnostic_msg = {
+            "timestamp": time.ticks_ms() / 1000.0,
+            "status": "diagnostic",
+            "message": "Only BME280 available (1 blink)"
+        }
+        print(json.dumps(diagnostic_msg))
+        blink_pattern(led, 1)  # BME280 only
+    else:  # mq135 is not None
+        diagnostic_msg = {
+            "timestamp": time.ticks_ms() / 1000.0,
+            "status": "diagnostic",
+            "message": "Only MQ135 available (2 blinks)"
+        }
+        print(json.dumps(diagnostic_msg))
+        blink_pattern(led, 2)  # MQ135 only
 
     # Start monitoring message
     start_msg = {
@@ -300,6 +397,10 @@ def auto_start_monitoring():
                 "timestamp": timestamp,
                 "timestamp_since_boot": timestamp - boot_timestamp
             }
+
+            # Track which sensors successfully read
+            bme280_read_ok = False
+            mq135_read_ok = False
 
             # Read BME280 if available
             if bme280 is not None:
@@ -358,6 +459,7 @@ def auto_start_monitoring():
                         "pressure_pa": round(pressure_pa, 0)
                     }
                     bme280_read_count += 1
+                    bme280_read_ok = True
                 except Exception as e:
                     # BME280 error - attempt recovery
                     error_data = {
@@ -416,6 +518,7 @@ def auto_start_monitoring():
                 try:
                     mq135_data = mq135.get_all_readings()
                     sensor_data["mq135"] = mq135_data
+                    mq135_read_ok = True
                 except Exception as e:
                     # MQ135 error - output as JSON
                     error_data = {
@@ -429,6 +532,18 @@ def auto_start_monitoring():
 
             # Output JSON to USB serial
             print(json.dumps(sensor_data))
+
+            # Blink LED pattern based on which sensors read successfully
+            # 1 blink = BME280 only, 2 blinks = MQ135 only, 3 blinks = both
+            if led is not None:
+                if bme280_read_ok and mq135_read_ok:
+                    blink_pattern(led, 3)  # Both sensors OK
+                elif bme280_read_ok:
+                    blink_pattern(led, 1)  # BME280 only
+                elif mq135_read_ok:
+                    blink_pattern(led, 2)  # MQ135 only
+                else:
+                    blink_error(led)  # Neither sensor read OK
 
             # Periodic garbage collection (from config)
             iteration_count += 1
