@@ -49,7 +49,7 @@ AQ_VERY_POOR = 2500
 # Timing Configuration
 BOOT_DELAY_SEC = 2.0  # Delay after boot to ensure USB is ready
 BME280_RETRY_DELAY_SEC = 2.0  # Delay between BME280 retry attempts
-SENSOR_READ_INTERVAL_SEC = 1.0  # Interval between sensor readings
+SENSOR_READ_INTERVAL_SEC = 5.0  # Interval between sensor readings
 GC_COLLECT_INTERVAL = 60  # Garbage collection every N iterations
 
 # ADC Configuration
