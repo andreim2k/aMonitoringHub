@@ -4,17 +4,18 @@ Centralized configuration for I2C pins, sensor addresses, and calibration values
 """
 
 # I2C Configuration
-# I2C1 configuration: SDA=GP2, SCL=GP3
-# This configuration uses I2C1 bus with GPIO 2 and 3
+# I2C1 configuration: SDA=GP14, SCL=GP15
+# This configuration uses I2C1 bus with GPIO 14 and 15 (BME280 is actually on these pins!)
 I2C_BUS = 1
-I2C_SDA_PIN = 2  # GPIO 2 (Pin 4)
-I2C_SCL_PIN = 3  # GPIO 3 (Pin 5)
+I2C_SDA_PIN = 14  # GPIO 14 (Pin 19)
+I2C_SCL_PIN = 15  # GPIO 15 (Pin 20)
 I2C_FREQ = 400000  # 400kHz
 
-# Alternative I2C configuration (I2C0)
-# I2C_BUS_ALT = 0
-# I2C_SDA_PIN_ALT = 4  # GPIO 4 (Pin 6)
-# I2C_SCL_PIN_ALT = 5  # GPIO 5 (Pin 7)
+# Alternative I2C configurations
+# I2C0 configuration (not used):
+# I2C_BUS = 0
+# I2C_SDA_PIN = 16  # GPIO 16 (Pin 21)
+# I2C_SCL_PIN = 17  # GPIO 17 (Pin 22)
 
 # BME280 Configuration
 BME280_ADDRESSES = [0x76, 0x77]  # Common addresses (try both)
