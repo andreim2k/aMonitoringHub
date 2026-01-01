@@ -167,12 +167,13 @@ class BME280:
         """Configure sensor settings"""
         # Set humidity oversampling to x1
         self._write_register(0xF2, 0x01)
-        
+
         # Set temperature and pressure oversampling to x1, normal mode
         self._write_register(0xF4, 0x27)
-        
-        # Set config: standby 1000ms, filter off
-        self._write_register(0xF5, 0xA0)
+
+        # Set config: standby 62.5ms (was 1000ms), filter off
+        # 0x20 = bits 7-5 (t_sb) = 001 = 62.5ms standby
+        self._write_register(0xF5, 0x20)
     
     def reset(self):
         """Reset the BME280 sensor"""
