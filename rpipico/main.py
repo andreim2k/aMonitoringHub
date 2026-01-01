@@ -405,49 +405,31 @@ def auto_start_monitoring():
             # Read BME280 if available
             if bme280 is not None:
                 try:
-                    # Check I2C bus health before reading
-                    if not check_i2c_bus_health(i2c):
-                        bus_error_msg = {
-                            "timestamp": timestamp,
-                            "status": "warning",
-                            "sensor": "bme280",
-                            "message": "I2C bus unhealthy, attempting recovery"
-                        }
-                        print(json.dumps(bus_error_msg))
-                        # Try to reinitialize I2C bus
-                        new_i2c = reinitialize_i2c()
-                        if new_i2c is not None:
-                            i2c = new_i2c
-                            # Try to recover BME280 with new bus
-                            bme280 = recover_bme280(i2c, current_bme280=bme280)
-                            if bme280 is None:
-                                # Recovery failed, skip this reading
-                                continue
-                        else:
-                            # I2C recovery failed, skip this reading
-                            continue
-                    
-                    # Periodic sensor reset (if enabled)
-                    if BME280_RESET_INTERVAL > 0 and bme280_read_count > 0 and bme280_read_count % BME280_RESET_INTERVAL == 0:
-                        try:
-                            bme280.reset()
-                            reset_msg = {
-                                "timestamp": timestamp,
-                                "status": "info",
-                                "sensor": "bme280",
-                                "message": "Periodic reset performed",
-                                "read_count": bme280_read_count
-                            }
-                            print(json.dumps(reset_msg))
-                        except Exception as reset_error:
-                            reset_error_msg = {
-                                "timestamp": timestamp,
-                                "status": "warning",
-                                "sensor": "bme280",
-                                "error": "Periodic reset failed",
-                                "details": str(reset_error)
-                            }
-                            print(json.dumps(reset_error_msg))
+                    # Note: Removed aggressive I2C bus health check - it was locking up the sensor
+                    # Health checks will happen only if read fails (in exception handler)
+
+                    # Periodic sensor reset (if enabled) - DISABLED for now to prevent sensor lockup
+                    # if BME280_RESET_INTERVAL > 0 and bme280_read_count > 0 and bme280_read_count % BME280_RESET_INTERVAL == 0:
+                    #     try:
+                    #         bme280.reset()
+                    #         time.sleep(0.5)  # Give sensor time to recover
+                    #         reset_msg = {
+                    #             "timestamp": timestamp,
+                    #             "status": "info",
+                    #             "sensor": "bme280",
+                    #             "message": "Periodic reset performed",
+                    #             "read_count": bme280_read_count
+                    #         }
+                    #         print(json.dumps(reset_msg))
+                    #     except Exception as reset_error:
+                    #         reset_error_msg = {
+                    #             "timestamp": timestamp,
+                    #             "status": "warning",
+                    #             "sensor": "bme280",
+                    #             "error": "Periodic reset failed",
+                    #             "details": str(reset_error)
+                    #         }
+                    #         print(json.dumps(reset_error_msg))
                     
                     # Read sensor data
                     temp_c, pressure_pa, humidity_pct = bme280.read_compensated_data()
