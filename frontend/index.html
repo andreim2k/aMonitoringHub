@@ -1559,10 +1559,11 @@
     /**
      * Formats a humidity value into a string with one decimal place and a percent symbol.
      * @param {number | null | undefined} value - The humidity value.
-     * @returns {string} The formatted humidity string (e.g., "55.1%").
+     * @returns {string} The formatted humidity string (e.g., "55.1%") or "N/A" if sensor doesn't support it.
      */
     function formatHumidity(value) {
       if (value === null || value === undefined) return '--%';
+      if (value === 0.0) return 'N/A';
       return parseFloat(value).toFixed(1) + '%';
     }
 
