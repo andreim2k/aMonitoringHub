@@ -27,20 +27,23 @@ echo "Pico detected! Starting file transfer..."
 echo ""
 
 # Copy main files
-echo "[1/5] Copying main.py..."
+echo "[1/6] Copying main.py..."
 mpremote connect auto cp main.py :main.py
 
 # Copy library files
-echo "[2/5] Copying lib/bme280.py..."
-mpremote connect auto cp lib/bme280.py :lib/bme280.py
+echo "[2/6] Copying lib/bme280_spi.py..."
+mpremote connect auto cp lib/bme280_spi.py :lib/bme280_spi.py
 
-echo "[3/5] Copying lib/config.py..."
+echo "[3/6] Copying lib/mq135.py..."
+mpremote connect auto cp lib/mq135.py :lib/mq135.py
+
+echo "[4/6] Copying lib/config.py..."
 mpremote connect auto cp lib/config.py :lib/config.py
 
-echo "[4/5] Copying lib/__init__.py..."
+echo "[5/6] Copying lib/__init__.py..."
 mpremote connect auto cp lib/__init__.py :lib/__init__.py
 
-echo "[5/5] Copying boot.py..."
+echo "[6/6] Copying boot.py..."
 mpremote connect auto cp boot.py :boot.py
 
 echo ""

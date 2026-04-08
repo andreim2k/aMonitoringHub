@@ -1,84 +1,107 @@
 """
 Auto-boot JSON Sensor Monitor for Raspberry Pi Pico
 This file runs automatically when the Pico boots up
-Outputs BME280 + MQ135 sensor data in JSON format every second over USB
+Outputs BME280 (SPI) + MQ135 sensor data in JSON format every second over USB
 """
 
 import json
 import time
 import machine
-from machine import Pin, I2C, ADC
+from machine import Pin, I2C, SPI, ADC
 
 # Import sensor libraries and configuration
 try:
-    from lib.bme280 import BME280
+    from lib.bme280_spi import BME280_SPI
     from lib.mq135 import MQ135
     from lib.config import (
-        I2C_BUS, I2C_SDA_PIN, I2C_SCL_PIN, I2C_FREQ,
-        MQ135_PIN, MQ135_R_ZERO, MQ135_R_LOAD,
-        BME280_ADDRESSES, BME280_DEFAULT_ADDRESS,
-        BOOT_DELAY_SEC, BME280_RETRY_DELAY_SEC,
-        SENSOR_READ_INTERVAL_SEC, GC_COLLECT_INTERVAL,
-        I2C_RECOVERY_RETRIES, BME280_RESET_INTERVAL,
-        LED_PIN, LED_BLINK_DURATION_MS
+        I2C_BUS,
+        I2C_SDA_PIN,
+        I2C_SCL_PIN,
+        I2C_FREQ,
+        SPI_BUS,
+        SPI_SCK_PIN,
+        SPI_MOSI_PIN,
+        SPI_MISO_PIN,
+        SPI_CS_PIN,
+        SPI_FREQ,
+        SPI_POLARITY,
+        SPI_PHASE,
+        MQ135_PIN,
+        MQ135_R_ZERO,
+        MQ135_R_LOAD,
+        BOOT_DELAY_SEC,
+        BME280_RETRY_DELAY_SEC,
+        SENSOR_READ_INTERVAL_SEC,
+        GC_COLLECT_INTERVAL,
+        I2C_RECOVERY_RETRIES,
+        BME280_RESET_INTERVAL,
+        LED_PIN,
+        LED_BLINK_DURATION_MS,
     )
 except ImportError as e:
     # Library modules are required - fail fast with clear error
     error_msg = {
         "error": "Failed to import required libraries",
         "details": str(e),
-        "message": "Ensure lib/ directory is present with bme280.py, mq135.py, and config.py"
+        "message": "Ensure lib/ directory is present with bme280_spi.py, mq135.py, and config.py",
     }
     print(json.dumps(error_msg))
     raise
 
 
-# I2C and sensor recovery functions
-def reinitialize_i2c(max_retries=None):
+# SPI and sensor recovery functions
+def reinitialize_spi(max_retries=None):
     """
-    Reinitialize the I2C bus with exponential backoff retry logic
-    Returns: I2C object or None if failed
+    Reinitialize the SPI bus with exponential backoff retry logic
+    Returns: (SPI object, CS pin object) or (None, None) if failed
     """
     if max_retries is None:
         max_retries = I2C_RECOVERY_RETRIES
-    
+
     for attempt in range(max_retries):
         try:
-            # Try to create a new I2C bus
-            i2c = I2C(I2C_BUS, sda=Pin(I2C_SDA_PIN), scl=Pin(I2C_SCL_PIN), freq=I2C_FREQ)
-            # Verify bus is working by scanning
-            devices = i2c.scan()
-            if len(devices) > 0:
-                return i2c
+            # Try to create a new SPI bus with proper BME280 mode (SPI Mode 0)
+            spi = SPI(
+                SPI_BUS,
+                baudrate=SPI_FREQ,
+                polarity=SPI_POLARITY,
+                phase=SPI_PHASE,
+                sck=Pin(SPI_SCK_PIN),
+                mosi=Pin(SPI_MOSI_PIN),
+                miso=Pin(SPI_MISO_PIN),
+            )
+            cs_pin = Pin(SPI_CS_PIN, Pin.OUT)
+            cs_pin.on()  # Deselect initially
+            return spi, cs_pin
         except Exception as e:
             if attempt < max_retries - 1:
                 # Exponential backoff: 2^attempt * 0.1 seconds
-                delay = (2 ** attempt) * 0.1
+                delay = (2**attempt) * 0.1
                 time.sleep(delay)
             else:
                 error_msg = {
                     "timestamp": time.ticks_ms() / 1000.0,
                     "status": "error",
-                    "error": "I2C reinitialization failed",
+                    "error": "SPI reinitialization failed",
                     "details": str(e),
-                    "attempts": max_retries
+                    "attempts": max_retries,
                 }
                 print(json.dumps(error_msg))
-    
-    return None
+
+    return None, None
 
 
-def recover_bme280(i2c, current_bme280=None, max_retries=None):
+def recover_bme280_spi(spi, cs_pin, current_bme280=None, max_retries=None):
     """
-    Attempt to recover BME280 sensor
-    Returns: BME280 object or None if recovery failed
+    Attempt to recover BME280 sensor via SPI
+    Returns: BME280_SPI object or None if recovery failed
     """
     if max_retries is None:
         max_retries = I2C_RECOVERY_RETRIES
-    
-    if i2c is None:
+
+    if spi is None or cs_pin is None:
         return None
-    
+
     # Step 1: Try to reset existing sensor if available
     if current_bme280 is not None:
         try:
@@ -89,59 +112,42 @@ def recover_bme280(i2c, current_bme280=None, max_retries=None):
                 "timestamp": time.ticks_ms() / 1000.0,
                 "status": "recovered",
                 "sensor": "bme280",
-                "method": "reset"
+                "method": "reset",
             }
             print(json.dumps(recovery_msg))
             return current_bme280
         except Exception:
             pass  # Reset failed, try reinitializing
-    
+
     # Step 2: Try to reinitialize sensor with exponential backoff
-    for address in BME280_ADDRESSES:
-        for attempt in range(max_retries):
-            try:
-                bme280 = BME280(i2c, address=address)
-                recovery_msg = {
+    for attempt in range(max_retries):
+        try:
+            bme280 = BME280_SPI(spi, cs_pin)
+            recovery_msg = {
+                "timestamp": time.ticks_ms() / 1000.0,
+                "status": "recovered",
+                "sensor": "bme280",
+                "method": "reinitialize",
+                "attempt": attempt + 1,
+            }
+            print(json.dumps(recovery_msg))
+            return bme280
+        except Exception as e:
+            if attempt < max_retries - 1:
+                # Exponential backoff: 2^attempt * base delay
+                delay = (2**attempt) * BME280_RETRY_DELAY_SEC
+                time.sleep(delay)
+            else:
+                error_msg = {
                     "timestamp": time.ticks_ms() / 1000.0,
-                    "status": "recovered",
-                    "sensor": "bme280",
-                    "method": "reinitialize",
-                    "address": f"0x{address:02X}",
-                    "attempt": attempt + 1
+                    "status": "error",
+                    "error": "BME280 recovery failed",
+                    "details": str(e),
+                    "attempts": max_retries,
                 }
-                print(json.dumps(recovery_msg))
-                return bme280
-            except Exception as e:
-                if attempt < max_retries - 1:
-                    # Exponential backoff: 2^attempt * base delay
-                    delay = (2 ** attempt) * BME280_RETRY_DELAY_SEC
-                    time.sleep(delay)
-                else:
-                    error_msg = {
-                        "timestamp": time.ticks_ms() / 1000.0,
-                        "status": "error",
-                        "error": "BME280 recovery failed",
-                        "address": f"0x{address:02X}",
-                        "details": str(e),
-                        "attempts": max_retries
-                    }
-                    print(json.dumps(error_msg))
-    
+                print(json.dumps(error_msg))
+
     return None
-
-
-def check_i2c_bus_health(i2c):
-    """
-    Check if I2C bus is healthy by scanning for devices
-    Returns: True if bus is healthy, False otherwise
-    """
-    if i2c is None:
-        return False
-    try:
-        devices = i2c.scan()
-        return len(devices) > 0
-    except Exception:
-        return False
 
 
 def blink_led(led_pin, duration_ms=LED_BLINK_DURATION_MS):
@@ -194,15 +200,15 @@ def blink_error(led_pin, duration_ms=200):
 def auto_start_monitoring():
     """Auto-start monitoring on boot"""
     boot_timestamp = time.ticks_ms() / 1000.0
-    
+
     # Output startup message as JSON for consistency
     startup_msg = {
         "timestamp": boot_timestamp,
         "status": "starting",
-        "message": "Auto-starting JSON sensor monitoring..."
+        "message": "Auto-starting JSON sensor monitoring...",
     }
     print(json.dumps(startup_msg))
-    
+
     # Delay to ensure USB is ready (from config)
     time.sleep(BOOT_DELAY_SEC)
 
@@ -214,7 +220,7 @@ def auto_start_monitoring():
         led_msg = {
             "timestamp": time.ticks_ms() / 1000.0,
             "status": "led_initialized",
-            "pin": LED_PIN
+            "pin": LED_PIN,
         }
         print(json.dumps(led_msg))
     except Exception as e:
@@ -222,11 +228,11 @@ def auto_start_monitoring():
             "timestamp": time.ticks_ms() / 1000.0,
             "status": "warning",
             "message": "LED initialization failed",
-            "details": str(e)
+            "details": str(e),
         }
         print(json.dumps(led_error_msg))
 
-    # Initialize I2C bus once (do not create in loop)
+    # Initialize I2C bus (used by other sensors)
     i2c = None
     try:
         i2c = I2C(I2C_BUS, sda=Pin(I2C_SDA_PIN), scl=Pin(I2C_SCL_PIN), freq=I2C_FREQ)
@@ -236,7 +242,7 @@ def auto_start_monitoring():
             "bus": I2C_BUS,
             "sda_pin": I2C_SDA_PIN,
             "scl_pin": I2C_SCL_PIN,
-            "frequency": I2C_FREQ
+            "frequency": I2C_FREQ,
         }
         print(json.dumps(i2c_msg))
     except Exception as e:
@@ -244,7 +250,43 @@ def auto_start_monitoring():
             "timestamp": time.ticks_ms() / 1000.0,
             "status": "error",
             "error": "I2C bus initialization failed",
-            "details": str(e)
+            "details": str(e),
+        }
+        print(json.dumps(error_msg))
+
+    # Initialize SPI bus for GY-BME280
+    spi = None
+    cs_pin = None
+    try:
+        # BME280 requires SPI Mode 0 (CPOL=0, CPHA=0)
+        spi = SPI(
+            SPI_BUS,
+            baudrate=SPI_FREQ,
+            polarity=SPI_POLARITY,
+            phase=SPI_PHASE,
+            sck=Pin(SPI_SCK_PIN),
+            mosi=Pin(SPI_MOSI_PIN),
+            miso=Pin(SPI_MISO_PIN),
+        )
+        cs_pin = Pin(SPI_CS_PIN, Pin.OUT)
+        cs_pin.on()  # Deselect initially
+        spi_msg = {
+            "timestamp": time.ticks_ms() / 1000.0,
+            "status": "spi_initialized",
+            "bus": SPI_BUS,
+            "sck_pin": SPI_SCK_PIN,
+            "mosi_pin": SPI_MOSI_PIN,
+            "miso_pin": SPI_MISO_PIN,
+            "cs_pin": SPI_CS_PIN,
+            "frequency": SPI_FREQ,
+        }
+        print(json.dumps(spi_msg))
+    except Exception as e:
+        error_msg = {
+            "timestamp": time.ticks_ms() / 1000.0,
+            "status": "error",
+            "error": "SPI bus initialization failed",
+            "details": str(e),
         }
         print(json.dumps(error_msg))
 
@@ -252,59 +294,60 @@ def auto_start_monitoring():
     bme280 = None
     mq135 = None
 
-    # Try to initialize BME280 with address fallback (try both 0x76 and 0x77)
-    if i2c is not None:
+    # Try to initialize BME280 via SPI
+    if spi is not None and cs_pin is not None:
         max_retries = 10
         bme280_initialized = False
-        
-        for address in BME280_ADDRESSES:
-            if bme280_initialized:
+
+        retry_count = 0
+        while retry_count < max_retries and bme280 is None:
+            try:
+                bme280 = BME280_SPI(spi, cs_pin)
+                bme280_msg = {
+                    "timestamp": time.ticks_ms() / 1000.0,
+                    "status": "bme280_initialized",
+                    "interface": "SPI",
+                }
+                print(json.dumps(bme280_msg))
+                bme280_initialized = True
                 break
-            
-            retry_count = 0
-            while retry_count < max_retries and bme280 is None:
-                try:
-                    bme280 = BME280(i2c, address=address)
-                    bme280_msg = {
-                        "timestamp": time.ticks_ms() / 1000.0,
-                        "status": "bme280_initialized",
-                        "address": f"0x{address:02X}"
-                    }
-                    print(json.dumps(bme280_msg))
-                    bme280_initialized = True
-                    break
-                except OSError as e:
-                    retry_count += 1
-                    retry_msg = {
-                        "timestamp": time.ticks_ms() / 1000.0,
-                        "status": "bme280_retry",
-                        "address": f"0x{address:02X}",
-                        "attempt": retry_count,
-                        "max_retries": max_retries,
-                        "error": str(e)
-                    }
-                    print(json.dumps(retry_msg))
-                    if retry_count < max_retries:
-                        time.sleep(BME280_RETRY_DELAY_SEC)
-                except ValueError as e:
-                    # Wrong address or chip ID - try next address
-                    break
-                except Exception as e:
-                    error_msg = {
-                        "timestamp": time.ticks_ms() / 1000.0,
-                        "status": "error",
-                        "error": "BME280 initialization error",
-                        "address": f"0x{address:02X}",
-                        "details": str(e)
-                    }
-                    print(json.dumps(error_msg))
-                    break
-        
+            except OSError as e:
+                retry_count += 1
+                retry_msg = {
+                    "timestamp": time.ticks_ms() / 1000.0,
+                    "status": "bme280_retry",
+                    "attempt": retry_count,
+                    "max_retries": max_retries,
+                    "error": str(e),
+                }
+                print(json.dumps(retry_msg))
+                if retry_count < max_retries:
+                    time.sleep(BME280_RETRY_DELAY_SEC)
+            except ValueError as e:
+                # Chip ID mismatch
+                error_msg = {
+                    "timestamp": time.ticks_ms() / 1000.0,
+                    "status": "error",
+                    "error": "BME280 initialization error",
+                    "details": str(e),
+                }
+                print(json.dumps(error_msg))
+                break
+            except Exception as e:
+                error_msg = {
+                    "timestamp": time.ticks_ms() / 1000.0,
+                    "status": "error",
+                    "error": "BME280 initialization error",
+                    "details": str(e),
+                }
+                print(json.dumps(error_msg))
+                break
+
         if not bme280_initialized:
             warning_msg = {
                 "timestamp": time.ticks_ms() / 1000.0,
                 "status": "warning",
-                "message": "BME280 unavailable - will send MQ135 data only"
+                "message": "BME280 unavailable - will send MQ135 data only",
             }
             print(json.dumps(warning_msg))
 
@@ -316,7 +359,7 @@ def auto_start_monitoring():
             "status": "mq135_initialized",
             "pin": MQ135_PIN,
             "r_zero": MQ135_R_ZERO,
-            "r_load": MQ135_R_LOAD
+            "r_load": MQ135_R_LOAD,
         }
         print(json.dumps(mq135_msg))
     except Exception as e:
@@ -326,7 +369,7 @@ def auto_start_monitoring():
             "error": "MQ135 initialization failed",
             "pin": MQ135_PIN,
             "details": str(e),
-            "message": f"Check wiring on GPIO {MQ135_PIN}"
+            "message": f"Check wiring on GPIO {MQ135_PIN}",
         }
         print(json.dumps(error_msg))
         return
@@ -337,7 +380,7 @@ def auto_start_monitoring():
             "timestamp": time.ticks_ms() / 1000.0,
             "status": "error",
             "error": "No sensors available",
-            "message": "Check all connections"
+            "message": "Check all connections",
         }
         print(json.dumps(error_msg))
         # Blink error pattern
@@ -351,7 +394,7 @@ def auto_start_monitoring():
         diagnostic_msg = {
             "timestamp": time.ticks_ms() / 1000.0,
             "status": "diagnostic",
-            "message": "Both sensors available (3 blinks)"
+            "message": "Both sensors available (3 blinks)",
         }
         print(json.dumps(diagnostic_msg))
         blink_pattern(led, 3)  # Both sensors
@@ -359,7 +402,7 @@ def auto_start_monitoring():
         diagnostic_msg = {
             "timestamp": time.ticks_ms() / 1000.0,
             "status": "diagnostic",
-            "message": "Only BME280 available (1 blink)"
+            "message": "Only BME280 available (1 blink)",
         }
         print(json.dumps(diagnostic_msg))
         blink_pattern(led, 1)  # BME280 only
@@ -367,7 +410,7 @@ def auto_start_monitoring():
         diagnostic_msg = {
             "timestamp": time.ticks_ms() / 1000.0,
             "status": "diagnostic",
-            "message": "Only MQ135 available (2 blinks)"
+            "message": "Only MQ135 available (2 blinks)",
         }
         print(json.dumps(diagnostic_msg))
         blink_pattern(led, 2)  # MQ135 only
@@ -379,12 +422,13 @@ def auto_start_monitoring():
         "message": "Starting continuous JSON monitoring (auto-boot)",
         "bme280_available": bme280 is not None,
         "mq135_available": mq135 is not None,
-        "note": "Press Ctrl+C to stop, or reset Pico to restart"
+        "note": "Press Ctrl+C to stop, or reset Pico to restart",
     }
     print(json.dumps(start_msg))
 
     # Start continuous monitoring loop
     import gc
+
     gc.collect()
     iteration_count = 0
     bme280_read_count = 0  # Counter for periodic reset
@@ -395,7 +439,7 @@ def auto_start_monitoring():
             timestamp = time.ticks_ms() / 1000.0
             sensor_data = {
                 "timestamp": timestamp,
-                "timestamp_since_boot": timestamp - boot_timestamp
+                "timestamp_since_boot": timestamp - boot_timestamp,
             }
 
             # Track which sensors successfully read
@@ -430,7 +474,7 @@ def auto_start_monitoring():
                     #             "details": str(reset_error)
                     #         }
                     #         print(json.dumps(reset_error_msg))
-                    
+
                     # Read sensor data
                     temp_c, pressure_pa, humidity_pct = bme280.read_compensated_data()
                     pressure_hpa = pressure_pa / 100.0
@@ -438,7 +482,7 @@ def auto_start_monitoring():
                         "temperature_c": round(temp_c, 2),
                         "humidity_percent": round(humidity_pct, 1),
                         "pressure_hpa": round(pressure_hpa, 1),
-                        "pressure_pa": round(pressure_pa, 0)
+                        "pressure_pa": round(pressure_pa, 0),
                     }
                     bme280_read_count += 1
                     bme280_read_ok = True
@@ -450,13 +494,13 @@ def auto_start_monitoring():
                         "sensor": "bme280",
                         "error": "BME280 read error",
                         "details": str(e),
-                        "attempting_recovery": True
+                        "attempting_recovery": True,
                     }
                     print(json.dumps(error_data))
-                    
+
                     # Attempt recovery: first try reset, then reinitialize bus if needed
                     recovery_successful = False
-                    
+
                     # Step 1: Try to reset sensor
                     try:
                         if bme280 is not None:
@@ -468,30 +512,33 @@ def auto_start_monitoring():
                                 "timestamp": timestamp,
                                 "status": "recovered",
                                 "sensor": "bme280",
-                                "method": "reset"
+                                "method": "reset",
                             }
                             print(json.dumps(recovery_msg))
                     except Exception:
                         pass  # Reset failed, try bus recovery
-                    
-                    # Step 2: If reset failed, try reinitializing I2C bus
+
+                    # Step 2: If reset failed, try reinitializing SPI bus
                     if not recovery_successful:
-                        new_i2c = reinitialize_i2c()
-                        if new_i2c is not None:
-                            i2c = new_i2c
+                        new_spi, new_cs_pin = reinitialize_spi()
+                        if new_spi is not None:
+                            spi = new_spi
+                            cs_pin = new_cs_pin
                             # Step 3: Try to recover BME280 with new bus
-                            recovered_bme280 = recover_bme280(i2c, current_bme280=bme280)
+                            recovered_bme280 = recover_bme280_spi(
+                                spi, cs_pin, current_bme280=bme280
+                            )
                             if recovered_bme280 is not None:
                                 bme280 = recovered_bme280
                                 recovery_successful = True
-                    
+
                     if not recovery_successful:
                         # Recovery failed - sensor unavailable for this cycle
                         unavailable_msg = {
                             "timestamp": timestamp,
                             "status": "warning",
                             "sensor": "bme280",
-                            "message": "BME280 unavailable after recovery attempts"
+                            "message": "BME280 unavailable after recovery attempts",
                         }
                         print(json.dumps(unavailable_msg))
 
@@ -508,7 +555,7 @@ def auto_start_monitoring():
                         "status": "error",
                         "sensor": "mq135",
                         "error": "MQ135 read error",
-                        "details": str(e)
+                        "details": str(e),
                     }
                     print(json.dumps(error_data))
 
@@ -539,7 +586,7 @@ def auto_start_monitoring():
             stop_msg = {
                 "timestamp": time.ticks_ms() / 1000.0,
                 "status": "stopped",
-                "message": "Monitoring stopped by user"
+                "message": "Monitoring stopped by user",
             }
             print(json.dumps(stop_msg))
             return
@@ -550,7 +597,7 @@ def auto_start_monitoring():
                 "status": "error",
                 "error": "Unexpected error",
                 "details": str(e),
-                "type": type(e).__name__
+                "type": type(e).__name__,
             }
             print(json.dumps(error_data))
             time.sleep(SENSOR_READ_INTERVAL_SEC)

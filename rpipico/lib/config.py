@@ -3,19 +3,23 @@ Configuration constants for Raspberry Pi Pico sensor monitoring
 Centralized configuration for I2C pins, sensor addresses, and calibration values
 """
 
-# I2C Configuration
-# I2C1 configuration: SDA=GP14, SCL=GP15
-# This configuration uses I2C1 bus with GPIO 14 and 15 (BME280 is actually on these pins!)
+# SPI Configuration (BME280 on SPI)
+# Using SPI0 bus with pins as per GY-BME280 sensor wiring
+# RP2040 SPI0: MOSI=GP19, MISO=GP16, SCK=GP18, CS=GP17
+SPI_BUS = 0
+SPI_SCK_PIN = 18   # GP18 (Physical Pin 24) - SCL/SCK
+SPI_MOSI_PIN = 19  # GP19 (Physical Pin 25) - SDA/MOSI
+SPI_MISO_PIN = 16  # GP16 (Physical Pin 21) - SDO/MISO
+SPI_CS_PIN = 17    # GP17 (Physical Pin 22) - CSB/CS
+SPI_FREQ = 1000000  # 1MHz for BME280
+SPI_POLARITY = 0   # BME280 SPI Mode 0 (CPOL=0)
+SPI_PHASE = 0      # BME280 SPI Mode 0 (CPHA=0)
+
+# I2C Configuration (used by other sensors on I2C bus)
 I2C_BUS = 1
 I2C_SDA_PIN = 14  # GPIO 14 (Pin 19)
 I2C_SCL_PIN = 15  # GPIO 15 (Pin 20)
 I2C_FREQ = 400000  # 400kHz
-
-# Alternative I2C configurations
-# I2C0 configuration (not used):
-# I2C_BUS = 0
-# I2C_SDA_PIN = 16  # GPIO 16 (Pin 21)
-# I2C_SCL_PIN = 17  # GPIO 17 (Pin 22)
 
 # BME280 Configuration
 BME280_ADDRESSES = [0x76, 0x77]  # Common addresses (try both)
