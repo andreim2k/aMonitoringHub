@@ -1304,10 +1304,6 @@
           </svg></div>
         <div class="metric-label">Humidity <span class="unit-badge">%</span></div>
         <div class="metric-value" id="currentHumidity">--%</div>
-        <div style="font-size: 0.75rem; color: #888; margin-top: 8px;">
-          <span style="display: block;">Clopotiva (OWM):</span>
-          <span id="externalHumidity">--%</span>
-        </div>
       </div>
       <div class="metric-card glass meter-card" id="electricityIndexCard" style="grid-column: 2; grid-row: 1;">
         <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Electricity"
@@ -1712,17 +1708,14 @@
         setSeverity(elT, severityFor('temp', currentData.temperature));
       }
 
-      // Update main humidity display
+      // Update main humidity display — use external (OWM) when sensor has no humidity (BMP280)
       var elH = document.getElementById('currentHumidity');
       if (elH) {
-        elH.textContent = formatHumidity(currentData.humidity);
-        setSeverity(elH, severityFor('humidity', currentData.humidity));
-      }
-
-      // Update external humidity display (from OpenWeatherMap)
-      var extH = document.getElementById('externalHumidity');
-      if (extH && currentData.externalHumidity !== null) {
-        extH.textContent = formatHumidity(currentData.externalHumidity);
+        var displayHumidity = (currentData.humidity === null || currentData.humidity === 0)
+          ? currentData.externalHumidity
+          : currentData.humidity;
+        elH.textContent = formatHumidity(displayHumidity);
+        setSeverity(elH, severityFor('humidity', displayHumidity));
       }
 
       // Update pressure display

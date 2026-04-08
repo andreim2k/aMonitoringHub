@@ -168,6 +168,15 @@ def get_external_humidity() -> Optional[float]:
         humidity = data.get('main', {}).get('humidity')
         weather_cache = {'data': {'humidity': humidity}, 'timestamp': current_time}
         logger.debug(f"Weather humidity from OpenWeatherMap: {humidity}%")
+
+        # Store in DB same way as other sensors
+        if humidity is not None:
+            db.add_humidity_reading(
+                humidity_percent=humidity,
+                sensor_type='openweathermap',
+                sensor_id='clopotiva_hunedoara'
+            )
+
         return humidity
     except Exception as e:
         logger.warning(f"Failed to fetch external humidity: {e}")
