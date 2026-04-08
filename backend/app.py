@@ -25,6 +25,10 @@ from datetime import datetime, timezone
 from typing import Dict, Any, List, Tuple, Optional
 from queue import Queue
 import threading
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 # Helper to present timestamps in local system time
