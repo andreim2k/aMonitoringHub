@@ -1304,6 +1304,10 @@
           </svg></div>
         <div class="metric-label">Humidity <span class="unit-badge">%</span></div>
         <div class="metric-value" id="currentHumidity">--%</div>
+        <div style="font-size: 0.75rem; color: #888; margin-top: 8px;">
+          <span style="display: block;">Clopotiva (OWM):</span>
+          <span id="externalHumidity">--%</span>
+        </div>
       </div>
       <div class="metric-card glass meter-card" id="electricityIndexCard" style="grid-column: 2; grid-row: 1;">
         <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Electricity"
@@ -1444,6 +1448,7 @@
       timestampUnix: null,
       humidityTimestamp: null,
       sensorType: null,
+      externalHumidity: null,
       stats: { minimum: null, maximum: null, average: null, count: 0, total_count: 0, min_timestamp: null, max_timestamp: null },
       humidityStats: { minimum: null, maximum: null, average: null, count: 0, min_timestamp: null, max_timestamp: null },
       pressureStats: { minimum: null, maximum: null, average: null, count: 0, min_timestamp: null, max_timestamp: null },
@@ -1714,6 +1719,12 @@
         setSeverity(elH, severityFor('humidity', currentData.humidity));
       }
 
+      // Update external humidity display (from OpenWeatherMap)
+      var extH = document.getElementById('externalHumidity');
+      if (extH && currentData.externalHumidity !== null) {
+        extH.textContent = formatHumidity(currentData.externalHumidity);
+      }
+
       // Update pressure display
       const pEl = document.getElementById('currentPressure');
       if (pEl) { pEl.textContent = formatPressure(currentData.pressure_hpa); setSeverity(pEl, severityFor('pressure', currentData.pressure_hpa)); }
@@ -1962,6 +1973,17 @@
           console.log('Current humidity loaded:', humidity);
         } else {
           console.log('No current humidity data available');
+        }
+
+        // Fetch external weather (from OpenWeatherMap)
+        console.log('Fetching external weather...');
+        const weatherResponse = await graphqlQuery('{ externalWeather { humidityPercent location } }');
+        if (weatherResponse.data && weatherResponse.data.externalWeather) {
+          const weather = weatherResponse.data.externalWeather;
+          currentData.externalHumidity = weather.humidityPercent;
+          console.log('External humidity loaded:', weather);
+        } else {
+          console.log('No external weather data available');
         }
 
         // Fetch stats

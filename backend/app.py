@@ -20,6 +20,7 @@ import time
 import logging
 import argparse
 import re
+import requests
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Tuple, Optional
 from queue import Queue
@@ -124,6 +125,49 @@ CORS(app, resources={
         "max_age": 3600
     }
 })
+
+# OpenWeatherMap integration for humidity from Clopotiva, Hunedoara
+OPENWEATHER_API_KEY = os.environ.get('OPENWEATHER_API_KEY', None)
+CLOPOTIVA_LAT = 45.436
+CLOPOTIVA_LON = 22.781
+weather_cache = {'data': None, 'timestamp': 0}
+WEATHER_CACHE_DURATION = 300  # Cache for 5 minutes
+
+def get_external_humidity() -> Optional[float]:
+    """Fetch humidity from OpenWeatherMap for Clopotiva, Hunedoara.
+
+    Returns:
+        Humidity percentage (0-100) or None if unavailable.
+    """
+    global weather_cache
+
+    if not OPENWEATHER_API_KEY:
+        return None
+
+    current_time = time.time()
+    # Return cached data if fresh
+    if weather_cache['data'] and (current_time - weather_cache['timestamp']) < WEATHER_CACHE_DURATION:
+        return weather_cache['data'].get('humidity')
+
+    try:
+        url = f"https://api.openweathermap.org/data/2.5/weather"
+        params = {
+            'lat': CLOPOTIVA_LAT,
+            'lon': CLOPOTIVA_LON,
+            'appid': OPENWEATHER_API_KEY,
+            'units': 'metric'
+        }
+        response = requests.get(url, params=params, timeout=5)
+        response.raise_for_status()
+        data = response.json()
+
+        humidity = data.get('main', {}).get('humidity')
+        weather_cache = {'data': {'humidity': humidity}, 'timestamp': current_time}
+        logger.debug(f"Weather humidity from OpenWeatherMap: {humidity}%")
+        return humidity
+    except Exception as e:
+        logger.warning(f"Failed to fetch external humidity: {e}")
+        return None
 
 # Global variables
 temperature_sensor = None
@@ -248,6 +292,12 @@ class HumidityStatistics(ObjectType):
     min_timestamp = String()
     max_timestamp = String()
     hours_back = Int()
+
+class ExternalWeather(ObjectType):
+    """GraphQL type for external weather data (from OpenWeatherMap)."""
+    humidity_percent = Float()
+    location = String()
+    timestamp_unix = Float()
 
 class PressureReading(ObjectType):
     """GraphQL type for a single pressure reading."""
@@ -404,6 +454,8 @@ class Query(ObjectType):
         hours=Int(default_value=24)
     )
 
+    # External weather queries
+    external_weather = Field(ExternalWeather)
 
     # Pressure queries
     current_pressure = Field(PressureReading)
@@ -811,7 +863,27 @@ class Query(ObjectType):
                 count=0, average=0.0, minimum=0.0, maximum=0.0, hours_back=hours
             )
 
+    def resolve_external_weather(self, info: Any) -> Optional[ExternalWeather]:
+        """Resolves the query for external weather data (OpenWeatherMap).
 
+        Args:
+            info: The GraphQL resolve info object.
+
+        Returns:
+            An ExternalWeather object with humidity from OpenWeatherMap.
+        """
+        try:
+            humidity = get_external_humidity()
+            if humidity is not None:
+                return ExternalWeather(
+                    humidity_percent=humidity,
+                    location="Clopotiva, Hunedoara",
+                    timestamp_unix=time.time()
+                )
+            return None
+        except Exception as e:
+            logger.error(f'Error getting external weather: {e}')
+            return None
 
     def resolve_current_pressure(self, info: Any) -> Optional[PressureReading]:
         """Resolves the query for the most recent pressure reading.
