@@ -154,7 +154,7 @@ def get_external_humidity() -> Optional[float]:
         return weather_cache['data'].get('humidity')
 
     try:
-        url = f"https://api.openweathermap.org/data/2.5/weather"
+        url = "https://api.openweathermap.org/data/2.5/weather"
         params = {
             'lat': CLOPOTIVA_LAT,
             'lon': CLOPOTIVA_LON,
