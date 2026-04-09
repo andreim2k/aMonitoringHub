@@ -2081,6 +2081,14 @@
           console.log('No external weather data available');
         }
 
+        // Fetch weather history
+        console.log('Fetching weather history...');
+        const wHist = await graphqlQuery('{ weatherHistory(limit: 1000) { condition description timestampUnix } }');
+        if (wHist.data && wHist.data.weatherHistory) {
+          currentData.weatherHistory = wHist.data.weatherHistory;
+          console.log('Weather history loaded:', currentData.weatherHistory.length, 'records');
+        }
+
         // Fetch stats
         console.log('Fetching temperature statistics...');
         const statsResponse = await graphqlQuery('{ temperatureStatistics { count totalCount average minimum maximum minTimestamp maxTimestamp } }');

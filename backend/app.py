@@ -73,7 +73,7 @@ app_config = load_app_config()
 from graphene import ObjectType, String, Float, List as GrapheneList, Field, Int, Schema
 
 # Import our modules
-from models import init_database, db, TemperatureReading as DBTemperatureReading, HumidityReading as DBHumidityReading, MeterReading as DBMeterReading
+from models import init_database, db, TemperatureReading as DBTemperatureReading, HumidityReading as DBHumidityReading, MeterReading as DBMeterReading, WeatherReading as DBWeatherReading
 from sensor_reader import TemperatureSensorReader, HumiditySensorReader
 from usb_json_reader import USBJSONReader
 
@@ -182,6 +182,17 @@ def get_external_humidity() -> Optional[float]:
         if humidity is not None:
             db.add_humidity_reading(
                 humidity_percent=humidity,
+                sensor_type='openweathermap',
+                sensor_id='clopotiva_hunedoara'
+            )
+
+        # Store weather condition in DB
+        condition = weather_info.get('main')
+        description = weather_info.get('description')
+        if condition and description:
+            db.add_weather_reading(
+                condition=condition,
+                description=description,
                 sensor_type='openweathermap',
                 sensor_id='clopotiva_hunedoara'
             )
@@ -352,6 +363,16 @@ class PressureTrend(ObjectType):
     description = String()
     readings_used = Int()
 
+class WeatherReading(ObjectType):
+    """GraphQL type for a single weather reading."""
+    id = Int()
+    condition = String()
+    description = String()
+    timestamp = String()
+    timestamp_unix = Float()
+    sensor_type = String()
+    sensor_id = String()
+
 class AirQualityReading(ObjectType):
     """GraphQL type for a single air quality reading."""
     id = Int()
@@ -506,6 +527,15 @@ class Query(ObjectType):
         hours=Int(default_value=24)
     )
     pressure_trend = Field(PressureTrend)
+
+    # Weather queries
+    weather_history = GrapheneList(
+        WeatherReading,
+        year=Int(),
+        month=Int(),
+        day=Int(),
+        limit=Int(default_value=1000)
+    )
 
     # Air quality queries
     current_air_quality = Field(AirQualityReading)
@@ -923,6 +953,44 @@ class Query(ObjectType):
         except Exception as e:
             logger.error(f'Error getting external weather: {e}')
             return None
+
+    def resolve_weather_history(self, info: Any, limit: int = 1000, year: Optional[int] = None, month: Optional[int] = None, day: Optional[int] = None) -> list:
+        """Resolves the query for weather history.
+
+        Args:
+            info: The GraphQL resolve info object.
+            limit: Maximum number of readings to return.
+            year: Optional year filter.
+            month: Optional month filter.
+            day: Optional day filter.
+
+        Returns:
+            A list of WeatherReading objects.
+        """
+        try:
+            readings = []
+            if year is not None:
+                if month is not None and day is not None:
+                    readings = db.get_weather_readings_by_day(year, month, day)
+                elif month is not None:
+                    readings = db.get_weather_readings_by_month(year, month)
+                else:
+                    readings = db.get_weather_readings_by_year(year)
+            else:
+                readings = db.get_recent_weather_readings(limit=min(limit, 5000))
+
+            return [WeatherReading(
+                id=reading.id,
+                condition=reading.condition,
+                description=reading.description,
+                timestamp=reading.timestamp.isoformat() if reading.timestamp else None,
+                timestamp_unix=reading.timestamp_unix,
+                sensor_type=reading.sensor_type,
+                sensor_id=reading.sensor_id
+            ) for reading in readings]
+        except Exception as e:
+            logger.error(f"Error getting weather history: {e}")
+            return []
 
     def resolve_current_pressure(self, info: Any) -> Optional[PressureReading]:
         """Resolves the query for the most recent pressure reading.

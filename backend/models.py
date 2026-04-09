@@ -680,8 +680,147 @@ class DatabaseManager:
             self.logger.error(f"Error getting humidity readings for {year}-{month}-{day}: {e}")
             return []
 
+    def add_weather_reading(self, condition: str, description: str, sensor_type: str = "unknown", sensor_id: str = "default", timestamp: Optional[datetime] = None) -> Optional['WeatherReading']:
+        """Adds a new weather reading to the database.
 
+        Args:
+            condition: The weather condition (e.g., 'Clear', 'Rain', 'Snow').
+            description: The weather description (e.g., 'clear sky', 'light rain').
+            sensor_type: The type of sensor.
+            sensor_id: The unique ID of the sensor.
+            timestamp: The timestamp of the reading. Defaults to now (UTC).
 
+        Returns:
+            The created WeatherReading object, or None on failure.
+        """
+        try:
+            with self.get_session() as session:
+                reading_ts = timestamp or datetime.now(timezone.utc)
+                reading = WeatherReading(
+                    condition=condition,
+                    description=description,
+                    sensor_type=sensor_type,
+                    sensor_id=sensor_id,
+                    timestamp=reading_ts,
+                    timestamp_unix=reading_ts.timestamp()
+                )
+                session.add(reading)
+                session.commit()
+                session.refresh(reading)
+                return reading
+        except Exception as e:
+            self.logger.error(f"Error adding weather reading: {e}")
+            return None
+
+    def get_recent_weather_readings(self, limit: int = 100, sensor_id: Optional[str] = None) -> List['WeatherReading']:
+        """Retrieves the most recent weather readings.
+
+        Args:
+            limit: The maximum number of readings to retrieve.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A list of WeatherReading objects, most recent first.
+        """
+        try:
+            with self.get_session() as session:
+                query = session.query(WeatherReading)
+                if sensor_id:
+                    query = query.filter(WeatherReading.sensor_id == sensor_id)
+                return query.order_by(WeatherReading.timestamp.desc()).limit(limit).all()
+        except Exception as e:
+            self.logger.error(f"Error getting recent weather readings: {e}")
+            return []
+
+    def get_weather_readings_by_year(self, year: int, sensor_id: Optional[str] = None) -> List['WeatherReading']:
+        """Retrieves weather readings for a specific year.
+
+        Args:
+            year: The year to retrieve data for.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A list of WeatherReading objects.
+        """
+        try:
+            with self.get_session() as session:
+                start_time = datetime(year, 1, 1, tzinfo=timezone.utc)
+                end_time = datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+
+                query = session.query(WeatherReading).filter(
+                    WeatherReading.timestamp >= start_time,
+                    WeatherReading.timestamp < end_time
+                )
+
+                if sensor_id:
+                    query = query.filter(WeatherReading.sensor_id == sensor_id)
+
+                return query.order_by(WeatherReading.timestamp.desc()).all()
+        except Exception as e:
+            self.logger.error(f"Error getting weather readings for {year}: {e}")
+            return []
+
+    def get_weather_readings_by_month(self, year: int, month: int, sensor_id: Optional[str] = None) -> List['WeatherReading']:
+        """Retrieves weather readings for a specific month.
+
+        Args:
+            year: The year of the month.
+            month: The month to retrieve data for.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A list of WeatherReading objects.
+        """
+        try:
+            with self.get_session() as session:
+                start_time = datetime(year, month, 1, tzinfo=timezone.utc)
+                if month == 12:
+                    end_time = datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+                else:
+                    end_time = datetime(year, month + 1, 1, tzinfo=timezone.utc)
+
+                query = session.query(WeatherReading).filter(
+                    WeatherReading.timestamp >= start_time,
+                    WeatherReading.timestamp < end_time
+                )
+
+                if sensor_id:
+                    query = query.filter(WeatherReading.sensor_id == sensor_id)
+
+                return query.order_by(WeatherReading.timestamp.desc()).all()
+        except Exception as e:
+            self.logger.error(f"Error getting weather readings for {year}-{month}: {e}")
+            return []
+
+    def get_weather_readings_by_day(self, year: int, month: int, day: int, sensor_id: Optional[str] = None) -> List['WeatherReading']:
+        """Retrieves weather readings for a specific day.
+
+        Args:
+            year: The year of the day.
+            month: The month of the day.
+            day: The day to retrieve data for.
+            sensor_id: An optional sensor ID to filter by.
+
+        Returns:
+            A list of WeatherReading objects.
+        """
+        try:
+            with self.get_session() as session:
+                start_time = datetime(year, month, day, tzinfo=timezone.utc)
+                end_time = start_time + timedelta(days=1)
+
+                query = session.query(WeatherReading).filter(
+                    WeatherReading.timestamp >= start_time,
+                    WeatherReading.timestamp < end_time
+                )
+
+                if sensor_id:
+                    query = query.filter(WeatherReading.sensor_id == sensor_id)
+
+                return query.order_by(WeatherReading.timestamp.desc()).all()
+        except Exception as e:
+            self.logger.error(f"Error getting weather readings for {year}-{month}-{day}: {e}")
+            return []
 
     def add_pressure_reading(self, pressure_hpa: float, sensor_type: str = "unknown", sensor_id: str = "default", timestamp: Optional[datetime] = None) -> Optional['PressureReading']:
         """Adds a new pressure reading to the database.
@@ -1620,6 +1759,36 @@ class MeterReading(Base):
     def __repr__(self) -> str:
         """Provides a developer-friendly representation of the object."""
         return f'<MeterReading(id={self.id}, value={self.meter_value}, sensor={self.sensor_id}, time={self.timestamp})>'
+
+class WeatherReading(Base):
+    """SQLAlchemy model for storing weather condition readings."""
+
+    __tablename__ = 'weather_readings'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    timestamp = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+    timestamp_unix = Column(Float, nullable=False, default=lambda: time.time())
+    condition = Column(String(100), nullable=False)
+    description = Column(String(255), nullable=False)
+    sensor_type = Column(String(50), nullable=False, default='unknown')
+    sensor_id = Column(String(100), nullable=False, default='default')
+
+    __table_args__ = (
+        Index('idx_weather_timestamp', 'timestamp'),
+        Index('idx_weather_sensor_timestamp', 'sensor_id', 'timestamp'),
+    )
+
+    def to_dict(self) -> dict:
+        """Converts the object to a dictionary."""
+        return {
+            'id': self.id,
+            'condition': self.condition,
+            'description': self.description,
+            'timestamp': self.timestamp.isoformat() if self.timestamp else None,
+            'timestamp_unix': self.timestamp_unix,
+            'sensor_type': self.sensor_type,
+            'sensor_id': self.sensor_id
+        }
 
 def init_database(database_url: Optional[str] = None):
     """Initializes the global database instance.
