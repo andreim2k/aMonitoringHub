@@ -30,6 +30,16 @@
       padding: 20px;
     }
 
+    .electricity-card {
+      background: transparent;
+      border: none;
+      border-radius: 12px;
+      padding: 20px;
+      width: 100%;
+      box-sizing: border-box;
+      text-align: center;
+    }
+
     .card {
       background: linear-gradient(135deg, rgba(20, 18, 35, 0.95) 0%, rgba(35, 30, 70, 0.9) 50%, rgba(25, 25, 45, 0.95) 100%);
       backdrop-filter: blur(10px);
@@ -248,23 +258,17 @@
       margin-bottom: 20px;
       gap: 20px;
       flex-wrap: wrap;
+      width: 100%;
     }
 
     .metrics-row {
       justify-content: center;
-      width: fit-content;
       margin: 0 auto;
+      max-width: 400px;
     }
 
     .charts-row {
       justify-content: center;
-      width: fit-content;
-      margin: 0 auto;
-    }
-
-    .stats-row {
-      justify-content: center;
-      width: fit-content;
       margin: 0 auto;
     }
 
@@ -274,7 +278,8 @@
       border-radius: 12px;
       padding: 20px;
       text-align: center;
-
+      flex: 1;
+      min-width: 150px;
     }
 
     .metric-card-disabled {
@@ -302,6 +307,10 @@
       border-left: 4px solid #42a5f5;
     }
 
+    .weather-card {
+      border-left: 4px solid #9c27b0;
+    }
+
     .chart-card {
       background: transparent;
       border: none;
@@ -315,17 +324,6 @@
       margin: 0 0 15px 0;
       color: #e0e0e0;
       font-size: 1.1rem;
-      text-align: center;
-    }
-
-    /* Electricity Meter Card - Compact styling */
-    .electricity-card {
-      background: transparent;
-      border: none;
-      border-radius: 12px;
-      padding: 20px;
-      width: 100%;
-      box-sizing: border-box;
       text-align: center;
     }
 
@@ -412,18 +410,13 @@
     }
 
     /* Responsive adjustments */
-    @media (max-width: 768px) {
+    @media (max-width: 600px) {
 
-      .metrics-row:nth-child(n+3),
-      .charts-row {
-        flex-direction: column;
-        gap: 15px;
-      }
-
-      .stats-row {
+      .metrics-row {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
+        grid-template-columns: 1fr;
+        width: 100%;
+        gap: 12px;
       }
 
       .metric-card,
@@ -434,10 +427,24 @@
         min-width: auto;
       }
 
-      .electricity-container {
-        justify-content: center;
-        width: fit-content;
-        margin: 0 auto;
+      .electricity-card {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      #weatherCard {
+        grid-column: span 1;
+      }
+    }
+
+    /* Tablet two columns */
+    @media (min-width: 601px) and (max-width: 1024px) {
+      .metrics-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      #weatherCard {
+        grid-column: span 2;
       }
     }
 
@@ -1274,7 +1281,7 @@
       </div>
     </div>
 
-    <!-- Row 3: Temperature & Pressure -->
+    <!-- Row 3: Temperature, Pressure & Weather -->
     <div class="metrics-row">
       <div class="metric-card glass temperature-card" id="temperatureCard">
         <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Temperature"
@@ -1297,11 +1304,16 @@
           <span id="rainRiskChange" style="color:#888; margin-left:4px; font-size:0.7rem;"></span>
         </div>
       </div>
+      <div class="metric-card glass weather-card" id="weatherCard" style="grid-column: 1 / 3; cursor: pointer;" onclick="showWeatherHistory(this)">
+        <div class="metric-icon" id="weatherIcon">🌤️</div>
+        <div class="metric-label">Weather</div>
+        <div class="metric-value" id="weatherStatus">--</div>
+      </div>
     </div>
 
-    <!-- Row 4-5: Humidity & Electricity Index (top), Electricity Meter below (spans both) -->
-    <div class="metrics-row" style="grid-template-rows: auto auto;">
-      <div class="metric-card glass humidity-card" id="humidityCard" style="grid-column: 1; grid-row: 1;">
+    <!-- Row 4-5: Humidity & Electricity Index (top), Electricity Meter below -->
+    <div class="metrics-row">
+      <div class="metric-card glass humidity-card" id="humidityCard">
         <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Humidity"
             role="img">
             <path fill="currentColor" d="M12 2s7 7.58 7 12a7 7 0 11-14 0c0-4.42 7-12 7-12z" />
@@ -1309,12 +1321,7 @@
         <div class="metric-label">Humidity <span class="unit-badge">%</span></div>
         <div class="metric-value" id="currentHumidity">--%</div>
       </div>
-      <div class="metric-card glass" id="weatherCard" style="grid-column: 1.5; grid-row: 1;">
-        <div class="metric-icon" id="weatherIcon" style="font-size:1.5rem;">🌤️</div>
-        <div class="metric-label">Weather</div>
-        <div class="metric-value" id="weatherStatus">--</div>
-      </div>
-      <div class="metric-card glass meter-card" id="electricityIndexCard" style="grid-column: 2; grid-row: 1;">
+      <div class="metric-card glass meter-card" id="electricityIndexCard">
         <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Electricity"
             role="img">
             <path fill="currentColor"
@@ -1325,9 +1332,13 @@
         <div class="metric-timestampUnix" id="meterTimestamp" style="font-size: 0.75rem; color: #888;">Last reading: --
         </div>
       </div>
-      <div class="electricity-card glass" id="electricityMeterCard" style="grid-column: 1 / 3; grid-row: 2;">
+    </div>
+
+    <!-- Electricity Meter -->
+    <div class="metrics-row">
+      <div class="electricity-card glass" id="electricityMeterCard" style="grid-column: 1 / 3; flex: 1;">
         <h3>Electricity Meter</h3>
-        <div style="position: relative; width: 320px; height: 240px; margin: 0 auto 15px; overflow: hidden;">
+      <div style="position: relative; width: 320px; height: 240px; margin: 0 auto 15px; overflow: hidden;">
           <img id="webcamImage" style="display: none; object-fit: cover; width: 100%; height: 100%;" />
           <div id="webcamLoading" class="spinner-container" style="display: flex;">
             <div class="spinner"></div>
@@ -1957,6 +1968,33 @@
       if (iconEl) iconEl.textContent = emoji;
       if (statusEl) statusEl.textContent = label;
       if (weatherCard) weatherCard.style.opacity = '1';
+    }
+
+    async function showWeatherHistory(anchorEl) {
+      await ensureHistory('weather');
+      const ds = chartDataFor('weather');
+      if (!ds.labels.length) return;
+
+      currentChartKind = 'weather';
+      const overlay = document.getElementById('chartModalOverlay');
+      const title = document.getElementById('chartModalTitle');
+      const canvas = document.getElementById('chartModalCanvas');
+      title.textContent = 'Weather History';
+      document.getElementById('airQualityInfo').style.display = 'none';
+      overlay.style.display = 'flex';
+
+      document.getElementById('periodMonth').checked = true;
+      const now = new Date();
+      document.getElementById('modalYearInput').value = now.getFullYear();
+      document.getElementById('modalMonthInput').value = now.getMonth() + 1;
+      document.getElementById('modalDayInput').value = now.getDate();
+      updateModalInputsVisibility();
+
+      if (modalChart) { modalChart.destroy(); }
+      modalChart = new Chart(canvas.getContext('2d'), { type: 'line', data: ds, options: buildLineOptions('weather') });
+      currentModalChart = modalChart;
+
+      await updateModalChartData();
     }
 
     function updateCO2HistoryChart() {
@@ -2635,7 +2673,8 @@
       humidity: { border: '#9c27b0', bg: 'rgba(156,39,176,0.15)' },
       pressure: { border: '#ffa726', bg: 'rgba(255,167,38,0.15)' },
       co2: { border: '#ef5350', bg: 'rgba(239,83,80,0.15)' },
-      meter: { border: '#42a5f5', bg: 'rgba(66,165,245,0.15)' }
+      meter: { border: '#42a5f5', bg: 'rgba(66,165,245,0.15)' },
+      weather: { border: '#9c27b0', bg: 'rgba(156,39,176,0.15)' }
     };
 
     async function ensureHistory(kind) {
@@ -2645,6 +2684,7 @@
       if (kind === 'pressure' && currentData.pressureHistory && currentData.pressureHistory.length) return;
       if (kind === 'co2' && currentData.airQualityHistory && currentData.airQualityHistory.length) return;
       if (kind === 'meter' && currentData.meterHistory && currentData.meterHistory.length) return;
+      if (kind === 'weather' && currentData.weatherHistory && currentData.weatherHistory.length) return;
       try {
         if (kind === 'temp') {
           const r = await graphqlQuery('{ temperatureHistory(limit: 5000) { temperatureC timestampUnix } }');
@@ -2661,6 +2701,9 @@
         } else if (kind === 'meter') {
           const r = await graphqlQuery('{ meterHistory(limit: 5000) { meterValue timestampUnix } }');
           if (r.data && r.data.meterHistory) currentData.meterHistory = r.data.meterHistory.map(i => ({ meterValue: i.meterValue, timestampUnix: i.timestampUnix }));
+        } else if (kind === 'weather') {
+          const r = await graphqlQuery('{ weatherHistory(limit: 5000) { condition description timestampUnix } }');
+          if (r.data && r.data.weatherHistory) currentData.weatherHistory = r.data.weatherHistory;
         }
       } catch (e) { console.warn('ensureHistory failed for', kind, e); }
     }
@@ -2711,6 +2754,14 @@
         data = arr.map(i => parseFloat(i.meterValue) || 0);
         return { labels, datasets: [{ label: 'Electricity Meter (kWh)', data, borderColor: c.border, backgroundColor: c.bg, borderWidth: 2, fill: true, pointRadius: 2 }] };
       }
+      if (kind === 'weather') {
+        const arr = (currentData.weatherHistory || []).slice().sort((a, b) => a.timestampUnix - b.timestampUnix);
+        labels = arr.map(i => new Date(i.timestampUnix * 1000).toLocaleString("en-GB", { timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }));
+        const conditions = ['Clear', 'Clouds', 'Rain', 'Drizzle', 'Thunderstorm', 'Snow', 'Mist', 'Fog'];
+        const numericData = arr.map(i => conditions.indexOf(i.condition) >= 0 ? conditions.indexOf(i.condition) : 0);
+        const originalConditions = arr.map(i => i.condition);
+        return { labels, datasets: [{ label: 'Weather Condition', data: numericData, originalData: originalConditions, borderColor: '#9c27b0', backgroundColor: 'rgba(156,39,176,0.15)', borderWidth: 2, fill: true, pointRadius: 3 }] };
+      }
       return { labels: [], datasets: [] };
     }
 
@@ -2752,6 +2803,48 @@
               grid: { display: false },
               ticks: { color: '#b3b3b3', beginAtZero: true },
               title: { display: true, text: 'ppm', color: '#b3b3b3' }
+            }
+          }
+        };
+      }
+
+      // Weather chart - show actual condition names with emojis
+      if (chartType === 'weather') {
+        return {
+          responsive: true,
+          maintainAspectRatio: false,
+          legend: { display: false },
+          tooltips: {
+            callbacks: {
+              label: function (tooltipItem, data) {
+                const idx = tooltipItem.index;
+                const orig = data.datasets[tooltipItem.datasetIndex].originalData;
+                const emojis = { 'Clear': '☀️', 'Clouds': '☁️', 'Rain': '🌧️', 'Drizzle': '🌦️', 'Thunderstorm': '⛈️', 'Snow': '🌨️', 'Mist': '🌫️', 'Fog': '🌫️' };
+                return orig ? orig[idx] + ' ' + (emojis[orig[idx]] || '') : '';
+              },
+              title: function (tooltipItems, data) {
+                const label = data.labels[tooltipItems[0].index];
+                return label;
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255,255,255,0.1)' },
+              ticks: { color: '#b3b3b3', maxTicksLimit: 8 }
+            },
+            y: {
+              grid: { color: 'rgba(255,255,255,0.1)' },
+              ticks: {
+                color: '#b3b3b3',
+                callback: function (value) {
+                  const conditions = ['', 'Clear', 'Clouds', 'Rain', 'Drizzle', 'Thunderstorm', 'Snow', 'Mist', 'Fog'];
+                  const emojis = ['', '☀️', '☁️', '🌧️', '🌦️', '⛈️', '🌨️', '🌫️', '🌫️'];
+                  return emojis[value] ? conditions[value] + ' ' + emojis[value] : '';
+                }
+              },
+              suggestedMin: 0,
+              suggestedMax: 7
             }
           }
         };
@@ -2997,7 +3090,8 @@
           'humidity': 'Humidity History',
           'pressure': 'Atmospheric Pressure History',
           'co2': 'Air Quality History',
-          'meter': 'Electricity Consumption History'
+          'meter': 'Electricity Consumption History',
+          'weather': 'Weather History'
         };
         title.textContent = titles[kind] || kind.toUpperCase() + ' History';
 
