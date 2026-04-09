@@ -1292,6 +1292,10 @@
           </svg></div>
         <div class="metric-label">Pressure <span class="unit-badge">hPa</span></div>
         <div class="metric-value" id="currentPressure">-- hPa</div>
+        <div id="rainRisk" style="font-size:0.75rem; margin-top:6px; display:none;">
+          <span id="rainRiskBadge" style="padding:2px 6px; border-radius:3px; font-weight:bold;">--</span>
+          <span id="rainRiskChange" style="color:#888; margin-left:4px; font-size:0.7rem;"></span>
+        </div>
       </div>
     </div>
 
@@ -1462,7 +1466,8 @@
       pressureTimestamp: null,
       co2_ppm: null,
       airStatus: null,
-      airTimestamp: null
+      airTimestamp: null,
+      pressureTrend: null
     };
 
     let eventSource = null;
@@ -1536,8 +1541,10 @@
           if (value > 60) return 'warn';
           return 'ok';
         case 'pressure':
-          if (value < 990) return 'warn';
-          if (value > 1030) return 'warn';
+          // At 610m elevation, normal pressure ~943 hPa
+          if (value < 920) return 'bad';
+          if (value > 965) return 'bad';
+          if (value < 935 || value > 950) return 'warn';
           return 'ok';
         case 'co2':
           if (value > 1000) return 'bad';
@@ -1859,6 +1866,41 @@
       window.historyPressureChart.update();
     }
 
+    function updateRainRisk() {
+      const trend = currentData.pressureTrend;
+      const rainRiskEl = document.getElementById('rainRisk');
+      const badgeEl = document.getElementById('rainRiskBadge');
+      const changeEl = document.getElementById('rainRiskChange');
+
+      if (!trend) {
+        if (rainRiskEl) rainRiskEl.style.display = 'none';
+        return;
+      }
+
+      if (rainRiskEl) rainRiskEl.style.display = 'block';
+
+      // Color badge based on rain risk
+      let bgColor = '#4caf50'; // GREEN
+      if (trend.rainRisk === 'MEDIUM') bgColor = '#ff9800'; // ORANGE
+      if (trend.rainRisk === 'HIGH') bgColor = '#f44336';   // RED
+
+      // Trend direction arrow
+      let arrow = '→';
+      if (trend.trendDirection === 'rising') arrow = '↑';
+      if (trend.trendDirection === 'falling') arrow = '↓';
+
+      if (badgeEl) {
+        badgeEl.textContent = trend.rainRisk;
+        badgeEl.style.backgroundColor = bgColor;
+        badgeEl.style.color = '#fff';
+      }
+
+      if (changeEl) {
+        const sign = trend.change1h >= 0 ? '+' : '';
+        changeEl.textContent = `${arrow} ${sign}${trend.change1h.toFixed(1)} hPa/h`;
+      }
+    }
+
     function updateCO2HistoryChart() {
       if (!window.historyCO2Chart || !window.historyCO2Chart.data || currentData.airQualityHistory.length === 0) return;
       const sorted = currentData.airQualityHistory.slice().sort(function (a, b) { return a.timestampUnix - b.timestampUnix; });
@@ -2079,6 +2121,14 @@
           updatePressureHistoryChart();
         }
 
+        // Fetch pressure trend
+        console.log('Fetching pressure trend...');
+        const pTrend = await graphqlQuery('{ pressureTrend { pressureNow change1h trendDirection rainRisk description } }');
+        if (pTrend.data && pTrend.data.pressureTrend) {
+          currentData.pressureTrend = pTrend.data.pressureTrend;
+          updateRainRisk();
+        }
+
         // Fetch current AQ
         console.log('Fetching current air quality...');
         const curAQ = await graphqlQuery('{ currentAirQuality { co2Ppm nh3Ppm alcoholPpm aqi status timestampUnix } }');
@@ -2216,6 +2266,11 @@
               }
               updateDisplay();
               updateUnifiedTimestamp();
+              // Periodically refetch trend (every ~20 pressure readings = ~2 minutes at 5s interval)
+              if ((currentData.pressureStats.count % 20) === 0) {
+                graphqlQuery('{ pressureTrend { pressureNow change1h trendDirection rainRisk description } }')
+                  .then(r => { if (r.data?.pressureTrend) { currentData.pressureTrend = r.data.pressureTrend; updateRainRisk(); } });
+              }
 
             } else if (data.type === 'air_quality_update' && data.data) {
               const aq = data.data;

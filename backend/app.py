@@ -331,6 +331,15 @@ class PressureStatistics(ObjectType):
     max_timestamp = String()
     hours_back = Int()
 
+class PressureTrend(ObjectType):
+    """GraphQL type for pressure trend and rain risk prediction."""
+    pressure_now = Float()
+    change_1h = Float()
+    trend_direction = String()
+    rain_risk = String()
+    description = String()
+    readings_used = Int()
+
 class AirQualityReading(ObjectType):
     """GraphQL type for a single air quality reading."""
     id = Int()
@@ -484,6 +493,7 @@ class Query(ObjectType):
         PressureStatistics,
         hours=Int(default_value=24)
     )
+    pressure_trend = Field(PressureTrend)
 
     # Air quality queries
     current_air_quality = Field(AirQualityReading)
@@ -990,6 +1000,104 @@ class Query(ObjectType):
         except Exception as e:
             logger.error(f"Error getting pressure statistics: {e}")
             return PressureStatistics(count=0, average=0.0, minimum=0.0, maximum=0.0, hours_back=hours)
+
+    def resolve_pressure_trend(self, info: Any) -> PressureTrend:
+        """Resolves the query for pressure trend and rain risk prediction.
+
+        Calculates 1-hour pressure change and determines rain risk based on:
+        - Absolute pressure (at 610m elevation, normal ~943 hPa)
+        - Rate of change (hPa/hour)
+
+        Returns:
+            A PressureTrend object with rain risk assessment.
+        """
+        from datetime import datetime, timedelta
+
+        try:
+            readings = db.get_recent_pressure_readings(limit=1500)
+            if not readings or len(readings) < 2:
+                return PressureTrend(
+                    pressure_now=None,
+                    change_1h=0.0,
+                    trend_direction="unknown",
+                    rain_risk="UNKNOWN",
+                    description="Insufficient data",
+                    readings_used=len(readings) if readings else 0
+                )
+
+            # Most recent reading
+            now_reading = readings[0]
+            pressure_now = now_reading.pressure_hpa
+            now_time = now_reading.timestamp_unix if now_reading.timestamp_unix else now_reading.timestamp.timestamp()
+
+            # Find reading closest to 60 minutes ago
+            target_time = now_time - 3600  # 60 minutes in seconds
+            hour_ago_reading = None
+            min_diff = float('inf')
+
+            for reading in readings[1:]:
+                reading_time = reading.timestamp_unix if reading.timestamp_unix else reading.timestamp.timestamp()
+                time_diff = abs(reading_time - target_time)
+                if time_diff < min_diff:
+                    min_diff = time_diff
+                    hour_ago_reading = reading
+
+            if hour_ago_reading is None:
+                return PressureTrend(
+                    pressure_now=pressure_now,
+                    change_1h=0.0,
+                    trend_direction="stable",
+                    rain_risk="LOW",
+                    description="Less than 1 hour of data",
+                    readings_used=len(readings)
+                )
+
+            pressure_1h_ago = hour_ago_reading.pressure_hpa
+            change_1h = pressure_now - pressure_1h_ago
+
+            # Determine trend direction
+            if change_1h > 2:
+                trend_direction = "rising"
+            elif change_1h < -2:
+                trend_direction = "falling"
+            else:
+                trend_direction = "stable"
+
+            # Rain risk logic for 610m elevation (normal pressure ~943 hPa)
+            if pressure_now < 930 or change_1h < -10:
+                rain_risk = "HIGH"
+                if pressure_now < 930:
+                    description = f"Very low pressure ({pressure_now:.1f} hPa) - rain likely"
+                else:
+                    description = f"Pressure falling fast ({change_1h:.1f} hPa/h) - rain coming"
+            elif -10 <= change_1h <= -3:
+                rain_risk = "MEDIUM"
+                description = f"Pressure falling ({change_1h:.1f} hPa/h) - possible rain"
+            else:
+                rain_risk = "LOW"
+                if change_1h > 0:
+                    description = f"Pressure rising ({change_1h:.1f} hPa/h) - clearing"
+                else:
+                    description = f"Pressure stable ({change_1h:.1f} hPa/h) - no change"
+
+            return PressureTrend(
+                pressure_now=pressure_now,
+                change_1h=change_1h,
+                trend_direction=trend_direction,
+                rain_risk=rain_risk,
+                description=description,
+                readings_used=len(readings)
+            )
+        except Exception as e:
+            logger.error(f"Error calculating pressure trend: {e}")
+            return PressureTrend(
+                pressure_now=None,
+                change_1h=0.0,
+                trend_direction="error",
+                rain_risk="UNKNOWN",
+                description=f"Error: {str(e)}",
+                readings_used=0
+            )
 
     def resolve_current_air_quality(self, info: Any) -> Optional[AirQualityReading]:
         """Resolves the query for the most recent air quality reading.
