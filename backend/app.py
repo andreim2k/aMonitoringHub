@@ -166,8 +166,17 @@ def get_external_humidity() -> Optional[float]:
         data = response.json()
 
         humidity = data.get('main', {}).get('humidity')
-        weather_cache = {'data': {'humidity': humidity}, 'timestamp': current_time}
-        logger.debug(f"Weather humidity from OpenWeatherMap: {humidity}%")
+        weather_info = data.get('weather', [{}])[0] if data.get('weather') else {}
+        weather_cache = {
+            'data': {
+                'humidity': humidity,
+                'condition': weather_info.get('main'),
+                'description': weather_info.get('description'),
+                'icon': weather_info.get('icon')
+            },
+            'timestamp': current_time
+        }
+        logger.debug(f"Weather from OpenWeatherMap: {weather_info.get('main')}, Humidity: {humidity}%")
 
         # Store in DB same way as other sensors
         if humidity is not None:
@@ -311,6 +320,9 @@ class ExternalWeather(ObjectType):
     humidity_percent = Float()
     location = String()
     timestamp_unix = Float()
+    weather_condition = String()
+    weather_description = String()
+    weather_icon = String()
 
 class PressureReading(ObjectType):
     """GraphQL type for a single pressure reading."""
@@ -893,15 +905,19 @@ class Query(ObjectType):
             info: The GraphQL resolve info object.
 
         Returns:
-            An ExternalWeather object with humidity from OpenWeatherMap.
+            An ExternalWeather object with humidity and weather condition from OpenWeatherMap.
         """
         try:
             humidity = get_external_humidity()
+            cached = weather_cache.get('data', {}) or {}
             if humidity is not None:
                 return ExternalWeather(
                     humidity_percent=humidity,
                     location="Clopotiva, Hunedoara",
-                    timestamp_unix=time.time()
+                    timestamp_unix=time.time(),
+                    weather_condition=cached.get('condition'),
+                    weather_description=cached.get('description'),
+                    weather_icon=cached.get('icon')
                 )
             return None
         except Exception as e:
