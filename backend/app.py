@@ -1992,85 +1992,70 @@ def run_ocr() -> Response:
         with open(os.path.join(os.path.dirname(__file__), 'config.json'), 'r') as f:
             config = json.load(f)
         
-        # Try Gemini OCR
+        # Try Requesty OCR
         try:
-            gemini_config = config.get('ocr', {}).get('engines', {}).get('gemini', {})
-            # Prioritize environment variable over config file for security
-            api_key = os.environ.get('GEMINI_API_KEY') or gemini_config.get('api_key')
-            model = gemini_config.get('model', 'gemini-2.5-flash-lite')
-            prompt = gemini_config.get('prompt', 'Extract only the numbers from this image.')
-            
+            requesty_config = config.get('ocr', {}).get('engines', {}).get('requesty', {})
+            api_key = os.environ.get('REQUESTY_API_KEY') or requesty_config.get('api_key')
+            model = requesty_config.get('model', 'google/gemini-2.5-flash-lite')
+            base_url = requesty_config.get('base_url', 'https://router.requesty.ai/v1')
+            prompt = requesty_config.get('prompt', 'Extract only the numbers from this image.')
+
             if not api_key:
-                raise Exception("Gemini API key not configured. Set GEMINI_API_KEY environment variable.")
-            
-            # Prepare Gemini API request
-            url = f'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}'
-            
-            headers = {
-                'Content-Type': 'application/json'
-            }
-            
+                raise Exception("Requesty API key not configured. Set REQUESTY_API_KEY environment variable.")
+
             payload = {
-                "contents": [
+                "model": model,
+                "messages": [
                     {
-                        "parts": [
-                            {
-                                "text": prompt
-                            },
-                            {
-                                "inline_data": {
-                                    "mime_type": "image/jpeg",
-                                    "data": image_b64
-                                }
-                            }
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": prompt},
+                            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image_b64}"}}
                         ]
                     }
-                ]
+                ],
+                "max_tokens": 100
             }
-            
-            # Make API call to Gemini
+
             ocr_response = requests.post(
-                url,
-                headers=headers,
+                f"{base_url}/chat/completions",
+                headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
                 json=payload,
                 timeout=30
             )
             ocr_response.raise_for_status()
-            
+
             result = ocr_response.json()
-            ocr_text = result.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', '').strip()
-            
+            ocr_text = result.get('choices', [{}])[0].get('message', {}).get('content', '').strip()
+
             # Check if OCR failed according to the prompt (EXACT match)
             if 'Failed to read index!' in ocr_text:
-                # Gemini wasn't confident - return the exact failure message
                 return jsonify({
                     "success": False,
-                    "engine": f"Google Gemini ({model})",
+                    "engine": f"Requesty ({model})",
                     "image": cap_json['image'],
                     "timestamp": datetime.now().isoformat() + "Z",
                     "raw_ocr": ocr_text,
                     "error": "Failed to read index!"
                 })
-            
+
             # Extract numbers from response
             numbers = re.findall(r'\d+', ocr_text)
-            
+
             # Find exactly 4-digit number
             four_digit = None
             for num in numbers:
                 if len(num) == 4:
                     four_digit = num
                     break
-            
+
             if four_digit:
-                # Prepend "1" to the successfully read 4-digit number
                 meter_value_with_prefix = "1" + four_digit
 
-                # Save successful reading to database
                 try:
                     db.add_meter_reading(
                         meter_value=meter_value_with_prefix,
-                        ocr_engine=f"Google Gemini ({model})",
+                        ocr_engine=f"Requesty ({model})",
                         raw_ocr_text=ocr_text,
                         sensor_type="esp32cam_ocr",
                         sensor_id="cabana1_meter"
@@ -2080,7 +2065,7 @@ def run_ocr() -> Response:
                     return jsonify({
                         "success": True,
                         "index": meter_value_with_prefix,
-                        "engine": f"Google Gemini ({model})",
+                        "engine": f"Requesty ({model})",
                         "image": cap_json['image'],
                         "timestamp": datetime.now().isoformat() + "Z",
                         "raw_ocr": ocr_text
@@ -2090,7 +2075,7 @@ def run_ocr() -> Response:
                     return jsonify({
                         "success": False,
                         "error": f"OCR succeeded but database save failed: {str(db_err)}",
-                        "engine": f"Google Gemini ({model})",
+                        "engine": f"Requesty ({model})",
                         "image": cap_json['image'],
                         "timestamp": datetime.now().isoformat() + "Z",
                         "raw_ocr": ocr_text
@@ -2098,19 +2083,19 @@ def run_ocr() -> Response:
             else:
                 return jsonify({
                     "success": False,
-                    "engine": f"Google Gemini ({model})",
+                    "engine": f"Requesty ({model})",
                     "image": cap_json['image'],
                     "timestamp": datetime.now().isoformat() + "Z",
                     "raw_ocr": ocr_text,
                     "error": "No 4-digit number found in response"
                 })
-                
+
         except Exception as ocr_error:
-            logger.error(f"Gemini OCR error: {ocr_error}")
+            logger.error(f"Requesty OCR error: {ocr_error}")
             return jsonify({
                 "success": False,
                 "error": f"Reading index failed: {str(ocr_error)}",
-                "engine": "Gemini AI - Error",
+                "engine": "Requesty - Error",
                 "image": cap_json['image'],
                 "timestamp": datetime.now().isoformat() + "Z"
             })
