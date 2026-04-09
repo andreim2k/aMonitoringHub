@@ -1308,10 +1308,11 @@
           </svg></div>
         <div class="metric-label">Humidity <span class="unit-badge">%</span></div>
         <div class="metric-value" id="currentHumidity">--%</div>
-        <div id="weatherBadge" style="font-size:0.8rem; margin-top:6px; display:none;">
-          <span id="weatherEmoji" style="font-size:1.2rem;"></span>
-          <span id="weatherLabel" style="margin-left:4px; font-size:0.75rem;"></span>
-        </div>
+      </div>
+      <div class="metric-card glass" id="weatherCard" style="grid-column: 1.5; grid-row: 1;">
+        <div class="metric-icon" id="weatherIcon" style="font-size:1.5rem;">🌤️</div>
+        <div class="metric-label">Weather</div>
+        <div class="metric-value" id="weatherStatus">--</div>
       </div>
       <div class="metric-card glass meter-card" id="electricityIndexCard" style="grid-column: 2; grid-row: 1;">
         <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Electricity"
@@ -1910,12 +1911,12 @@
     function updateWeatherBadge() {
       const cond = currentData.weatherCondition;
       const desc = (currentData.weatherDescription || '').toLowerCase();
-      const badgeEl = document.getElementById('weatherBadge');
-      const emojiEl = document.getElementById('weatherEmoji');
-      const labelEl = document.getElementById('weatherLabel');
+      const weatherCard = document.getElementById('weatherCard');
+      const iconEl = document.getElementById('weatherIcon');
+      const statusEl = document.getElementById('weatherStatus');
 
       if (!cond) {
-        if (badgeEl) badgeEl.style.display = 'none';
+        if (weatherCard) weatherCard.style.opacity = '0.5';
         return;
       }
 
@@ -1953,9 +1954,9 @@
         label = 'Foggy';
       }
 
-      if (badgeEl) badgeEl.style.display = 'block';
-      if (emojiEl) emojiEl.textContent = emoji;
-      if (labelEl) labelEl.textContent = label;
+      if (iconEl) iconEl.textContent = emoji;
+      if (statusEl) statusEl.textContent = label;
+      if (weatherCard) weatherCard.style.opacity = '1';
     }
 
     function updateCO2HistoryChart() {
