@@ -7,17 +7,13 @@ Outputs BME280 (SPI) + MQ135 sensor data in JSON format every second over USB
 import json
 import time
 import machine
-from machine import Pin, I2C, SPI, ADC
+from machine import Pin, SPI, ADC
 
 # Import sensor libraries and configuration
 try:
     from lib.bme280_spi import BME280_SPI
     from lib.mq135 import MQ135
     from lib.config import (
-        I2C_BUS,
-        I2C_SDA_PIN,
-        I2C_SCL_PIN,
-        I2C_FREQ,
         SPI_BUS,
         SPI_SCK_PIN,
         SPI_MOSI_PIN,
@@ -34,7 +30,6 @@ try:
         SENSOR_READ_INTERVAL_SEC,
         GC_COLLECT_INTERVAL,
         I2C_RECOVERY_RETRIES,
-        BME280_RESET_INTERVAL,
         LED_PIN,
         LED_BLINK_DURATION_MS,
     )
@@ -50,13 +45,20 @@ except ImportError as e:
 
 
 # SPI and sensor recovery functions
-def reinitialize_spi(max_retries=None):
+def reinitialize_spi(old_spi=None, max_retries=None):
     """
-    Reinitialize the SPI bus with exponential backoff retry logic
+    Reinitialize the SPI bus with exponential backoff retry logic.
+    Deinits old_spi before creating the new bus to release RP2040 SPI peripheral resources.
     Returns: (SPI object, CS pin object) or (None, None) if failed
     """
     if max_retries is None:
         max_retries = I2C_RECOVERY_RETRIES
+
+    if old_spi is not None:
+        try:
+            old_spi.deinit()
+        except Exception:
+            pass  # Best-effort; proceed regardless
 
     for attempt in range(max_retries):
         try:
@@ -106,6 +108,9 @@ def recover_bme280_spi(spi, cs_pin, current_bme280=None, max_retries=None):
     if current_bme280 is not None:
         try:
             current_bme280.reset()
+            # CRITICAL: reset() returns BME280 to sleep mode — must reconfigure
+            # to restore normal operating mode before sensor will produce data again.
+            current_bme280.reconfigure()
             # Verify sensor is responding
             _ = current_bme280.check_status()
             recovery_msg = {
@@ -232,27 +237,10 @@ def auto_start_monitoring():
         }
         print(json.dumps(led_error_msg))
 
-    # Initialize I2C bus (used by other sensors)
+    # I2C bus not used in current configuration (BME280 uses SPI, MQ135 uses ADC).
+    # Skip I2C initialization to avoid locking the bus.
+    # If future sensors need I2C, initialize here.
     i2c = None
-    try:
-        i2c = I2C(I2C_BUS, sda=Pin(I2C_SDA_PIN), scl=Pin(I2C_SCL_PIN), freq=I2C_FREQ)
-        i2c_msg = {
-            "timestamp": time.ticks_ms() / 1000.0,
-            "status": "i2c_initialized",
-            "bus": I2C_BUS,
-            "sda_pin": I2C_SDA_PIN,
-            "scl_pin": I2C_SCL_PIN,
-            "frequency": I2C_FREQ,
-        }
-        print(json.dumps(i2c_msg))
-    except Exception as e:
-        error_msg = {
-            "timestamp": time.ticks_ms() / 1000.0,
-            "status": "error",
-            "error": "I2C bus initialization failed",
-            "details": str(e),
-        }
-        print(json.dumps(error_msg))
 
     # Initialize SPI bus for GY-BME280
     spi = None
@@ -297,8 +285,6 @@ def auto_start_monitoring():
     # Try to initialize BME280 via SPI
     if spi is not None and cs_pin is not None:
         max_retries = 10
-        bme280_initialized = False
-
         retry_count = 0
         while retry_count < max_retries and bme280 is None:
             try:
@@ -309,7 +295,6 @@ def auto_start_monitoring():
                     "interface": "SPI",
                 }
                 print(json.dumps(bme280_msg))
-                bme280_initialized = True
                 break
             except OSError as e:
                 retry_count += 1
@@ -343,7 +328,7 @@ def auto_start_monitoring():
                 print(json.dumps(error_msg))
                 break
 
-        if not bme280_initialized:
+        if bme280 is None:
             warning_msg = {
                 "timestamp": time.ticks_ms() / 1000.0,
                 "status": "warning",
@@ -449,32 +434,6 @@ def auto_start_monitoring():
             # Read BME280 if available
             if bme280 is not None:
                 try:
-                    # Note: Removed aggressive I2C bus health check - it was locking up the sensor
-                    # Health checks will happen only if read fails (in exception handler)
-
-                    # Periodic sensor reset (if enabled) - DISABLED for now to prevent sensor lockup
-                    # if BME280_RESET_INTERVAL > 0 and bme280_read_count > 0 and bme280_read_count % BME280_RESET_INTERVAL == 0:
-                    #     try:
-                    #         bme280.reset()
-                    #         time.sleep(0.5)  # Give sensor time to recover
-                    #         reset_msg = {
-                    #             "timestamp": timestamp,
-                    #             "status": "info",
-                    #             "sensor": "bme280",
-                    #             "message": "Periodic reset performed",
-                    #             "read_count": bme280_read_count
-                    #         }
-                    #         print(json.dumps(reset_msg))
-                    #     except Exception as reset_error:
-                    #         reset_error_msg = {
-                    #             "timestamp": timestamp,
-                    #             "status": "warning",
-                    #             "sensor": "bme280",
-                    #             "error": "Periodic reset failed",
-                    #             "details": str(reset_error)
-                    #         }
-                    #         print(json.dumps(reset_error_msg))
-
                     # Read sensor data
                     temp_c, pressure_pa, humidity_pct = bme280.read_compensated_data()
                     pressure_hpa = pressure_pa / 100.0
@@ -505,6 +464,9 @@ def auto_start_monitoring():
                     try:
                         if bme280 is not None:
                             bme280.reset()
+                            # CRITICAL: reset() returns BME280 to sleep mode — must
+                            # reconfigure to restore normal mode before reads will work.
+                            bme280.reconfigure()
                             # Verify sensor responds
                             _ = bme280.check_status()
                             recovery_successful = True
@@ -520,7 +482,7 @@ def auto_start_monitoring():
 
                     # Step 2: If reset failed, try reinitializing SPI bus
                     if not recovery_successful:
-                        new_spi, new_cs_pin = reinitialize_spi()
+                        new_spi, new_cs_pin = reinitialize_spi(old_spi=spi)
                         if new_spi is not None:
                             spi = new_spi
                             cs_pin = new_cs_pin

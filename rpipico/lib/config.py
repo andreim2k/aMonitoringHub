@@ -15,21 +15,8 @@ SPI_FREQ = 1000000  # 1MHz for BME280
 SPI_POLARITY = 0   # BME280 SPI Mode 0 (CPOL=0)
 SPI_PHASE = 0      # BME280 SPI Mode 0 (CPHA=0)
 
-# I2C Configuration (used by other sensors on I2C bus)
-I2C_BUS = 1
-I2C_SDA_PIN = 14  # GPIO 14 (Pin 19)
-I2C_SCL_PIN = 15  # GPIO 15 (Pin 20)
-I2C_FREQ = 400000  # 400kHz
-
-# BME280 Configuration
-BME280_ADDRESSES = [0x76, 0x77]  # Common addresses (try both)
-BME280_DEFAULT_ADDRESS = 0x76
-BME280_CHIP_ID = 0x60
-BME280_STATUS_REGISTER = 0xF3  # Status register address
-BME280_DATA_READY_BIT = 3  # Bit 3 indicates data ready
-BME280_MEASURING_BIT = 0  # Bit 0 indicates measuring in progress
-BME280_RESET_REGISTER = 0xE0  # Reset register address
-BME280_RESET_VALUE = 0xB6  # Reset command value
+# I2C Configuration — NOT USED (BME280 uses SPI, MQ135 uses ADC)
+# Kept for reference only; do not initialize to avoid locking GPIO 14/15
 
 # LED Configuration
 LED_PIN = 25  # GPIO 25 (onboard green LED on Pico)
@@ -83,5 +70,4 @@ MIN_R_ZERO = 1000.0  # Minimum valid R0 value
 MAX_R_ZERO = 1000000.0  # Maximum valid R0 value
 MIN_R_LOAD = 100.0  # Minimum valid load resistor value
 MAX_R_LOAD = 1000000.0  # Maximum valid load resistor value
-VALID_I2C_ADDRESSES = list(range(0x08, 0x78))  # Valid I2C addresses (excluding reserved)
 

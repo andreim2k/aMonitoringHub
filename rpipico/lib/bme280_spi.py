@@ -8,25 +8,23 @@ from machine import SPI, Pin
 
 try:
     from lib.config import (
-        BME280_DEFAULT_ADDRESS, BME280_CHIP_ID,
-        BME280_STATUS_REGISTER, BME280_DATA_READY_BIT, BME280_MEASURING_BIT,
-        BME280_RESET_REGISTER, BME280_RESET_VALUE,
         I2C_RECOVERY_RETRIES, I2C_OPERATION_TIMEOUT_MS, I2C_STATUS_CHECK_TIMEOUT_MS,
         SPI_POLARITY, SPI_PHASE
     )
 except ImportError:
     # Fallback defaults if config not available
-    BME280_CHIP_ID = 0x60
-    BME280_STATUS_REGISTER = 0xF3
-    BME280_DATA_READY_BIT = 3
-    BME280_MEASURING_BIT = 0
-    BME280_RESET_REGISTER = 0xE0
-    BME280_RESET_VALUE = 0xB6
     I2C_RECOVERY_RETRIES = 3
     I2C_OPERATION_TIMEOUT_MS = 100
     I2C_STATUS_CHECK_TIMEOUT_MS = 500
     SPI_POLARITY = 0
     SPI_PHASE = 0
+
+# BME280 sensor register map (hardware-specific, not configurable)
+BME280_CHIP_ID_BME280 = 0x60
+BME280_CHIP_ID_BMP280 = 0x58
+BME280_STATUS_REGISTER = 0xF3
+BME280_RESET_REGISTER = 0xE0
+BME280_RESET_VALUE = 0xB6
 
 # Float comparison epsilon
 EPSILON = 1e-6
@@ -55,8 +53,8 @@ class BME280_SPI:
 
         # Verify chip ID (0x60 = BME280, 0x58 = BMP280)
         chip_id = self._read_register(0xD0)
-        if chip_id not in (0x60, 0x58):  # Both BME280 and BMP280 supported
-            raise ValueError(f"Invalid chip ID: 0x{chip_id:02X}, expected 0x60 (BME280) or 0x58 (BMP280)")
+        if chip_id not in (BME280_CHIP_ID_BME280, BME280_CHIP_ID_BMP280):
+            raise ValueError(f"Invalid chip ID: 0x{chip_id:02X}, expected 0x{BME280_CHIP_ID_BME280:02X} (BME280) or 0x{BME280_CHIP_ID_BMP280:02X} (BMP280)")
 
         # Store chip ID - but ALWAYS try to read humidity (some sensors may have it despite chip ID)
         self.chip_id = chip_id
@@ -213,13 +211,18 @@ class BME280_SPI:
         self._write_register(0xF5, 0x20)
 
     def reset(self):
-        """Reset the BME280 sensor"""
+        """Soft-reset the sensor. Caller must call reconfigure() afterwards —
+        reset returns BME280 to sleep mode (mode=00, no measurements)."""
         try:
             self._write_register(BME280_RESET_REGISTER, BME280_RESET_VALUE)
-            time.sleep(0.01)  # Wait for reset to complete
-            time.sleep(0.01)
+            time.sleep(0.003)  # Datasheet startup time < 2ms; 3ms gives safe margin
         except Exception as e:
             raise OSError(f"BME280 reset failed: {e}")
+
+    def reconfigure(self):
+        """Re-apply sensor configuration after a soft reset.
+        BME280 returns to sleep mode after any reset; this restores normal operating mode."""
+        self._configure_sensor()
 
     def check_status(self):
         """Read the status register"""
@@ -229,13 +232,21 @@ class BME280_SPI:
             raise OSError(f"Failed to read status register: {e}")
 
     def is_ready(self):
-        """Check if sensor data is ready (not measuring and data ready)"""
+        """Check if sensor measurement is complete (safe to read data registers).
+
+        BME280 register 0xF3 per datasheet:
+          bit 3 = measuring : 1 while a conversion is running, 0 when done
+          bit 0 = im_update : 1 while NVM data is being copied to image registers
+
+        NOTE: config.py has these bit positions misnamed (DATA_READY_BIT=3 is
+        actually the measuring flag; MEASURING_BIT=0 is actually im_update).
+        We use hardcoded bit positions here to avoid the naming confusion.
+        """
         try:
             status = self.check_status()
-            # Bit 0 = measuring, Bit 3 = data ready
-            measuring = (status >> BME280_MEASURING_BIT) & 0x01
-            data_ready = (status >> BME280_DATA_READY_BIT) & 0x01
-            return measuring == 0 and data_ready == 1
+            measuring = (status >> 3) & 0x01   # bit 3: 1 = conversion in progress
+            im_update = (status >> 0) & 0x01   # bit 0: 1 = NVM copy in progress
+            return measuring == 0 and im_update == 0
         except Exception:
             return False
 
