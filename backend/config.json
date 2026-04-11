@@ -1,0 +1,26 @@
+{
+  "webcam": {
+    "url": "http://192.168.50.3/snapshot",
+    "enabled": true,
+    "title": "\ud83d\udcf9 Cabana 1 Electricity Meter"
+  },
+  "ocr": {
+    "enabled": true,
+    "engines": {
+      "requesty": {
+        "enabled": true,
+        "base_url": "https://router.requesty.ai/v1",
+        "model": "google/gemini-2.5-flash-lite",
+        "prompt": "Analyze this image and extract the electricity meter index as a 4-digit number. The image may be slightly out of focus, have camera noise, or show uneven lighting, which is expected. Rules: 1) Extract the 4 most prominent digits displayed horizontally. 2) Tolerate slight blur, shadows, or noise as long as the core shape of the digit is recognizable (e.g., distinguish clearly between 6 and 8, or 3 and 9). 3) If a mechanical digit is rolling but mostly shows one number, pick the most visible number. 4) Reply with ONLY the 4-digit number (e.g., 9683), and absolutely no other text, spaces, or punctuation. 5) Only if the digits are completely obscured or unreadable, reply with 'Failed to read index!'."
+      }
+    },
+    "refresh_interval": 30
+  },
+  "app": {
+    "log_level": "ERROR"
+  },
+  "usb": {
+    "port": "/dev/ttyACM0",
+    "baudrate": 1200
+  }
+}

@@ -17,6 +17,3 @@ backend/*.db
 # Environment variables
 .env
 
-# Configuration files with secrets
-backend/config.json
-config.json
