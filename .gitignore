@@ -13,6 +13,7 @@ __pycache__/
 # Database file
 backend/*.db
 !backend/database.db-example
+!backend/monitoringhub.db
 
 # Environment variables
 .env
