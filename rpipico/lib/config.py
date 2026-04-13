@@ -1,40 +1,37 @@
 """
 Configuration constants for Raspberry Pi Pico sensor monitoring.
-SPI is used for the BME280; ADC for the MQ135. No I2C devices are wired.
+SPI is used for the BMP280; ADC for the MQ135. No I2C devices are wired.
 """
 
-# SPI Configuration (BME280 on SPI0)
+# SPI Configuration (BMP280 on SPI0)
 # RP2040 SPI0: SCK=GP18, MOSI=GP19, MISO=GP16, CS=GP17
 SPI_BUS = 0
 SPI_SCK_PIN = 18
 SPI_MOSI_PIN = 19
 SPI_MISO_PIN = 16
 SPI_CS_PIN = 17
-SPI_FREQ = 500_000      # 500 kHz: conservative, immune to wiring noise
-SPI_POLARITY = 0        # BME280 SPI mode 0
+SPI_FREQ = 100_000      # 100 kHz: extra margin for long-run SPI stability
+SPI_POLARITY = 0        # BMP280 SPI mode 0
 SPI_PHASE = 0
 
-# BME280 register map (datasheet §5.3 / §5.4)
-BME280_CHIP_ID_REG = 0xD0
-BME280_RESET_REG = 0xE0
-BME280_RESET_VALUE = 0xB6
-BME280_CTRL_HUM_REG = 0xF2
-BME280_STATUS_REG = 0xF3
-BME280_CTRL_MEAS_REG = 0xF4
-BME280_CONFIG_REG = 0xF5
-BME280_DATA_REG = 0xF7   # press/temp/hum burst start
+# BMP280 register map
+BMP280_CHIP_ID_REG = 0xD0
+BMP280_RESET_REG = 0xE0
+BMP280_RESET_VALUE = 0xB6
+BMP280_STATUS_REG = 0xF3
+BMP280_CTRL_MEAS_REG = 0xF4
+BMP280_CONFIG_REG = 0xF5
+BMP280_DATA_REG = 0xF7   # pressure/temp burst start
 
-# Status register bit positions (datasheet §5.4.4 — these were swapped before)
-BME280_MEASURING_BIT = 3
-BME280_IM_UPDATE_BIT = 0
+# Status register bit positions
+BMP280_MEASURING_BIT = 3
+BMP280_IM_UPDATE_BIT = 0
 
 # Sensor configuration bytes
-# ctrl_hum: humidity oversampling x1
-BME280_CTRL_HUM_VALUE = 0x01
 # ctrl_meas: temp x1, press x1, normal mode
-BME280_CTRL_MEAS_VALUE = 0x27
+BMP280_CTRL_MEAS_VALUE = 0x27
 # config: standby 62.5 ms, filter off, SPI 4-wire
-BME280_CONFIG_VALUE = 0x20
+BMP280_CONFIG_VALUE = 0x20
 
 # SPI retry / timing
 SPI_OP_RETRIES = 3
@@ -69,10 +66,15 @@ AQ_VERY_POOR = 2500
 
 # Timing
 BOOT_DELAY_SEC = 2.0
-BME280_RETRY_DELAY_SEC = 2.0
+BMP280_RETRY_DELAY_SEC = 2.0
 SENSOR_READ_INTERVAL_SEC = 5.0
 GC_COLLECT_INTERVAL = 10        # collect every N iterations (was 60 — too sparse)
-BME280_INIT_RETRIES = 10
+BMP280_REQUIRED = False         # When False, firmware keeps running with MQ135 only
+BMP280_INIT_RETRIES = 10        # Startup retries when BMP280 is required
+BMP280_RECOVERY_INIT_RETRIES = 1
+BMP280_RECOVERY_RETRY_DELAY_SEC = 0.0
+BMP280_MAX_CONSEC_FAILS_BEFORE_REBOOT = 12  # Consecutive failed recovery cycles
+BMP280_OPTIONAL_RETRY_DELAY_SEC = 60.0      # Backoff when BMP280 is optional
 
 # ADC
 ADC_MAX_VALUE = 65535

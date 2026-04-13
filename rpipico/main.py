@@ -1,24 +1,30 @@
 """
 Auto-boot JSON sensor monitor for Raspberry Pi Pico.
-BME280 over SPI + MQ135 over ADC. Emits one JSON object per cycle on USB serial.
+BMP280 over SPI + MQ135 over ADC.
+Emits one JSON object per cycle on USB serial.
 """
 
+import builtins
 import gc
 import json
 import time
 
 from machine import Pin, SPI
+import machine
 
 try:
-    from lib.bme280_spi import BME280_SPI
+    from lib.bmp280_spi import BMP280_SPI
     from lib.mq135 import MQ135
     from lib.config import (
         SPI_BUS, SPI_SCK_PIN, SPI_MOSI_PIN, SPI_MISO_PIN, SPI_CS_PIN,
         SPI_FREQ, SPI_POLARITY, SPI_PHASE,
         MQ135_PIN, MQ135_R_ZERO, MQ135_R_LOAD,
-        BOOT_DELAY_SEC, BME280_RETRY_DELAY_SEC, BME280_INIT_RETRIES,
+        BOOT_DELAY_SEC, BMP280_RETRY_DELAY_SEC, BMP280_INIT_RETRIES,
+        BMP280_RECOVERY_INIT_RETRIES, BMP280_RECOVERY_RETRY_DELAY_SEC,
         SENSOR_READ_INTERVAL_SEC, GC_COLLECT_INTERVAL,
         LED_PIN, LED_BLINK_DURATION_MS,
+        BMP280_MAX_CONSEC_FAILS_BEFORE_REBOOT,
+        BMP280_OPTIONAL_RETRY_DELAY_SEC, BMP280_REQUIRED,
     )
 except ImportError as e:
     print(json.dumps({
@@ -27,14 +33,36 @@ except ImportError as e:
     }))
     raise
 
+_BOOT_TICKS_MS = time.ticks_ms()
+_POS_INF = float("inf")
+_NEG_INF = float("-inf")
+
 
 def _now():
     """Monotonic seconds since boot, safe across ticks_ms wraparound."""
-    return time.ticks_ms() / 1000.0
+    return time.ticks_diff(time.ticks_ms(), _BOOT_TICKS_MS) / 1000.0
+
+
+def _sanitize_numbers(value):
+    if isinstance(value, dict):
+        return {k: _sanitize_numbers(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_sanitize_numbers(v) for v in value]
+    if isinstance(value, float):
+        if value != value or value == _POS_INF or value == _NEG_INF:
+            return None
+    return value
 
 
 def _emit(obj):
-    print(json.dumps(obj))
+    print(json.dumps(_sanitize_numbers(obj)))
+
+
+def _validate_bmp280_reading(temp_c, pressure_pa):
+    if temp_c < -40.0 or temp_c > 85.0:
+        raise ValueError("BMP280 temperature out of range: %.2f C" % temp_c)
+    if pressure_pa < 30000.0 or pressure_pa > 110000.0:
+        raise ValueError("BMP280 pressure out of range: %.1f Pa" % pressure_pa)
 
 
 # ---- SPI / sensor lifecycle ----
@@ -51,6 +79,7 @@ def _make_spi():
         miso=Pin(SPI_MISO_PIN),
     )
     cs = Pin(SPI_CS_PIN, Pin.OUT, value=1)
+    time.sleep_ms(5)
     return spi, cs
 
 
@@ -66,41 +95,53 @@ def _safe_deinit_spi(spi):
         pass
 
 
-def _init_bme280(spi, cs):
-    """Try to init the BME280, with retries. Returns sensor or None."""
+def _init_bmp280(spi, cs, retries, retry_delay_sec, context):
+    """Try to init the BMP280. Returns sensor or None."""
+    if retries < 1:
+        retries = 1
+
     last_err = None
-    for attempt in range(1, BME280_INIT_RETRIES + 1):
+    for attempt in range(1, retries + 1):
         try:
-            sensor = BME280_SPI(spi, cs)
-            _emit({"status": "bme280_initialized", "attempt": attempt})
+            sensor = BMP280_SPI(spi, cs)
+            _emit({"status": "bmp280_initialized", "attempt": attempt})
             return sensor
-        except ValueError as e:
-            _emit({"status": "error", "error": "BME280 chip ID mismatch",
-                   "details": str(e)})
-            return None
         except Exception as e:
             last_err = e
-            _emit({"status": "bme280_retry", "attempt": attempt, "error": str(e)})
-            time.sleep(BME280_RETRY_DELAY_SEC)
-    _emit({"status": "warning", "message": "BME280 unavailable",
+            _emit({
+                "status": "bmp280_retry",
+                "context": context,
+                "attempt": attempt,
+                "retries": retries,
+                "error": str(e),
+            })
+            if attempt < retries and retry_delay_sec > 0:
+                time.sleep(retry_delay_sec)
+    _emit({"status": "warning", "message": "BMP280 unavailable",
+           "context": context,
            "last_error": str(last_err) if last_err else None})
     return None
 
 
-def _recover_bme280(spi, cs):
-    """Tear down the SPI bus and bring up a fresh BME280. Returns
-    (sensor_or_None, new_spi, new_cs). Always returns valid spi/cs so the
-    caller can keep retrying on the next cycle."""
+def _recover_bmp280(spi, cs):
+    """Tear down the SPI bus and bring up a fresh BMP280. Returns
+    (sensor_or_None, new_spi_or_None, new_cs_or_None)."""
     _safe_deinit_spi(spi)
     gc.collect()
     try:
         new_spi, new_cs = _make_spi()
     except Exception as e:
         _emit({"status": "error", "error": "SPI reinit failed", "details": str(e)})
-        return None, spi, cs
-    sensor = _init_bme280(new_spi, new_cs)
+        return None, None, None
+    sensor = _init_bmp280(
+        new_spi,
+        new_cs,
+        retries=BMP280_RECOVERY_INIT_RETRIES,
+        retry_delay_sec=BMP280_RECOVERY_RETRY_DELAY_SEC,
+        context="recovery",
+    )
     if sensor is not None:
-        _emit({"status": "recovered", "sensor": "bme280"})
+        _emit({"status": "recovered", "sensor": "bmp280"})
     return sensor, new_spi, new_cs
 
 
@@ -136,6 +177,10 @@ def _blink_error(led):
 # ---- main loop ----
 
 def auto_start_monitoring():
+    if getattr(builtins, "PICO_SAFE_BOOT", False):
+        _emit({"status": "safe_boot", "message": "Auto-start disabled by boot pin"})
+        return
+
     _emit({"status": "starting", "message": "Auto-starting JSON sensor monitoring"})
     time.sleep(BOOT_DELAY_SEC)
 
@@ -154,7 +199,14 @@ def auto_start_monitoring():
     except Exception as e:
         _emit({"status": "error", "error": "SPI init failed", "details": str(e)})
 
-    bme280 = _init_bme280(spi, cs) if spi is not None else None
+    startup_bmp_retries = BMP280_INIT_RETRIES if BMP280_REQUIRED else 1
+    startup_bmp_retry_delay = BMP280_RETRY_DELAY_SEC if startup_bmp_retries > 1 else 0.0
+    bmp280 = _init_bmp280(
+        spi, cs,
+        retries=startup_bmp_retries,
+        retry_delay_sec=startup_bmp_retry_delay,
+        context="startup",
+    ) if spi is not None else None
 
     mq135 = None
     try:
@@ -163,37 +215,55 @@ def auto_start_monitoring():
     except Exception as e:
         _emit({"status": "error", "error": "MQ135 init failed", "details": str(e)})
 
-    if bme280 is None and mq135 is None:
+    if bmp280 is None and mq135 is None:
         _emit({"status": "error", "error": "No sensors available"})
         _blink_error(led)
         return
 
     _emit({"status": "monitoring_started",
-           "bme280_available": bme280 is not None,
+           "bmp280_available": bmp280 is not None,
+           "bmp280_required": BMP280_REQUIRED,
            "mq135_available": mq135 is not None})
 
     iteration = 0
+    next_bmp_retry_at = _now()
+    bmp_fail_streak = 0
     while True:
         try:
             data = {"timestamp": _now()}
-            bme_ok = False
+            bmp_ok = False
             mq_ok = False
 
-            if bme280 is not None:
+            if bmp280 is None and _now() >= next_bmp_retry_at:
+                _emit({"status": "bmp280_recovery_attempt"})
+                bmp280, spi, cs = _recover_bmp280(spi, cs)
+                if bmp280 is None:
+                    bmp_fail_streak += 1
+                    next_bmp_retry_at = _now() + BMP280_RETRY_DELAY_SEC
+                else:
+                    bmp_fail_streak = 0
+
+            if bmp280 is not None:
                 try:
-                    t_c, p_pa, h_pct = bme280.read_compensated_data()
-                    data["bme280"] = {
+                    t_c, p_pa = bmp280.read_compensated_data()
+                    _validate_bmp280_reading(t_c, p_pa)
+                    data["bmp280"] = {
                         "temperature_c": round(t_c, 2),
-                        "humidity_percent": round(h_pct, 1),
                         "pressure_hpa": round(p_pa / 100.0, 1),
                         "pressure_pa": round(p_pa, 0),
                     }
-                    bme_ok = True
+                    bmp_ok = True
+                    bmp_fail_streak = 0
                 except Exception as e:
-                    _emit({"status": "error", "sensor": "bme280",
+                    _emit({"status": "error", "sensor": "bmp280",
                            "error": "read failed", "details": str(e),
                            "attempting_recovery": True})
-                    bme280, spi, cs = _recover_bme280(spi, cs)
+                    bmp280, spi, cs = _recover_bmp280(spi, cs)
+                    if bmp280 is None:
+                        bmp_fail_streak += 1
+                        next_bmp_retry_at = _now() + BMP280_RETRY_DELAY_SEC
+                    else:
+                        bmp_fail_streak = 0
 
             if mq135 is not None:
                 try:
@@ -206,14 +276,37 @@ def auto_start_monitoring():
             _emit(data)
 
             if led is not None:
-                if bme_ok and mq_ok:
+                if bmp_ok and mq_ok:
                     _blink(led, 3)
-                elif bme_ok:
+                elif bmp_ok:
                     _blink(led, 1)
                 elif mq_ok:
                     _blink(led, 2)
                 else:
                     _blink_error(led)
+
+            if bmp_fail_streak >= BMP280_MAX_CONSEC_FAILS_BEFORE_REBOOT:
+                if BMP280_REQUIRED:
+                    _emit({
+                        "status": "error",
+                        "sensor": "bmp280",
+                        "error": "persistent_failure",
+                        "fail_streak": bmp_fail_streak,
+                        "action": "machine_reset"
+                    })
+                    time.sleep_ms(200)
+                    machine.reset()
+                else:
+                    _emit({
+                        "status": "warning",
+                        "sensor": "bmp280",
+                        "error": "persistent_failure_optional",
+                        "fail_streak": bmp_fail_streak,
+                        "action": "continue_without_bmp280",
+                        "next_retry_sec": BMP280_OPTIONAL_RETRY_DELAY_SEC,
+                    })
+                    bmp_fail_streak = 0
+                    next_bmp_retry_at = _now() + BMP280_OPTIONAL_RETRY_DELAY_SEC
 
             iteration += 1
             if iteration % GC_COLLECT_INTERVAL == 0:
