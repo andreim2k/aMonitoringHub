@@ -442,7 +442,7 @@ class HealthStatus(ObjectType):
     sensor = Field(SensorInfo)
     recent_readings = Int()
     usb_connection = String()
-    bme280_status = Field(USBSensorStatus)
+    bm280_status = Field(USBSensorStatus)
     mq135_status = Field(USBSensorStatus)
 
 
@@ -619,18 +619,18 @@ class Query(ObjectType):
             usb_truly_connected = usb_status['connected'] and usb_status['last_success_time'] is not None
             usb_connected = "connected" if usb_truly_connected else "disconnected"
 
-            # Get BME280 sensor status
+            # Get BM280 sensor status
             current_time = time.time()
-            bme280_last_reading = None
-            bme280_seconds_ago = None
-            bme280_connected_str = "disconnected"
+            bm280_last_reading = None
+            bm280_seconds_ago = None
+            bm280_connected_str = "disconnected"
 
             if hasattr(app, 'usb_data_processor') and app.usb_data_processor:
-                if app.usb_data_processor.last_bme280_reading:
-                    bme280_last_reading = app.usb_data_processor.last_bme280_reading
-                    bme280_seconds_ago = current_time - bme280_last_reading
+                if app.usb_data_processor.last_bm280_reading:
+                    bm280_last_reading = app.usb_data_processor.last_bm280_reading
+                    bm280_seconds_ago = current_time - bm280_last_reading
                     # Consider online if reading within last 120 seconds
-                    bme280_connected_str = "online" if bme280_seconds_ago < 120 else "stale"
+                    bm280_connected_str = "online" if bm280_seconds_ago < 120 else "stale"
 
             # Get MQ135 sensor status
             mq135_last_reading = None
@@ -656,11 +656,11 @@ class Query(ObjectType):
                 ),
                 recent_readings=stats.get('count', 0),
                 usb_connection=usb_connected,
-                bme280_status=USBSensorStatus(
-                    name="BME280 (Temp/Humidity/Pressure)",
-                    connected=bme280_connected_str,
-                    last_reading=bme280_last_reading,
-                    seconds_since_last_reading=bme280_seconds_ago,
+                bm280_status=USBSensorStatus(
+                    name="BM280 (Temp/Humidity/Pressure)",
+                    connected=bm280_connected_str,
+                    last_reading=bm280_last_reading,
+                    seconds_since_last_reading=bm280_seconds_ago,
                     error=usb_status['last_error'] if not usb_status['connected'] else None
                 ),
                 mq135_status=USBSensorStatus(
@@ -680,7 +680,7 @@ class Query(ObjectType):
                 sensor=None,
                 recent_readings=0,
                 usb_connection="error",
-                bme280_status=None,
+                bm280_status=None,
                 mq135_status=None
             )
 
@@ -1559,7 +1559,7 @@ class USBDataProcessor:
         self.logger = logger
         self.error_count = 0
         self.max_errors = 10
-        self.last_bme280_reading = None  # Track last BME280 (temp/humidity/pressure) reading time
+        self.last_bm280_reading = None  # Track last BM280 (temp/humidity/pressure) reading time
         self.last_mq135_reading = None   # Track last MQ135 (air quality) reading time
         
     def process_sensor_data(self, data: Dict[str, Any]):
@@ -1587,7 +1587,7 @@ class USBDataProcessor:
             # Update timestamps immediately when data is received (before throttling check)
             # This prevents false stale detection when data is throttled
             if temp_c is not None or humidity_pct is not None or pressure_hpa is not None:
-                self.last_bme280_reading = current_time
+                self.last_bm280_reading = current_time
             
             if air_data and air_data.get('co2_ppm') is not None:
                 self.last_mq135_reading = current_time
@@ -1609,7 +1609,7 @@ class USBDataProcessor:
                         'temperature_c': round(temp_c, 2),
                         'timestamp': current_time,
                         'timestamp_iso': timestamp.isoformat(),
-                        'sensor_type': 'bme280_usb',
+                        'sensor_type': 'bm280_usb',
                         'sensor_id': 'micropython_device',
                         'change_reason': 'usb_update'
                     }
@@ -1628,7 +1628,7 @@ class USBDataProcessor:
                         'humidity_percent': round(humidity_pct, 1),
                         'timestamp': current_time,
                         'timestamp_iso': timestamp.isoformat(),
-                        'sensor_type': 'bme280_usb',
+                        'sensor_type': 'bm280_usb',
                         'sensor_id': 'micropython_device'
                     }
                 }
@@ -1646,7 +1646,7 @@ class USBDataProcessor:
                         'pressure_hpa': round(pressure_hpa, 1),
                         'timestamp': current_time,
                         'timestamp_iso': timestamp.isoformat(),
-                        'sensor_type': 'bme280_usb',
+                        'sensor_type': 'bm280_usb',
                         'sensor_id': 'micropython_device'
                     }
                 }
@@ -1685,7 +1685,7 @@ class USBDataProcessor:
             if temp_c is not None:
                 db.add_temperature_reading(
                     temperature_c=temp_c,
-                    sensor_type='bme280_usb',
+                    sensor_type='bm280_usb',
                     sensor_id='micropython_device',
                     timestamp=timestamp
                 )
@@ -1693,7 +1693,7 @@ class USBDataProcessor:
             if humidity_pct is not None:
                 db.add_humidity_reading(
                     humidity_percent=humidity_pct,
-                    sensor_type='bme280_usb',
+                    sensor_type='bm280_usb',
                     sensor_id='micropython_device',
                     timestamp=timestamp
                 )
@@ -1701,7 +1701,7 @@ class USBDataProcessor:
             if pressure_hpa is not None:
                 db.add_pressure_reading(
                     pressure_hpa=pressure_hpa,
-                    sensor_type='bme280_usb',
+                    sensor_type='bm280_usb',
                     sensor_id='micropython_device',
                     timestamp=timestamp
                 )
@@ -1870,15 +1870,15 @@ def events() -> Response:
                             usb_status = usb_reader.get_status() if usb_reader else {'connected': False, 'last_error': 'Not initialized', 'last_success_time': None}
 
                             # Get sensor status
-                            bme280_connected = "disconnected"
+                            bm280_connected = "disconnected"
                             mq135_connected = "disconnected"
-                            bme280_seconds_ago = None
+                            bm280_seconds_ago = None
                             mq135_seconds_ago = None
 
                             if hasattr(app, 'usb_data_processor') and app.usb_data_processor:
-                                if app.usb_data_processor.last_bme280_reading:
-                                    bme280_seconds_ago = current_time - app.usb_data_processor.last_bme280_reading
-                                    bme280_connected = "online" if bme280_seconds_ago < 120 else "stale"
+                                if app.usb_data_processor.last_bm280_reading:
+                                    bm280_seconds_ago = current_time - app.usb_data_processor.last_bm280_reading
+                                    bm280_connected = "online" if bm280_seconds_ago < 120 else "stale"
 
                                 if app.usb_data_processor.last_mq135_reading:
                                     mq135_seconds_ago = current_time - app.usb_data_processor.last_mq135_reading
@@ -1890,9 +1890,9 @@ def events() -> Response:
                                 'data': {
                                     'usb_connected': usb_status['connected'],
                                     'usb_error': str(usb_status['last_error']) if usb_status['last_error'] else None,
-                                    'bme280': {
-                                        'status': bme280_connected,
-                                        'seconds_since_reading': bme280_seconds_ago
+                                    'bm280': {
+                                        'status': bm280_connected,
+                                        'seconds_since_reading': bm280_seconds_ago
                                     },
                                     'mq135': {
                                         'status': mq135_connected,

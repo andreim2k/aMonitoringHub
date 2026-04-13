@@ -23,7 +23,7 @@ class USBJSONReader:
     Expected JSON format:
       {
         "timestamp": <seconds>,
-        "bme280": {"temperature_c": 23.4, "humidity_percent": 55.0, ...},
+        "bm280": {"temperature_c": 23.4, "humidity_percent": 55.0, ...},
         "mq135": {"co2_ppm": 560.0, "air_quality_index": 3, ...}
       }
     """
@@ -187,8 +187,8 @@ class USBJSONReader:
                     
                     if self.processor:
                         # Check processor timestamps (same source as health endpoint)
-                        if hasattr(self.processor, 'last_bme280_reading') and self.processor.last_bme280_reading:
-                            check_time = self.processor.last_bme280_reading
+                        if hasattr(self.processor, 'last_bm280_reading') and self.processor.last_bm280_reading:
+                            check_time = self.processor.last_bm280_reading
                         elif hasattr(self.processor, 'last_mq135_reading') and self.processor.last_mq135_reading:
                             check_time = self.processor.last_mq135_reading
                     
@@ -324,8 +324,8 @@ class USBJSONReader:
                         
                         # Reset processor timestamps if available to prevent immediate stale detection
                         if self.processor:
-                            if hasattr(self.processor, 'last_bme280_reading'):
-                                self.processor.last_bme280_reading = None
+                            if hasattr(self.processor, 'last_bm280_reading'):
+                                self.processor.last_bm280_reading = None
                             if hasattr(self.processor, 'last_mq135_reading'):
                                 self.processor.last_mq135_reading = None
                         
@@ -487,13 +487,13 @@ class USBJSONReader:
             A standardized dictionary containing sensor data.
         """
         ts = payload.get('timestamp', time.time())
-        bme = payload.get('bme280', {})
+        bm = payload.get('bm280', {})
         mq = payload.get('mq135', {})
         result = {
             'timestamp': ts,
-            'temperature_c': bme.get('temperature_c'),
-            'humidity_percent': bme.get('humidity_percent'),
-            'pressure_hpa': bme.get('pressure_hpa') or (bme.get('pressure_pa') / 100.0 if bme.get('pressure_pa') else None),
+            'temperature_c': bm.get('temperature_c'),
+            'humidity_percent': bm.get('humidity_percent'),
+            'pressure_hpa': bm.get('pressure_hpa') or (bm.get('pressure_pa') / 100.0 if bm.get('pressure_pa') else None),
             'air': {
                 'co2_ppm': mq.get('co2_ppm'),
                 'nh3_ppm': mq.get('nh3_ppm'),

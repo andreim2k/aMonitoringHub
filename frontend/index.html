@@ -1166,7 +1166,7 @@
   </div>
 
   <div class="container">
-    <!-- Row 1-2: BME280 & MQ135 Status (top), Air Quality below (spans both) -->
+    <!-- Row 1-2: BM280 & MQ135 Status (top), Air Quality below (spans both) -->
     <div class="metrics-row" style="grid-template-rows: auto auto;">
       <div class="metric-card-disabled glass" style="grid-column: 1; grid-row: 1;">
         <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Ambiental"
@@ -1175,7 +1175,7 @@
               d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
           </svg></div>
         <div class="metric-label" style="font-size: 0.85rem;">Ambiental</div>
-        <div class="metric-value status-checking" id="bme280Status" style="font-size: 0.9rem;">Checking...</div>
+        <div class="metric-value status-checking" id="bm280Status" style="font-size: 0.9rem;">Checking...</div>
       </div>
       <div class="metric-card-disabled glass" style="grid-column: 2; grid-row: 1;">
         <div class="metric-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-label="Air Quality"
@@ -1620,7 +1620,7 @@
 
     /**
      * Updates individual sensor status indicators on the UI.
-     * @param {string} sensorId - The sensor element ID ('bme280Status' or 'mq135Status').
+     * @param {string} sensorId - The sensor element ID ('bm280Status' or 'mq135Status').
      * @param {string} status - The sensor status ('online', 'offline', 'stale', 'disconnected', 'checking').
      * @param {number} secondsSince - Seconds since last reading (optional).
      */
@@ -1649,25 +1649,25 @@
       }
 
       sensorEl.textContent = displayText;
-      sensorEl.className = className + ' ' + (sensorId === 'bme280Status' ? 'bme280' : 'mq135');
+      sensorEl.className = className + ' ' + (sensorId === 'bm280Status' ? 'bm280' : 'mq135');
     }
 
     /**
      * Updates both sensor status indicators.
-     * @param {object} sensorData - Object containing bme280 and mq135 status data.
+     * @param {object} sensorData - Object containing bm280 and mq135 status data.
      */
     function updateSensorStatus(sensorData) {
-      if (sensorData.bme280) {
-        updateIndividualSensorStatus('bme280Status', sensorData.bme280.status, sensorData.bme280.seconds_since_reading);
+      if (sensorData.bm280) {
+        updateIndividualSensorStatus('bm280Status', sensorData.bm280.status, sensorData.bm280.seconds_since_reading);
       }
       if (sensorData.mq135) {
         updateIndividualSensorStatus('mq135Status', sensorData.mq135.status, sensorData.mq135.seconds_since_reading);
       }
 
       // Update global connected state based on either sensor being online
-      const bme280Online = sensorData.bme280 && sensorData.bme280.status === 'online';
+      const bm280Online = sensorData.bm280 && sensorData.bm280.status === 'online';
       const mq135Online = sensorData.mq135 && sensorData.mq135.status === 'online';
-      currentData.connected = bme280Online || mq135Online;
+      currentData.connected = bm280Online || mq135Online;
 
       // Apply visual styling to data cards based on sensor status
       const tempCard = document.getElementById('temperatureCard');
@@ -1675,8 +1675,8 @@
       const pressureCard = document.getElementById('pressureCard');
       const airQualityCard = document.getElementById('airQualityCard');
 
-      // BME280 controls temperature, humidity, and pressure
-      if (bme280Online) {
+      // BM280 controls temperature, humidity, and pressure
+      if (bm280Online) {
         if (tempCard) tempCard.classList.remove('sensor-offline');
         if (humidityCard) humidityCard.classList.remove('sensor-offline');
         if (pressureCard) pressureCard.classList.remove('sensor-offline');
@@ -1733,7 +1733,7 @@
         setSeverity(elT, severityFor('temp', currentData.temperature));
       }
 
-      // Update main humidity display — use external (OWM) when sensor has no humidity (BMP280)
+      // Update main humidity display — use external (OWM) when sensor has no humidity (BM280)
       var elH = document.getElementById('currentHumidity');
       if (elH) {
         var displayHumidity = (currentData.humidity === null || currentData.humidity === 0)
@@ -2309,7 +2309,7 @@
     function connectSSE() {
       console.log('Connecting to SSE...');
       // Set both sensors to checking status
-      updateIndividualSensorStatus('bme280Status', 'checking');
+      updateIndividualSensorStatus('bm280Status', 'checking');
       updateIndividualSensorStatus('mq135Status', 'checking');
 
       if (eventSource) {
@@ -2453,7 +2453,7 @@
           console.error('SSE error:', error);
           console.log('SSE readyState:', eventSource.readyState);
           // Mark both sensors as offline when SSE connection fails
-          updateIndividualSensorStatus('bme280Status', 'disconnected');
+          updateIndividualSensorStatus('bm280Status', 'disconnected');
           updateIndividualSensorStatus('mq135Status', 'disconnected');
 
           // Attempt to reconnect after 3 seconds
@@ -2467,7 +2467,7 @@
 
       } catch (error) {
         console.error('Failed to create SSE connection:', error);
-        updateIndividualSensorStatus('bme280Status', 'disconnected');
+        updateIndividualSensorStatus('bm280Status', 'disconnected');
         updateIndividualSensorStatus('mq135Status', 'disconnected');
         updateDisplay();
         updateUnifiedTimestamp();
