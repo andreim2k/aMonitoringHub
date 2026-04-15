@@ -31,14 +31,14 @@ prompt = requesty_config.get('prompt', 'Extract only the numbers from this image
 
 print(f"📸 Step 1: Capturing snapshot from {webcam_url}...")
 
-# Prepare the exact payload with latest camera settings
+# Prepare the exact payload with optimized camera settings for OCR
 payload = {
     "resolution": "UXGA",
     "flash": False,
-    "brightness": 0,
-    "contrast": 0,
+    "brightness": 2,
+    "contrast": 2,
     "saturation": 0,
-    "exposure": 300,
+    "exposure": 600,
     "gain": 15,
     "special_effect": 1,
     "wb_mode": 0,
