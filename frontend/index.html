@@ -2660,10 +2660,12 @@
 
 
 
-    // Auto-capture image when page loads (immediately)
-    setTimeout(() => {
-      captureWebcamImage();
-    }, 100);
+    // DISABLED: Auto-capture on page load was using wrong camera settings.
+    // Screenshots now only captured at scheduled 12:00 noon OCR with optimized settings.
+    // Users can manually capture via "Capture Settings" button if needed.
+    // setTimeout(() => {
+    //   captureWebcamImage();
+    // }, 100);
 
     // === Popup charts logic ===
     let modalChart = null; let popoverChart = null; let hoverHideTimer = null;
