@@ -2695,6 +2695,11 @@
           if (data.success && data.image) {
             img.src = data.image;
             img.style.display = "block";
+            // Show controls and button after successful capture
+            const controls = document.getElementById("webcamControls");
+            const btn = document.getElementById("captureSettingsBtn");
+            if (controls) controls.style.display = "flex";
+            if (btn) btn.style.display = "block";
             const electricityIndexCard = document.getElementById('electricityIndexCard');
             const electricityMeterCard = document.getElementById('electricityMeterCard');
             if (electricityIndexCard) electricityIndexCard.classList.remove('sensor-offline');
@@ -2712,6 +2717,11 @@
           loading.style.display = "none";
           placeholder.style.display = "flex";
           placeholder.innerHTML = "📷 Offline";
+          // Show controls and button even if capture fails
+          const controls = document.getElementById("webcamControls");
+          const btn = document.getElementById("captureSettingsBtn");
+          if (controls) controls.style.display = "flex";
+          if (btn) btn.style.display = "block";
           const electricityIndexCard = document.getElementById('electricityIndexCard');
           const electricityMeterCard = document.getElementById('electricityMeterCard');
           if (electricityIndexCard) electricityIndexCard.classList.add('sensor-offline');
