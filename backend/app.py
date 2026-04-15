@@ -78,13 +78,13 @@ from sensor_reader import TemperatureSensorReader, HumiditySensorReader
 from usb_json_reader import USBJSONReader
 
 # Configure logging (use config.json instead of .env)
-log_level = app_config.get('app', {}).get('log_level', 'ERROR').upper()
+log_level = app_config.get('app', {}).get('log_level', 'INFO').upper()
 # Ensure USBJSONReader health checks are visible (use WARNING level minimum for health checks)
 logging.basicConfig(
-    level=getattr(logging, log_level, logging.ERROR),
+    level=getattr(logging, log_level, logging.INFO),
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('logs/backend.log'),
+        logging.FileHandler('../logs/backend.log'),
         logging.StreamHandler()
     ]
 )
@@ -1993,18 +1993,18 @@ def initialize_application() -> bool:
         from sensor_reader import HumiditySensorReader
         humidity_sensor = HumiditySensorReader("mock")
 
-        # Initialize scheduler for daily OCR task at 23:59
+        # Initialize scheduler for daily OCR task at 12:00 (noon)
         scheduler = BackgroundScheduler()
         scheduler.add_job(
             scheduled_ocr_task,
             'cron',
-            hour=23,
-            minute=59,
+            hour=12,
+            minute=0,
             id='daily_ocr_task',
-            name='Daily OCR Meter Reading at 23:59'
+            name='Daily OCR Meter Reading at 12:00 (noon)'
         )
         scheduler.start()
-        logger.info("Scheduler started - OCR task will run daily at 23:59")
+        logger.info("Scheduler started - OCR task will run daily at 12:00 (noon)")
 
         logger.info("Application initialized with USB sensor data")
         return True
@@ -2088,12 +2088,12 @@ def capture_webcam() -> Response:
         # Prepare the exact payload as specified
         payload = {
             "resolution": "UXGA",
-            "flash": True,
+            "flash": False,
             "brightness": 0,
             "contrast": 0,
             "saturation": 0,
             "exposure": 300,
-            "gain": 8,
+            "gain": 15,
             "special_effect": 1,
             "wb_mode": 0,
             "hmirror": False,
@@ -2164,11 +2164,14 @@ def run_ocr() -> Response:
     from datetime import datetime
     
     try:
+        logger.info("Starting OCR process...")
         # Capture a fresh image (no auto-OCR elsewhere)
         with app.test_client() as client:
+            logger.info("Capturing fresh image for OCR...")
             cap_resp = client.post('/webcam/capture', json={"gain": 5})
             cap_json = cap_resp.get_json()
         if not cap_json.get('success'):
+            logger.error(f"Failed to capture image for OCR: {cap_json.get('error')}")
             return jsonify({
                 "success": False,
                 "error": "Failed to capture image for OCR"
@@ -2192,6 +2195,7 @@ def run_ocr() -> Response:
             base_url = requesty_config.get('base_url', 'https://router.requesty.ai/v1')
             prompt = requesty_config.get('prompt', 'Extract only the numbers from this image.')
 
+            logger.info(f"Using OCR engine: Requesty ({model})")
             if not api_key:
                 raise Exception("Requesty API key not configured. Set REQUESTY_API_KEY environment variable.")
 
@@ -2209,6 +2213,7 @@ def run_ocr() -> Response:
                 "max_tokens": 100
             }
 
+            logger.info(f"Sending request to Requesty API: {base_url}")
             ocr_response = requests.post(
                 f"{base_url}/chat/completions",
                 headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
@@ -2219,9 +2224,11 @@ def run_ocr() -> Response:
 
             result = ocr_response.json()
             ocr_text = result.get('choices', [{}])[0].get('message', {}).get('content', '').strip()
+            logger.info(f"Raw OCR output: {ocr_text}")
 
             # Check if OCR failed according to the prompt (EXACT match)
             if 'Failed to read index!' in ocr_text:
+                logger.warning("OCR failed to read index (as per prompt instructions)")
                 return jsonify({
                     "success": False,
                     "engine": f"Requesty ({model})",
