@@ -2660,12 +2660,68 @@
 
 
 
-    // DISABLED: Auto-capture on page load was using wrong camera settings.
-    // Screenshots now only captured at scheduled 12:00 noon OCR with optimized settings.
-    // Users can manually capture via "Capture Settings" button if needed.
-    // setTimeout(() => {
-    //   captureWebcamImage();
-    // }, 100);
+    // Auto-capture image when page loads with OPTIMIZED camera settings
+    function captureWebcamImageOptimized() {
+      const img = document.getElementById("webcamImage");
+      const loading = document.getElementById("webcamLoading");
+      const placeholder = document.getElementById("webcamPlaceholder");
+      loading.style.display = "flex";
+      placeholder.style.display = "none";
+      img.style.display = "none";
+
+      // Use optimized settings from scheduled OCR (same as 12:00 noon capture)
+      const optimizedSettings = {
+        resolution: "UXGA",
+        flash: false,
+        brightness: 2,
+        contrast: 2,
+        saturation: 0,
+        exposure: 600,
+        gain: 15,
+        special_effect: 1,
+        wb_mode: 0,
+        hmirror: false,
+        vflip: false
+      };
+
+      fetch("/webcam/capture", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(optimizedSettings)
+      })
+        .then(response => response.json())
+        .then(data => {
+          loading.style.display = "none";
+          if (data.success && data.image) {
+            img.src = data.image;
+            img.style.display = "block";
+            const electricityIndexCard = document.getElementById('electricityIndexCard');
+            const electricityMeterCard = document.getElementById('electricityMeterCard');
+            if (electricityIndexCard) electricityIndexCard.classList.remove('sensor-offline');
+            if (electricityMeterCard) electricityMeterCard.classList.remove('sensor-offline');
+          } else {
+            placeholder.style.display = "flex";
+            placeholder.innerHTML = "📷 Offline";
+            const electricityIndexCard = document.getElementById('electricityIndexCard');
+            const electricityMeterCard = document.getElementById('electricityMeterCard');
+            if (electricityIndexCard) electricityIndexCard.classList.add('sensor-offline');
+            if (electricityMeterCard) electricityMeterCard.classList.add('sensor-offline');
+          }
+        })
+        .catch(error => {
+          loading.style.display = "none";
+          placeholder.style.display = "flex";
+          placeholder.innerHTML = "📷 Offline";
+          const electricityIndexCard = document.getElementById('electricityIndexCard');
+          const electricityMeterCard = document.getElementById('electricityMeterCard');
+          if (electricityIndexCard) electricityIndexCard.classList.add('sensor-offline');
+          if (electricityMeterCard) electricityMeterCard.classList.add('sensor-offline');
+        });
+    }
+
+    setTimeout(() => {
+      captureWebcamImageOptimized();
+    }, 100);
 
     // === Popup charts logic ===
     let modalChart = null; let popoverChart = null; let hoverHideTimer = null;
