@@ -207,6 +207,8 @@ temperature_sensor = None
 scheduler = None
 usb_reader = None
 sse_clients = Queue()
+sse_subscribers = 0
+sse_subscribers_lock = threading.Lock()
 
 # Configurable throttling system
 THROTTLE_INTERVAL = 3600  # Default: 1 hour in seconds
@@ -1614,11 +1616,12 @@ class USBDataProcessor:
                         'change_reason': 'usb_update'
                     }
                 }
-                try:
-                    sse_clients.put_nowait(temperature_data)
-                    self.logger.info(f"Temperature SSE: {temp_c:.2f}°C")
-                except:
-                    pass  # Queue full
+                if has_sse_subscribers():
+                    try:
+                        sse_clients.put_nowait(temperature_data)
+                        self.logger.info(f"Temperature SSE: {temp_c:.2f}°C")
+                    except:
+                        pass  # Queue full
 
             # Send SSE updates for humidity
             if humidity_pct is not None:
@@ -1632,11 +1635,12 @@ class USBDataProcessor:
                         'sensor_id': 'micropython_device'
                     }
                 }
-                try:
-                    sse_clients.put_nowait(humidity_data)
-                    self.logger.info(f"Humidity SSE: {humidity_pct:.1f}%")
-                except:
-                    pass
+                if has_sse_subscribers():
+                    try:
+                        sse_clients.put_nowait(humidity_data)
+                        self.logger.info(f"Humidity SSE: {humidity_pct:.1f}%")
+                    except:
+                        pass
 
             # Send SSE updates for pressure
             if pressure_hpa is not None:
@@ -1650,11 +1654,12 @@ class USBDataProcessor:
                         'sensor_id': 'micropython_device'
                     }
                 }
-                try:
-                    sse_clients.put_nowait(pressure_data)
-                    self.logger.info(f"Pressure SSE: {pressure_hpa:.1f} hPa")
-                except:
-                    pass
+                if has_sse_subscribers():
+                    try:
+                        sse_clients.put_nowait(pressure_data)
+                        self.logger.info(f"Pressure SSE: {pressure_hpa:.1f} hPa")
+                    except:
+                        pass
 
             # Send SSE updates for air quality
             if air_data.get('co2_ppm') is not None:
@@ -1672,11 +1677,12 @@ class USBDataProcessor:
                         'sensor_id': 'micropython_device'
                     }
                 }
-                try:
-                    sse_clients.put_nowait(air_quality_data)
-                    self.logger.info(f"Air Quality SSE: {air_data.get('co2_ppm', 0):.1f} ppm CO2")
-                except:
-                    pass
+                if has_sse_subscribers():
+                    try:
+                        sse_clients.put_nowait(air_quality_data)
+                        self.logger.info(f"Air Quality SSE: {air_data.get('co2_ppm', 0):.1f} ppm CO2")
+                    except:
+                        pass
 
             # Store to database (controlled by unified throttling)
             # Note: Timestamps already updated above (before throttling check)
@@ -1807,7 +1813,13 @@ def events() -> Response:
     """
     def event_stream():
         """Generator function for the SSE stream."""
+        global sse_subscribers
+        registered = False
         try:
+            with sse_subscribers_lock:
+                sse_subscribers += 1
+                registered = True
+
             # Send immediate connection confirmation with latest data
             yield f"data: {json.dumps({'type': 'connected', 'timestamp': time.time()})}\n\n"
 
@@ -1916,6 +1928,10 @@ def events() -> Response:
         except Exception as e:
             logger.error(f"SSE generator error: {e}")
             return
+        finally:
+            if registered:
+                with sse_subscribers_lock:
+                    sse_subscribers = max(0, sse_subscribers - 1)
 
     return Response(
         event_stream(),
@@ -2012,6 +2028,12 @@ def initialize_application() -> bool:
     except Exception as e:
         logger.error(f"Failed to initialize application: {e}")
         return False
+
+
+def has_sse_subscribers() -> bool:
+    """Returns True when at least one SSE client is connected."""
+    with sse_subscribers_lock:
+        return sse_subscribers > 0
 
 
 def cleanup_application():
