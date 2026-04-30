@@ -18,3 +18,7 @@ backend/*.db
 # Environment variables
 .env
 
+# AI tool configurations
+.claude/
+**/.claude/
+
