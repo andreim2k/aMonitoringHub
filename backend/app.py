@@ -714,58 +714,36 @@ class Query(ObjectType):
             return None
 
     def resolve_temperature_history(self, info: Any, range: str = "daily", limit: int = 1000, year: Optional[int] = None, month: Optional[int] = None, day: Optional[int] = None) -> List[TemperatureReading]:
-        """Resolves the query for historical temperature readings.
-
-        Args:
-            info: The GraphQL resolve info object.
-            range: The time range to query ("daily", "weekly", "recent").
-            limit: The maximum number of readings to return.
-            year: The year to query for historical data.
-            month: The month to query for historical data.
-            day: The day to query for historical data.
-
-        Returns:
-            A list of TemperatureReading objects.
-        """
+        """Resolves the query for historical temperature readings."""
         try:
-            limit = min(limit, 5000)
-            # Handle time-based queries first
-            if year is not None:
-                if month is not None and day is not None:
-                    readings = db.get_readings_by_day(year, month, day)
-                elif month is not None:
-                    readings = db.get_readings_by_month(year, month)
-                else:
-                    readings = db.get_readings_by_year(year)
-            elif range == "daily":
+            readings = []
+            now = datetime.now(timezone.utc)
+
+            if range == 'day':
                 readings = db.get_daily_readings(days_back=1)
-            elif range == "weekly":
-                readings = db.get_weekly_readings(weeks_back=1)
-            elif range == "recent":
-                readings = db.get_recent_readings(limit=limit)
+            elif range == 'week':
+                readings = db.get_daily_readings(days_back=7)
+            elif range == 'month':
+                readings = db.get_readings_by_month(year=now.year, month=now.month)
+            elif range == 'year':
+                readings = db.get_readings_by_year(year=now.year)
             else:
-                readings = db.get_recent_readings(limit=limit)
-                
-            # Ensure we return the most recent N items for time-range queries
-            if range in ("daily", "weekly"):
-                readings = readings[-limit:]
-                
-            result = []
-            for reading in readings:
-                result.append(TemperatureReading(
+                readings = db.get_recent_readings(limit=min(limit, 5000))
+            
+            result = [
+                TemperatureReading(
                     id=reading.id,
                     temperature_c=reading.temperature_c,
                     timestamp=_to_local_iso_unix(reading.timestamp)[0],
                     timestamp_unix=_to_local_iso_unix(reading.timestamp)[1],
                     sensor_type=reading.sensor_type,
                     sensor_id=reading.sensor_id
-                ))
-                
+                ) for reading in readings
+            ]
             result.sort(key=lambda x: x.timestamp_unix)
             return result
-            
         except Exception as e:
-            logger.error(f"Error getting temperature history: {e}")
+            logger.error(f'Error getting temperature history: {e}')
             return []
 
     
@@ -1315,11 +1293,12 @@ class Query(ObjectType):
             logger.error(f"Error getting current meter reading: {e}")
             return None
 
-    def resolve_meter_history(self, info: Any, limit: int = 1000, year: Optional[int] = None, month: Optional[int] = None, day: Optional[int] = None) -> List[MeterReading]:
+    def resolve_meter_history(self, info: Any, range: str = "day", limit: int = 1000, year: Optional[int] = None, month: Optional[int] = None, day: Optional[int] = None) -> List[MeterReading]:
         """Resolves the query for historical meter readings.
 
         Args:
             info: The GraphQL resolve info object.
+            range: Time range filter ('day', 'week', 'month', 'year').
             limit: The maximum number of readings to return.
             year: The year to query for historical data.
             month: The month to query for historical data.
@@ -1330,7 +1309,16 @@ class Query(ObjectType):
         """
         try:
             # Handle time-based queries
-            if year is not None:
+            now = datetime.now(timezone.utc)
+
+            if range == 'day' or range == 'week':
+                # For day and week, just get recent readings
+                readings = db.get_recent_meter_readings(limit=min(limit, 5000))
+            elif range == 'month':
+                readings = db.get_meter_readings_by_month(year=now.year, month=now.month)
+            elif range == 'year':
+                readings = db.get_meter_readings_by_year(year=now.year)
+            elif year is not None:
                 if month is not None and day is not None:
                     readings = db.get_meter_readings_by_day(year, month, day)
                 elif month is not None:

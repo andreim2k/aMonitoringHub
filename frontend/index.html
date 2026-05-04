@@ -713,11 +713,19 @@
                 <canvas id="modalChart"></canvas>
             </div>
             
-            <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center;">
-                <button class="btn-glass" onclick="app.updatePeriod('day')">24h</button>
-                <button class="btn-glass" onclick="app.updatePeriod('week')">7d</button>
-                <button class="btn-glass" onclick="app.updatePeriod('month')">30d</button>
-                <button class="btn-glass" onclick="app.updatePeriod('year')">1y</button>
+            <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <button class="btn-glass" onclick="app.updatePeriod('day')" title="Last 24 hours">
+                    <i data-lucide="clock" style="width: 14px;"></i> 24h
+                </button>
+                <button class="btn-glass" onclick="app.updatePeriod('week')" title="Last 7 days">
+                    <i data-lucide="calendar" style="width: 14px;"></i> 7d
+                </button>
+                <button class="btn-glass" onclick="app.updatePeriod('month')" title="Current month">
+                    <i data-lucide="calendar-days" style="width: 14px;"></i> 1m
+                </button>
+                <button class="btn-glass" onclick="app.updatePeriod('year')" title="Current year">
+                    <i data-lucide="calendar-range" style="width: 14px;"></i> 1y
+                </button>
             </div>
         </div>
     </div>
@@ -736,7 +744,7 @@
                     alcohol: null,
                     meter: null,
                     weather: null,
-                    history: []
+                    sparklineHistory: []
                 },
                 charts: {
                     tempSparkline: null,
@@ -997,7 +1005,8 @@
                     }
 
                     if (d.temperatureHistory) {
-                        renderSparkline(d.temperatureHistory.sort((a,b) => a.timestampUnix - b.timestampUnix));
+                        state.currentData.sparklineHistory = d.temperatureHistory.sort((a,b) => a.timestampUnix - b.timestampUnix);
+                        renderSparkline(state.currentData.sparklineHistory);
                     }
                     
                     updateDisplay();
@@ -1116,33 +1125,47 @@
             async function updateModalChart() {
                 const metric = state.currentMetric;
                 const period = state.currentPeriod;
-                
-                // Simplified mapping for the 2026 demo - in prod this uses full GraphQL filtering
+
+                // Map period buttons to GraphQL range values
+                const rangeMap = { 'day': 'day', 'week': 'week', 'month': 'month', 'year': 'year' };
+                const range = rangeMap[period] || 'day';
+
+                // Update subtitle to show period
+                const subtitle = document.querySelector('.modal-header .location-badge');
+                const periodLabels = {
+                    'day': 'Last 24 Hours',
+                    'week': 'Last 7 Days',
+                    'month': 'Current Month',
+                    'year': 'Current Year'
+                };
+                if (subtitle) subtitle.textContent = periodLabels[period] || 'Historical Data Analytics';
+
                 let query = '';
                 let dataField = '';
-                
-                if (metric === 'temp') { query = '{ temperatureHistory(limit: 100) { temperatureC timestampUnix } }'; dataField = 'temperatureHistory'; }
-                else if (metric === 'humidity') { query = '{ humidityHistory(limit: 100) { humidityPercent timestampUnix } }'; dataField = 'humidityHistory'; }
-                else if (metric === 'pressure') { query = '{ pressureHistory(limit: 100) { pressureHpa timestampUnix } }'; dataField = 'pressureHistory'; }
-                else if (metric === 'co2') { 
-                    query = '{ airQualityHistory(limit: 100) { co2Ppm nh3Ppm alcoholPpm aqi timestampUnix } }'; 
-                    dataField = 'airQualityHistory'; 
+
+                // Pass range parameter to backend queries
+                if (metric === 'temp') { query = `{ temperatureHistory(range: "${range}", limit: 1000) { temperatureC timestampUnix } }`; dataField = 'temperatureHistory'; }
+                else if (metric === 'humidity') { query = `{ humidityHistory(range: "${range}", limit: 1000) { humidityPercent timestampUnix } }`; dataField = 'humidityHistory'; }
+                else if (metric === 'pressure') { query = `{ pressureHistory(range: "${range}", limit: 1000) { pressureHpa timestampUnix } }`; dataField = 'pressureHistory'; }
+                else if (metric === 'co2') {
+                    query = `{ airQualityHistory(range: "${range}", limit: 1000) { co2Ppm nh3Ppm alcoholPpm aqi timestampUnix } }`;
+                    dataField = 'airQualityHistory';
                 }
-                else if (metric === 'meter') { query = '{ meterHistory(limit: 100) { meterValue timestampUnix } }'; dataField = 'meterHistory'; }
-                else if (metric === 'weather') { query = '{ weatherHistory(limit: 100) { condition description timestampUnix } }'; dataField = 'weatherHistory'; }
+                else if (metric === 'meter') { query = `{ meterHistory(range: "${range}", limit: 1000) { meterValue timestampUnix } }`; dataField = 'meterHistory'; }
+                else if (metric === 'weather') { query = `{ weatherHistory(limit: 1000) { condition description timestampUnix } }`; dataField = 'weatherHistory'; }
 
                 try {
                     const res = await gql(query);
                     const history = res.data[dataField].sort((a,b) => a.timestampUnix - b.timestampUnix);
-                    
-                    renderChart(history, metric);
+
+                    renderChart(history, metric, period);
                 } catch (e) { console.error('Chart load failed', e); }
             }
 
-            function renderChart(data, metric) {
+            function renderChart(data, metric, period = 'day') {
                 const ctx = document.getElementById('modalChart').getContext('2d');
                 if (state.charts.modalChart) state.charts.modalChart.destroy();
-                
+
                 const colors = {
                     temp: '#38BDF8',
                     humidity: '#A855F7',
@@ -1153,6 +1176,21 @@
                     aqi: '#FFFFFF',
                     meter: '#10B981',
                     weather: '#A855F7'
+                };
+
+                // Format labels based on period
+                const formatLabel = (timestamp) => {
+                    const date = new Date(timestamp * 1000);
+                    if (period === 'day') {
+                        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+                    } else if (period === 'week') {
+                        return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                    } else if (period === 'month') {
+                        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    } else if (period === 'year') {
+                        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    }
+                    return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 };
 
                 let datasets = [];
@@ -1232,7 +1270,7 @@
                 state.charts.modalChart = new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels: data.map(d => new Date(d.timestampUnix * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})),
+                        labels: data.map(d => formatLabel(d.timestampUnix)),
                         datasets: datasets
                     },
                     options: {
