@@ -684,17 +684,17 @@
                 </div>
                 <div class="webcam-controls" style="position: relative; margin-top: 1rem; inset: auto; display: flex; flex-direction: column; gap: 0.75rem;">
                     <!-- Exposure Control -->
-                    <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem;" onclick="event.stopPropagation();">
                         <label style="color: var(--text-secondary); min-width: 70px;">Exposure:</label>
                         <input type="range" id="exposureSlider" min="100" max="1000" step="50" value="600"
-                               style="flex: 1; cursor: pointer;" onchange="app.updateExposure(this.value)">
+                               style="flex: 1; cursor: pointer;" onchange="app.updateExposure(this.value)" onclick="event.stopPropagation();">
                         <span id="exposureValue" style="color: var(--text-tertiary); min-width: 40px; text-align: right;">600</span>
                     </div>
 
                     <!-- Flash & Snapshot Controls -->
-                    <div style="display: flex; gap: 0.5rem; justify-content: flex-end; align-items: center;">
+                    <div style="display: flex; gap: 0.5rem; justify-content: flex-end; align-items: center;" onclick="event.stopPropagation();">
                         <label style="display: flex; align-items: center; gap: 0.4rem; color: var(--text-secondary); font-size: 0.75rem; cursor: pointer;">
-                            <input type="checkbox" id="flashToggle" onchange="app.updateFlash(this.checked)" style="cursor: pointer;">
+                            <input type="checkbox" id="flashToggle" onchange="app.updateFlash(this.checked)" style="cursor: pointer;" onclick="event.stopPropagation();">
                             <i data-lucide="zap" style="width: 14px;"></i> Flash
                         </label>
                         <button class="btn-glass" onclick="event.stopPropagation(); app.captureSnapshot()">
