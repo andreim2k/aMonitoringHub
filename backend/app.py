@@ -2196,11 +2196,11 @@ def run_ocr() -> Response:
 
         # Use Google Gemini API with latest Flash model
         try:
-            api_key = os.environ.get('GOOGLE_API_KEY') or 'AIzaSyDF8kYhLeBg0yGglzmRdaDm_kiQNOGe1gg'
+            api_key = os.environ.get('GOOGLE_API_KEY')
 
             logger.info("Using OCR engine: Google Gemini API (2.5 Flash Lite)")
             if not api_key:
-                raise Exception("Google API key not configured. Set GOOGLE_API_KEY environment variable.")
+                raise Exception("Google API key not configured. Set GOOGLE_API_KEY environment variable or add to .env file.")
 
             payload = {
                 "contents": [
