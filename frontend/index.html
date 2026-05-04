@@ -712,27 +712,25 @@
                         </div>
 
                         <!-- Controls (Only on Desktop, below canvas) -->
-                        <div class="meter-controls" style="display: flex; flex-direction: column; gap: 0.75rem;" onclick="event.stopPropagation();">
-                            <!-- First Row: Gain + Flash -->
-                            <div style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; justify-content: space-between;">
-                                <div style="display: flex; align-items: center; gap: 0.4rem; flex: 1;">
-                                    <label style="color: var(--text-secondary); min-width: 40px;">Gain:</label>
-                                    <input type="range" id="gainSlider" min="0" max="31" step="1" value="15"
-                                           style="flex: 1; cursor: pointer;" onchange="app.updateGain(this.value)" onclick="event.stopPropagation();">
-                                    <span id="gainValue" style="color: var(--text-tertiary); min-width: 25px; text-align: right;">15</span>
-                                </div>
-                                <label style="display: flex; align-items: center; gap: 0.3rem; color: var(--text-secondary); font-size: 0.75rem; cursor: pointer;">
-                                    <input type="checkbox" id="flashToggle" onchange="app.updateFlash(this.checked)" style="cursor: pointer;" onclick="event.stopPropagation();">
-                                    <i data-lucide="zap" style="width: 13px;"></i> Flash
-                                </label>
+                        <div class="meter-controls" style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem;" onclick="event.stopPropagation();">
+                            <!-- Gain Control -->
+                            <div style="display: flex; align-items: center; gap: 0.4rem; flex: 1;">
+                                <label style="color: var(--text-secondary); min-width: 40px;">Gain:</label>
+                                <input type="range" id="gainSlider" min="0" max="31" step="1" value="15"
+                                       style="flex: 1; cursor: pointer;" onchange="app.updateGain(this.value)" onclick="event.stopPropagation();">
+                                <span id="gainValue" style="color: var(--text-tertiary); min-width: 25px; text-align: right;">15</span>
                             </div>
 
-                            <!-- Second Row: Snapshot (Centered) -->
-                            <div style="display: flex; justify-content: center;">
-                                <button class="btn-glass" onclick="event.stopPropagation(); app.captureSnapshot()" style="padding: 0.4rem 0.75rem;">
-                                    <i data-lucide="camera" style="width: 13px;"></i> Snapshot
-                                </button>
-                            </div>
+                            <!-- Flash Toggle -->
+                            <label style="display: flex; align-items: center; gap: 0.3rem; color: var(--text-secondary); font-size: 0.75rem; cursor: pointer;">
+                                <input type="checkbox" id="flashToggle" onchange="app.updateFlash(this.checked)" style="cursor: pointer;" onclick="event.stopPropagation();">
+                                <i data-lucide="zap" style="width: 13px;"></i> Flash
+                            </label>
+
+                            <!-- Snapshot Icon Only -->
+                            <button class="btn-glass" onclick="event.stopPropagation(); app.captureSnapshot()" style="padding: 0.3rem 0.5rem; display: flex; align-items: center; justify-content: center;">
+                                <i data-lucide="camera" style="width: 13px;"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
