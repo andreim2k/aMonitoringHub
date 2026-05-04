@@ -2158,10 +2158,10 @@ def capture_webcam() -> Response:
 
 @app.route("/webcam/ocr", methods=['POST'])
 def run_ocr() -> Response:
-    """Captures a fresh image and runs OCR on it using the Gemini API.
+    """Captures a fresh image and runs OCR on it using Google Cloud Vision API.
 
     This endpoint is used by the scheduled daily task and can also be called
-    programmatically. It handles image capture, calls the Gemini API,
+    programmatically. It handles image capture, calls Google Cloud Vision API,
     parses the result, and saves successful readings to the database.
 
     Returns:
@@ -2173,10 +2173,10 @@ def run_ocr() -> Response:
     import os
     import requests
     from datetime import datetime
-    
+
     try:
         logger.info("Starting OCR process...")
-        # Capture a fresh image (no auto-OCR elsewhere)
+        # Capture a fresh image
         with app.test_client() as client:
             logger.info("Capturing fresh image for OCR...")
             cap_resp = client.post('/webcam/capture', json={"gain": 5})
@@ -2187,72 +2187,90 @@ def run_ocr() -> Response:
                 "success": False,
                 "error": "Failed to capture image for OCR"
             }), 500
-        
+
         # Decode base64
         image_b64 = cap_json['image']
         prefix = 'data:image/jpeg;base64,'
         if image_b64.startswith(prefix):
             image_b64 = image_b64[len(prefix):]
-        
-        # Load config for OCR
-        with open(os.path.join(os.path.dirname(__file__), 'config.json'), 'r') as f:
-            config = json.load(f)
-        
-        # Try Requesty OCR
-        try:
-            requesty_config = config.get('ocr', {}).get('engines', {}).get('requesty', {})
-            api_key = os.environ.get('REQUESTY_API_KEY') or requesty_config.get('api_key')
-            model = requesty_config.get('model', 'google/gemini-2.5-flash-lite')
-            base_url = requesty_config.get('base_url', 'https://router.requesty.ai/v1')
-            prompt = requesty_config.get('prompt', 'Extract only the numbers from this image.')
 
-            logger.info(f"Using OCR engine: Requesty ({model})")
+        # Use Google Gemini API with latest Flash model
+        try:
+            api_key = os.environ.get('GOOGLE_API_KEY') or 'AIzaSyDF8kYhLeBg0yGglzmRdaDm_kiQNOGe1gg'
+
+            logger.info("Using OCR engine: Google Gemini API (2.5 Flash Lite)")
             if not api_key:
-                raise Exception("Requesty API key not configured. Set REQUESTY_API_KEY environment variable.")
+                raise Exception("Google API key not configured. Set GOOGLE_API_KEY environment variable.")
 
             payload = {
-                "model": model,
-                "messages": [
+                "contents": [
                     {
-                        "role": "user",
-                        "content": [
-                            {"type": "text", "text": prompt},
-                            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image_b64}"}}
+                        "parts": [
+                            {
+                                "text": "Extract only the 4-digit meter reading numbers from this electricity meter image. Return only the numbers found, nothing else."
+                            },
+                            {
+                                "inline_data": {
+                                    "mime_type": "image/jpeg",
+                                    "data": image_b64
+                                }
+                            }
                         ]
                     }
-                ],
-                "max_tokens": 100
+                ]
             }
 
-            logger.info(f"Sending request to Requesty API: {base_url}")
+            gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key={api_key}"
+            logger.info(f"Sending request to Google Gemini API (2.5 Flash Lite model)")
             ocr_response = requests.post(
-                f"{base_url}/chat/completions",
-                headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+                gemini_url,
+                headers={"Content-Type": "application/json"},
                 json=payload,
                 timeout=30
             )
             ocr_response.raise_for_status()
 
             result = ocr_response.json()
-            ocr_text = result.get('choices', [{}])[0].get('message', {}).get('content', '').strip()
-            logger.info(f"Raw OCR output: {ocr_text}")
 
-            # Check if OCR failed according to the prompt (EXACT match)
-            if 'Failed to read index!' in ocr_text:
-                logger.warning("OCR failed to read index (as per prompt instructions)")
+            # Check for errors in response
+            if 'error' in result:
+                error_msg = result['error'].get('message', 'Unknown error')
+                logger.error(f"Gemini API error: {error_msg}")
                 return jsonify({
                     "success": False,
-                    "engine": f"Requesty ({model})",
+                    "engine": "Google Gemini API (2.5 Flash Lite)",
+                    "image": cap_json['image'],
+                    "timestamp": datetime.now().isoformat() + "Z",
+                    "error": f"Gemini API error: {error_msg}"
+                }), 500
+
+            # Extract text from response
+            ocr_text = ""
+            if 'candidates' in result and len(result['candidates']) > 0:
+                candidate = result['candidates'][0]
+                if 'content' in candidate and 'parts' in candidate['content']:
+                    for part in candidate['content']['parts']:
+                        if 'text' in part:
+                            ocr_text = part['text'].strip()
+                            break
+
+            logger.info(f"Raw OCR output: {ocr_text}")
+
+            if not ocr_text:
+                logger.warning("No text detected in image")
+                return jsonify({
+                    "success": False,
+                    "engine": "Google Cloud Vision API",
                     "image": cap_json['image'],
                     "timestamp": datetime.now().isoformat() + "Z",
                     "raw_ocr": ocr_text,
-                    "error": "Failed to read index!"
+                    "error": "No text detected in image"
                 })
 
             # Extract numbers from response
             numbers = re.findall(r'\d+', ocr_text)
 
-            # Find exactly 4-digit number
+            # Find exactly 4-digit number (meter reading)
             four_digit = None
             for num in numbers:
                 if len(num) == 4:
@@ -2265,17 +2283,17 @@ def run_ocr() -> Response:
                 try:
                     db.add_meter_reading(
                         meter_value=meter_value_with_prefix,
-                        ocr_engine=f"Requesty ({model})",
+                        ocr_engine="Google Gemini API (2.5 Flash Lite)",
                         raw_ocr_text=ocr_text,
                         sensor_type="esp32cam_ocr",
                         sensor_id="cabana1_meter"
                     )
-                    logger.info(f"Saved meter reading to database: {meter_value_with_prefix}")
+                    logger.info(f"✅ Saved meter reading to database: {meter_value_with_prefix}")
 
                     return jsonify({
                         "success": True,
                         "index": meter_value_with_prefix,
-                        "engine": f"Requesty ({model})",
+                        "engine": "Google Gemini API (2.5 Flash Lite)",
                         "image": cap_json['image'],
                         "timestamp": datetime.now().isoformat() + "Z",
                         "raw_ocr": ocr_text
@@ -2285,15 +2303,16 @@ def run_ocr() -> Response:
                     return jsonify({
                         "success": False,
                         "error": f"OCR succeeded but database save failed: {str(db_err)}",
-                        "engine": f"Requesty ({model})",
+                        "engine": "Google Gemini API (2.5 Flash Lite)",
                         "image": cap_json['image'],
                         "timestamp": datetime.now().isoformat() + "Z",
                         "raw_ocr": ocr_text
                     }), 500
             else:
+                logger.warning(f"No 4-digit number found. Numbers detected: {numbers}")
                 return jsonify({
                     "success": False,
-                    "engine": f"Requesty ({model})",
+                    "engine": "Google Gemini API (2.5 Flash Lite)",
                     "image": cap_json['image'],
                     "timestamp": datetime.now().isoformat() + "Z",
                     "raw_ocr": ocr_text,
@@ -2301,11 +2320,11 @@ def run_ocr() -> Response:
                 })
 
         except Exception as ocr_error:
-            logger.error(f"Requesty OCR error: {ocr_error}")
+            logger.error(f"Google Gemini API OCR error: {ocr_error}")
             return jsonify({
                 "success": False,
-                "error": f"Reading index failed: {str(ocr_error)}",
-                "engine": "Requesty - Error",
+                "error": f"OCR failed: {str(ocr_error)}",
+                "engine": "Google Gemini API (2.5 Flash Lite) - Error",
                 "image": cap_json['image'],
                 "timestamp": datetime.now().isoformat() + "Z"
             })
