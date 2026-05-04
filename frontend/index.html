@@ -1249,21 +1249,29 @@
                         }
                     ];
                 } else {
+                    const values = data.map(d => {
+                        if (metric === 'temp') return d.temperatureC;
+                        if (metric === 'humidity') return d.humidityPercent;
+                        if (metric === 'pressure') return d.pressureHpa;
+                        if (metric === 'meter') return parseFloat(d.meterValue);
+                        return 0;
+                    });
+
+                    // Show points if only 1 data point, hide if many
+                    const showPoints = data.length <= 5;
+
                     datasets.push({
                         label: metric.toUpperCase(),
-                        data: data.map(d => {
-                            if (metric === 'temp') return d.temperatureC;
-                            if (metric === 'humidity') return d.humidityPercent;
-                            if (metric === 'pressure') return d.pressureHpa;
-                            if (metric === 'meter') return parseFloat(d.meterValue);
-                            return 0;
-                        }),
+                        data: values,
                         borderColor: colors[metric],
                         backgroundColor: `${colors[metric]}20`,
                         fill: true,
                         tension: 0.4,
                         borderWidth: 2,
-                        pointRadius: 0
+                        pointRadius: showPoints ? 5 : 0,
+                        pointBackgroundColor: colors[metric],
+                        pointBorderColor: '#141416',
+                        pointBorderWidth: 2
                     });
                 }
 
@@ -1297,9 +1305,11 @@
                         },
                         scales: {
                             x: { grid: { display: false }, ticks: { color: '#52525B', font: { size: 10 } } },
-                            y: { 
-                                grid: { color: 'rgba(255,255,255,0.03)' }, 
-                                ticks: yTicks
+                            y: {
+                                grid: { color: 'rgba(255,255,255,0.03)' },
+                                ticks: yTicks,
+                                suggestedMin: metric === 'meter' ? Math.max(...datasets[0].data) * 0.95 : undefined,
+                                suggestedMax: metric === 'meter' ? Math.max(...datasets[0].data) * 1.05 : undefined
                             }
                         }
                     }
