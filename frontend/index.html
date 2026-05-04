@@ -452,13 +452,7 @@
                     margin-bottom: 1.5rem !important;
                 }
 
-                .meter-controls {
-                    grid-template-columns: 1fr !important;
-                }
-
-                .meter-controls > div {
-                    justify-content: flex-start !important;
-                }
+                /* Controls already vertical on desktop, no changes needed for mobile */
             }
 
             .container { padding: 1rem; }
@@ -710,7 +704,7 @@
 
                     <!-- Right: Webcam -->
                     <div style="display: flex; flex-direction: column; gap: 1rem;">
-                        <div id="webcamContainer" style="width: 100px; height: 80px; position: relative; border-radius: var(--radius-sm); overflow: hidden;">
+                        <div id="webcamContainer" style="width: 140px; height: 110px; position: relative; border-radius: var(--radius-sm); overflow: hidden;">
                             <img id="webcamImage" class="webcam-preview skeleton" src="" alt="Meter View" style="display: none;">
                             <div id="webcamLoading" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5);">
                                 <div class="spinner"></div>
@@ -718,8 +712,8 @@
                         </div>
 
                         <!-- Controls (Only on Desktop, below canvas) -->
-                        <div class="meter-controls" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: center;" onclick="event.stopPropagation();">
-                            <!-- Left Column: Gain Control -->
+                        <div class="meter-controls" style="display: flex; flex-direction: column; gap: 0.75rem;" onclick="event.stopPropagation();">
+                            <!-- Gain Control (Full Width on Top) -->
                             <div style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem;">
                                 <label style="color: var(--text-secondary); min-width: 40px;">Gain:</label>
                                 <input type="range" id="gainSlider" min="0" max="31" step="1" value="15"
@@ -727,8 +721,8 @@
                                 <span id="gainValue" style="color: var(--text-tertiary); min-width: 25px; text-align: right;">15</span>
                             </div>
 
-                            <!-- Right Column: Flash & Snapshot -->
-                            <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: flex-end;">
+                            <!-- Flash & Snapshot (Below Gain) -->
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
                                 <label style="display: flex; align-items: center; gap: 0.3rem; color: var(--text-secondary); font-size: 0.75rem; cursor: pointer;">
                                     <input type="checkbox" id="flashToggle" onchange="app.updateFlash(this.checked)" style="cursor: pointer;" onclick="event.stopPropagation();">
                                     <i data-lucide="zap" style="width: 13px;"></i> Flash
