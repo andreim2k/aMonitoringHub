@@ -558,6 +558,7 @@ class Query(ObjectType):
     current_meter_reading = Field(MeterReading)
     meter_history = GrapheneList(
         MeterReading,
+        range=String(default_value="day"),
         year=Int(),
         month=Int(),
         day=Int(),
