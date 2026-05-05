@@ -2207,7 +2207,20 @@ def run_ocr() -> Response:
                     {
                         "parts": [
                             {
-                                "text": "Extract only the 4-digit meter reading numbers from this electricity meter image. Return only the numbers found, nothing else."
+                                "text": (
+                                    "You are reading a mechanical (analog) electricity meter from a photo. "
+                                    "The meter shows EXACTLY 4 digits on rotating wheels. "
+                                    "The image may be blurry, dark, or partially obscured.\n\n"
+                                    "STRICT RULES:\n"
+                                    "1. Read each of the 4 digits independently, left to right.\n"
+                                    "2. A digit is only valid if you are 100% certain what it is. "
+                                    "Mechanical wheels can sit between two digits — if a wheel is mid-rotation or ambiguous, that digit is NOT certain.\n"
+                                    "3. DO NOT guess. DO NOT infer from context. DO NOT use the previous reading. "
+                                    "DO NOT pick the 'most likely' digit — uncertain means uncertain.\n"
+                                    "4. If ALL 4 digits are unambiguously clear, respond with ONLY those 4 digits, nothing else (no spaces, no labels, no punctuation).\n"
+                                    "5. If ANY digit is unclear, blurry, ambiguous, partially visible, or you have any doubt, respond with EXACTLY: UNREADABLE\n\n"
+                                    "Hallucinating a digit is a critical failure. When in doubt, return UNREADABLE."
+                                )
                             },
                             {
                                 "inline_data": {
