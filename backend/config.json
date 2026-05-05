@@ -7,10 +7,9 @@
   "ocr": {
     "enabled": true,
     "engines": {
-      "requesty": {
+      "google": {
         "enabled": true,
-        "base_url": "https://router.requesty.ai/v1",
-        "model": "google/gemini-2.5-flash-lite",
+        "model": "gemini-flash-latest",
         "prompt": "You are reading an electricity meter display. Extract the 4-digit index number visible on the meter. Rules: 1) Look for a clear digital or LCD display showing numbers. 2) Read exactly 4 consecutive digits from left to right. 3) If you can identify each digit with at least 80% confidence, respond with ONLY the 4-digit number (e.g., '12345'). 4) Common meter readings range from 00000 to 99999 - extract accordingly. 5) If ANY digit is unclear, blurry, or ambiguous, respond with ONLY 'Failed to read index!' - do NOT guess. 6) Do not include any other text, explanation, or punctuation - just the number or the failure message."
       }
     },
