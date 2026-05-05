@@ -2096,16 +2096,17 @@ def capture_webcam() -> Response:
         
         webcam_url = config.get('webcam', {}).get('url', 'http://192.168.50.3/snapshot')
         
-        # Prepare the exact payload with optimized camera settings for OCR
+        # Prepare the camera payload defaults.
         payload = {
-            "resolution": "UXGA",
+            "resolution": "UXGA (1600x1200)",
+            "quality": 10,
             "flash": False,
-            "brightness": 2,
-            "contrast": 2,
+            "brightness": 0,
+            "contrast": 0,
             "saturation": 0,
-            "exposure": 600,
-            "gain": 15,
-            "special_effect": 1,
+            "exposure": 300,
+            "gain": 0,
+            "special_effect": 0,
             "wb_mode": 0,
             "hmirror": False,
             "vflip": False,
@@ -2179,7 +2180,7 @@ def run_ocr() -> Response:
         # Capture a fresh image
         with app.test_client() as client:
             logger.info("Capturing fresh image for OCR...")
-            cap_resp = client.post('/webcam/capture', json={"gain": 5})
+            cap_resp = client.post('/webcam/capture')
             cap_json = cap_resp.get_json()
         if not cap_json.get('success'):
             logger.error(f"Failed to capture image for OCR: {cap_json.get('error')}")
@@ -2194,11 +2195,25 @@ def run_ocr() -> Response:
         if image_b64.startswith(prefix):
             image_b64 = image_b64[len(prefix):]
 
-        # Use Google Gemini API with latest Flash model
+        # Use Google Gemini API with configurable model selection.
         try:
             api_key = os.environ.get('GOOGLE_API_KEY')
+            ocr_engines = app_config.get('ocr', {}).get('engines', {})
+            configured_model = (
+                ocr_engines.get('google', {}).get('model')
+                or ocr_engines.get('requesty', {}).get('model')
+                or 'gemini-2.5-flash-lite'
+            )
+            gemini_model = (
+                configured_model.split('/', 1)[1]
+                if isinstance(configured_model, str) and configured_model.startswith('google/')
+                else configured_model
+            )
+            if not gemini_model:
+                gemini_model = 'gemini-2.5-flash-lite'
+            engine_name = f"Google Gemini API ({gemini_model})"
 
-            logger.info("Using OCR engine: Google Gemini API (3.1 Flash Lite)")
+            logger.info(f"Using OCR engine: {engine_name}")
             if not api_key:
                 raise Exception("Google API key not configured. Set GOOGLE_API_KEY environment variable or add to .env file.")
 
@@ -2208,28 +2223,18 @@ def run_ocr() -> Response:
                         "parts": [
                             {
                                 "text": (
-                                    "You are reading a mechanical (analog) electricity meter from a photo. "
-                                    "The meter displays EXACTLY 4 digits on rotating numbered wheels.\n\n"
-                                    "CRITICAL RULES (Read each carefully):\n\n"
-                                    "PIXEL CLARITY REQUIREMENT:\n"
-                                    "- Each digit must be SHARP and CLEAR at the pixel level.\n"
-                                    "- If any wheel is blurry, out of focus, partially obscured, or at an angle where it's hard to see the number clearly, that digit FAILS.\n"
-                                    "- Image quality must be 'photo ID quality' for that digit to count.\n\n"
-                                    "DIGIT IDENTIFICATION:\n"
-                                    "- Read left to right, digit by digit.\n"
-                                    "- Mechanical wheels can sit BETWEEN two numbers — if a wheel edge is mid-rotation, you cannot read it.\n"
-                                    "- Common confusions to watch for: 0 vs O, 6 vs 8, 5 vs 8, 1 vs 7 — if you're slightly unsure, that's a FAIL.\n"
-                                    "- NO context inference. NO guessing from partial digits. NO rounding.\n\n"
-                                    "SUCCESS CONDITION:\n"
-                                    "- ONLY if all 4 digits are crystal clear, respond with EXACTLY those 4 digits (no spaces, no extra text).\n"
-                                    "- Example: if you see 1, 2, 3, 4 clearly, respond: 1234\n\n"
-                                    "FAILURE CONDITION (respond with UNREADABLE):\n"
-                                    "- Any digit is blurry, dark, at an angle, partially cut off, or mid-rotation.\n"
-                                    "- You are even slightly uncertain about any single digit (>1% doubt).\n"
-                                    "- Image lighting is poor on any digit.\n"
-                                    "- When in doubt, err on the side of UNREADABLE, not a guess.\n\n"
-                                    "REMEMBER: A hallucinated digit reading is worthless and dangerous. "
-                                    "UNREADABLE is the correct answer when image quality does not support 100% confidence."
+                                    "You are reading a mechanical electricity meter. "
+                                    "The image shows a dark horizontal band with exactly 4 white digits on rotating wheels.\n\n"
+                                    "The photo may be slightly blurry — that is expected and acceptable. "
+                                    "Read the digits as a human would: look at the overall shape of each number, not pixel-perfect sharpness.\n\n"
+                                    "RULES:\n"
+                                    "1. Focus on the dark display band — the 4 white/light digits are your target.\n"
+                                    "2. Read left to right. Each wheel shows one digit 0–9.\n"
+                                    "3. If a wheel is mid-rotation (halfway between two digits), read the lower digit.\n"
+                                    "4. If you can identify all 4 digits with reasonable confidence, respond with ONLY those 4 digits — nothing else. Example: 9772\n"
+                                    "5. Only respond with UNREADABLE if a digit is completely impossible to determine "
+                                    "(e.g. fully obscured, pitch black, or totally smeared beyond recognition).\n\n"
+                                    "Do NOT hallucinate. Do NOT guess randomly. But DO read what a human could read from this image."
                                 )
                             },
                             {
@@ -2243,8 +2248,8 @@ def run_ocr() -> Response:
                 ]
             }
 
-            gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-001:generateContent?key={api_key}"
-            logger.info(f"Sending request to Google Gemini API (2.5 Flash Lite model)")
+            gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/{gemini_model}:generateContent?key={api_key}"
+            logger.info(f"Sending request to Google Gemini API model: {gemini_model}")
             ocr_response = requests.post(
                 gemini_url,
                 headers={"Content-Type": "application/json"},
@@ -2261,7 +2266,7 @@ def run_ocr() -> Response:
                 logger.error(f"Gemini API error: {error_msg}")
                 return jsonify({
                     "success": False,
-                    "engine": "Google Gemini API (3.1 Flash Lite)",
+                    "engine": engine_name,
                     "image": cap_json['image'],
                     "timestamp": datetime.now().isoformat() + "Z",
                     "error": f"Gemini API error: {error_msg}"
@@ -2283,7 +2288,7 @@ def run_ocr() -> Response:
                 logger.warning("No text detected in image")
                 return jsonify({
                     "success": False,
-                    "engine": "Google Cloud Vision API",
+                    "engine": engine_name,
                     "image": cap_json['image'],
                     "timestamp": datetime.now().isoformat() + "Z",
                     "raw_ocr": ocr_text,
@@ -2311,7 +2316,7 @@ def run_ocr() -> Response:
                         return jsonify({
                             "success": False,
                             "error": f"Reading {meter_value_with_prefix} is below minimum threshold 19770",
-                            "engine": "Google Gemini API (3.1 Flash Lite)",
+                            "engine": engine_name,
                             "image": cap_json['image'],
                             "timestamp": datetime.now().isoformat() + "Z",
                             "raw_ocr": ocr_text
@@ -2321,7 +2326,7 @@ def run_ocr() -> Response:
                     return jsonify({
                         "success": False,
                         "error": f"Invalid meter value format: {meter_value_with_prefix}",
-                        "engine": "Google Gemini API (3.1 Flash Lite)",
+                        "engine": engine_name,
                         "image": cap_json['image'],
                         "timestamp": datetime.now().isoformat() + "Z",
                         "raw_ocr": ocr_text
@@ -2340,7 +2345,7 @@ def run_ocr() -> Response:
                                 return jsonify({
                                     "success": False,
                                     "error": f"Invalid: meter decreased from {prev_int} to {meter_int}",
-                                    "engine": "Google Gemini API (3.1 Flash Lite)",
+                                    "engine": engine_name,
                                     "image": cap_json['image'],
                                     "timestamp": datetime.now().isoformat() + "Z",
                                     "raw_ocr": ocr_text
@@ -2350,7 +2355,7 @@ def run_ocr() -> Response:
                                 return jsonify({
                                     "success": False,
                                     "error": f"Invalid: meter jumped {diff} units (max 100 allowed). Previous: {prev_int}, Current: {meter_int}",
-                                    "engine": "Google Gemini API (3.1 Flash Lite)",
+                                    "engine": engine_name,
                                     "image": cap_json['image'],
                                     "timestamp": datetime.now().isoformat() + "Z",
                                     "raw_ocr": ocr_text
@@ -2364,7 +2369,7 @@ def run_ocr() -> Response:
                 try:
                     db.add_meter_reading(
                         meter_value=meter_value_with_prefix,
-                        ocr_engine="Google Gemini API (3.1 Flash Lite)",
+                        ocr_engine=engine_name,
                         raw_ocr_text=ocr_text,
                         sensor_type="esp32cam_ocr",
                         sensor_id="cabana1_meter"
@@ -2374,7 +2379,7 @@ def run_ocr() -> Response:
                     return jsonify({
                         "success": True,
                         "index": meter_value_with_prefix,
-                        "engine": "Google Gemini API (3.1 Flash Lite)",
+                        "engine": engine_name,
                         "image": cap_json['image'],
                         "timestamp": datetime.now().isoformat() + "Z",
                         "raw_ocr": ocr_text
@@ -2384,7 +2389,7 @@ def run_ocr() -> Response:
                     return jsonify({
                         "success": False,
                         "error": f"OCR succeeded but database save failed: {str(db_err)}",
-                        "engine": "Google Gemini API (3.1 Flash Lite)",
+                        "engine": engine_name,
                         "image": cap_json['image'],
                         "timestamp": datetime.now().isoformat() + "Z",
                         "raw_ocr": ocr_text
@@ -2393,7 +2398,7 @@ def run_ocr() -> Response:
                 logger.warning(f"No 4-digit number found. Numbers detected: {numbers}")
                 return jsonify({
                     "success": False,
-                    "engine": "Google Gemini API (3.1 Flash Lite)",
+                    "engine": engine_name,
                     "image": cap_json['image'],
                     "timestamp": datetime.now().isoformat() + "Z",
                     "raw_ocr": ocr_text,
@@ -2405,7 +2410,7 @@ def run_ocr() -> Response:
             return jsonify({
                 "success": False,
                 "error": f"OCR failed: {str(ocr_error)}",
-                "engine": "Google Gemini API (3.1 Flash Lite) - Error",
+                "engine": f"{engine_name} - Error",
                 "image": cap_json['image'],
                 "timestamp": datetime.now().isoformat() + "Z"
             })
