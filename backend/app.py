@@ -2243,7 +2243,7 @@ def run_ocr() -> Response:
                 ]
             }
 
-            gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key={api_key}"
+            gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-001:generateContent?key={api_key}"
             logger.info(f"Sending request to Google Gemini API (2.5 Flash Lite model)")
             ocr_response = requests.post(
                 gemini_url,
