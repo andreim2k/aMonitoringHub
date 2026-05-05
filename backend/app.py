@@ -2303,6 +2303,64 @@ def run_ocr() -> Response:
             if four_digit:
                 meter_value_with_prefix = "1" + four_digit
 
+                # Validation 1: Check minimum threshold (must be >= 19770)
+                try:
+                    meter_int = int(meter_value_with_prefix)
+                    if meter_int < 19770:
+                        logger.warning(f"❌ Reading {meter_value_with_prefix} below minimum threshold 19770")
+                        return jsonify({
+                            "success": False,
+                            "error": f"Reading {meter_value_with_prefix} is below minimum threshold 19770",
+                            "engine": "Google Gemini API (2.5 Flash Lite)",
+                            "image": cap_json['image'],
+                            "timestamp": datetime.now().isoformat() + "Z",
+                            "raw_ocr": ocr_text
+                        })
+                except ValueError:
+                    logger.error(f"Failed to parse meter value: {meter_value_with_prefix}")
+                    return jsonify({
+                        "success": False,
+                        "error": f"Invalid meter value format: {meter_value_with_prefix}",
+                        "engine": "Google Gemini API (2.5 Flash Lite)",
+                        "image": cap_json['image'],
+                        "timestamp": datetime.now().isoformat() + "Z",
+                        "raw_ocr": ocr_text
+                    })
+
+                # Validation 2: Check against previous reading (max 100 unit difference)
+                try:
+                    previous_readings = db.session.query(db.models.MeterReading).order_by(db.models.MeterReading.id.desc()).limit(1).all()
+                    if previous_readings:
+                        prev_reading = previous_readings[0].meter_value
+                        try:
+                            prev_int = int(prev_reading)
+                            diff = meter_int - prev_int
+                            if diff < 0:
+                                logger.warning(f"❌ Reading went backwards: {prev_int} → {meter_int}")
+                                return jsonify({
+                                    "success": False,
+                                    "error": f"Invalid: meter decreased from {prev_int} to {meter_int}",
+                                    "engine": "Google Gemini API (2.5 Flash Lite)",
+                                    "image": cap_json['image'],
+                                    "timestamp": datetime.now().isoformat() + "Z",
+                                    "raw_ocr": ocr_text
+                                })
+                            elif diff > 100:
+                                logger.warning(f"❌ Reading jumped too much: {prev_int} → {meter_int} (diff: {diff})")
+                                return jsonify({
+                                    "success": False,
+                                    "error": f"Invalid: meter jumped {diff} units (max 100 allowed). Previous: {prev_int}, Current: {meter_int}",
+                                    "engine": "Google Gemini API (2.5 Flash Lite)",
+                                    "image": cap_json['image'],
+                                    "timestamp": datetime.now().isoformat() + "Z",
+                                    "raw_ocr": ocr_text
+                                })
+                            logger.info(f"✅ Validation passed: {prev_int} → {meter_int} (diff: {diff})")
+                        except ValueError:
+                            logger.warning(f"Could not parse previous reading: {prev_reading}")
+                except Exception as validation_err:
+                    logger.error(f"Validation check error: {validation_err}")
+
                 try:
                     db.add_meter_reading(
                         meter_value=meter_value_with_prefix,
