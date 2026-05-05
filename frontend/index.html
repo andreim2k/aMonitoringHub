@@ -696,9 +696,9 @@
                             <!-- Gain Control -->
                             <div style="display: flex; align-items: center; gap: 0.4rem; flex: 1;">
                                 <label style="color: var(--text-secondary); min-width: 40px;">Gain:</label>
-                                <input type="range" id="gainSlider" min="0" max="31" step="1" value="15"
+                                <input type="range" id="gainSlider" min="0" max="31" step="1" value="0"
                                        style="flex: 1; cursor: pointer;" onchange="app.updateGain(this.value)" onclick="event.stopPropagation();">
-                                <span id="gainValue" style="color: var(--text-tertiary); min-width: 25px; text-align: right;">15</span>
+                                <span id="gainValue" style="color: var(--text-tertiary); min-width: 25px; text-align: right;">0</span>
                             </div>
 
                             <!-- Flash Toggle -->
@@ -780,7 +780,7 @@
                 currentMetric: 'temp',
                 currentPeriod: 'day',
                 cameraSettings: {
-                    gain: 15,
+                    gain: 0,
                     flash: false
                 }
             };
