@@ -2198,7 +2198,7 @@ def run_ocr() -> Response:
         try:
             api_key = os.environ.get('GOOGLE_API_KEY')
 
-            logger.info("Using OCR engine: Google Gemini API (3 Flash)")
+            logger.info("Using OCR engine: Google Gemini API (3.1 Flash Lite)")
             if not api_key:
                 raise Exception("Google API key not configured. Set GOOGLE_API_KEY environment variable or add to .env file.")
 
@@ -2243,7 +2243,7 @@ def run_ocr() -> Response:
                 ]
             }
 
-            gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash:generateContent?key={api_key}"
+            gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key={api_key}"
             logger.info(f"Sending request to Google Gemini API (2.5 Flash Lite model)")
             ocr_response = requests.post(
                 gemini_url,
@@ -2261,7 +2261,7 @@ def run_ocr() -> Response:
                 logger.error(f"Gemini API error: {error_msg}")
                 return jsonify({
                     "success": False,
-                    "engine": "Google Gemini API (3 Flash)",
+                    "engine": "Google Gemini API (3.1 Flash Lite)",
                     "image": cap_json['image'],
                     "timestamp": datetime.now().isoformat() + "Z",
                     "error": f"Gemini API error: {error_msg}"
@@ -2311,7 +2311,7 @@ def run_ocr() -> Response:
                         return jsonify({
                             "success": False,
                             "error": f"Reading {meter_value_with_prefix} is below minimum threshold 19770",
-                            "engine": "Google Gemini API (3 Flash)",
+                            "engine": "Google Gemini API (3.1 Flash Lite)",
                             "image": cap_json['image'],
                             "timestamp": datetime.now().isoformat() + "Z",
                             "raw_ocr": ocr_text
@@ -2321,7 +2321,7 @@ def run_ocr() -> Response:
                     return jsonify({
                         "success": False,
                         "error": f"Invalid meter value format: {meter_value_with_prefix}",
-                        "engine": "Google Gemini API (3 Flash)",
+                        "engine": "Google Gemini API (3.1 Flash Lite)",
                         "image": cap_json['image'],
                         "timestamp": datetime.now().isoformat() + "Z",
                         "raw_ocr": ocr_text
@@ -2340,7 +2340,7 @@ def run_ocr() -> Response:
                                 return jsonify({
                                     "success": False,
                                     "error": f"Invalid: meter decreased from {prev_int} to {meter_int}",
-                                    "engine": "Google Gemini API (3 Flash)",
+                                    "engine": "Google Gemini API (3.1 Flash Lite)",
                                     "image": cap_json['image'],
                                     "timestamp": datetime.now().isoformat() + "Z",
                                     "raw_ocr": ocr_text
@@ -2350,7 +2350,7 @@ def run_ocr() -> Response:
                                 return jsonify({
                                     "success": False,
                                     "error": f"Invalid: meter jumped {diff} units (max 100 allowed). Previous: {prev_int}, Current: {meter_int}",
-                                    "engine": "Google Gemini API (3 Flash)",
+                                    "engine": "Google Gemini API (3.1 Flash Lite)",
                                     "image": cap_json['image'],
                                     "timestamp": datetime.now().isoformat() + "Z",
                                     "raw_ocr": ocr_text
@@ -2364,7 +2364,7 @@ def run_ocr() -> Response:
                 try:
                     db.add_meter_reading(
                         meter_value=meter_value_with_prefix,
-                        ocr_engine="Google Gemini API (3 Flash)",
+                        ocr_engine="Google Gemini API (3.1 Flash Lite)",
                         raw_ocr_text=ocr_text,
                         sensor_type="esp32cam_ocr",
                         sensor_id="cabana1_meter"
@@ -2374,7 +2374,7 @@ def run_ocr() -> Response:
                     return jsonify({
                         "success": True,
                         "index": meter_value_with_prefix,
-                        "engine": "Google Gemini API (3 Flash)",
+                        "engine": "Google Gemini API (3.1 Flash Lite)",
                         "image": cap_json['image'],
                         "timestamp": datetime.now().isoformat() + "Z",
                         "raw_ocr": ocr_text
@@ -2384,7 +2384,7 @@ def run_ocr() -> Response:
                     return jsonify({
                         "success": False,
                         "error": f"OCR succeeded but database save failed: {str(db_err)}",
-                        "engine": "Google Gemini API (3 Flash)",
+                        "engine": "Google Gemini API (3.1 Flash Lite)",
                         "image": cap_json['image'],
                         "timestamp": datetime.now().isoformat() + "Z",
                         "raw_ocr": ocr_text
@@ -2393,7 +2393,7 @@ def run_ocr() -> Response:
                 logger.warning(f"No 4-digit number found. Numbers detected: {numbers}")
                 return jsonify({
                     "success": False,
-                    "engine": "Google Gemini API (3 Flash)",
+                    "engine": "Google Gemini API (3.1 Flash Lite)",
                     "image": cap_json['image'],
                     "timestamp": datetime.now().isoformat() + "Z",
                     "raw_ocr": ocr_text,
@@ -2405,7 +2405,7 @@ def run_ocr() -> Response:
             return jsonify({
                 "success": False,
                 "error": f"OCR failed: {str(ocr_error)}",
-                "engine": "Google Gemini API (3 Flash) - Error",
+                "engine": "Google Gemini API (3.1 Flash Lite) - Error",
                 "image": cap_json['image'],
                 "timestamp": datetime.now().isoformat() + "Z"
             })
