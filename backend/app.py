@@ -136,6 +136,8 @@ CLOPOTIVA_LAT = 45.436
 CLOPOTIVA_LON = 22.781
 weather_cache = {'data': None, 'timestamp': 0}
 WEATHER_CACHE_DURATION = 300  # Cache for 5 minutes
+OPENWEATHER_SENSOR_TYPE = 'openweathermap'
+OPENWEATHER_SENSOR_ID = 'clopotiva_hunedoara'
 
 def get_external_humidity() -> Optional[float]:
     """Fetch humidity from OpenWeatherMap for Clopotiva, Hunedoara.
@@ -182,8 +184,8 @@ def get_external_humidity() -> Optional[float]:
         if humidity is not None:
             db.add_humidity_reading(
                 humidity_percent=humidity,
-                sensor_type='openweathermap',
-                sensor_id='clopotiva_hunedoara'
+                sensor_type=OPENWEATHER_SENSOR_TYPE,
+                sensor_id=OPENWEATHER_SENSOR_ID
             )
 
         # Store weather condition in DB
@@ -193,8 +195,8 @@ def get_external_humidity() -> Optional[float]:
             db.add_weather_reading(
                 condition=condition,
                 description=description,
-                sensor_type='openweathermap',
-                sensor_id='clopotiva_hunedoara'
+                sensor_type=OPENWEATHER_SENSOR_TYPE,
+                sensor_id=OPENWEATHER_SENSOR_ID
             )
 
         return humidity
@@ -813,18 +815,31 @@ class Query(ObjectType):
             A HumidityReading object or None if no readings are available.
         """
         try:
-            recent_readings = db.get_recent_humidity_readings(limit=1)
-            if not recent_readings:
+            recent_readings = db.get_recent_humidity_readings(limit=1, sensor_id=OPENWEATHER_SENSOR_ID)
+            if recent_readings:
+                reading = recent_readings[0]
+                return HumidityReading(
+                    id=reading.id,
+                    humidity_percent=reading.humidity_percent,
+                    timestamp=_to_local_iso_unix(reading.timestamp)[0],
+                    timestamp_unix=_to_local_iso_unix(reading.timestamp)[1],
+                    sensor_type=reading.sensor_type,
+                    sensor_id=reading.sensor_id
+                )
+
+            # Fallback to a live OpenWeather fetch if DB has no cached humidity yet.
+            humidity = get_external_humidity()
+            if humidity is None:
                 return None
-                
-            reading = recent_readings[0]
+
+            now_iso, now_unix = _to_local_iso_unix(datetime.now(timezone.utc))
             return HumidityReading(
-                id=reading.id,
-                humidity_percent=reading.humidity_percent,
-                timestamp=_to_local_iso_unix(reading.timestamp)[0],
-                timestamp_unix=_to_local_iso_unix(reading.timestamp)[1],
-                sensor_type=reading.sensor_type,
-                sensor_id=reading.sensor_id
+                id=None,
+                humidity_percent=humidity,
+                timestamp=now_iso,
+                timestamp_unix=now_unix,
+                sensor_type=OPENWEATHER_SENSOR_TYPE,
+                sensor_id=OPENWEATHER_SENSOR_ID
             )
         except Exception as e:
             logger.error(f'Error getting current humidity: {e}')
@@ -848,19 +863,19 @@ class Query(ObjectType):
             # Handle time-based queries
             if year is not None:
                 if month is not None and day is not None:
-                    readings = db.get_humidity_readings_by_day(year, month, day)
+                    readings = db.get_humidity_readings_by_day(year, month, day, sensor_id=OPENWEATHER_SENSOR_ID)
                 elif month is not None:
-                    readings = db.get_humidity_readings_by_month(year, month)
+                    readings = db.get_humidity_readings_by_month(year, month, sensor_id=OPENWEATHER_SENSOR_ID)
                 else:
-                    readings = db.get_humidity_readings_by_year(year)
+                    readings = db.get_humidity_readings_by_year(year, sensor_id=OPENWEATHER_SENSOR_ID)
             elif range == 'recent':
-                readings = db.get_recent_humidity_readings(limit=limit)
+                readings = db.get_recent_humidity_readings(limit=limit, sensor_id=OPENWEATHER_SENSOR_ID)
             elif range == 'daily':
-                readings = db.get_recent_humidity_readings(limit=min(limit, 1440))  # Max 1 day of minute readings
+                readings = db.get_recent_humidity_readings(limit=min(limit, 1440), sensor_id=OPENWEATHER_SENSOR_ID)  # Max 1 day of minute readings
             elif range == 'weekly':
-                readings = db.get_recent_humidity_readings(limit=min(limit, 10080))  # Max 1 week of minute readings
+                readings = db.get_recent_humidity_readings(limit=min(limit, 10080), sensor_id=OPENWEATHER_SENSOR_ID)  # Max 1 week of minute readings
             else:
-                readings = db.get_recent_humidity_readings(limit=limit)
+                readings = db.get_recent_humidity_readings(limit=limit, sensor_id=OPENWEATHER_SENSOR_ID)
 
             return [
                 HumidityReading(
@@ -888,7 +903,7 @@ class Query(ObjectType):
             A HumidityStatistics object.
         """
         try:
-            stats = db.get_humidity_statistics(hours_back=hours)
+            stats = db.get_humidity_statistics(sensor_id=OPENWEATHER_SENSOR_ID, hours_back=hours)
             
             if stats.get('count', 0) > 0:
                 return HumidityStatistics(
@@ -1571,13 +1586,14 @@ class USBDataProcessor:
             # This ensures health checks reflect data reception, not just processing
             # Extract data to check what sensors are present
             temp_c = data.get('temperature_c')
-            humidity_pct = data.get('humidity_percent')
             pressure_hpa = data.get('pressure_hpa')
+            # Humidity must come from OpenWeatherMap only.
+            humidity_pct = None
             air_data = data.get('air', {})
             
             # Update timestamps immediately when data is received (before throttling check)
             # This prevents false stale detection when data is throttled
-            if temp_c is not None or humidity_pct is not None or pressure_hpa is not None:
+            if temp_c is not None or pressure_hpa is not None:
                 self.last_bm280_reading = current_time
             
             if air_data and air_data.get('co2_ppm') is not None:
@@ -1832,8 +1848,11 @@ def events() -> Response:
                         }
                         yield f"data: {json.dumps(sse_message)}\n\n"
 
-                    # Also send latest humidity
-                    cursor.execute("SELECT humidity_percent, timestamp, sensor_type, sensor_id FROM humidity_readings ORDER BY timestamp DESC LIMIT 1")
+                    # Also send latest OpenWeather humidity
+                    cursor.execute(
+                        "SELECT humidity_percent, timestamp, sensor_type, sensor_id FROM humidity_readings WHERE sensor_id = ? ORDER BY timestamp DESC LIMIT 1",
+                        (OPENWEATHER_SENSOR_ID,)
+                    )
                     humidity_row = cursor.fetchone()
                     if humidity_row:
                         humidity_data = {
