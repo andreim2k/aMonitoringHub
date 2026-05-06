@@ -23,23 +23,22 @@ with open(config_path, 'r') as f:
     config = json.load(f)
 
 webcam_url = config.get('webcam', {}).get('url', 'http://192.168.50.3/snapshot')
-requesty_config = config['ocr']['engines']['requesty']
-api_key = os.environ.get('REQUESTY_API_KEY')
-model = requesty_config.get('model', 'google/gemini-2.5-flash-lite')
-base_url = requesty_config.get('base_url', 'https://router.requesty.ai/v1')
-prompt = requesty_config.get('prompt', 'Extract only the numbers from this image.')
+google_config = config['ocr']['engines']['google']
+api_key = os.environ.get('GOOGLE_API_KEY')
+model = google_config.get('model', 'gemini-flash-latest')
+prompt = google_config.get('prompt', 'Extract only the numbers from this image.')
 
 print(f"📸 Step 1: Capturing snapshot from {webcam_url}...")
 
 # Prepare the exact payload with optimized camera settings for OCR
 payload = {
     "resolution": "UXGA",
-    "flash": False,
+    "flash": True,
     "brightness": 2,
     "contrast": 2,
     "saturation": 0,
     "exposure": 600,
-    "gain": 15,
+    "gain": 3,
     "special_effect": 1,
     "wb_mode": 0,
     "hmirror": False,
@@ -79,32 +78,32 @@ except Exception as e:
 print(f"\n🚀 Step 2: Sending to Gemini OCR...")
 print(f"   Model: {model}")
 
-# Prepare OCR request
+# Prepare OCR request for Google Generative AI API
 ocr_payload = {
-    "model": model,
-    "messages": [
+    "contents": [
         {
-            "role": "user",
-            "content": [
-                {"type": "text", "text": prompt},
-                {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}}
+            "parts": [
+                {"text": prompt},
+                {"inlineData": {"mimeType": "image/jpeg", "data": image_base64}}
             ]
         }
     ],
-    "max_tokens": 100
+    "generationConfig": {
+        "maxOutputTokens": 100
+    }
 }
 
 try:
     ocr_response = requests.post(
-        f"{base_url}/chat/completions",
-        headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+        f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}",
+        headers={"Content-Type": "application/json"},
         json=ocr_payload,
         timeout=30
     )
     ocr_response.raise_for_status()
 
     result = ocr_response.json()
-    ocr_text = result.get('choices', [{}])[0].get('message', {}).get('content', '').strip()
+    ocr_text = result.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', '').strip()
 
     print(f"\n✅ OCR Response:")
     print(f"   Result: {ocr_text}")
@@ -158,29 +157,29 @@ while True:
 
             # Run OCR
             ocr_payload = {
-                "model": model,
-                "messages": [
+                "contents": [
                     {
-                        "role": "user",
-                        "content": [
-                            {"type": "text", "text": prompt},
-                            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}}
+                        "parts": [
+                            {"text": prompt},
+                            {"inlineData": {"mimeType": "image/jpeg", "data": image_base64}}
                         ]
                     }
                 ],
-                "max_tokens": 100
+                "generationConfig": {
+                    "maxOutputTokens": 100
+                }
             }
 
             ocr_response = requests.post(
-                f"{base_url}/chat/completions",
-                headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+                f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}",
+                headers={"Content-Type": "application/json"},
                 json=ocr_payload,
                 timeout=30
             )
             ocr_response.raise_for_status()
 
             result = ocr_response.json()
-            ocr_text = result.get('choices', [{}])[0].get('message', {}).get('content', '').strip()
+            ocr_text = result.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', '').strip()
 
             print(f"\n✅ OCR Response: {ocr_text}")
             if 'Failed to read index!' not in ocr_text:
