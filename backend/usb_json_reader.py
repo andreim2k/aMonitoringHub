@@ -23,7 +23,7 @@ class USBJSONReader:
     Expected JSON format:
       {
         "timestamp": <seconds>,
-        "bm280": {"temperature_c": 23.4, "humidity_percent": 55.0, ...},
+        "bme280": {"temperature_c": 23.4, "humidity_percent": 55.0, ...},
         "mq135": {"co2_ppm": 560.0, "air_quality_index": 3, ...}
       }
     """
@@ -487,7 +487,7 @@ class USBJSONReader:
             A standardized dictionary containing sensor data.
         """
         ts = payload.get('timestamp', time.time())
-        bm = payload.get('bm280', {})
+        bm = payload.get('bme280', {})
         mq = payload.get('mq135', {})
         result = {
             'timestamp': ts,
