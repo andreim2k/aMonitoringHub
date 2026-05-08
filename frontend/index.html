@@ -603,6 +603,9 @@
                 <div class="card-subtext" style="margin-top: 1rem;">
                     Breathe easy. Indoor levels are healthy.
                 </div>
+                <div id="aqiLastUpdate" class="text-mono" style="font-size: 0.65rem; color: var(--text-tertiary); margin-top: 1rem;">
+                    Updated --:--:--
+                </div>
             </section>
 
             <!-- Middle Row: Humidity, Pressure, Weather, Status -->
@@ -615,6 +618,9 @@
                 <div>
                     <div class="card-value" id="currentHumidity">--%</div>
                     <div class="card-subtext" id="humidityStatus">Perfectly balanced</div>
+                </div>
+                <div id="humidityLastUpdate" class="text-mono" style="font-size: 0.65rem; color: var(--text-tertiary); margin-top: 1rem;">
+                    Updated --:--:--
                 </div>
             </section>
 
@@ -629,6 +635,9 @@
                     <div id="rainRisk" class="card-subtext" style="display: flex; align-items: center; gap: 0.4rem;">
                         <i data-lucide="cloud-sun" style="width: 14px;"></i> Low rain risk
                     </div>
+                </div>
+                <div id="pressureLastUpdate" class="text-mono" style="font-size: 0.65rem; color: var(--text-tertiary); margin-top: 1rem;">
+                    Updated --:--:--
                 </div>
             </section>
 
@@ -680,6 +689,9 @@
                         </div>
                         <div class="card-value" id="currentMeter">----</div>
                         <div class="card-subtext">Total kWh recorded today</div>
+                        <div id="meterLastUpdate" class="text-mono" style="font-size: 0.65rem; color: var(--text-tertiary); margin-top: 1rem;">
+                            Updated --:--:--
+                        </div>
                     </div>
 
                     <!-- Right: Webcam -->
@@ -770,7 +782,15 @@
                     alcohol: null,
                     meter: null,
                     weather: null,
-                    sparklineHistory: []
+                    sparklineHistory: [],
+                    timestamps: {
+                        temperature: null,
+                        humidity: null,
+                        pressure: null,
+                        aqi: null,
+                        meter: null,
+                        esp: null
+                    }
                 },
                 charts: {
                     tempSparkline: null,
@@ -792,16 +812,26 @@
                 second: '2-digit' 
             });
 
+            const FULL_FMT = new Intl.DateTimeFormat('ro-RO', {
+                timeZone: 'Europe/Bucharest',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+
             // Initialize Lucide Icons
             lucide.createIcons();
 
             // --- UI Updates ---
             function updateDisplay() {
                 const data = state.currentData;
+                const ts = data.timestamps;
                 
                 if (data.temperature !== null) {
                     document.getElementById('currentTemp').textContent = `${data.temperature.toFixed(1)}°`;
-                    document.getElementById('lastUpdate').textContent = `Updated ${BUCHAREST_FMT.format(new Date())}`;
+                    const timeStr = ts.temperature ? FULL_FMT.format(new Date(ts.temperature)) : BUCHAREST_FMT.format(new Date());
+                    document.getElementById('lastUpdate').textContent = `Updated ${timeStr}`;
                     updateSeverity('currentTemp', data.temperature, 'temp');
                     
                     // Dynamic Temp Subtext
@@ -813,9 +843,11 @@
                 
                 if (data.humidity !== null) {
                     document.getElementById('currentHumidity').textContent = `${data.humidity.toFixed(1)}%`;
+                    const timeStr = ts.humidity ? FULL_FMT.format(new Date(ts.humidity)) : BUCHAREST_FMT.format(new Date());
+                    document.getElementById('humidityLastUpdate').textContent = `Updated ${timeStr}`;
                     updateSeverity('currentHumidity', data.humidity, 'humidity');
                     
-                    // Dynamic Humidity Subtext
+                    // ... (rest of humidity logic)
                     const humStatus = document.getElementById('humidityStatus');
                     if (data.humidity < 30) humStatus.textContent = 'Air is quite dry';
                     else if (data.humidity > 60) humStatus.textContent = 'High moisture levels';
@@ -824,8 +856,10 @@
                 
                 if (data.pressure !== null) {
                     document.getElementById('currentPressure').textContent = `${data.pressure.toFixed(1)} hPa`;
+                    const timeStr = ts.pressure ? FULL_FMT.format(new Date(ts.pressure)) : BUCHAREST_FMT.format(new Date());
+                    document.getElementById('pressureLastUpdate').textContent = `Updated ${timeStr}`;
                     
-                    // Dynamic Pressure / Rain Risk (Mountain Adjusted for ~550m altitude)
+                    // ... (rest of pressure logic)
                     const rainRisk = document.getElementById('rainRisk');
                     if (data.pressure < 935) {
                         rainRisk.innerHTML = '<i data-lucide="cloud-rain" style="width: 14px;"></i> High rain risk';
@@ -842,10 +876,12 @@
                 
                 if (data.aqi !== null) {
                     document.getElementById('currentAQI').textContent = data.aqi;
+                    const timeStr = ts.aqi ? FULL_FMT.format(new Date(ts.aqi)) : BUCHAREST_FMT.format(new Date());
+                    document.getElementById('aqiLastUpdate').textContent = `Updated ${timeStr}`;
 
                     const aqStatus = document.getElementById('airQualityStatus');
                     const aqSub = document.querySelector('#aqiCard .card-subtext');
-
+                    // ... (rest of aqi logic)
                     if (data.aqi < 30) {
                         aqStatus.textContent = 'Pristine';
                         aqStatus.style.color = 'var(--accent-emerald)';
@@ -874,13 +910,16 @@
                     updateSeverity('currentAlcohol', data.alcohol, 'alcohol');
                 }
                 
-                if (data.meter !== null) document.getElementById('currentMeter').textContent = data.meter;
+                if (data.meter !== null) {
+                    document.getElementById('currentMeter').textContent = data.meter;
+                    const timeStr = ts.meter ? FULL_FMT.format(new Date(ts.meter)) : BUCHAREST_FMT.format(new Date());
+                    document.getElementById('meterLastUpdate').textContent = `Updated ${timeStr}`;
+                }
 
                 if (data.weather) {
                     document.getElementById('weatherStatus').textContent = data.weather.condition;
                     document.getElementById('weatherDesc').textContent = data.weather.description;
-                    
-                    // Dynamic Weather Emoji/Icon
+                    // ... (rest of weather logic)
                     const icons = {
                         'Clear': '☀️',
                         'Clouds': '☁️',
@@ -935,14 +974,17 @@
                     switch(msg.type) {
                         case 'temperature_update':
                             state.currentData.temperature = d.temperature_c;
+                            state.currentData.timestamps.temperature = d.timestamp_iso;
                             updateDisplay();
                             break;
                         case 'humidity_update':
                             state.currentData.humidity = d.humidity_percent;
+                            state.currentData.timestamps.humidity = d.timestamp_iso;
                             updateDisplay();
                             break;
                         case 'pressure_update':
                             state.currentData.pressure = d.pressure_hpa;
+                            state.currentData.timestamps.pressure = d.timestamp_iso;
                             updateDisplay();
                             break;
                         case 'air_quality_update':
@@ -950,6 +992,7 @@
                             state.currentData.co2 = d.co2_ppm;
                             state.currentData.nh3 = d.nh3_ppm;
                             state.currentData.alcohol = d.alcohol_ppm;
+                            state.currentData.timestamps.aqi = d.timestamp_iso;
                             updateDisplay();
                             break;
                         case 'sensor_status':
@@ -1001,35 +1044,66 @@
             async function fetchInitialData() {
                 try {
                     const res = await gql(`{
-                        currentTemperature { temperatureC }
-                        currentHumidity { humidityPercent }
-                        currentPressure { pressureHpa }
-                        currentAirQuality { aqi co2Ppm nh3Ppm alcoholPpm status }
-                        currentMeterReading { meterValue }
-                        externalWeather { humidityPercent weatherCondition weatherDescription }
+                        currentTemperature { temperatureC timestamp }
+                        currentHumidity { humidityPercent timestamp }
+                        currentPressure { pressureHpa timestamp }
+                        currentAirQuality { aqi co2Ppm nh3Ppm alcoholPpm status timestamp }
+                        currentMeterReading { meterValue timestamp }
+                        externalWeather { humidityPercent weatherCondition weatherDescription timestampUnix }
                         temperatureHistory(limit: 20) { temperatureC timestampUnix }
+                        health { 
+                            bm280Status { secondsSinceLastReading connected }
+                            mq135Status { secondsSinceLastReading connected }
+                        }
                     }`);
                     
                     const d = res.data;
-                    if (d.currentTemperature) state.currentData.temperature = d.currentTemperature.temperatureC;
+                    const ts = state.currentData.timestamps;
+
+                    if (d.currentTemperature) {
+                        state.currentData.temperature = d.currentTemperature.temperatureC;
+                        ts.temperature = d.currentTemperature.timestamp;
+                    }
                     if (d.externalWeather && d.externalWeather.humidityPercent !== null && d.externalWeather.humidityPercent !== undefined) {
                         state.currentData.humidity = d.externalWeather.humidityPercent;
+                        ts.humidity = new Date(d.externalWeather.timestampUnix * 1000).toISOString();
                     } else if (d.currentHumidity) {
                         state.currentData.humidity = d.currentHumidity.humidityPercent;
+                        ts.humidity = d.currentHumidity.timestamp;
                     }
-                    if (d.currentPressure) state.currentData.pressure = d.currentPressure.pressureHpa;
+                    if (d.currentPressure) {
+                        state.currentData.pressure = d.currentPressure.pressureHpa;
+                        ts.pressure = d.currentPressure.timestamp;
+                    }
                     if (d.currentAirQuality) {
                         state.currentData.aqi = d.currentAirQuality.aqi;
                         state.currentData.co2 = d.currentAirQuality.co2Ppm;
                         state.currentData.nh3 = d.currentAirQuality.nh3Ppm;
                         state.currentData.alcohol = d.currentAirQuality.alcoholPpm;
+                        ts.aqi = d.currentAirQuality.timestamp;
                     }
-                    if (d.currentMeterReading) state.currentData.meter = d.currentMeterReading.meterValue;
+                    if (d.currentMeterReading) {
+                        state.currentData.meter = d.currentMeterReading.meterValue;
+                        ts.meter = d.currentMeterReading.timestamp;
+                    }
                     if (d.externalWeather) {
                         state.currentData.weather = {
                             condition: d.externalWeather.weatherCondition,
                             description: d.externalWeather.weatherDescription
                         };
+                    }
+
+                    if (d.health) {
+                        updateSensorStatus({
+                            bm280: {
+                                status: d.health.bm280Status.connected,
+                                seconds_since_reading: d.health.bm280Status.secondsSinceLastReading
+                            },
+                            mq135: {
+                                status: d.health.mq135Status.connected,
+                                seconds_since_reading: d.health.mq135Status.secondsSinceLastReading
+                            }
+                        });
                     }
 
                     if (d.temperatureHistory) {
@@ -1104,6 +1178,7 @@
                         img.src = data.image;
                         img.style.display = 'block';
                         img.classList.remove('skeleton');
+                        state.currentData.timestamps.esp = data.timestamp;
                         document.getElementById('espStatus').textContent = 'Active';
                         document.getElementById('espStatus').className = 'val-ok';
                         meterCard.classList.remove('sensor-offline');
