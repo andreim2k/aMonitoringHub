@@ -1,0 +1,50 @@
+#ifndef BME280_I2C_H
+#define BME280_I2C_H
+
+#include <Arduino.h>
+#include <Wire.h>
+#include <stdint.h>
+
+class BME280_I2C {
+public:
+  BME280_I2C(uint8_t i2cAddr = 0x77);
+
+  float read_temperature();
+  float read_pressure();
+  float read_humidity();
+  bool read_compensated_data(float &temp, float &pressure, float &humidity);
+
+  bool reset();
+  void reconfigure();
+  uint8_t check_status();
+  bool is_ready();
+  bool wait_for_ready(unsigned long timeoutMs = 500);
+
+  uint8_t getChipId() { return chip_id; }
+  bool hasHumidity() { return has_humidity; }
+
+private:
+  uint8_t i2c_addr;
+  uint8_t chip_id;
+  bool has_humidity;
+
+  // Calibration coefficients
+  uint16_t dig_T1;
+  int16_t dig_T2, dig_T3;
+  uint16_t dig_P1;
+  int16_t dig_P2, dig_P3, dig_P4, dig_P5, dig_P6, dig_P7, dig_P8, dig_P9;
+  uint8_t dig_H1;
+  int16_t dig_H2, dig_H4, dig_H5;
+  uint8_t dig_H3, dig_H6;
+
+  bool _read_register(uint8_t reg, uint8_t &out);
+  bool _read_registers(uint8_t reg, uint8_t count, uint8_t *buf);
+  bool _write_register(uint8_t reg, uint8_t value);
+  bool _read_calibration_data();
+  bool _configure_sensor();
+  bool _read_raw_data(uint32_t &raw_temp, uint32_t &raw_press, uint32_t &raw_hum);
+
+  int16_t _to_signed(int16_t value, uint8_t bits);
+};
+
+#endif

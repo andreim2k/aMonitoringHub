@@ -1,0 +1,64 @@
+================================================================================
+ARDUINO DUE SENSOR WIRING DIAGRAM
+================================================================================
+
+Wiring is I2C for BME280 and analog for MQ135.
+
++------------+---------------+-------------------------------+
+| BME280 Pin | Signal        | Arduino Due Pin               |
++------------+---------------+-------------------------------+
+| VIN        | Power (5V)    | 5V (regulator onboard module) |
+| GND        | Ground        | GND                           |
+| SCL        | I2C Clock     | D20 (SCL0)                    |
+| SDA        | I2C Data      | D21 (SDA0)                    |
+| 3V3        | (regulator    | leave unconnected             |
+|            |  output)      |                               |
++------------+---------------+-------------------------------+
+
++-----------+---------------+-------------------------------+
+| MQ135 Pin | Signal        | Arduino Due Pin               |
++-----------+---------------+-------------------------------+
+| VCC       | Power (3.3V)  | 3.3V                          |
+| GND       | Ground        | GND                           |
+| A0        | Analog Out    | A0 (analog pin 0)             |
+| D0        | Digital Out   | (NOT CONNECTED)               |
++-----------+---------------+-------------------------------+
+
+ IMPORTANT: MQ135 must be powered at 3.3V so its analog output stays within
+ the Due's 3.3V ADC range.  If powered at 5V the ADC will saturate/clamp and
+ ppm values will be wrong.
+
++---------+---------------+-------------------------------+
+| Onboard | Green LED     | D13 (controlled by sketch)    |
+| LED     |               |                               |
++---------+---------------+-------------------------------+
+
++-----------+-------------------+--------------------------------+
+| USB Port  | Programming Port  | /dev/tty.usbmodem* (macOS)     |
+| (use this)| (center USB port) | /dev/ttyACM* (Linux)           |
+|           | @ 115200 baud     |                                |
++-----------+-------------------+--------------------------------+
+
+CHECKLIST BEFORE UPLOAD
+================================================================================
+ BME280:
+   VIN  -> 5V
+   GND  -> GND
+   SCL  -> D20
+   SDA  -> D21
+   3V3  -> (unconnected)
+
+ MQ135:
+   VCC  -> 3.3V   (not 5V)
+   GND  -> GND
+   A0   -> A0
+   D0   -> (unconnected)
+
+ Board:
+   Programming Port USB cable plugged into computer (center port, closer to power jack)
+   IDE board = "Arduino Due (Programming Port)"
+   IDE port  = /dev/tty.usbmodem* or /dev/ttyACM*
+
+ -> Click Upload. IDE auto-enters bootloader (amber LED on Due).
+ -> After upload, open Serial Monitor (115200 baud).
+ -> Should see JSON lines every 5 seconds.

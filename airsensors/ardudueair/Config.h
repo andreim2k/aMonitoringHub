@@ -14,7 +14,7 @@ const int LED_BLINK_DURATION_MS = 100;
 // MQ135 Configuration
 const int MQ135_PIN = A0;        // Analog pin A0 (A0 on module)
 const float MQ135_R_LOAD = 10000.0;      // 10kΩ load resistor
-const float MQ135_R_ZERO = 280000.0;     // Calibrated for 650m mountain air (410ppm CO2 baseline)
+const float MQ135_R_ZERO = 280000.0;     // Initial guess; overridden by auto-calibration
 
 // MQ135 Gas Calculation Constants
 const float MQ135_CO2_A = 116.6020682;
@@ -38,25 +38,23 @@ const int AQ_VERY_POOR = 2500;
 
 // Timing Configuration (milliseconds)
 const unsigned long BOOT_DELAY_MS = 2000;
-const unsigned long BM280_RETRY_DELAY_MS = 2000;
 const unsigned long SENSOR_READ_INTERVAL_MS = 5000;
-const int GC_COLLECT_INTERVAL = 60;  // Not used on Due (no GC)
-
-// BM280 Recovery Configuration
-const int I2C_RECOVERY_RETRIES = 3;
-const int I2C_OPERATION_TIMEOUT_MS = 100;
-const int I2C_STATUS_CHECK_TIMEOUT_MS = 500;
 
 // ADC Configuration
-const int ADC_MAX_VALUE = 4095;  // 12-bit ADC on Due
+const int ADC_MAX_VALUE = 4095;       // 12-bit ADC on Due
 const float VOLTAGE_REFERENCE = 3.3;  // Arduino Due ADC reference is 3.3V
 const float MIN_VOLTAGE_THRESHOLD = 0.01;
 
-// BM280 Reliability Tuning
-const int BM280_STARTUP_RETRIES = 10;
-const unsigned long BM280_RUNTIME_RETRY_INTERVAL_MS = 10000;
-const int BM280_RUNTIME_INIT_RETRIES = 2;
-const unsigned long BM280_RUNTIME_RETRY_DELAY_MS = 500;
-const unsigned long BM280_MAX_BACKOFF_MS = 5000;
+// BME280 Reliability Tuning
+const unsigned long BME280_RUNTIME_RETRY_INTERVAL_MS = 10000;
+
+// Math helper
+const float EPSILON = 1e-6;
+
+// MQ135 Auto-Calibration
+const float MQ135_ASSUMED_CLEAN_AIR_CO2_PPM = 410.0;  // Global outdoor baseline (~650m mountain air)
+const unsigned long MQ135_CALIBRATION_SETTLE_MS = 5000; // Extra settle time before calibrating
+const int MQ135_CALIBRATION_SAMPLES = 10;               // Number of ADC readings to average during calibration
+const int MQ135_CALIBRATION_SAMPLE_DELAY_MS = 50;       // Delay between calibration samples
 
 #endif
