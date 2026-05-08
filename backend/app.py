@@ -808,6 +808,8 @@ class Query(ObjectType):
     def resolve_current_humidity(self, info: Any) -> Optional[HumidityReading]:
         """Resolves the query for the most recent humidity reading.
 
+        Prefers USB sensor (BME280) humidity, falls back to OpenWeatherMap.
+
         Args:
             info: The GraphQL resolve info object.
 
@@ -815,6 +817,20 @@ class Query(ObjectType):
             A HumidityReading object or None if no readings are available.
         """
         try:
+            # First, try to get humidity from USB sensor (BME280)
+            usb_readings = db.get_recent_humidity_readings(limit=1, sensor_id='micropython_device')
+            if usb_readings:
+                reading = usb_readings[0]
+                return HumidityReading(
+                    id=reading.id,
+                    humidity_percent=reading.humidity_percent,
+                    timestamp=_to_local_iso_unix(reading.timestamp)[0],
+                    timestamp_unix=_to_local_iso_unix(reading.timestamp)[1],
+                    sensor_type=reading.sensor_type,
+                    sensor_id=reading.sensor_id
+                )
+
+            # Fallback to OpenWeatherMap if USB sensor data unavailable
             recent_readings = db.get_recent_humidity_readings(limit=1, sensor_id=OPENWEATHER_SENSOR_ID)
             if recent_readings:
                 reading = recent_readings[0]
@@ -827,7 +843,7 @@ class Query(ObjectType):
                     sensor_id=reading.sensor_id
                 )
 
-            # Fallback to a live OpenWeather fetch if DB has no cached humidity yet.
+            # Final fallback to a live OpenWeather fetch if DB has no cached humidity yet
             humidity = get_external_humidity()
             if humidity is None:
                 return None
@@ -848,6 +864,8 @@ class Query(ObjectType):
     def resolve_humidity_history(self, info: Any, range: str = 'daily', limit: int = 1000, year: Optional[int] = None, month: Optional[int] = None, day: Optional[int] = None) -> List[HumidityReading]:
         """Resolves the query for historical humidity readings.
 
+        Prefers USB sensor (BME280) humidity, falls back to OpenWeatherMap.
+
         Args:
             info: The GraphQL resolve info object.
             range: The time range to query ("daily", "weekly", "recent").
@@ -860,22 +878,31 @@ class Query(ObjectType):
             A list of HumidityReading objects.
         """
         try:
-            # Handle time-based queries
-            if year is not None:
-                if month is not None and day is not None:
-                    readings = db.get_humidity_readings_by_day(year, month, day, sensor_id=OPENWEATHER_SENSOR_ID)
-                elif month is not None:
-                    readings = db.get_humidity_readings_by_month(year, month, sensor_id=OPENWEATHER_SENSOR_ID)
+            # Try to get USB sensor data first, fallback to OpenWeatherMap
+            sensor_priority = ['micropython_device', OPENWEATHER_SENSOR_ID]
+            readings = []
+
+            for sensor_id in sensor_priority:
+                # Handle time-based queries
+                if year is not None:
+                    if month is not None and day is not None:
+                        readings = db.get_humidity_readings_by_day(year, month, day, sensor_id=sensor_id)
+                    elif month is not None:
+                        readings = db.get_humidity_readings_by_month(year, month, sensor_id=sensor_id)
+                    else:
+                        readings = db.get_humidity_readings_by_year(year, sensor_id=sensor_id)
+                elif range == 'recent':
+                    readings = db.get_recent_humidity_readings(limit=limit, sensor_id=sensor_id)
+                elif range == 'daily':
+                    readings = db.get_recent_humidity_readings(limit=min(limit, 1440), sensor_id=sensor_id)
+                elif range == 'weekly':
+                    readings = db.get_recent_humidity_readings(limit=min(limit, 10080), sensor_id=sensor_id)
                 else:
-                    readings = db.get_humidity_readings_by_year(year, sensor_id=OPENWEATHER_SENSOR_ID)
-            elif range == 'recent':
-                readings = db.get_recent_humidity_readings(limit=limit, sensor_id=OPENWEATHER_SENSOR_ID)
-            elif range == 'daily':
-                readings = db.get_recent_humidity_readings(limit=min(limit, 1440), sensor_id=OPENWEATHER_SENSOR_ID)  # Max 1 day of minute readings
-            elif range == 'weekly':
-                readings = db.get_recent_humidity_readings(limit=min(limit, 10080), sensor_id=OPENWEATHER_SENSOR_ID)  # Max 1 week of minute readings
-            else:
-                readings = db.get_recent_humidity_readings(limit=limit, sensor_id=OPENWEATHER_SENSOR_ID)
+                    readings = db.get_recent_humidity_readings(limit=limit, sensor_id=sensor_id)
+
+                # Use first sensor that has data
+                if readings:
+                    break
 
             return [
                 HumidityReading(
@@ -895,6 +922,8 @@ class Query(ObjectType):
     def resolve_humidity_statistics(self, info: Any, hours: int = 24) -> HumidityStatistics:
         """Resolves the query for humidity statistics.
 
+        Prefers USB sensor (BME280) humidity, falls back to OpenWeatherMap.
+
         Args:
             info: The GraphQL resolve info object.
             hours: The number of hours to look back for statistics.
@@ -903,8 +932,12 @@ class Query(ObjectType):
             A HumidityStatistics object.
         """
         try:
-            stats = db.get_humidity_statistics(sensor_id=OPENWEATHER_SENSOR_ID, hours_back=hours)
-            
+            # Try USB sensor first, then OpenWeatherMap
+            stats = db.get_humidity_statistics(sensor_id='micropython_device', hours_back=hours)
+            if stats.get('count', 0) == 0:
+                # Fallback to OpenWeatherMap if no USB data
+                stats = db.get_humidity_statistics(sensor_id=OPENWEATHER_SENSOR_ID, hours_back=hours)
+
             if stats.get('count', 0) > 0:
                 return HumidityStatistics(
                     count=stats['count'],
