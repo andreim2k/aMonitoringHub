@@ -920,9 +920,6 @@
                 }
 
                 if (data.weather) {
-                    document.getElementById('weatherStatus').textContent = data.weather.condition;
-                    document.getElementById('weatherDesc').textContent = data.weather.description;
-                    // ... (rest of weather logic)
                     const icons = {
                         'Clear': '☀️',
                         'Clouds': '⛅',
@@ -934,9 +931,23 @@
                         'Sleet': '🧊',
                         'Fog': '🌫️'
                     };
+                    const displayNames = {
+                        'Clear': 'Clear Sky',
+                        'Clouds': 'Partly Cloudy',
+                        'CloudsHeavy': 'Cloudy',
+                        'Rain': 'Rainy',
+                        'Drizzle': 'Drizzle',
+                        'Thunderstorm': 'Thunderstorm',
+                        'Snow': 'Snowy',
+                        'Sleet': 'Sleet',
+                        'Fog': 'Foggy'
+                    };
                     document.getElementById('weatherIcon').textContent = icons[data.weather.condition] || '🌤️';
+                    document.getElementById('weatherStatus').textContent = displayNames[data.weather.condition] || data.weather.condition;
                     if (data.weather.dewPoint !== undefined && data.weather.seaLevelPressure !== undefined) {
                         document.getElementById('weatherDesc').textContent = `${data.weather.description} | dew ${data.weather.dewPoint}°C | ${data.weather.seaLevelPressure} hPa SL`;
+                    } else {
+                        document.getElementById('weatherDesc').textContent = data.weather.description;
                     }
                 }
             }
@@ -1313,7 +1324,7 @@
                 let yTicks = { color: '#52525B', font: { size: 10 } };
 
                 if (metric === 'weather') {
-                    const conditions = ['Clear', 'Clouds', 'Drizzle', 'Rain', 'Mist', 'Fog', 'Snow', 'Thunderstorm'];
+                    const conditions = ['Clear', 'Clouds', 'CloudsHeavy', 'Drizzle', 'Rain', 'Sleet', 'Snow', 'Fog', 'Thunderstorm'];
                     datasets.push({
                         label: 'WEATHER',
                         data: data.map(d => conditions.indexOf(d.condition) >= 0 ? conditions.indexOf(d.condition) : 0),
@@ -1411,7 +1422,7 @@
                                 callbacks: {
                                     label: (context) => {
                                         if (metric === 'weather') {
-                                            const conditions = ['Clear', 'Clouds', 'Drizzle', 'Rain', 'Mist', 'Fog', 'Snow', 'Thunderstorm'];
+                                            const conditions = ['Clear', 'Clouds', 'CloudsHeavy', 'Drizzle', 'Rain', 'Sleet', 'Snow', 'Fog', 'Thunderstorm'];
                                             return `Condition: ${conditions[context.parsed.y] || 'Unknown'}`;
                                         }
                                         return `${context.dataset.label}: ${context.parsed.y}`;
