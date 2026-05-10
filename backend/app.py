@@ -130,7 +130,74 @@ CORS(app, resources={
     }
 })
 
-# OpenWeatherMap integration for humidity from Clopotiva, Hunedoara
+# Weather calculation constants
+ALTITUDE_M = 650  # Mountain location altitude in meters
+
+def calculate_local_weather(temp_c: float, humidity: float, pressure_hpa: float) -> Dict[str, Any]:
+    """Calculate local weather conditions from BME280 sensor data.
+
+    Accounts for 650m altitude. Returns weather condition, description, sea-level pressure, and dew point.
+
+    Args:
+        temp_c: Temperature in Celsius
+        humidity: Relative humidity (0-100%)
+        pressure_hpa: Barometric pressure in hPa
+
+    Returns:
+        Dict with keys: condition, description, sea_level_pressure_hpa, dew_point_c
+    """
+    import math
+
+    # Calculate sea-level pressure (hypsometric formula)
+    if temp_c != -273.15:  # Avoid division by zero
+        sea_level_pressure = pressure_hpa / pow(
+            1 - (0.0065 * ALTITUDE_M) / (temp_c + 273.15 + 0.0065 * ALTITUDE_M),
+            5.257
+        )
+    else:
+        sea_level_pressure = pressure_hpa
+
+    # Calculate dew point (Magnus formula)
+    a, b = 17.27, 237.7
+    if humidity > 0:
+        alpha = (a * temp_c / (b + temp_c)) + math.log(humidity / 100.0)
+        dew_point = (b * alpha) / (a - alpha)
+    else:
+        dew_point = temp_c
+
+    temp_dew_spread = temp_c - dew_point
+
+    # Determine weather condition (priority order)
+    if sea_level_pressure < 990 and humidity > 80:
+        condition, description = "Thunderstorm", "violent thunderstorm"
+    elif sea_level_pressure < 1000 and humidity > 75 and temp_c >= 5:
+        condition, description = "Rain", "heavy rain"
+    elif sea_level_pressure < 1000 and humidity > 75 and 2 <= temp_c < 5:
+        condition, description = "Sleet", "sleet/ice pellets"
+    elif sea_level_pressure < 1000 and humidity > 75 and temp_c < 2:
+        condition, description = "Snow", "heavy snowfall"
+    elif sea_level_pressure < 1005 and humidity > 70 and temp_c >= 5:
+        condition, description = "Drizzle", "light rain"
+    elif sea_level_pressure < 1005 and humidity > 70 and 2 <= temp_c < 5:
+        condition, description = "Sleet", "light sleet"
+    elif sea_level_pressure < 1005 and humidity > 70 and temp_c < 2:
+        condition, description = "Snow", "light snowfall"
+    elif temp_dew_spread < 2.5 and humidity > 85:
+        condition, description = "Fog", "foggy conditions"
+    elif sea_level_pressure < 1010 and humidity > 60:
+        condition, description = "CloudsHeavy", "overcast/cloudy"
+    elif humidity > 60 or sea_level_pressure < 1015:
+        condition, description = "Clouds", "partly cloudy"
+    else:
+        condition, description = "Clear", "clear sky"
+
+    return {
+        'condition': condition,
+        'description': description,
+        'sea_level_pressure_hpa': round(sea_level_pressure, 1),
+        'dew_point_c': round(dew_point, 1)
+    }
+
 # Global variables
 temperature_sensor = None
 scheduler = None
@@ -340,6 +407,17 @@ class WeatherReading(ObjectType):
     sensor_type = String()
     sensor_id = String()
 
+class CurrentWeather(ObjectType):
+    """GraphQL type for calculated current weather from sensor data."""
+    condition = String()
+    description = String()
+    temperature_c = Float()
+    humidity_percent = Float()
+    pressure_hpa = Float()
+    sea_level_pressure_hpa = Float()
+    dew_point_c = Float()
+    timestamp = String()
+
 class AirQualityReading(ObjectType):
     """GraphQL type for a single air quality reading."""
     id = Int()
@@ -493,6 +571,7 @@ class Query(ObjectType):
     pressure_trend = Field(PressureTrend)
 
     # Weather queries
+    current_weather = Field(CurrentWeather)
     weather_history = GrapheneList(
         WeatherReading,
         year=Int(),
@@ -880,6 +959,56 @@ class Query(ObjectType):
             return HumidityStatistics(
                 count=0, average=0.0, minimum=0.0, maximum=0.0, hours_back=hours
             )
+
+    def resolve_current_weather(self, info: Any) -> Optional[CurrentWeather]:
+        """Resolves the current weather query by calculating from latest sensor readings.
+
+        Args:
+            info: The GraphQL resolve info object.
+
+        Returns:
+            A CurrentWeather object with calculated conditions, or None if any reading is missing.
+        """
+        try:
+            temp_readings = db.get_recent_readings(limit=1)
+            humidity_readings = db.get_recent_humidity_readings(limit=1, sensor_id='micropython_device')
+            pressure_readings = db.get_recent_pressure_readings(limit=1)
+
+            if not temp_readings or not humidity_readings or not pressure_readings:
+                return None
+
+            latest_temp = temp_readings[0]
+            latest_humidity = humidity_readings[0]
+            latest_pressure = pressure_readings[0]
+
+            weather_data = calculate_local_weather(
+                latest_temp.temperature_c,
+                latest_humidity.humidity_percent,
+                latest_pressure.pressure_hpa
+            )
+
+            db.add_weather_reading(
+                condition=weather_data['condition'],
+                description=weather_data['description'],
+                sensor_type='BME280',
+                sensor_id='micropython_device'
+            )
+
+            iso_time, unix_time = _to_local_iso_unix(datetime.now(timezone.utc))
+
+            return CurrentWeather(
+                condition=weather_data['condition'],
+                description=weather_data['description'],
+                temperature_c=latest_temp.temperature_c,
+                humidity_percent=latest_humidity.humidity_percent,
+                pressure_hpa=latest_pressure.pressure_hpa,
+                sea_level_pressure_hpa=weather_data['sea_level_pressure_hpa'],
+                dew_point_c=weather_data['dew_point_c'],
+                timestamp=iso_time
+            )
+        except Exception as e:
+            logger.error(f'Error calculating current weather: {e}')
+            return None
 
     def resolve_weather_history(self, info: Any, limit: int = 1000, year: Optional[int] = None, month: Optional[int] = None, day: Optional[int] = None) -> list:
         """Resolves the query for weather history.

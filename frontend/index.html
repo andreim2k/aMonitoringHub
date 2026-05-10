@@ -925,15 +925,19 @@
                     // ... (rest of weather logic)
                     const icons = {
                         'Clear': '☀️',
-                        'Clouds': '☁️',
+                        'Clouds': '⛅',
+                        'CloudsHeavy': '☁️',
                         'Rain': '🌧️',
                         'Drizzle': '🌦️',
                         'Thunderstorm': '⛈️',
                         'Snow': '❄️',
-                        'Mist': '🌫️',
+                        'Sleet': '🧊',
                         'Fog': '🌫️'
                     };
                     document.getElementById('weatherIcon').textContent = icons[data.weather.condition] || '🌤️';
+                    if (data.weather.dewPoint !== undefined && data.weather.seaLevelPressure !== undefined) {
+                        document.getElementById('weatherDesc').textContent = `${data.weather.description} | dew ${data.weather.dewPoint}°C | ${data.weather.seaLevelPressure} hPa SL`;
+                    }
                 }
             }
 
@@ -1050,6 +1054,7 @@
                         currentTemperature { temperatureC timestamp }
                         currentHumidity { humidityPercent timestamp }
                         currentPressure { pressureHpa timestamp }
+                        currentWeather { condition description temperatureC humidityPercent pressureHpa seaLevelPressureHpa dewPointC timestamp }
                         currentAirQuality { aqi co2Ppm nh3Ppm alcoholPpm status timestamp }
                         currentMeterReading { meterValue timestamp }
                         temperatureHistory(limit: 20) { temperatureC timestampUnix }
@@ -1073,6 +1078,14 @@
                     if (d.currentPressure) {
                         state.currentData.pressure = d.currentPressure.pressureHpa;
                         ts.pressure = d.currentPressure.timestamp;
+                    }
+                    if (d.currentWeather) {
+                        state.currentData.weather = {
+                            condition: d.currentWeather.condition,
+                            description: d.currentWeather.description,
+                            dewPoint: d.currentWeather.dewPointC,
+                            seaLevelPressure: d.currentWeather.seaLevelPressureHpa
+                        };
                     }
                     if (d.currentAirQuality) {
                         state.currentData.aqi = d.currentAirQuality.aqi;
