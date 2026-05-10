@@ -286,6 +286,51 @@ def scheduled_ocr_task():
     logger.info("=== SCHEDULED OCR TASK COMPLETED ===")
 
 
+def scheduled_esp32_reset_task():
+    """Sends a reset command to ESP32-CAM at midnight.
+
+    This function is intended to be run by a scheduler (e.g., APScheduler)
+    to automatically restart the ESP32-CAM device every day at 00:00.
+    """
+    import traceback
+    logger.info("=== SCHEDULED ESP32-CAM RESET TASK STARTED ===")
+    logger.info(f"Current time: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+
+    try:
+        import json
+        import os
+        import requests
+
+        # Load config to get ESP32-CAM URL
+        with open(os.path.join(os.path.dirname(__file__), 'config.json'), 'r') as f:
+            config = json.load(f)
+
+        esp32_url = config.get('webcam', {}).get('url', 'http://192.168.50.3/snapshot').replace('/snapshot', '')
+        reset_endpoint = f"{esp32_url}/reset"
+
+        logger.info(f"Sending POST request to {reset_endpoint}...")
+
+        response = requests.post(
+            reset_endpoint,
+            json={},
+            headers={'Content-Type': 'application/json'},
+            timeout=5
+        )
+
+        logger.info(f"Response status code: {response.status_code}")
+
+        if response.status_code == 200:
+            logger.info(f"✅ ESP32-CAM RESET SENT: Device is restarting")
+        else:
+            logger.error(f"ESP32-CAM reset endpoint returned status {response.status_code}")
+            logger.error(f"Response: {response.text}")
+    except Exception as e:
+        logger.error(f"❌ SCHEDULED ESP32-CAM RESET TASK EXCEPTION: {e}")
+        logger.error(f"Exception traceback: {traceback.format_exc()}")
+
+    logger.info("=== SCHEDULED ESP32-CAM RESET TASK COMPLETED ===")
+
+
 
 # GraphQL Types
 class TemperatureReading(ObjectType):
@@ -2050,7 +2095,7 @@ def initialize_application() -> bool:
         from sensor_reader import HumiditySensorReader
         humidity_sensor = HumiditySensorReader("mock")
 
-        # Initialize scheduler for daily OCR task at 12:00 (noon)
+        # Initialize scheduler for daily OCR task at 12:00 (noon) and ESP32-CAM reset at midnight
         scheduler = BackgroundScheduler()
         scheduler.add_job(
             scheduled_ocr_task,
@@ -2060,8 +2105,16 @@ def initialize_application() -> bool:
             id='daily_ocr_task',
             name='Daily OCR Meter Reading at 12:00 (noon)'
         )
+        scheduler.add_job(
+            scheduled_esp32_reset_task,
+            'cron',
+            hour=0,
+            minute=0,
+            id='daily_esp32_reset',
+            name='Daily ESP32-CAM Reset at 00:00 (midnight)'
+        )
         scheduler.start()
-        logger.info("Scheduler started - OCR task will run daily at 12:00 (noon)")
+        logger.info("Scheduler started - OCR task will run daily at 12:00 (noon), ESP32-CAM reset at 00:00 (midnight)")
 
         logger.info("Application initialized with USB sensor data")
         return True

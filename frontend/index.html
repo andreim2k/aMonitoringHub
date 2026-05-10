@@ -692,6 +692,9 @@
                         <div id="meterLastUpdate" class="text-mono" style="font-size: 0.65rem; color: var(--text-tertiary); margin-top: 1rem;">
                             Updated --:--:--
                         </div>
+                        <div id="restartCountdown" class="text-mono" style="font-size: 0.65rem; color: var(--accent-amber); margin-top: 0.5rem;">
+                            Restart in --:--:--
+                        </div>
                     </div>
 
                     <!-- Right: Webcam -->
@@ -1154,24 +1157,28 @@
             }
 
             // --- Webcam Logic ---
-            async function captureSnapshot() {
+            async function captureSnapshot(resolution = null) {
                 const meterCard = document.getElementById('meterCard');
                 if (meterCard.classList.contains('sensor-offline')) return;
 
                 const img = document.getElementById('webcamImage');
                 const loader = document.getElementById('webcamLoading');
-                
+
                 loader.style.display = 'flex';
                 img.style.display = 'none';
-                
+
                 try {
+                    const payload = {
+                        gain: state.cameraSettings.gain,
+                        flash: state.cameraSettings.flash
+                    };
+                    if (resolution) {
+                        payload.resolution = resolution;
+                    }
                     const res = await fetch('/webcam/capture', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            gain: state.cameraSettings.gain,
-                            flash: state.cameraSettings.flash
-                        })
+                        body: JSON.stringify(payload)
                     });
                     const data = await res.json();
                     if (data.success && data.image) {
@@ -1422,20 +1429,41 @@
                 });
             }
 
+            function updateRestartCountdown() {
+                const countdownEl = document.getElementById('restartCountdown');
+                if (!countdownEl) return;
+
+                const now = new Date();
+                const nextMidnight = new Date(now);
+                nextMidnight.setHours(24, 0, 0, 0);
+
+                const timeUntilRestart = nextMidnight - now;
+                const hours = Math.floor(timeUntilRestart / 3600000);
+                const minutes = Math.floor((timeUntilRestart % 3600000) / 60000);
+                const seconds = Math.floor((timeUntilRestart % 60000) / 1000);
+
+                const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                countdownEl.textContent = `Restart in ${timeStr}`;
+            }
+
             return {
                 init: () => {
                     fetchInitialData();
                     connectSSE();
-                    captureSnapshot(); // Auto capture on load
-                    
+                    captureSnapshot('VGA (640x480)'); // Auto capture on load at VGA resolution
+
+                    // Update restart countdown every second
+                    updateRestartCountdown();
+                    setInterval(updateRestartCountdown, 1000);
+
                     // Add entry animations
-                    gsap.fromTo('.bento-card', 
+                    gsap.fromTo('.bento-card',
                         { y: 30, opacity: 0 },
-                        { 
-                            duration: 0.8, 
-                            y: 0, 
-                            opacity: 1, 
-                            stagger: 0.1, 
+                        {
+                            duration: 0.8,
+                            y: 0,
+                            opacity: 1,
+                            stagger: 0.1,
                             ease: 'power3.out',
                             delay: 0.2
                         }
