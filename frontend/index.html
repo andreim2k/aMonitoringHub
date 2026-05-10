@@ -1067,12 +1067,12 @@
                         state.currentData.temperature = d.currentTemperature.temperatureC;
                         ts.temperature = d.currentTemperature.timestamp;
                     }
-                    if (d.externalWeather && d.externalWeather.humidityPercent !== null && d.externalWeather.humidityPercent !== undefined) {
-                        state.currentData.humidity = d.externalWeather.humidityPercent;
-                        ts.humidity = new Date(d.externalWeather.timestampUnix * 1000).toISOString();
-                    } else if (d.currentHumidity) {
+                    if (d.currentHumidity) {
                         state.currentData.humidity = d.currentHumidity.humidityPercent;
                         ts.humidity = d.currentHumidity.timestamp;
+                    } else if (d.externalWeather && d.externalWeather.humidityPercent !== null && d.externalWeather.humidityPercent !== undefined) {
+                        state.currentData.humidity = d.externalWeather.humidityPercent;
+                        ts.humidity = new Date(d.externalWeather.timestampUnix * 1000).toISOString();
                     }
                     if (d.currentPressure) {
                         state.currentData.pressure = d.currentPressure.pressureHpa;
