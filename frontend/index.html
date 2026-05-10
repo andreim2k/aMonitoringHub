@@ -805,7 +805,8 @@
                 cameraSettings: {
                     gain: 1,
                     flash: false
-                }
+                },
+                lastCameraSuccess: null
             };
 
             const BUCHAREST_FMT = new Intl.DateTimeFormat('ro-RO', { 
@@ -1188,7 +1189,8 @@
                     const res = await fetch('/webcam/capture', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
+                        body: JSON.stringify(payload),
+                        timeout: 30000
                     });
                     const data = await res.json();
                     if (data.success && data.image) {
@@ -1199,14 +1201,18 @@
                         document.getElementById('espStatus').textContent = 'Active';
                         document.getElementById('espStatus').className = 'val-ok';
                         meterCard.classList.remove('sensor-offline');
+                        state.lastCameraSuccess = Date.now();
                     } else {
                         throw new Error('Capture failed');
                     }
                 } catch (e) {
                     console.error('Webcam capture failed', e);
-                    document.getElementById('espStatus').textContent = 'Offline';
-                    document.getElementById('espStatus').className = 'val-bad';
-                    meterCard.classList.add('sensor-offline');
+                    const timeSinceLastSuccess = state.lastCameraSuccess ? (Date.now() - state.lastCameraSuccess) / 1000 : 0;
+                    if (timeSinceLastSuccess >= 30) {
+                        document.getElementById('espStatus').textContent = 'Not Connected';
+                        document.getElementById('espStatus').className = 'val-bad';
+                        meterCard.classList.add('sensor-offline');
+                    }
                 } finally {
                     loader.style.display = 'none';
                 }
