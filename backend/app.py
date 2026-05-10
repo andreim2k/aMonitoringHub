@@ -213,7 +213,7 @@ sse_subscribers = 0
 sse_subscribers_lock = threading.Lock()
 
 # Configurable throttling system
-THROTTLE_INTERVAL = 3600  # Default: 1 hour in seconds
+THROTTLE_INTERVAL = 60  # Default: 1 minute in seconds (reduced from 1 hour for more data points)
 last_throttle_time = 0    # Global throttle timestamp
 
 def should_throttle() -> bool:
@@ -1665,8 +1665,8 @@ class USBDataProcessor:
             # Extract data to check what sensors are present
             temp_c = data.get('temperature_c')
             pressure_hpa = data.get('pressure_hpa')
-            # Humidity must come from OpenWeatherMap only.
-            humidity_pct = None
+            # Get humidity from USB sensor (BME280)
+            humidity_pct = data.get('humidity_percent')
             air_data = data.get('air', {})
             
             # Update timestamps immediately when data is received (before throttling check)
@@ -2548,7 +2548,7 @@ if __name__ == '__main__':
     parser.add_argument('--port', type=int, default=5000, help='Port to listen on')
     parser.add_argument('--debug', action='store_true', help='Enable debug mode')
     parser.add_argument('--threshold', type=float, default=0.1, help='Temperature change threshold for SSE (default: 0.1°C)')
-    parser.add_argument('--throttle', type=int, default=3600, help='Throttle interval for all operations - SSE, DB storage, USB reading (default: 3600 seconds = 1 hour)')
+    parser.add_argument('--throttle', type=int, default=60, help='Throttle interval for all operations - SSE, DB storage, USB reading (default: 60 seconds = 1 minute)')
     
     args = parser.parse_args()
 
