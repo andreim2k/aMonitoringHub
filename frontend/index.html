@@ -944,11 +944,7 @@
                     };
                     document.getElementById('weatherIcon').textContent = icons[data.weather.condition] || '🌤️';
                     document.getElementById('weatherStatus').textContent = displayNames[data.weather.condition] || data.weather.condition;
-                    if (data.weather.dewPoint !== undefined && data.weather.seaLevelPressure !== undefined) {
-                        document.getElementById('weatherDesc').textContent = `${data.weather.description} | dew ${data.weather.dewPoint}°C | ${data.weather.seaLevelPressure} hPa SL`;
-                    } else {
-                        document.getElementById('weatherDesc').textContent = data.weather.description;
-                    }
+                    document.getElementById('weatherDesc').textContent = 'Outside conditions';
                 }
             }
 
