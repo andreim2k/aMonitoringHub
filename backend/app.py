@@ -131,79 +131,6 @@ CORS(app, resources={
 })
 
 # OpenWeatherMap integration for humidity from Clopotiva, Hunedoara
-OPENWEATHER_API_KEY = os.environ.get('OPENWEATHER_API_KEY', None)
-CLOPOTIVA_LAT = 45.436
-CLOPOTIVA_LON = 22.781
-weather_cache = {'data': None, 'timestamp': 0}
-WEATHER_CACHE_DURATION = 300  # Cache for 5 minutes
-OPENWEATHER_SENSOR_TYPE = 'openweathermap'
-OPENWEATHER_SENSOR_ID = 'clopotiva_hunedoara'
-
-def get_external_humidity() -> Optional[float]:
-    """Fetch humidity from OpenWeatherMap for Clopotiva, Hunedoara.
-
-    Returns:
-        Humidity percentage (0-100) or None if unavailable.
-    """
-    global weather_cache
-
-    if not OPENWEATHER_API_KEY:
-        return None
-
-    current_time = time.time()
-    # Return cached data if fresh
-    if weather_cache['data'] and (current_time - weather_cache['timestamp']) < WEATHER_CACHE_DURATION:
-        return weather_cache['data'].get('humidity')
-
-    try:
-        url = "https://api.openweathermap.org/data/2.5/weather"
-        params = {
-            'lat': CLOPOTIVA_LAT,
-            'lon': CLOPOTIVA_LON,
-            'appid': OPENWEATHER_API_KEY,
-            'units': 'metric'
-        }
-        response = requests.get(url, params=params, timeout=5)
-        response.raise_for_status()
-        data = response.json()
-
-        humidity = data.get('main', {}).get('humidity')
-        weather_info = data.get('weather', [{}])[0] if data.get('weather') else {}
-        weather_cache = {
-            'data': {
-                'humidity': humidity,
-                'condition': weather_info.get('main'),
-                'description': weather_info.get('description'),
-                'icon': weather_info.get('icon')
-            },
-            'timestamp': current_time
-        }
-        logger.debug(f"Weather from OpenWeatherMap: {weather_info.get('main')}, Humidity: {humidity}%")
-
-        # Store in DB same way as other sensors
-        if humidity is not None:
-            db.add_humidity_reading(
-                humidity_percent=humidity,
-                sensor_type=OPENWEATHER_SENSOR_TYPE,
-                sensor_id=OPENWEATHER_SENSOR_ID
-            )
-
-        # Store weather condition in DB
-        condition = weather_info.get('main')
-        description = weather_info.get('description')
-        if condition and description:
-            db.add_weather_reading(
-                condition=condition,
-                description=description,
-                sensor_type=OPENWEATHER_SENSOR_TYPE,
-                sensor_id=OPENWEATHER_SENSOR_ID
-            )
-
-        return humidity
-    except Exception as e:
-        logger.warning(f"Failed to fetch external humidity: {e}")
-        return None
-
 # Global variables
 temperature_sensor = None
 scheduler = None
@@ -374,15 +301,6 @@ class HumidityStatistics(ObjectType):
     min_timestamp = String()
     max_timestamp = String()
     hours_back = Int()
-
-class ExternalWeather(ObjectType):
-    """GraphQL type for external weather data (from OpenWeatherMap)."""
-    humidity_percent = Float()
-    location = String()
-    timestamp_unix = Float()
-    weather_condition = String()
-    weather_description = String()
-    weather_icon = String()
 
 class PressureReading(ObjectType):
     """GraphQL type for a single pressure reading."""
@@ -557,9 +475,6 @@ class Query(ObjectType):
         HumidityStatistics,
         hours=Int(default_value=24)
     )
-
-    # External weather queries
-    external_weather = Field(ExternalWeather)
 
     # Pressure queries
     current_pressure = Field(PressureReading)
@@ -875,41 +790,13 @@ class Query(ObjectType):
                     sensor_id=reading.sensor_id
                 )
 
-            # Fallback to OpenWeatherMap if USB sensor data unavailable
-            recent_readings = db.get_recent_humidity_readings(limit=1, sensor_id=OPENWEATHER_SENSOR_ID)
-            if recent_readings:
-                reading = recent_readings[0]
-                return HumidityReading(
-                    id=reading.id,
-                    humidity_percent=reading.humidity_percent,
-                    timestamp=_to_local_iso_unix(reading.timestamp)[0],
-                    timestamp_unix=_to_local_iso_unix(reading.timestamp)[1],
-                    sensor_type=reading.sensor_type,
-                    sensor_id=reading.sensor_id
-                )
-
-            # Final fallback to a live OpenWeather fetch if DB has no cached humidity yet
-            humidity = get_external_humidity()
-            if humidity is None:
-                return None
-
-            now_iso, now_unix = _to_local_iso_unix(datetime.now(timezone.utc))
-            return HumidityReading(
-                id=None,
-                humidity_percent=humidity,
-                timestamp=now_iso,
-                timestamp_unix=now_unix,
-                sensor_type=OPENWEATHER_SENSOR_TYPE,
-                sensor_id=OPENWEATHER_SENSOR_ID
-            )
+            return None
         except Exception as e:
             logger.error(f'Error getting current humidity: {e}')
             return None
             
     def resolve_humidity_history(self, info: Any, range: str = 'daily', limit: int = 1000, year: Optional[int] = None, month: Optional[int] = None, day: Optional[int] = None) -> List[HumidityReading]:
-        """Resolves the query for historical humidity readings.
-
-        Prefers USB sensor (BME280) humidity, falls back to OpenWeatherMap.
+        """Resolves the query for historical humidity readings from USB sensor (BME280).
 
         Args:
             info: The GraphQL resolve info object.
@@ -923,31 +810,26 @@ class Query(ObjectType):
             A list of HumidityReading objects.
         """
         try:
-            # Try to get USB sensor data first, fallback to OpenWeatherMap
-            sensor_priority = ['micropython_device', OPENWEATHER_SENSOR_ID]
+            # Get USB sensor data only
+            sensor_id = 'micropython_device'
             readings = []
 
-            for sensor_id in sensor_priority:
-                # Handle time-based queries
-                if year is not None:
-                    if month is not None and day is not None:
-                        readings = db.get_humidity_readings_by_day(year, month, day, sensor_id=sensor_id)
-                    elif month is not None:
-                        readings = db.get_humidity_readings_by_month(year, month, sensor_id=sensor_id)
-                    else:
-                        readings = db.get_humidity_readings_by_year(year, sensor_id=sensor_id)
-                elif range == 'recent':
-                    readings = db.get_recent_humidity_readings(limit=limit, sensor_id=sensor_id)
-                elif range == 'daily':
-                    readings = db.get_recent_humidity_readings(limit=min(limit, 1440), sensor_id=sensor_id)
-                elif range == 'weekly':
-                    readings = db.get_recent_humidity_readings(limit=min(limit, 10080), sensor_id=sensor_id)
+            # Handle time-based queries
+            if year is not None:
+                if month is not None and day is not None:
+                    readings = db.get_humidity_readings_by_day(year, month, day, sensor_id=sensor_id)
+                elif month is not None:
+                    readings = db.get_humidity_readings_by_month(year, month, sensor_id=sensor_id)
                 else:
-                    readings = db.get_recent_humidity_readings(limit=limit, sensor_id=sensor_id)
-
-                # Use first sensor that has data
-                if readings:
-                    break
+                    readings = db.get_humidity_readings_by_year(year, sensor_id=sensor_id)
+            elif range == 'recent':
+                readings = db.get_recent_humidity_readings(limit=limit, sensor_id=sensor_id)
+            elif range == 'daily':
+                readings = db.get_recent_humidity_readings(limit=min(limit, 1440), sensor_id=sensor_id)
+            elif range == 'weekly':
+                readings = db.get_recent_humidity_readings(limit=min(limit, 10080), sensor_id=sensor_id)
+            else:
+                readings = db.get_recent_humidity_readings(limit=limit, sensor_id=sensor_id)
 
             return [
                 HumidityReading(
@@ -967,7 +849,7 @@ class Query(ObjectType):
     def resolve_humidity_statistics(self, info: Any, hours: int = 24) -> HumidityStatistics:
         """Resolves the query for humidity statistics.
 
-        Prefers USB sensor (BME280) humidity, falls back to OpenWeatherMap.
+        Resolves humidity statistics from USB sensor (BME280).
 
         Args:
             info: The GraphQL resolve info object.
@@ -977,11 +859,8 @@ class Query(ObjectType):
             A HumidityStatistics object.
         """
         try:
-            # Try USB sensor first, then OpenWeatherMap
+            # Get USB sensor statistics
             stats = db.get_humidity_statistics(sensor_id='micropython_device', hours_back=hours)
-            if stats.get('count', 0) == 0:
-                # Fallback to OpenWeatherMap if no USB data
-                stats = db.get_humidity_statistics(sensor_id=OPENWEATHER_SENSOR_ID, hours_back=hours)
 
             if stats.get('count', 0) > 0:
                 return HumidityStatistics(
@@ -1001,32 +880,6 @@ class Query(ObjectType):
             return HumidityStatistics(
                 count=0, average=0.0, minimum=0.0, maximum=0.0, hours_back=hours
             )
-
-    def resolve_external_weather(self, info: Any) -> Optional[ExternalWeather]:
-        """Resolves the query for external weather data (OpenWeatherMap).
-
-        Args:
-            info: The GraphQL resolve info object.
-
-        Returns:
-            An ExternalWeather object with humidity and weather condition from OpenWeatherMap.
-        """
-        try:
-            humidity = get_external_humidity()
-            cached = weather_cache.get('data', {}) or {}
-            if humidity is not None:
-                return ExternalWeather(
-                    humidity_percent=humidity,
-                    location="Clopotiva, Hunedoara",
-                    timestamp_unix=time.time(),
-                    weather_condition=cached.get('condition'),
-                    weather_description=cached.get('description'),
-                    weather_icon=cached.get('icon')
-                )
-            return None
-        except Exception as e:
-            logger.error(f'Error getting external weather: {e}')
-            return None
 
     def resolve_weather_history(self, info: Any, limit: int = 1000, year: Optional[int] = None, month: Optional[int] = None, day: Optional[int] = None) -> list:
         """Resolves the query for weather history.
@@ -1923,26 +1776,6 @@ def events() -> Response:
                             'type': 'temperature_update',
                             'data': temp_data,
                             'timestamp': temp_row[1]
-                        }
-                        yield f"data: {json.dumps(sse_message)}\n\n"
-
-                    # Also send latest OpenWeather humidity
-                    cursor.execute(
-                        "SELECT humidity_percent, timestamp, sensor_type, sensor_id FROM humidity_readings WHERE sensor_id = ? ORDER BY timestamp DESC LIMIT 1",
-                        (OPENWEATHER_SENSOR_ID,)
-                    )
-                    humidity_row = cursor.fetchone()
-                    if humidity_row:
-                        humidity_data = {
-                            'humidity_percent': humidity_row[0],
-                            'timestamp_iso': humidity_row[1],
-                            'sensor_type': humidity_row[2],
-                            'sensor_id': humidity_row[3]
-                        }
-                        sse_message = {
-                            'type': 'humidity_update',
-                            'data': humidity_data,
-                            'timestamp': humidity_row[1]
                         }
                         yield f"data: {json.dumps(sse_message)}\n\n"
             except Exception as e:

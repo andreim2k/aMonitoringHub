@@ -1052,7 +1052,6 @@
                         currentPressure { pressureHpa timestamp }
                         currentAirQuality { aqi co2Ppm nh3Ppm alcoholPpm status timestamp }
                         currentMeterReading { meterValue timestamp }
-                        externalWeather { humidityPercent weatherCondition weatherDescription timestampUnix }
                         temperatureHistory(limit: 20) { temperatureC timestampUnix }
                         health { 
                             bm280Status { secondsSinceLastReading connected }
@@ -1070,9 +1069,6 @@
                     if (d.currentHumidity) {
                         state.currentData.humidity = d.currentHumidity.humidityPercent;
                         ts.humidity = d.currentHumidity.timestamp;
-                    } else if (d.externalWeather && d.externalWeather.humidityPercent !== null && d.externalWeather.humidityPercent !== undefined) {
-                        state.currentData.humidity = d.externalWeather.humidityPercent;
-                        ts.humidity = new Date(d.externalWeather.timestampUnix * 1000).toISOString();
                     }
                     if (d.currentPressure) {
                         state.currentData.pressure = d.currentPressure.pressureHpa;
@@ -1088,12 +1084,6 @@
                     if (d.currentMeterReading) {
                         state.currentData.meter = d.currentMeterReading.meterValue;
                         ts.meter = d.currentMeterReading.timestamp;
-                    }
-                    if (d.externalWeather) {
-                        state.currentData.weather = {
-                            condition: d.externalWeather.weatherCondition,
-                            description: d.externalWeather.weatherDescription
-                        };
                     }
 
                     if (d.health) {
