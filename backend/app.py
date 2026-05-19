@@ -70,7 +70,7 @@ from config import get_config as load_app_config
 
 # Load application configuration
 app_config = load_app_config()
-from graphene import ObjectType, String, Float, List as GrapheneList, Field, Int, Schema
+from graphene import ObjectType, String, Float, List as GrapheneList, Field, Int, Schema, Boolean
 
 # Import our modules
 from models import init_database, db, TemperatureReading as DBTemperatureReading, HumidityReading as DBHumidityReading, MeterReading as DBMeterReading, WeatherReading as DBWeatherReading
@@ -325,6 +325,33 @@ def scheduled_esp32_reset_task():
     logger.info("=== SCHEDULED ESP32-CAM RESET TASK COMPLETED ===")
 
 
+def scheduled_heartbeat_task():
+    """Records a per-minute system heartbeat (which sensors are up)."""
+    try:
+        current_time = time.time()
+
+        bm280_up = False
+        mq135_up = False
+        if hasattr(app, 'usb_data_processor') and app.usb_data_processor:
+            if app.usb_data_processor.last_bm280_reading:
+                bm280_up = (current_time - app.usb_data_processor.last_bm280_reading) < 120
+            if app.usb_data_processor.last_mq135_reading:
+                mq135_up = (current_time - app.usb_data_processor.last_mq135_reading) < 120
+
+        esp32cam_up = False
+        try:
+            cfg = load_app_config()
+            esp32_url = cfg.get('webcam', {}).get('url', '').replace('/snapshot', '').replace('/capture', '')
+            if esp32_url:
+                response = requests.get(f"{esp32_url}/status", timeout=3)
+                esp32cam_up = response.status_code == 200
+        except Exception:
+            esp32cam_up = False
+
+        db.add_heartbeat(bm280_up, mq135_up, esp32cam_up)
+    except Exception as e:
+        logger.error(f"Heartbeat task error: {e}")
+
 
 # GraphQL Types
 class TemperatureReading(ObjectType):
@@ -417,6 +444,30 @@ class CurrentWeather(ObjectType):
     sea_level_pressure_hpa = Float()
     dew_point_c = Float()
     timestamp = String()
+
+class SystemHeartbeat(ObjectType):
+    """GraphQL type for a single per-minute system heartbeat."""
+    timestamp = String()
+    timestamp_unix = Float()
+    bm280_up = Boolean()
+    mq135_up = Boolean()
+    esp32cam_up = Boolean()
+
+class UptimeStats(ObjectType):
+    """GraphQL type for sensor uptime percentages over a period."""
+    hours_back = Int()
+    bm280_uptime_percent = Float()
+    mq135_uptime_percent = Float()
+    esp32cam_uptime_percent = Float()
+    total_uptime_percent = Float()
+    total_minutes = Int()
+
+class DowntimeEvent(ObjectType):
+    """GraphQL type for a sensor downtime event."""
+    sensor = String()
+    start_time = String()
+    end_time = String()
+    duration_seconds = Int()
 
 class AirQualityReading(ObjectType):
     """GraphQL type for a single air quality reading."""
@@ -578,6 +629,20 @@ class Query(ObjectType):
         month=Int(),
         day=Int(),
         limit=Int(default_value=1000)
+    )
+
+    # System health queries
+    system_health_history = GrapheneList(
+        SystemHeartbeat,
+        hours_back=Int(default_value=24)
+    )
+    uptime_stats = Field(
+        UptimeStats,
+        hours_back=Int(default_value=24)
+    )
+    downtime_events = GrapheneList(
+        DowntimeEvent,
+        hours_back=Int(default_value=24)
     )
 
     # Air quality queries
@@ -1046,6 +1111,55 @@ class Query(ObjectType):
             ) for reading in readings]
         except Exception as e:
             logger.error(f"Error getting weather history: {e}")
+            return []
+
+    def resolve_system_health_history(self, info: Any, hours_back: int = 24) -> list:
+        """Returns per-minute heartbeats for the requested window."""
+        try:
+            beats = db.get_heartbeats_by_range(hours_back=hours_back)
+            return [SystemHeartbeat(
+                timestamp=b.timestamp.isoformat() if b.timestamp else None,
+                timestamp_unix=b.timestamp_unix,
+                bm280_up=bool(b.bm280_up),
+                mq135_up=bool(b.mq135_up),
+                esp32cam_up=bool(b.esp32cam_up),
+            ) for b in beats]
+        except Exception as e:
+            logger.error(f"Error getting system health history: {e}")
+            return []
+
+    def resolve_uptime_stats(self, info: Any, hours_back: int = 24) -> UptimeStats:
+        """Returns uptime percentages over the requested window."""
+        try:
+            stats = db.get_uptime_stats(hours_back=hours_back)
+            return UptimeStats(
+                hours_back=stats['hours_back'],
+                bm280_uptime_percent=stats['bm280_uptime_percent'],
+                mq135_uptime_percent=stats['mq135_uptime_percent'],
+                esp32cam_uptime_percent=stats['esp32cam_uptime_percent'],
+                total_uptime_percent=stats['total_uptime_percent'],
+                total_minutes=stats['total_minutes'],
+            )
+        except Exception as e:
+            logger.error(f"Error getting uptime stats: {e}")
+            return UptimeStats(
+                hours_back=hours_back, bm280_uptime_percent=0.0,
+                mq135_uptime_percent=0.0, esp32cam_uptime_percent=0.0,
+                total_uptime_percent=0.0, total_minutes=0
+            )
+
+    def resolve_downtime_events(self, info: Any, hours_back: int = 24) -> list:
+        """Returns downtime events over the requested window."""
+        try:
+            events = db.get_downtime_events(hours_back=hours_back)
+            return [DowntimeEvent(
+                sensor=e['sensor'],
+                start_time=e['start_time'],
+                end_time=e['end_time'],
+                duration_seconds=e['duration_seconds'],
+            ) for e in events]
+        except Exception as e:
+            logger.error(f"Error getting downtime events: {e}")
             return []
 
     def resolve_current_pressure(self, info: Any) -> Optional[PressureReading]:
@@ -2075,8 +2189,15 @@ def initialize_application() -> bool:
             id='daily_esp32_reset',
             name='Daily ESP32-CAM Reset at 00:00 (midnight)'
         )
+        scheduler.add_job(
+            scheduled_heartbeat_task,
+            'interval',
+            seconds=60,
+            id='system_heartbeat',
+            name='System Heartbeat (every minute)'
+        )
         scheduler.start()
-        logger.info("Scheduler started - OCR task will run daily at 12:00 (noon), ESP32-CAM reset at 00:00 (midnight)")
+        logger.info("Scheduler started - OCR task daily at 12:00, ESP32-CAM reset daily at 00:00, system heartbeat every minute")
 
         logger.info("Application initialized with USB sensor data")
         return True

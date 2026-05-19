@@ -655,7 +655,7 @@
                 </div>
             </section>
 
-            <section class="bento-card">
+            <section class="bento-card" id="hardwareCard" onclick="app.showHistory('hardware')" style="cursor: pointer;">
                 <div class="card-label">
                     <i data-lucide="cpu"></i>
                     Hardware Hub
@@ -824,6 +824,17 @@
                 hour12: false
             });
 
+            const FULL_DATETIME_FMT = new Intl.DateTimeFormat('en-GB', {
+                timeZone: 'Europe/Bucharest',
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+
             // Initialize Lucide Icons
             lucide.createIcons();
 
@@ -916,7 +927,7 @@
                 
                 if (data.meter !== null) {
                     document.getElementById('currentMeter').textContent = data.meter;
-                    const timeStr = ts.meter ? FULL_FMT.format(new Date(ts.meter)) : BUCHAREST_FMT.format(new Date());
+                    const timeStr = ts.meter ? FULL_DATETIME_FMT.format(new Date(ts.meter)) : FULL_DATETIME_FMT.format(new Date());
                     document.getElementById('meterLastUpdate').textContent = `Updated ${timeStr}`;
                 }
 
@@ -1220,21 +1231,22 @@
 
             // --- Modal & History ---
             function showHistory(metric) {
-                const cardMap = { temp: 'tempCard', humidity: 'humidityCard', pressure: 'pressureCard', co2: 'aqiCard', meter: 'meterCard', weather: 'weatherCard' };
+                const cardMap = { temp: 'tempCard', humidity: 'humidityCard', pressure: 'pressureCard', co2: 'aqiCard', meter: 'meterCard', weather: 'weatherCard', hardware: 'hardwareCard' };
                 const card = document.getElementById(cardMap[metric]);
-                if (card && card.classList.contains('sensor-offline')) return;
+                if (card && card.classList.contains('sensor-offline') && metric !== 'hardware') return;
 
                 state.currentMetric = metric;
                 const modal = document.getElementById('historyModal');
                 const title = document.getElementById('modalTitle');
-                
+
                 const titles = {
                     temp: 'Temperature History',
                     humidity: 'Humidity Levels',
                     pressure: 'Barometric Pressure',
                     co2: 'Air Quality Trends',
                     meter: 'Power Consumption',
-                    weather: 'Weather Condition History'
+                    weather: 'Weather Condition History',
+                    hardware: 'System Health History'
                 };
                 
                 title.textContent = titles[metric] || 'Metric History';
@@ -1282,6 +1294,19 @@
                 }
                 else if (metric === 'meter') { query = `{ meterHistory(range: "${range}", limit: 1000) { meterValue timestampUnix } }`; dataField = 'meterHistory'; }
                 else if (metric === 'weather') { query = `{ weatherHistory(limit: 1000) { condition description timestampUnix } }`; dataField = 'weatherHistory'; }
+                else if (metric === 'hardware') {
+                    const hoursMap = { 'day': 24, 'week': 168, 'month': 720, 'year': 8760 };
+                    const hours = hoursMap[period] || 24;
+                    try {
+                        const res = await gql(`{
+                            systemHealthHistory(hoursBack: ${hours}) { timestampUnix bm280Up mq135Up esp32camUp }
+                            uptimeStats(hoursBack: ${hours}) { bm280UptimePercent mq135UptimePercent esp32camUptimePercent totalUptimePercent totalMinutes }
+                            downtimeEvents(hoursBack: ${hours}) { sensor startTime endTime durationSeconds }
+                        }`);
+                        renderHardwareHistory(res.data, period);
+                    } catch (e) { console.error('Hardware history load failed', e); }
+                    return;
+                }
 
                 try {
                     const res = await gql(query);
@@ -1291,8 +1316,94 @@
                 } catch (e) { console.error('Chart load failed', e); }
             }
 
+            function renderHardwareHistory(data, period) {
+                const stats = data.uptimeStats || {};
+                const events = data.downtimeEvents || [];
+                const beats = (data.systemHealthHistory || []).sort((a,b) => a.timestampUnix - b.timestampUnix);
+
+                const chartEl = document.getElementById('modalChart');
+                const ctx = chartEl.getContext('2d');
+                if (state.charts.modalChart) state.charts.modalChart.destroy();
+                ctx.clearRect(0, 0, chartEl.width, chartEl.height);
+
+                let container = document.getElementById('hardwareHistoryContainer');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = 'hardwareHistoryContainer';
+                    chartEl.parentNode.insertBefore(container, chartEl);
+                }
+                chartEl.style.display = 'none';
+                container.style.display = 'block';
+
+                const fmtPct = (v) => (v == null ? '--' : `${v.toFixed(1)}%`);
+                const sensors = [
+                    { key: 'bm280Up',    label: 'BM280',     pct: stats.bm280UptimePercent },
+                    { key: 'mq135Up',    label: 'MQ135',     pct: stats.mq135UptimePercent },
+                    { key: 'esp32camUp', label: 'ESP32-CAM', pct: stats.esp32camUptimePercent }
+                ];
+
+                const sensorRows = sensors.map(s => {
+                    const segments = beats.map(b => {
+                        const up = b[s.key];
+                        return `<div style="flex:1; height:100%; background:${up ? 'var(--accent-emerald)' : 'var(--accent-rose)'};"></div>`;
+                    }).join('');
+                    return `
+                        <div style="margin-bottom: 1rem;">
+                            <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:0.3rem;">
+                                <span style="color:var(--text-secondary)">${s.label}</span>
+                                <span class="val-ok">${fmtPct(s.pct)}</span>
+                            </div>
+                            <div style="display:flex; height:18px; gap:1px; background:var(--bg-page); border-radius:4px; overflow:hidden;">${segments || '<div style="flex:1; background:var(--bg-page);"></div>'}</div>
+                        </div>`;
+                }).join('');
+
+                const eventRows = events.length === 0
+                    ? `<div style="color:var(--text-tertiary); font-size:0.85rem; padding:0.5rem 0;">No downtime events in this period.</div>`
+                    : events.slice(0, 50).map(e => {
+                        const start = e.startTime ? new Date(e.startTime) : null;
+                        const end = e.endTime ? new Date(e.endTime) : null;
+                        const fmt = (d) => d ? d.toLocaleString('en-GB', { timeZone: 'Europe/Bucharest', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : '--';
+                        const mins = Math.round((e.durationSeconds || 0) / 60);
+                        return `<div style="display:flex; justify-content:space-between; padding:0.3rem 0; border-bottom:1px solid var(--border); font-size:0.8rem;">
+                            <span><strong style="color:var(--accent-rose)">${e.sensor.toUpperCase()}</strong> down</span>
+                            <span style="color:var(--text-tertiary)">${fmt(start)} → ${fmt(end)} (${mins} min)</span>
+                        </div>`;
+                    }).join('');
+
+                container.innerHTML = `
+                    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:0.8rem; margin-bottom:1.2rem;">
+                        <div style="text-align:center; padding:0.7rem; background:var(--bg-card-hover); border-radius:var(--radius-sm);">
+                            <div style="font-size:0.7rem; color:var(--text-tertiary)">BM280</div>
+                            <div style="font-size:1.3rem; font-weight:700;">${fmtPct(stats.bm280UptimePercent)}</div>
+                        </div>
+                        <div style="text-align:center; padding:0.7rem; background:var(--bg-card-hover); border-radius:var(--radius-sm);">
+                            <div style="font-size:0.7rem; color:var(--text-tertiary)">MQ135</div>
+                            <div style="font-size:1.3rem; font-weight:700;">${fmtPct(stats.mq135UptimePercent)}</div>
+                        </div>
+                        <div style="text-align:center; padding:0.7rem; background:var(--bg-card-hover); border-radius:var(--radius-sm);">
+                            <div style="font-size:0.7rem; color:var(--text-tertiary)">ESP32-CAM</div>
+                            <div style="font-size:1.3rem; font-weight:700;">${fmtPct(stats.esp32camUptimePercent)}</div>
+                        </div>
+                        <div style="text-align:center; padding:0.7rem; background:var(--bg-card-hover); border-radius:var(--radius-sm); border:1px solid var(--accent-emerald);">
+                            <div style="font-size:0.7rem; color:var(--text-tertiary)">TOTAL</div>
+                            <div style="font-size:1.3rem; font-weight:700; color:var(--accent-emerald)">${fmtPct(stats.totalUptimePercent)}</div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom:1rem;">${sensorRows}</div>
+                    <div>
+                        <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:0.5rem;">Downtime Events</div>
+                        <div style="max-height: 200px; overflow-y: auto;">${eventRows}</div>
+                    </div>
+                    <div style="margin-top:0.8rem; font-size:0.7rem; color:var(--text-tertiary); text-align:center;">${stats.totalMinutes || 0} minutes monitored</div>
+                `;
+            }
+
             function renderChart(data, metric, period = 'day') {
-                const ctx = document.getElementById('modalChart').getContext('2d');
+                const chartEl = document.getElementById('modalChart');
+                const hwContainer = document.getElementById('hardwareHistoryContainer');
+                if (hwContainer) hwContainer.style.display = 'none';
+                chartEl.style.display = '';
+                const ctx = chartEl.getContext('2d');
                 if (state.charts.modalChart) state.charts.modalChart.destroy();
 
                 const colors = {

@@ -10,7 +10,7 @@ session management, data insertion, and querying.
 from datetime import datetime, timezone, timedelta
 import time
 from typing import List, Optional, Dict, Any
-from sqlalchemy import create_engine, Column, Integer, Float, DateTime, String, Index
+from sqlalchemy import create_engine, Column, Integer, Float, DateTime, String, Index, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.sql import func
@@ -1620,6 +1620,118 @@ class DatabaseManager:
             self.logger.error(f"Error getting daily statistics for {year}-{month}-{day}: {e}")
             return {"count": 0, "average": 0, "minimum": 0, "maximum": 0, "year": year, "month": month, "day": day}
 
+    def add_heartbeat(self, bm280_up: bool, mq135_up: bool, esp32cam_up: bool) -> Optional['SystemHeartbeat']:
+        """Records a system heartbeat for the current minute."""
+        try:
+            with self.get_session() as session:
+                now = datetime.now(timezone.utc)
+                reading = SystemHeartbeat(
+                    timestamp=now,
+                    timestamp_unix=now.timestamp(),
+                    bm280_up=bool(bm280_up),
+                    mq135_up=bool(mq135_up),
+                    esp32cam_up=bool(esp32cam_up),
+                )
+                session.add(reading)
+                session.commit()
+                session.refresh(reading)
+                return reading
+        except Exception as e:
+            self.logger.error(f"Error adding heartbeat: {e}")
+            return None
+
+    def get_heartbeats_by_range(self, hours_back: int = 24) -> List['SystemHeartbeat']:
+        """Retrieves heartbeats within the last N hours, oldest first."""
+        try:
+            with self.get_session() as session:
+                cutoff = datetime.now(timezone.utc) - timedelta(hours=hours_back)
+                return session.query(SystemHeartbeat).filter(
+                    SystemHeartbeat.timestamp >= cutoff
+                ).order_by(SystemHeartbeat.timestamp.asc()).all()
+        except Exception as e:
+            self.logger.error(f"Error getting heartbeats: {e}")
+            return []
+
+    def get_uptime_stats(self, hours_back: int = 24) -> Dict[str, Any]:
+        """Calculates uptime percentages per sensor and overall."""
+        try:
+            heartbeats = self.get_heartbeats_by_range(hours_back)
+            total = len(heartbeats)
+            if total == 0:
+                return {
+                    'hours_back': hours_back,
+                    'bm280_uptime_percent': 0.0,
+                    'mq135_uptime_percent': 0.0,
+                    'esp32cam_uptime_percent': 0.0,
+                    'total_uptime_percent': 0.0,
+                    'total_minutes': 0,
+                }
+            bm280 = sum(1 for h in heartbeats if h.bm280_up)
+            mq135 = sum(1 for h in heartbeats if h.mq135_up)
+            esp = sum(1 for h in heartbeats if h.esp32cam_up)
+            all_up = sum(1 for h in heartbeats if h.bm280_up and h.mq135_up and h.esp32cam_up)
+            return {
+                'hours_back': hours_back,
+                'bm280_uptime_percent': round(100.0 * bm280 / total, 2),
+                'mq135_uptime_percent': round(100.0 * mq135 / total, 2),
+                'esp32cam_uptime_percent': round(100.0 * esp / total, 2),
+                'total_uptime_percent': round(100.0 * all_up / total, 2),
+                'total_minutes': total,
+            }
+        except Exception as e:
+            self.logger.error(f"Error computing uptime stats: {e}")
+            return {
+                'hours_back': hours_back,
+                'bm280_uptime_percent': 0.0,
+                'mq135_uptime_percent': 0.0,
+                'esp32cam_uptime_percent': 0.0,
+                'total_uptime_percent': 0.0,
+                'total_minutes': 0,
+            }
+
+    def get_downtime_events(self, hours_back: int = 24) -> List[Dict[str, Any]]:
+        """Collapses consecutive `false` heartbeats into downtime events per sensor."""
+        try:
+            heartbeats = self.get_heartbeats_by_range(hours_back)
+            events = []
+            sensors = [('bm280', 'bm280_up'), ('mq135', 'mq135_up'), ('esp32cam', 'esp32cam_up')]
+
+            for sensor_name, attr in sensors:
+                in_down = False
+                start_ts = None
+                last_ts = None
+                for h in heartbeats:
+                    up = getattr(h, attr)
+                    if not up and not in_down:
+                        in_down = True
+                        start_ts = h.timestamp
+                        last_ts = h.timestamp
+                    elif not up and in_down:
+                        last_ts = h.timestamp
+                    elif up and in_down:
+                        events.append({
+                            'sensor': sensor_name,
+                            'start_time': start_ts.isoformat() if start_ts else None,
+                            'end_time': last_ts.isoformat() if last_ts else None,
+                            'duration_seconds': int((last_ts - start_ts).total_seconds()) + 60 if start_ts and last_ts else 60,
+                        })
+                        in_down = False
+                        start_ts = None
+                        last_ts = None
+                if in_down and start_ts and last_ts:
+                    events.append({
+                        'sensor': sensor_name,
+                        'start_time': start_ts.isoformat(),
+                        'end_time': last_ts.isoformat(),
+                        'duration_seconds': int((last_ts - start_ts).total_seconds()) + 60,
+                    })
+
+            events.sort(key=lambda e: e['start_time'] or '', reverse=True)
+            return events
+        except Exception as e:
+            self.logger.error(f"Error computing downtime events: {e}")
+            return []
+
 # Global database instance
 
 db = DatabaseManager()
@@ -1788,6 +1900,33 @@ class WeatherReading(Base):
             'timestamp_unix': self.timestamp_unix,
             'sensor_type': self.sensor_type,
             'sensor_id': self.sensor_id
+        }
+
+
+class SystemHeartbeat(Base):
+    """SQLAlchemy model for storing per-minute system health heartbeats."""
+
+    __tablename__ = 'system_heartbeat'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    timestamp = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+    timestamp_unix = Column(Float, nullable=False, default=lambda: time.time())
+    bm280_up = Column(Boolean, nullable=False, default=False)
+    mq135_up = Column(Boolean, nullable=False, default=False)
+    esp32cam_up = Column(Boolean, nullable=False, default=False)
+
+    __table_args__ = (
+        Index('idx_heartbeat_timestamp', 'timestamp'),
+    )
+
+    def to_dict(self) -> dict:
+        return {
+            'id': self.id,
+            'timestamp': self.timestamp.isoformat() if self.timestamp else None,
+            'timestamp_unix': self.timestamp_unix,
+            'bm280_up': bool(self.bm280_up),
+            'mq135_up': bool(self.mq135_up),
+            'esp32cam_up': bool(self.esp32cam_up),
         }
 
 def init_database(database_url: Optional[str] = None):
