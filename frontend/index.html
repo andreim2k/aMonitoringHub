@@ -663,22 +663,17 @@
                 <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem;">
                         <span style="color: var(--text-secondary)">BM280</span>
-                        <span style="display: flex; align-items: center; gap: 0.5rem;">
-                            <i data-lucide="rotate-cw" style="width: 12px; height: 12px; color: var(--text-tertiary);" title="Auto-refresh"></i>
-                            <span id="bm280Status" class="val-ok">Online</span>
-                        </span>
+                        <span id="bm280Status" class="val-ok">Online</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem;">
                         <span style="color: var(--text-secondary)">MQ135</span>
-                        <span style="display: flex; align-items: center; gap: 0.5rem;">
-                            <i data-lucide="rotate-cw" style="width: 12px; height: 12px; color: var(--text-tertiary);" title="Auto-refresh"></i>
-                            <span id="mq135Status" class="val-ok">Online</span>
-                        </span>
+                        <span id="mq135Status" class="val-ok">Online</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem;">
                         <span style="color: var(--text-secondary)">ESP32-CAM</span>
-                        <span style="display: flex; align-items: center; gap: 0.5rem;">
-                            <i id="restartCountdown" data-lucide="rotate-cw" style="width: 12px; height: 12px; color: var(--accent-amber);" title="Restart in --:--:--"></i>
+                        <span style="display: flex; align-items: center; gap: 0.4rem;">
+                            <i data-lucide="rotate-cw" style="width: 12px; height: 12px; color: var(--accent-amber);"></i>
+                            <span id="restartCountdown" class="text-mono" style="font-size: 0.65rem; color: var(--accent-amber);">--:--:--</span>
                             <span id="espStatus" class="val-ok">Active</span>
                         </span>
                     </div>
@@ -1585,7 +1580,7 @@
                 const seconds = Math.floor((timeUntilRestart % 60000) / 1000);
 
                 const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-                countdownEl.setAttribute('title', `Restart in ${timeStr}`);
+                countdownEl.textContent = timeStr;
             }
 
             return {
