@@ -673,6 +673,9 @@
                         <span style="color: var(--text-secondary)">ESP32-CAM</span>
                         <span id="espStatus" class="val-ok">Active</span>
                     </div>
+                    <div id="restartCountdown" class="text-mono" style="font-size: 0.65rem; color: var(--accent-amber); text-align: right; margin-top: -0.2rem;">
+                        Restart in --:--:--
+                    </div>
                 </div>
             </section>
 
@@ -691,9 +694,6 @@
                         <div class="card-subtext">Total kWh recorded today</div>
                         <div id="meterLastUpdate" class="text-mono" style="font-size: 0.65rem; color: var(--text-tertiary); margin-top: 1rem;">
                             Updated --:--:--
-                        </div>
-                        <div id="restartCountdown" class="text-mono" style="font-size: 0.65rem; color: var(--accent-amber); margin-top: 0.5rem;">
-                            Restart in --:--:--
                         </div>
                     </div>
 
@@ -1359,14 +1359,23 @@
 
                 const eventRows = events.length === 0
                     ? `<div style="color:var(--text-tertiary); font-size:0.85rem; padding:0.5rem 0;">No downtime events in this period.</div>`
-                    : events.slice(0, 50).map(e => {
+                    : events.slice(0, 100).map(e => {
                         const start = e.startTime ? new Date(e.startTime) : null;
                         const end = e.endTime ? new Date(e.endTime) : null;
-                        const fmt = (d) => d ? d.toLocaleString('en-GB', { timeZone: 'Europe/Bucharest', day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : '--';
+                        const fmt = (d) => d ? d.toLocaleString('en-GB', { timeZone: 'Europe/Bucharest', day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false }) : '--';
                         const mins = Math.round((e.durationSeconds || 0) / 60);
-                        return `<div style="display:flex; justify-content:space-between; padding:0.3rem 0; border-bottom:1px solid var(--border); font-size:0.8rem;">
-                            <span><strong style="color:var(--accent-rose)">${e.sensor.toUpperCase()}</strong> down</span>
-                            <span style="color:var(--text-tertiary)">${fmt(start)} → ${fmt(end)} (${mins} min)</span>
+                        const isHub = e.sensor === 'hub';
+                        const sensorLabel = isHub ? 'HUB OFFLINE' : `${e.sensor.toUpperCase()} down`;
+                        const sensorColor = isHub ? 'var(--accent-amber)' : 'var(--accent-rose)';
+                        return `<div style="padding:0.5rem 0.6rem; margin-bottom:0.3rem; border-left:3px solid ${sensorColor}; background:var(--bg-card-hover); border-radius:4px; font-size:0.8rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.2rem;">
+                                <strong style="color:${sensorColor}">${sensorLabel}</strong>
+                                <span style="color:var(--text-tertiary); font-size:0.75rem;">${mins} min</span>
+                            </div>
+                            <div style="display:flex; flex-direction:column; gap:0.1rem; color:var(--text-secondary); font-size:0.75rem;">
+                                <div><span style="color:var(--text-tertiary)">From:</span> ${fmt(start)}</div>
+                                <div><span style="color:var(--text-tertiary)">To:&nbsp;&nbsp;</span> ${fmt(end)}</div>
+                            </div>
                         </div>`;
                     }).join('');
 

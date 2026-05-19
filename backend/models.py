@@ -1690,7 +1690,11 @@ class DatabaseManager:
             }
 
     def get_downtime_events(self, hours_back: int = 24) -> List[Dict[str, Any]]:
-        """Collapses consecutive `false` heartbeats into downtime events per sensor."""
+        """Collapses consecutive `false` heartbeats into downtime events per sensor.
+
+        Also detects gaps > 90s between heartbeats as 'hub' downtime
+        (the hub itself was offline — no power, no process, etc.).
+        """
         try:
             heartbeats = self.get_heartbeats_by_range(hours_back)
             events = []
@@ -1724,6 +1728,17 @@ class DatabaseManager:
                         'start_time': start_ts.isoformat(),
                         'end_time': last_ts.isoformat(),
                         'duration_seconds': int((last_ts - start_ts).total_seconds()) + 60,
+                    })
+
+            # Detect gaps between consecutive heartbeats > 90s => hub was down
+            for prev, curr in zip(heartbeats, heartbeats[1:]):
+                gap = (curr.timestamp - prev.timestamp).total_seconds()
+                if gap > 90:
+                    events.append({
+                        'sensor': 'hub',
+                        'start_time': prev.timestamp.isoformat(),
+                        'end_time': curr.timestamp.isoformat(),
+                        'duration_seconds': int(gap),
                     })
 
             events.sort(key=lambda e: e['start_time'] or '', reverse=True)
