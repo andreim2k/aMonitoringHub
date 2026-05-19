@@ -658,7 +658,7 @@
             <section class="bento-card" id="hardwareCard" onclick="app.showHistory('hardware')" style="cursor: pointer;">
                 <div class="card-label">
                     <i data-lucide="cpu"></i>
-                    Hardware Hub
+                    System Health
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem;">
@@ -1247,7 +1247,7 @@
                     co2: 'Air Quality Trends',
                     meter: 'Power Consumption',
                     weather: 'Weather Condition History',
-                    hardware: 'System Health History'
+                    hardware: 'System Health'
                 };
                 
                 title.textContent = titles[metric] || 'Metric History';
@@ -1381,22 +1381,22 @@
                     }).join('');
 
                 container.innerHTML = `
-                    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:0.8rem; margin-bottom:1.2rem;">
-                        <div style="text-align:center; padding:0.7rem; background:var(--bg-card-hover); border-radius:var(--radius-sm);">
-                            <div style="font-size:0.7rem; color:var(--text-tertiary)">BM280</div>
-                            <div style="font-size:1.3rem; font-weight:700;">${fmtPct(stats.bm280UptimePercent)}</div>
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(85px, 1fr)); gap:0.5rem; margin-bottom:1.2rem; width:100%;">
+                        <div style="text-align:center; padding:0.6rem 0.4rem; background:var(--bg-card-hover); border-radius:var(--radius-sm); min-width:0;">
+                            <div style="font-size:0.65rem; color:var(--text-tertiary); white-space:nowrap;">BM280</div>
+                            <div style="font-size:1.1rem; font-weight:700; white-space:nowrap;">${fmtPct(stats.bm280UptimePercent)}</div>
                         </div>
-                        <div style="text-align:center; padding:0.7rem; background:var(--bg-card-hover); border-radius:var(--radius-sm);">
-                            <div style="font-size:0.7rem; color:var(--text-tertiary)">MQ135</div>
-                            <div style="font-size:1.3rem; font-weight:700;">${fmtPct(stats.mq135UptimePercent)}</div>
+                        <div style="text-align:center; padding:0.6rem 0.4rem; background:var(--bg-card-hover); border-radius:var(--radius-sm); min-width:0;">
+                            <div style="font-size:0.65rem; color:var(--text-tertiary); white-space:nowrap;">MQ135</div>
+                            <div style="font-size:1.1rem; font-weight:700; white-space:nowrap;">${fmtPct(stats.mq135UptimePercent)}</div>
                         </div>
-                        <div style="text-align:center; padding:0.7rem; background:var(--bg-card-hover); border-radius:var(--radius-sm);">
-                            <div style="font-size:0.7rem; color:var(--text-tertiary)">ESP32-CAM</div>
-                            <div style="font-size:1.3rem; font-weight:700;">${fmtPct(stats.esp32camUptimePercent)}</div>
+                        <div style="text-align:center; padding:0.6rem 0.4rem; background:var(--bg-card-hover); border-radius:var(--radius-sm); min-width:0;">
+                            <div style="font-size:0.65rem; color:var(--text-tertiary); white-space:nowrap;">ESP32-CAM</div>
+                            <div style="font-size:1.1rem; font-weight:700; white-space:nowrap;">${fmtPct(stats.esp32camUptimePercent)}</div>
                         </div>
-                        <div style="text-align:center; padding:0.7rem; background:var(--bg-card-hover); border-radius:var(--radius-sm); border:1px solid var(--accent-emerald);">
-                            <div style="font-size:0.7rem; color:var(--text-tertiary)">TOTAL</div>
-                            <div style="font-size:1.3rem; font-weight:700; color:var(--accent-emerald)">${fmtPct(stats.totalUptimePercent)}</div>
+                        <div style="text-align:center; padding:0.6rem 0.4rem; background:var(--bg-card-hover); border-radius:var(--radius-sm); border:1px solid var(--accent-emerald); min-width:0;">
+                            <div style="font-size:0.65rem; color:var(--text-tertiary); white-space:nowrap;">TOTAL</div>
+                            <div style="font-size:1.1rem; font-weight:700; color:var(--accent-emerald); white-space:nowrap;">${fmtPct(stats.totalUptimePercent)}</div>
                         </div>
                     </div>
                     <div style="margin-bottom:1rem;">${sensorRows}</div>
