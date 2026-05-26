@@ -1259,8 +1259,6 @@
             }
 
             function closeModal() {
-                const tip = document.getElementById('uptimeTip');
-                if (tip) tip.style.display = 'none';
                 gsap.to('.modal', { y: 20, opacity: 0, duration: 0.3, onComplete: () => {
                     document.getElementById('historyModal').style.display = 'none';
                 }});
@@ -1320,49 +1318,50 @@
             }
 
             function renderHardwareHistory(data, period) {
-                const stats = data.uptimeStats || {};
+                const stats  = data.uptimeStats || {};
                 const events = data.downtimeEvents || [];
-                const beats = (data.systemHealthHistory || []).sort((a, b) => a.timestampUnix - b.timestampUnix);
+                const beats  = (data.systemHealthHistory || []).sort((a, b) => a.timestampUnix - b.timestampUnix);
 
+                // Hide the normal 400px chart wrapper; we take over the space ourselves
                 const chartEl = document.getElementById('modalChart');
                 if (state.charts.modalChart) { state.charts.modalChart.destroy(); state.charts.modalChart = null; }
-                chartEl.style.display = 'none';
+                chartEl.parentElement.style.display = 'none';
 
                 let container = document.getElementById('hardwareHistoryContainer');
                 if (!container) {
                     container = document.createElement('div');
                     container.id = 'hardwareHistoryContainer';
-                    chartEl.parentNode.insertBefore(container, chartEl);
+                    chartEl.parentNode.insertBefore(container, chartEl.parentElement);
                 }
                 container.style.display = 'block';
 
-                const fmtPct = (v) => (v == null ? '--' : `${v.toFixed(1)}%`);
+                const fmtPct  = (v) => v == null ? '--' : `${v.toFixed(1)}%`;
+                const pctClr  = (v) => v == null ? 'var(--text-primary)' : v >= 99 ? 'var(--accent-emerald)' : v >= 90 ? 'var(--accent-amber)' : 'var(--accent-rose)';
+                const fmtDt   = (d) => d ? d.toLocaleString('en-GB', { timeZone: 'Europe/Bucharest', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) : '--';
+
                 const sensors = [
-                    { key: 'bm280Up',    label: 'BM280',     pct: stats.bm280UptimePercent },
-                    { key: 'mq135Up',    label: 'MQ135',     pct: stats.mq135UptimePercent },
-                    { key: 'esp32camUp', label: 'ESP32-CAM', pct: stats.esp32camUptimePercent }
+                    { key: 'bm280Up',    label: 'BM280',     pct: stats.bm280UptimePercent,    color: '#38BDF8', up: 6,   down: 5,   mid: 5.5 },
+                    { key: 'mq135Up',    label: 'MQ135',     pct: stats.mq135UptimePercent,    color: '#F59E0B', up: 3.5, down: 2.5, mid: 3.0 },
+                    { key: 'esp32camUp', label: 'ESP32-CAM', pct: stats.esp32camUptimePercent, color: '#A855F7', up: 1,   down: 0,   mid: 0.5 }
                 ];
 
-                const pctColor = (v) => v == null ? 'var(--text-primary)' : v >= 99 ? 'var(--accent-emerald)' : v >= 90 ? 'var(--accent-amber)' : 'var(--accent-rose)';
-
-                const fmtDt = (d) => d ? d.toLocaleString('en-GB', { timeZone: 'Europe/Bucharest', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) : '--';
                 const eventRows = events.length === 0
-                    ? `<div style="color:var(--text-tertiary); font-size:0.85rem; padding:0.5rem 0;">No downtime events in this period.</div>`
+                    ? `<div style="color:var(--text-tertiary);font-size:0.85rem;padding:0.5rem 0;">No downtime events in this period.</div>`
                     : events.slice(0, 100).map(e => {
-                        const start = e.startTime ? new Date(e.startTime) : null;
-                        const end   = e.endTime   ? new Date(e.endTime)   : null;
-                        const mins = Math.round((e.durationSeconds || 0) / 60);
-                        const secs = (e.durationSeconds || 0) % 60;
-                        const dur  = mins >= 60 ? `${Math.floor(mins/60)}h ${mins%60}m` : mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
-                        const isHub = e.sensor === 'hub';
-                        const sensorLabel = isHub ? 'HUB OFFLINE' : `${e.sensor.toUpperCase()} down`;
-                        const sensorColor = isHub ? 'var(--accent-amber)' : 'var(--accent-rose)';
-                        return `<div style="padding:0.5rem 0.7rem; margin-bottom:0.35rem; border-left:3px solid ${sensorColor}; background:var(--bg-card-hover); border-radius:4px; font-size:0.8rem;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.2rem;">
-                                <strong style="color:${sensorColor}">${sensorLabel}</strong>
-                                <span style="color:var(--text-tertiary); font-size:0.72rem; font-family:monospace;">${dur}</span>
+                        const start  = e.startTime ? new Date(e.startTime) : null;
+                        const end    = e.endTime   ? new Date(e.endTime)   : null;
+                        const mins   = Math.floor((e.durationSeconds || 0) / 60);
+                        const secs   = (e.durationSeconds || 0) % 60;
+                        const dur    = mins >= 60 ? `${Math.floor(mins/60)}h ${mins%60}m` : mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+                        const isHub  = e.sensor === 'hub';
+                        const label  = isHub ? 'HUB OFFLINE' : `${e.sensor.toUpperCase()} down`;
+                        const color  = isHub ? 'var(--accent-amber)' : 'var(--accent-rose)';
+                        return `<div style="padding:0.5rem 0.7rem;margin-bottom:0.35rem;border-left:3px solid ${color};background:var(--bg-card-hover);border-radius:4px;font-size:0.8rem;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.15rem;">
+                                <strong style="color:${color}">${label}</strong>
+                                <span style="color:var(--text-tertiary);font-size:0.72rem;font-family:monospace;">${dur}</span>
                             </div>
-                            <div style="color:var(--text-secondary); font-size:0.73rem; font-family:monospace;">
+                            <div style="color:var(--text-secondary);font-size:0.73rem;font-family:monospace;">
                                 <span style="color:var(--text-tertiary)">↓</span> ${fmtDt(start)}<br>
                                 <span style="color:var(--text-tertiary)">↑</span> ${fmtDt(end)}
                             </div>
@@ -1370,182 +1369,104 @@
                     }).join('');
 
                 container.innerHTML = `
-                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(85px, 1fr)); gap:0.5rem; margin-bottom:1.2rem; width:100%;">
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(85px,1fr));gap:0.5rem;margin-bottom:1.2rem;width:100%;">
                         ${sensors.map(s => `
-                        <div style="text-align:center; padding:0.6rem 0.4rem; background:var(--bg-card-hover); border-radius:var(--radius-sm); min-width:0;">
-                            <div style="font-size:0.65rem; color:var(--text-tertiary); white-space:nowrap;">${s.label}</div>
-                            <div style="font-size:1.1rem; font-weight:700; white-space:nowrap; color:${pctColor(s.pct)}">${fmtPct(s.pct)}</div>
+                        <div style="text-align:center;padding:0.6rem 0.4rem;background:var(--bg-card-hover);border-radius:var(--radius-sm);min-width:0;">
+                            <div style="font-size:0.65rem;color:var(--text-tertiary);white-space:nowrap;">${s.label}</div>
+                            <div style="font-size:1.1rem;font-weight:700;white-space:nowrap;color:${pctClr(s.pct)}">${fmtPct(s.pct)}</div>
                         </div>`).join('')}
-                        <div style="text-align:center; padding:0.6rem 0.4rem; background:var(--bg-card-hover); border-radius:var(--radius-sm); border:1px solid var(--accent-emerald); min-width:0;">
-                            <div style="font-size:0.65rem; color:var(--text-tertiary); white-space:nowrap;">TOTAL</div>
-                            <div style="font-size:1.1rem; font-weight:700; color:var(--accent-emerald); white-space:nowrap;">${fmtPct(stats.totalUptimePercent)}</div>
+                        <div style="text-align:center;padding:0.6rem 0.4rem;background:var(--bg-card-hover);border-radius:var(--radius-sm);border:1px solid var(--accent-emerald);min-width:0;">
+                            <div style="font-size:0.65rem;color:var(--text-tertiary);white-space:nowrap;">TOTAL</div>
+                            <div style="font-size:1.1rem;font-weight:700;color:var(--accent-emerald);white-space:nowrap;">${fmtPct(stats.totalUptimePercent)}</div>
                         </div>
                     </div>
-                    <div style="font-size:0.75rem; color:var(--text-tertiary); margin-bottom:0.4rem; display:flex; justify-content:space-between;">
-                        <span>Timeline</span>
-                        <span>${stats.totalMinutes || 0} min monitored &nbsp; <span style="color:var(--accent-emerald)">■</span> Up &nbsp; <span style="color:var(--accent-rose)">■</span> Down</span>
-                    </div>
-                    <canvas id="uptimeTimeline" style="width:100%; display:block; cursor:crosshair; border-radius:4px;"></canvas>
+                    <div style="height:300px;width:100%;"><canvas id="hwChart"></canvas></div>
                     <div style="margin-top:1rem;">
-                        <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:0.4rem;">Downtime Events</div>
-                        <div style="max-height:220px; overflow-y:auto;">${eventRows}</div>
+                        <div style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:0.4rem;">Downtime Events
+                            <span style="color:var(--text-tertiary);font-size:0.7rem;margin-left:0.5rem;">${stats.totalMinutes || 0} min monitored</span>
+                        </div>
+                        <div style="max-height:220px;overflow-y:auto;">${eventRows}</div>
                     </div>
                 `;
 
-                requestAnimationFrame(() => drawUptimeTimeline(beats, sensors));
-            }
+                const hwCtx = document.getElementById('hwChart').getContext('2d');
 
-            function drawUptimeTimeline(beats, sensors) {
-                const canvas = document.getElementById('uptimeTimeline');
-                if (!canvas) return;
+                const formatLabel = (ts) => {
+                    const d = new Date(ts * 1000);
+                    if (period === 'day')   return d.toLocaleTimeString('en-GB', { timeZone: 'Europe/Bucharest', hour: '2-digit', minute: '2-digit', hour12: false });
+                    if (period === 'week')  return d.toLocaleDateString('en-GB', { timeZone: 'Europe/Bucharest', weekday: 'short', month: 'short', day: 'numeric' });
+                    return d.toLocaleDateString('en-GB', { timeZone: 'Europe/Bucharest', month: 'short', day: 'numeric' });
+                };
 
-                const dpr     = window.devicePixelRatio || 1;
-                const W       = canvas.offsetWidth;
-                const LANE_H  = 26;
-                const LANE_GAP = 8;
-                const LABEL_W = 74;
-                const AXIS_H  = 26;
-                const TOP_PAD = 6;
-                const H = TOP_PAD + sensors.length * (LANE_H + LANE_GAP) - LANE_GAP + AXIS_H + 4;
+                const datasets = sensors.map(s => ({
+                    label: s.label,
+                    data:  beats.map(b => b[s.key] ? s.up : s.down),
+                    stepped: 'before',
+                    borderColor: s.color,
+                    backgroundColor: s.color + '33',
+                    fill: { target: { value: s.mid }, above: s.color + '33', below: 'rgba(244,63,94,0.18)' },
+                    pointRadius: 0,
+                    borderWidth: 2,
+                    tension: 0
+                }));
 
-                canvas.style.height = H + 'px';
-                canvas.width  = W * dpr;
-                canvas.height = H * dpr;
-                const ctx = canvas.getContext('2d');
-                ctx.scale(dpr, dpr);
-                ctx.clearRect(0, 0, W, H);
-
-                if (!beats.length) {
-                    ctx.fillStyle = '#64748b';
-                    ctx.font = '12px monospace';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('No heartbeat data recorded yet.', W / 2, H / 2);
-                    return;
-                }
-
-                const tMin   = beats[0].timestampUnix;
-                const tMax   = beats[beats.length - 1].timestampUnix;
-                const tRange = tMax - tMin || 1;
-                const chartW = W - LABEL_W;
-                const xOf    = (t) => LABEL_W + ((t - tMin) / tRange) * chartW;
-
-                sensors.forEach((sensor, i) => {
-                    const y = TOP_PAD + i * (LANE_H + LANE_GAP);
-
-                    // Base (all-down background)
-                    ctx.fillStyle = 'rgba(244,63,94,0.12)';
-                    ctx.fillRect(LABEL_W, y, chartW, LANE_H);
-
-                    // Segments
-                    for (let j = 0; j < beats.length; j++) {
-                        const b  = beats[j];
-                        const x1 = xOf(b.timestampUnix);
-                        const x2 = j < beats.length - 1 ? xOf(beats[j + 1].timestampUnix) : LABEL_W + chartW;
-                        ctx.fillStyle = b[sensor.key] ? 'rgba(16,185,129,0.82)' : 'rgba(244,63,94,0.72)';
-                        ctx.fillRect(x1, y, Math.max(1.5, x2 - x1 - 0.5), LANE_H);
+                state.charts.modalChart = new Chart(hwCtx, {
+                    type: 'line',
+                    data: {
+                        labels:   beats.map(b => formatLabel(b.timestampUnix)),
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                labels: { color: '#A1A1AA', font: { size: 10, family: 'Geist Sans' }, usePointStyle: true }
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                callbacks: {
+                                    label: (ctx) => {
+                                        const s = sensors[ctx.datasetIndex];
+                                        const up = ctx.parsed.y >= s.mid;
+                                        return ` ${ctx.dataset.label}: ${up ? '↑ UP' : '↓ DOWN'}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#52525B', font: { size: 10 }, maxTicksLimit: 8, maxRotation: 0 }
+                            },
+                            y: {
+                                grid: { color: 'rgba(255,255,255,0.03)' },
+                                min: -0.4,
+                                max: 6.9,
+                                ticks: {
+                                    color: '#52525B',
+                                    font: { size: 9 },
+                                    callback: (v) => {
+                                        if (Math.abs(v - 0.5) < 0.15) return 'ESP32';
+                                        if (Math.abs(v - 3.0) < 0.15) return 'MQ135';
+                                        if (Math.abs(v - 5.5) < 0.15) return 'BM280';
+                                        return '';
+                                    },
+                                    stepSize: 0.5
+                                }
+                            }
+                        }
                     }
-
-                    // Lane border
-                    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-                    ctx.lineWidth = 0.5;
-                    ctx.strokeRect(LABEL_W, y, chartW, LANE_H);
-
-                    // Sensor label (left)
-                    ctx.fillStyle = '#94a3b8';
-                    ctx.font = '11px monospace';
-                    ctx.textAlign = 'right';
-                    ctx.fillText(sensor.label, LABEL_W - 8, y + LANE_H / 2 + 4);
-
-                    // Uptime % (right edge, inside label area)
-                    const pct = sensor.pct != null ? sensor.pct.toFixed(1) + '%' : '--';
-                    const pctClr = sensor.pct == null ? '#94a3b8' : sensor.pct >= 99 ? '#10b981' : sensor.pct >= 90 ? '#f59e0b' : '#f43f5e';
-                    ctx.fillStyle = pctClr;
-                    ctx.font = 'bold 9px monospace';
-                    ctx.textAlign = 'right';
-                    ctx.fillText(pct, LABEL_W - 8, y + LANE_H / 2 - 4);
                 });
-
-                // Time axis line
-                const axisY = TOP_PAD + sensors.length * (LANE_H + LANE_GAP) - LANE_GAP + 4;
-                ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.moveTo(LABEL_W, axisY);
-                ctx.lineTo(W, axisY);
-                ctx.stroke();
-
-                // Time labels (~5 ticks)
-                const NUM_TICKS = Math.min(5, beats.length);
-                for (let i = 0; i <= NUM_TICKS; i++) {
-                    const t  = tMin + (tRange * i / NUM_TICKS);
-                    const x  = xOf(t);
-                    const dt = new Date(t * 1000);
-                    // show date if range > 6h
-                    const showDate = tRange > 6 * 3600;
-                    const label = showDate
-                        ? dt.toLocaleString('en-GB', { timeZone: 'Europe/Bucharest', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false })
-                        : dt.toLocaleTimeString('en-GB', { timeZone: 'Europe/Bucharest', hour: '2-digit', minute: '2-digit', hour12: false });
-                    const align = i === 0 ? 'left' : i === NUM_TICKS ? 'right' : 'center';
-                    const clampX = Math.max(LABEL_W + 2, Math.min(W - 2, x));
-                    ctx.fillStyle = '#64748b';
-                    ctx.font = '9px monospace';
-                    ctx.textAlign = align;
-                    ctx.fillText(label, clampX, axisY + 14);
-
-                    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-                    ctx.lineWidth = 0.5;
-                    ctx.beginPath();
-                    ctx.moveTo(x, axisY);
-                    ctx.lineTo(x, axisY + 4);
-                    ctx.stroke();
-                }
-
-                // Hover tooltip
-                const LANE_H_GAP = LANE_H + LANE_GAP;
-                canvas.onmousemove = (e) => {
-                    const rect = canvas.getBoundingClientRect();
-                    const mx   = e.clientX - rect.left;
-                    if (mx < LABEL_W || mx > W) { canvas.onmouseleave(); return; }
-
-                    const tHover = tMin + ((mx - LABEL_W) / chartW) * tRange;
-                    const beat   = beats.reduce((best, b) =>
-                        Math.abs(b.timestampUnix - tHover) < Math.abs(best.timestampUnix - tHover) ? b : best, beats[0]);
-
-                    let tip = document.getElementById('uptimeTip');
-                    if (!tip) {
-                        tip = document.createElement('div');
-                        tip.id = 'uptimeTip';
-                        tip.style.cssText = 'position:fixed;background:rgba(10,18,35,0.97);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:7px 10px;font-size:11px;font-family:monospace;pointer-events:none;z-index:9999;color:#e2e8f0;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,0.5);';
-                        document.body.appendChild(tip);
-                    }
-                    const dt = new Date(beat.timestampUnix * 1000).toLocaleString('en-GB', {
-                        timeZone: 'Europe/Bucharest', day: '2-digit', month: 'short',
-                        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-                    });
-                    const dot = (up) => `<span style="color:${up ? '#10b981' : '#f43f5e'}">●</span> ${up ? 'UP' : 'DOWN'}`;
-                    tip.innerHTML = `<div style="color:#64748b;margin-bottom:4px;">${dt}</div>
-                        <div>BM280 &nbsp;&nbsp;&nbsp; ${dot(beat.bm280Up)}</div>
-                        <div>MQ135 &nbsp;&nbsp;&nbsp; ${dot(beat.mq135Up)}</div>
-                        <div>ESP32-CAM ${dot(beat.esp32camUp)}</div>`;
-                    tip.style.left = (e.clientX + 14) + 'px';
-                    tip.style.top  = (e.clientY - 52) + 'px';
-                    tip.style.display = 'block';
-                };
-                canvas.onmouseleave = () => {
-                    const tip = document.getElementById('uptimeTip');
-                    if (tip) tip.style.display = 'none';
-                };
-
-                // Redraw on resize
-                const ro = new ResizeObserver(() => drawUptimeTimeline(beats, sensors));
-                ro.observe(canvas);
-                canvas._ro = ro;
             }
 
             function renderChart(data, metric, period = 'day') {
                 const chartEl = document.getElementById('modalChart');
                 const hwContainer = document.getElementById('hardwareHistoryContainer');
                 if (hwContainer) hwContainer.style.display = 'none';
+                chartEl.parentElement.style.display = '';
                 chartEl.style.display = '';
                 const ctx = chartEl.getContext('2d');
                 if (state.charts.modalChart) state.charts.modalChart.destroy();
