@@ -1325,13 +1325,15 @@
                 // Hide the normal 400px chart wrapper; we take over the space ourselves
                 const chartEl = document.getElementById('modalChart');
                 if (state.charts.modalChart) { state.charts.modalChart.destroy(); state.charts.modalChart = null; }
-                chartEl.parentElement.style.display = 'none';
+                const chartWrapper = chartEl.parentElement; // the 400px div
+                chartWrapper.style.display = 'none';
 
                 let container = document.getElementById('hardwareHistoryContainer');
                 if (!container) {
                     container = document.createElement('div');
                     container.id = 'hardwareHistoryContainer';
-                    chartEl.parentNode.insertBefore(container, chartEl.parentElement);
+                    // insert as sibling BEFORE the 400px wrapper, inside .modal
+                    chartWrapper.parentNode.insertBefore(container, chartWrapper);
                 }
                 container.style.display = 'block';
 
