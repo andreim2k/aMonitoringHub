@@ -755,17 +755,17 @@
                 <canvas id="modalChart"></canvas>
             </div>
             
-            <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                <button class="btn-glass" onclick="app.updatePeriod('day')" title="Last 24 hours">
+            <div style="margin-top: 2rem; display: flex; gap: 0.5rem;">
+                <button class="btn-glass" onclick="app.updatePeriod('day')" title="Last 24 hours" style="flex:1; justify-content:center;">
                     <i data-lucide="clock" style="width: 14px;"></i> 24h
                 </button>
-                <button class="btn-glass" onclick="app.updatePeriod('week')" title="Last 7 days">
+                <button class="btn-glass" onclick="app.updatePeriod('week')" title="Last 7 days" style="flex:1; justify-content:center;">
                     <i data-lucide="calendar" style="width: 14px;"></i> 7d
                 </button>
-                <button class="btn-glass" onclick="app.updatePeriod('month')" title="Current month">
+                <button class="btn-glass" onclick="app.updatePeriod('month')" title="Current month" style="flex:1; justify-content:center;">
                     <i data-lucide="calendar-days" style="width: 14px;"></i> 1m
                 </button>
-                <button class="btn-glass" onclick="app.updatePeriod('year')" title="Current year">
+                <button class="btn-glass" onclick="app.updatePeriod('year')" title="Current year" style="flex:1; justify-content:center;">
                     <i data-lucide="calendar-range" style="width: 14px;"></i> 1y
                 </button>
             </div>
