@@ -1329,6 +1329,9 @@
                 chartWrapper.style.display = 'none';
 
                 let container = document.getElementById('hardwareHistoryContainer');
+                // remember active tab before wiping innerHTML
+                const prevPanel = document.getElementById('hwPanelIncidents');
+                const activeTab = prevPanel && prevPanel.style.display !== 'none' ? 'incidents' : 'overview';
                 if (!container) {
                     container = document.createElement('div');
                     container.id = 'hardwareHistoryContainer';
@@ -1475,6 +1478,9 @@
                         }
                     }
                 });
+
+                // restore whichever tab was active before the period refresh
+                if (activeTab === 'incidents') app.hwTab('incidents');
             }
 
             function renderChart(data, metric, period = 'day') {
