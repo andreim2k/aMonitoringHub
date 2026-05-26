@@ -1370,24 +1370,41 @@
                         </div>`;
                     }).join('');
 
+                const badgeStyle = events.length > 0
+                    ? `display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;margin-left:6px;border-radius:9px;font-size:0.65rem;font-weight:700;background:rgba(244,63,94,0.2);color:#f43f5e;`
+                    : '';
+
                 container.innerHTML = `
-                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(85px,1fr));gap:0.5rem;margin-bottom:1.2rem;width:100%;">
-                        ${sensors.map(s => `
-                        <div style="text-align:center;padding:0.6rem 0.4rem;background:var(--bg-card-hover);border-radius:var(--radius-sm);min-width:0;">
-                            <div style="font-size:0.65rem;color:var(--text-tertiary);white-space:nowrap;">${s.label}</div>
-                            <div style="font-size:1.1rem;font-weight:700;white-space:nowrap;color:${pctClr(s.pct)}">${fmtPct(s.pct)}</div>
-                        </div>`).join('')}
-                        <div style="text-align:center;padding:0.6rem 0.4rem;background:var(--bg-card-hover);border-radius:var(--radius-sm);border:1px solid var(--accent-emerald);min-width:0;">
-                            <div style="font-size:0.65rem;color:var(--text-tertiary);white-space:nowrap;">TOTAL</div>
-                            <div style="font-size:1.1rem;font-weight:700;color:var(--accent-emerald);white-space:nowrap;">${fmtPct(stats.totalUptimePercent)}</div>
-                        </div>
+                    <div style="display:flex;gap:0.4rem;margin-bottom:1.1rem;">
+                        <button id="hwTabOverview" onclick="app.hwTab('overview')"
+                            style="flex:1;padding:0.45rem 0.6rem;font-size:0.8rem;font-family:inherit;border-radius:var(--radius-sm);cursor:pointer;transition:all 0.15s;background:rgba(56,189,248,0.15);color:#38BDF8;border:1px solid rgba(56,189,248,0.3);">
+                            Overview
+                        </button>
+                        <button id="hwTabIncidents" onclick="app.hwTab('incidents')"
+                            style="flex:1;padding:0.45rem 0.6rem;font-size:0.8rem;font-family:inherit;border-radius:var(--radius-sm);cursor:pointer;transition:all 0.15s;background:var(--bg-card-hover);color:var(--text-secondary);border:1px solid transparent;">
+                            Incidents${events.length > 0 ? `<span style="${badgeStyle}">${events.length}</span>` : ''}
+                        </button>
                     </div>
-                    <div style="height:300px;width:100%;"><canvas id="hwChart"></canvas></div>
-                    <div style="margin-top:1rem;">
-                        <div style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:0.4rem;">Downtime Events
-                            <span style="color:var(--text-tertiary);font-size:0.7rem;margin-left:0.5rem;">${stats.totalMinutes || 0} min monitored</span>
+
+                    <div id="hwPanelOverview">
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(85px,1fr));gap:0.5rem;margin-bottom:1rem;width:100%;">
+                            ${sensors.map(s => `
+                            <div style="text-align:center;padding:0.6rem 0.4rem;background:var(--bg-card-hover);border-radius:var(--radius-sm);min-width:0;">
+                                <div style="font-size:0.65rem;color:var(--text-tertiary);white-space:nowrap;">${s.label}</div>
+                                <div style="font-size:1.1rem;font-weight:700;white-space:nowrap;color:${pctClr(s.pct)}">${fmtPct(s.pct)}</div>
+                            </div>`).join('')}
+                            <div style="text-align:center;padding:0.6rem 0.4rem;background:var(--bg-card-hover);border-radius:var(--radius-sm);border:1px solid var(--accent-emerald);min-width:0;">
+                                <div style="font-size:0.65rem;color:var(--text-tertiary);white-space:nowrap;">TOTAL</div>
+                                <div style="font-size:1.1rem;font-weight:700;color:var(--accent-emerald);white-space:nowrap;">${fmtPct(stats.totalUptimePercent)}</div>
+                            </div>
                         </div>
-                        <div style="max-height:220px;overflow-y:auto;">${eventRows}</div>
+                        <div style="height:300px;width:100%;"><canvas id="hwChart"></canvas></div>
+                        <div style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-tertiary);text-align:right;">${stats.totalMinutes || 0} min monitored</div>
+                    </div>
+
+                    <div id="hwPanelIncidents" style="display:none;">
+                        <div style="font-size:0.78rem;color:var(--text-tertiary);margin-bottom:0.6rem;">${stats.totalMinutes || 0} min monitored · ${events.length} event${events.length !== 1 ? 's' : ''}</div>
+                        <div style="overflow-y:auto;max-height:calc(90vh - 280px);">${eventRows}</div>
                     </div>
                 `;
 
@@ -1665,6 +1682,23 @@
                 },
                 showHistory,
                 closeModal,
+                hwTab: (tab) => {
+                    const overview  = document.getElementById('hwPanelOverview');
+                    const incidents = document.getElementById('hwPanelIncidents');
+                    const btnOv     = document.getElementById('hwTabOverview');
+                    const btnInc    = document.getElementById('hwTabIncidents');
+                    if (!overview || !incidents) return;
+                    const isOv = tab === 'overview';
+                    overview.style.display  = isOv ? '' : 'none';
+                    incidents.style.display = isOv ? 'none' : '';
+                    btnOv.style.background  = isOv ? 'rgba(56,189,248,0.15)' : 'var(--bg-card-hover)';
+                    btnOv.style.color       = isOv ? '#38BDF8' : 'var(--text-secondary)';
+                    btnOv.style.border      = isOv ? '1px solid rgba(56,189,248,0.3)' : '1px solid transparent';
+                    btnInc.style.background = isOv ? 'var(--bg-card-hover)' : 'rgba(56,189,248,0.15)';
+                    btnInc.style.color      = isOv ? 'var(--text-secondary)' : '#38BDF8';
+                    btnInc.style.border     = isOv ? '1px solid transparent' : '1px solid rgba(56,189,248,0.3)';
+                    if (isOv && state.charts.modalChart) state.charts.modalChart.resize();
+                },
                 updatePeriod: (p) => { state.currentPeriod = p; updateModalChart(); },
                 updateGain: (value) => {
                     state.cameraSettings.gain = parseInt(value);
