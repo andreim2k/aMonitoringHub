@@ -1393,10 +1393,6 @@
                                 <div style="font-size:0.65rem;color:var(--text-tertiary);white-space:nowrap;">${s.label}</div>
                                 <div style="font-size:1.1rem;font-weight:700;white-space:nowrap;color:${pctClr(s.pct)}">${fmtPct(s.pct)}</div>
                             </div>`).join('')}
-                            <div style="text-align:center;padding:0.6rem 0.4rem;background:var(--bg-card-hover);border-radius:var(--radius-sm);border:1px solid var(--accent-emerald);min-width:0;">
-                                <div style="font-size:0.65rem;color:var(--text-tertiary);white-space:nowrap;">TOTAL</div>
-                                <div style="font-size:1.1rem;font-weight:700;color:var(--accent-emerald);white-space:nowrap;">${fmtPct(stats.totalUptimePercent)}</div>
-                            </div>
                         </div>
                         <div style="height:300px;width:100%;"><canvas id="hwChart"></canvas></div>
                         <div style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-tertiary);text-align:right;">${stats.totalMinutes || 0} min monitored</div>
