@@ -344,6 +344,7 @@
         }
 
         .btn-glass:hover { background: rgba(255,255,255,0.1); }
+        .btn-glass-active { background: rgba(56,189,248,0.18) !important; border-color: rgba(56,189,248,0.45) !important; color: #38BDF8 !important; }
 
         /* Modal / Overlay */
         .overlay {
@@ -761,16 +762,16 @@
             </div>
             
             <div style="margin-top: 2rem; display: flex; gap: 0.5rem;">
-                <button class="btn-glass" onclick="app.updatePeriod('day')" title="Last 24 hours" style="flex:1; justify-content:center;">
+                <button id="periodBtn-day" class="btn-glass" onclick="app.updatePeriod('day')" title="Last 24 hours" style="flex:1; justify-content:center;">
                     <i data-lucide="clock" style="width: 14px;"></i> 24h
                 </button>
-                <button class="btn-glass" onclick="app.updatePeriod('week')" title="Last 7 days" style="flex:1; justify-content:center;">
+                <button id="periodBtn-week" class="btn-glass" onclick="app.updatePeriod('week')" title="Last 7 days" style="flex:1; justify-content:center;">
                     <i data-lucide="calendar" style="width: 14px;"></i> 7d
                 </button>
-                <button class="btn-glass" onclick="app.updatePeriod('month')" title="Current month" style="flex:1; justify-content:center;">
+                <button id="periodBtn-month" class="btn-glass" onclick="app.updatePeriod('month')" title="Current month" style="flex:1; justify-content:center;">
                     <i data-lucide="calendar-days" style="width: 14px;"></i> 1m
                 </button>
-                <button class="btn-glass" onclick="app.updatePeriod('year')" title="Current year" style="flex:1; justify-content:center;">
+                <button id="periodBtn-year" class="btn-glass" onclick="app.updatePeriod('year')" title="Current year" style="flex:1; justify-content:center;">
                     <i data-lucide="calendar-range" style="width: 14px;"></i> 1y
                 </button>
             </div>
@@ -1257,9 +1258,9 @@
                 
                 title.textContent = titles[metric] || 'Metric History';
                 modal.style.display = 'flex';
-                
+                syncPeriodButtons();
                 gsap.fromTo('.modal', { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: 'power2.out' });
-                
+
                 updateModalChart();
             }
 
@@ -1267,6 +1268,26 @@
                 gsap.to('.modal', { y: 20, opacity: 0, duration: 0.3, onComplete: () => {
                     document.getElementById('historyModal').style.display = 'none';
                 }});
+            }
+
+            function syncPeriodButtons() {
+                const p = state.currentPeriod;
+                ['day','week','month','year'].forEach(key => {
+                    const btn = document.getElementById('periodBtn-' + key);
+                    if (btn) btn.classList.toggle('btn-glass-active', key === p);
+                });
+            }
+
+            function fmtMonitored(minutes) {
+                if (!minutes) return '0 min';
+                const d = Math.floor(minutes / 1440);
+                const h = Math.floor((minutes % 1440) / 60);
+                const m = minutes % 60;
+                if (d > 0 && h > 0) return `${d}d ${h}h`;
+                if (d > 0)          return `${d}d`;
+                if (h > 0 && m > 0) return `${h}h ${m}m`;
+                if (h > 0)          return `${h}h`;
+                return `${m} min`;
             }
 
             async function updateModalChart() {
@@ -1396,11 +1417,11 @@
                             </div>`).join('')}
                         </div>
                         <div style="height:300px;width:100%;"><canvas id="hwChart"></canvas></div>
-                        <div style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-tertiary);text-align:right;">${stats.totalMinutes || 0} min monitored</div>
+                        <div style="margin-top:0.5rem;font-size:0.7rem;color:var(--text-tertiary);text-align:right;">${fmtMonitored(stats.totalMinutes)} monitored</div>
                     </div>
 
                     <div id="hwPanelIncidents" style="display:none;">
-                        <div style="font-size:0.78rem;color:var(--text-tertiary);margin-bottom:0.6rem;">${stats.totalMinutes || 0} min monitored · ${events.length} event${events.length !== 1 ? 's' : ''}</div>
+                        <div style="font-size:0.78rem;color:var(--text-tertiary);margin-bottom:0.6rem;">${fmtMonitored(stats.totalMinutes)} monitored · ${events.length} event${events.length !== 1 ? 's' : ''}</div>
                         <div style="overflow-y:auto;max-height:400px;padding-right:2px;">${eventRows}</div>
                     </div>
                 `;
@@ -1699,7 +1720,7 @@
                     btnInc.style.border     = isOv ? '1px solid transparent' : '1px solid rgba(56,189,248,0.3)';
                     if (isOv && state.charts.modalChart) state.charts.modalChart.resize();
                 },
-                updatePeriod: (p) => { state.currentPeriod = p; updateModalChart(); },
+                updatePeriod: (p) => { state.currentPeriod = p; syncPeriodButtons(); updateModalChart(); },
                 updateGain: (value) => {
                     state.cameraSettings.gain = parseInt(value);
                     document.getElementById('gainValue').textContent = value;
