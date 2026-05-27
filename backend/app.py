@@ -34,6 +34,14 @@ load_dotenv()
 # Helper to present timestamps in local system time
 from datetime import timezone as _tzmod, datetime as _dtmod
 
+def _thin(items: list, limit: int) -> list:
+    """Evenly downsample a list to at most `limit` items."""
+    if len(items) <= limit:
+        return items
+    step = len(items) / limit
+    return [items[int(i * step)] for i in range(limit)]
+
+
 def _to_local_iso_unix(dt: Optional[datetime]) -> Tuple[Optional[str], Optional[float]]:
     """Converts a datetime object to a local timezone ISO 8601 string and a Unix timestamp.
 
@@ -836,7 +844,8 @@ class Query(ObjectType):
                 readings = db.get_readings_by_year(year=now.year)
             else:
                 readings = db.get_recent_readings(limit=min(limit, 5000))
-            
+
+            readings = _thin(readings, limit)
             result = [
                 TemperatureReading(
                     id=reading.id,
@@ -966,15 +975,22 @@ class Query(ObjectType):
                     readings = db.get_humidity_readings_by_month(year, month, sensor_id=sensor_id)
                 else:
                     readings = db.get_humidity_readings_by_year(year, sensor_id=sensor_id)
-            elif range == 'recent':
-                readings = db.get_recent_humidity_readings(limit=limit, sensor_id=sensor_id)
-            elif range == 'daily':
-                readings = db.get_recent_humidity_readings(limit=min(limit, 1440), sensor_id=sensor_id)
-            elif range == 'weekly':
-                readings = db.get_recent_humidity_readings(limit=min(limit, 10080), sensor_id=sensor_id)
             else:
-                readings = db.get_recent_humidity_readings(limit=limit, sensor_id=sensor_id)
+                now = datetime.now(timezone.utc)
+                if range in ('day', 'daily'):
+                    readings = db.get_humidity_readings_by_day(now.year, now.month, now.day, sensor_id=sensor_id)
+                elif range in ('week', 'weekly'):
+                    start = now - timedelta(days=7)
+                    readings = db.get_recent_humidity_readings(limit=99999, sensor_id=sensor_id)
+                    readings = [r for r in readings if r.timestamp and r.timestamp >= start]
+                elif range == 'month':
+                    readings = db.get_humidity_readings_by_month(now.year, now.month, sensor_id=sensor_id)
+                elif range == 'year':
+                    readings = db.get_humidity_readings_by_year(now.year, sensor_id=sensor_id)
+                else:
+                    readings = db.get_recent_humidity_readings(limit=limit, sensor_id=sensor_id)
 
+            readings = _thin(readings, limit)
             return [
                 HumidityReading(
                     id=reading.id,
@@ -1090,6 +1106,7 @@ class Query(ObjectType):
         """
         try:
             readings = []
+            now = datetime.now(timezone.utc)
             if year is not None:
                 if month is not None and day is not None:
                     readings = db.get_weather_readings_by_day(year, month, day)
@@ -1100,6 +1117,7 @@ class Query(ObjectType):
             else:
                 readings = db.get_recent_weather_readings(limit=min(limit, 5000))
 
+            readings = _thin(readings, limit)
             return [WeatherReading(
                 id=reading.id,
                 condition=reading.condition,
@@ -1117,6 +1135,7 @@ class Query(ObjectType):
         """Returns per-minute heartbeats for the requested window."""
         try:
             beats = db.get_heartbeats_by_range(hours_back=hours_back)
+            beats = _thin(beats, 1000)
             return [SystemHeartbeat(
                 timestamp=b.timestamp.isoformat() if b.timestamp else None,
                 timestamp_unix=b.timestamp_unix,
@@ -1204,6 +1223,7 @@ class Query(ObjectType):
         """
         try:
             # Handle time-based queries
+            now = datetime.now(timezone.utc)
             if year is not None:
                 if month is not None and day is not None:
                     readings = db.get_pressure_readings_by_day(year, month, day)
@@ -1211,9 +1231,20 @@ class Query(ObjectType):
                     readings = db.get_pressure_readings_by_month(year, month)
                 else:
                     readings = db.get_pressure_readings_by_year(year)
+            elif range == 'day':
+                readings = db.get_pressure_readings_by_day(now.year, now.month, now.day)
+            elif range == 'week':
+                readings = db.get_pressure_readings_by_month(now.year, now.month)
+                cutoff = now - timedelta(days=7)
+                readings = [r for r in readings if r.timestamp and r.timestamp >= cutoff]
+            elif range == 'month':
+                readings = db.get_pressure_readings_by_month(now.year, now.month)
+            elif range == 'year':
+                readings = db.get_pressure_readings_by_year(now.year)
             else:
                 readings = db.get_recent_pressure_readings(limit=min(limit, 5000))
 
+            readings = _thin(readings, limit)
             result = [
                 PressureReading(
                     id=r.id,
@@ -1398,7 +1429,7 @@ class Query(ObjectType):
             A list of AirQualityReading objects.
         """
         try:
-            # Handle time-based queries
+            now = datetime.now(timezone.utc)
             if year is not None:
                 if month is not None and day is not None:
                     readings = db.get_air_quality_readings_by_day(year, month, day)
@@ -1406,9 +1437,20 @@ class Query(ObjectType):
                     readings = db.get_air_quality_readings_by_month(year, month)
                 else:
                     readings = db.get_air_quality_readings_by_year(year)
+            elif range == 'day':
+                readings = db.get_air_quality_readings_by_day(now.year, now.month, now.day)
+            elif range == 'week':
+                cutoff = now - timedelta(days=7)
+                readings = db.get_recent_air_quality_readings(limit=99999)
+                readings = [r for r in readings if r.timestamp and r.timestamp >= cutoff]
+            elif range == 'month':
+                readings = db.get_air_quality_readings_by_month(now.year, now.month)
+            elif range == 'year':
+                readings = db.get_air_quality_readings_by_year(now.year)
             else:
                 readings = db.get_recent_air_quality_readings(limit=min(limit, 5000))
 
+            readings = _thin(readings, limit)
             result = [
                 AirQualityReading(
                     id=r.id,
@@ -1518,6 +1560,7 @@ class Query(ObjectType):
             else:
                 readings = db.get_recent_meter_readings(limit=min(limit, 5000))
 
+            readings = _thin(readings, limit)
             result = [
                 MeterReading(
                     id=r.id,
