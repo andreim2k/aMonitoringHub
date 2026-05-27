@@ -980,9 +980,9 @@ class Query(ObjectType):
                 if range in ('day', 'daily'):
                     readings = db.get_humidity_readings_by_day(now.year, now.month, now.day, sensor_id=sensor_id)
                 elif range in ('week', 'weekly'):
-                    start = now - timedelta(days=7)
+                    cutoff_unix = time.time() - 7 * 86400
                     readings = db.get_recent_humidity_readings(limit=99999, sensor_id=sensor_id)
-                    readings = [r for r in readings if r.timestamp and r.timestamp >= start]
+                    readings = [r for r in readings if r.timestamp_unix and r.timestamp_unix >= cutoff_unix]
                 elif range == 'month':
                     readings = db.get_humidity_readings_by_month(now.year, now.month, sensor_id=sensor_id)
                 elif range == 'year':
@@ -1234,9 +1234,9 @@ class Query(ObjectType):
             elif range == 'day':
                 readings = db.get_pressure_readings_by_day(now.year, now.month, now.day)
             elif range == 'week':
+                cutoff_unix = time.time() - 7 * 86400
                 readings = db.get_pressure_readings_by_month(now.year, now.month)
-                cutoff = now - timedelta(days=7)
-                readings = [r for r in readings if r.timestamp and r.timestamp >= cutoff]
+                readings = [r for r in readings if r.timestamp_unix and r.timestamp_unix >= cutoff_unix]
             elif range == 'month':
                 readings = db.get_pressure_readings_by_month(now.year, now.month)
             elif range == 'year':
@@ -1440,9 +1440,9 @@ class Query(ObjectType):
             elif range == 'day':
                 readings = db.get_air_quality_readings_by_day(now.year, now.month, now.day)
             elif range == 'week':
-                cutoff = now - timedelta(days=7)
+                cutoff_unix = time.time() - 7 * 86400
                 readings = db.get_recent_air_quality_readings(limit=99999)
-                readings = [r for r in readings if r.timestamp and r.timestamp >= cutoff]
+                readings = [r for r in readings if r.timestamp_unix and r.timestamp_unix >= cutoff_unix]
             elif range == 'month':
                 readings = db.get_air_quality_readings_by_month(now.year, now.month)
             elif range == 'year':
