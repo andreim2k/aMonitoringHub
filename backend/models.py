@@ -1766,7 +1766,9 @@ class DatabaseManager:
                 row.region         = attrs.get('region')
                 row.start_time     = attrs.get('start_time')
                 row.start_time_str = attrs.get('start_time_str')
+                row.end_time       = attrs.get('end_time')
                 row.expected_end   = attrs.get('expected_end')
+                row.details        = attrs.get('details')
                 row.latitude       = attrs.get('latitude')
                 row.longitude      = attrs.get('longitude')
                 row.num_affected   = attrs.get('num_affected') or 0
@@ -1780,8 +1782,13 @@ class DatabaseManager:
             self.logger.error(f"Error upserting outage {outage_code}: {e}")
             return False
 
-    def mark_outages_inactive(self, active_codes: List[str], scope_filter_county: Optional[str] = None) -> int:
-        """Mark all outages NOT in `active_codes` as resolved (within the scope filter). Returns rows updated."""
+    def mark_outages_inactive(self, active_codes: List[str], scope_filter_county: Optional[str] = None,
+                                exclude_prefix: Optional[str] = None) -> int:
+        """Mark all outages NOT in `active_codes` as resolved (within the scope filter). Returns rows updated.
+
+        Pass `exclude_prefix='PDF_'` to skip PDF-sourced scheduled entries — those age out by date,
+        not by API presence.
+        """
         try:
             with self.get_session() as session:
                 q = session.query(PowerOutage).filter(PowerOutage.is_active == True)
@@ -1789,6 +1796,8 @@ class DatabaseManager:
                     q = q.filter(PowerOutage.county == scope_filter_county)
                 if active_codes:
                     q = q.filter(~PowerOutage.outage_code.in_(active_codes))
+                if exclude_prefix:
+                    q = q.filter(~PowerOutage.outage_code.like(f'{exclude_prefix}%'))
                 now = datetime.now(timezone.utc)
                 count = 0
                 for row in q.all():
@@ -1802,15 +1811,54 @@ class DatabaseManager:
             return 0
 
     def get_active_outages(self) -> List['PowerOutage']:
+        """Return outages that are CURRENTLY in effect (not future-scheduled, not past).
+
+        For API rows: is_active=True.
+        For PDF rows: now is between start_time and end_time.
+        """
         try:
             with self.get_session() as session:
-                rows = session.query(PowerOutage).filter(PowerOutage.is_active == True)\
-                    .order_by(PowerOutage.start_time.desc().nullslast()).all()
+                now = datetime.now(timezone.utc)
+                rows = session.query(PowerOutage).filter(
+                    PowerOutage.is_active == True
+                ).order_by(PowerOutage.start_time.desc().nullslast()).all()
+                kept = []
+                for r in rows:
+                    is_pdf = (r.outage_code or '').startswith('PDF_')
+                    if is_pdf:
+                        # SQLite drops tzinfo on round-trip — assume stored UTC.
+                        st = r.start_time
+                        et = r.end_time
+                        if st and st.tzinfo is None: st = st.replace(tzinfo=timezone.utc)
+                        if et and et.tzinfo is None: et = et.replace(tzinfo=timezone.utc)
+                        if st and et and st <= now <= et:
+                            kept.append(r)
+                    else:
+                        kept.append(r)
+                for r in kept:
+                    session.expunge(r)
+                return kept
+        except Exception as e:
+            self.logger.error(f"Error getting active outages: {e}")
+            return []
+
+    def get_upcoming_outages(self, days_ahead: int = 28) -> List['PowerOutage']:
+        """Return PDF-sourced outages with start_time in the future, up to days_ahead."""
+        try:
+            with self.get_session() as session:
+                now = datetime.now(timezone.utc)
+                cutoff = now + timedelta(days=days_ahead)
+                rows = session.query(PowerOutage).filter(
+                    PowerOutage.outage_code.like('PDF_%'),
+                    PowerOutage.start_time != None,
+                    PowerOutage.start_time > now,
+                    PowerOutage.start_time <= cutoff,
+                ).order_by(PowerOutage.start_time.asc()).all()
                 for r in rows:
                     session.expunge(r)
                 return rows
         except Exception as e:
-            self.logger.error(f"Error getting active outages: {e}")
+            self.logger.error(f"Error getting upcoming outages: {e}")
             return []
 
     def get_recent_outages(self, limit: int = 50) -> List['PowerOutage']:
@@ -2041,7 +2089,9 @@ class PowerOutage(Base):
     region          = Column(String, nullable=True)
     start_time      = Column(DateTime(timezone=True), nullable=True)
     start_time_str  = Column(String, nullable=True)  # raw "DD/MM/YYYY HH:MM"
+    end_time        = Column(DateTime(timezone=True), nullable=True)  # known end (PDF planned events)
     expected_end    = Column(String, nullable=True)  # may be free-form ("In faza de definire")
+    details         = Column(String, nullable=True)  # free-form description / streets / "zona cabane ..."
     latitude        = Column(Float, nullable=True)
     longitude       = Column(Float, nullable=True)
     num_affected    = Column(Integer, nullable=False, default=0)

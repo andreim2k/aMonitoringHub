@@ -686,15 +686,15 @@
                     <i data-lucide="zap-off"></i>
                     Power Outages
                 </div>
-                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <div style="display: flex; flex-direction: column; gap: 0.35rem;">
                     <div style="display: flex; align-items: baseline; gap: 0.5rem;">
-                        <div class="card-value" id="outagesCount" style="font-size: 1.75rem; line-height: 1;">--</div>
-                        <div id="outagesCountLabel" style="font-size: 0.75rem; color: var(--text-secondary);">active</div>
+                        <div class="card-value" id="outagesCount" style="font-size: 1.5rem; line-height: 1;">--</div>
+                        <div id="outagesCountLabel" style="font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em;">loading</div>
                     </div>
-                    <div id="outagesBreakdown" style="font-size: 0.7rem; color: var(--text-tertiary); display: flex; gap: 0.6rem; flex-wrap: wrap;">
-                        <span>Clopotiva, Hunedoara</span>
-                    </div>
-                    <div id="outagesLastCheck" style="font-size: 0.65rem; color: var(--text-tertiary); margin-top: 0.15rem;">Loading…</div>
+                    <div id="outagesWhen" style="font-size: 0.78rem; color: var(--text-primary); font-weight: 600; line-height: 1.25;"></div>
+                    <div id="outagesLocality" style="font-size: 0.7rem; color: var(--text-secondary);">Clopotiva, Hunedoara</div>
+                    <div id="outagesDetails" style="font-size: 0.65rem; color: var(--text-tertiary); line-height: 1.35; display: none;"></div>
+                    <div id="outagesLastCheck" style="font-size: 0.6rem; color: var(--text-tertiary); margin-top: auto; padding-top: 0.2rem;">Loading…</div>
                 </div>
             </section>
 
@@ -1337,11 +1337,19 @@
 
                     if (metric === 'outages') {
                         const res = await gql(`{
-                            powerOutageHistory(limit: 100) {
-                                outageCode causeType locality county startTime startTimeStr expectedEnd
+                            currentPowerOutages {
+                                outageCode source causeType locality county startTime endTime startTimeStr expectedEnd details
                                 numAffected firstSeen lastSeen isActive resolvedAt
                             }
-                            powerOutagesSummary { activeCount accidentalCount plannedCount totalAffected lastCheck targetLocality targetCounty }
+                            upcomingPowerOutages(daysAhead: 28) {
+                                outageCode source causeType locality county startTime endTime startTimeStr expectedEnd details
+                                numAffected firstSeen lastSeen isActive
+                            }
+                            powerOutageHistory(limit: 100) {
+                                outageCode source causeType locality county startTime endTime startTimeStr expectedEnd details
+                                numAffected firstSeen lastSeen isActive resolvedAt
+                            }
+                            powerOutagesSummary { activeCount accidentalCount plannedCount upcomingCount totalAffected lastCheck lastPdfCheck targetLocality targetCounty }
                         }`);
                         renderOutagesHistory(res.data);
                         return;
@@ -1533,8 +1541,14 @@
             }
 
             function renderOutagesHistory(data) {
-                const events  = data.powerOutageHistory || [];
-                const summary = data.powerOutagesSummary || {};
+                const active   = data.currentPowerOutages   || [];
+                const upcoming = data.upcomingPowerOutages  || [];
+                const history  = data.powerOutageHistory    || [];
+                const summary  = data.powerOutagesSummary   || {};
+                // Resolved = history rows that are no longer active AND not in `active`
+                const activeCodes = new Set(active.map(e => e.outageCode));
+                const upcomingCodes = new Set(upcoming.map(e => e.outageCode));
+                const resolved = history.filter(e => !activeCodes.has(e.outageCode) && !upcomingCodes.has(e.outageCode));
 
                 const chartEl = document.getElementById('modalChart');
                 if (state.charts.modalChart) { state.charts.modalChart.destroy(); state.charts.modalChart = null; }
@@ -1564,67 +1578,60 @@
                     return `${Math.floor(mins/1440)}d ${Math.floor((mins%1440)/60)}h`;
                 };
 
-                const active   = events.filter(e => e.isActive);
-                const resolved = events.filter(e => !e.isActive);
-
-                const eventRow = (e) => {
+                const eventRow = (e, status) => {
                     const isPlanned    = (e.causeType || '').toLowerCase().startsWith('plan');
-                    const stripeColor  = e.isActive ? (isPlanned ? 'var(--accent-amber)' : 'var(--accent-rose)') : 'var(--text-tertiary)';
+                    const stripeColor  = status === 'active'   ? (isPlanned ? 'var(--accent-amber)' : 'var(--accent-rose)')
+                                       : status === 'upcoming' ? 'var(--accent-amber)'
+                                       : 'var(--text-tertiary)';
                     const causeLabel   = isPlanned ? 'PLANNED' : 'ACCIDENTAL';
-                    const statusBadge  = e.isActive
-                        ? `<span style="background:rgba(244,63,94,0.18);color:#f43f5e;padding:1px 7px;border-radius:9px;font-size:0.65rem;font-weight:700;">ACTIVE</span>`
-                        : `<span style="background:rgba(148,163,184,0.15);color:var(--text-tertiary);padding:1px 7px;border-radius:9px;font-size:0.65rem;font-weight:700;">RESOLVED</span>`;
+                    const badges = {
+                        active:   `<span style="background:rgba(244,63,94,0.18);color:#f43f5e;padding:1px 7px;border-radius:9px;font-size:0.65rem;font-weight:700;">ACTIVE</span>`,
+                        upcoming: `<span style="background:rgba(245,158,11,0.18);color:#f59e0b;padding:1px 7px;border-radius:9px;font-size:0.65rem;font-weight:700;">SCHEDULED</span>`,
+                        resolved: `<span style="background:rgba(148,163,184,0.15);color:var(--text-tertiary);padding:1px 7px;border-radius:9px;font-size:0.65rem;font-weight:700;">RESOLVED</span>`,
+                    };
                     const affected = e.numAffected ? ` · ${e.numAffected} clients` : '';
+                    const fmtRange = () => {
+                        if (!e.startTime) return e.startTimeStr || '—';
+                        const dStart = new Date(e.startTime);
+                        const dEnd   = e.endTime ? new Date(e.endTime) : null;
+                        const opts = { timeZone: 'Europe/Bucharest', weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false };
+                        const optsTime = { timeZone: 'Europe/Bucharest', hour: '2-digit', minute: '2-digit', hour12: false };
+                        return dEnd ? `${dStart.toLocaleString('en-GB', opts)} – ${dEnd.toLocaleString('en-GB', optsTime)}`
+                                    : dStart.toLocaleString('en-GB', opts);
+                    };
                     return `<div style="padding:0.55rem 0.75rem;margin-bottom:0.4rem;border-left:3px solid ${stripeColor};background:var(--bg-card-hover);border-radius:4px;font-size:0.8rem;">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;gap:0.5rem;flex-wrap:wrap;">
                             <strong style="color:${stripeColor}">${e.locality || '—'} <span style="font-weight:500;font-size:0.7rem;opacity:0.8;">(${causeLabel})</span></strong>
                             <span style="display:flex;align-items:center;gap:0.4rem;">
-                                ${statusBadge}
-                                <span style="color:var(--text-tertiary);font-size:0.7rem;font-family:monospace;">${fmtDuration(e)}</span>
+                                ${badges[status] || ''}
+                                ${status !== 'upcoming' ? `<span style="color:var(--text-tertiary);font-size:0.7rem;font-family:monospace;">${fmtDuration(e)}</span>` : ''}
                             </span>
                         </div>
                         <div style="color:var(--text-secondary);font-size:0.72rem;font-family:monospace;line-height:1.5;">
-                            <div><span style="color:var(--text-tertiary)">Start:</span> ${e.startTimeStr || fmtDt(e.startTime)}</div>
-                            <div><span style="color:var(--text-tertiary)">Expected:</span> ${e.expectedEnd || '—'}</div>
-                            ${!e.isActive ? `<div><span style="color:var(--text-tertiary)">Cleared:</span> ${fmtDt(e.resolvedAt)}</div>` : ''}
+                            <div><span style="color:var(--text-tertiary)">When:</span> ${fmtRange()}</div>
+                            ${e.details ? `<div style="font-family:inherit;color:var(--text-tertiary);margin-top:0.2rem;">${e.details}</div>` : ''}
+                            ${status === 'resolved' ? `<div><span style="color:var(--text-tertiary)">Cleared:</span> ${fmtDt(e.resolvedAt)}</div>` : ''}
                             ${affected ? `<div style="color:var(--text-tertiary)">${affected}</div>` : ''}
                         </div>
                     </div>`;
                 };
 
-                const list = (title, items) => `
+                const section = (title, items, status) => `
                     <div style="font-size:0.78rem;color:var(--text-secondary);margin:0.8rem 0 0.4rem;font-weight:600;">${title} <span style="color:var(--text-tertiary);font-weight:400;">(${items.length})</span></div>
                     ${items.length === 0
                         ? `<div style="color:var(--text-tertiary);font-size:0.8rem;padding:0.4rem 0;">None.</div>`
-                        : items.map(eventRow).join('')}
+                        : items.map(e => eventRow(e, status)).join('')}
                 `;
 
                 container.innerHTML = `
-                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(85px,1fr));gap:0.5rem;margin-bottom:1.1rem;">
-                        <div style="text-align:center;padding:0.6rem 0.4rem;background:var(--bg-card-hover);border-radius:var(--radius-sm);">
-                            <div style="font-size:0.65rem;color:var(--text-tertiary);">ACTIVE</div>
-                            <div style="font-size:1.3rem;font-weight:700;color:${summary.activeCount ? 'var(--accent-rose)' : 'var(--accent-emerald)'};">${summary.activeCount || 0}</div>
-                        </div>
-                        <div style="text-align:center;padding:0.6rem 0.4rem;background:var(--bg-card-hover);border-radius:var(--radius-sm);">
-                            <div style="font-size:0.65rem;color:var(--text-tertiary);">ACCIDENTAL</div>
-                            <div style="font-size:1.3rem;font-weight:700;">${summary.accidentalCount || 0}</div>
-                        </div>
-                        <div style="text-align:center;padding:0.6rem 0.4rem;background:var(--bg-card-hover);border-radius:var(--radius-sm);">
-                            <div style="font-size:0.65rem;color:var(--text-tertiary);">PLANNED</div>
-                            <div style="font-size:1.3rem;font-weight:700;">${summary.plannedCount || 0}</div>
-                        </div>
-                        <div style="text-align:center;padding:0.6rem 0.4rem;background:var(--bg-card-hover);border-radius:var(--radius-sm);">
-                            <div style="font-size:0.65rem;color:var(--text-tertiary);">AFFECTED</div>
-                            <div style="font-size:1.3rem;font-weight:700;">${summary.totalAffected || 0}</div>
-                        </div>
+                    <div style="font-size:0.72rem;color:var(--text-tertiary);margin-bottom:0.4rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+                        <span>Monitoring <strong>${summary.targetLocality || 'CLOPOTIVA'}, ${summary.targetCounty || 'HUNEDOARA'}</strong></span>
+                        <span>${summary.lastCheck ? `last live check ${fmtDt(summary.lastCheck)}` : ''}</span>
                     </div>
-                    <div style="font-size:0.7rem;color:var(--text-tertiary);margin-bottom:0.4rem;text-align:right;">
-                        Monitoring <strong>${summary.targetLocality || 'CLOPOTIVA'}, ${summary.targetCounty || 'HUNEDOARA'}</strong>
-                        ${summary.lastCheck ? ` · last check ${fmtDt(summary.lastCheck)}` : ''}
-                    </div>
-                    <div style="overflow-y:auto;max-height:480px;padding-right:2px;">
-                        ${list('Active', active)}
-                        ${list('Recently resolved', resolved.slice(0, 50))}
+                    <div style="overflow-y:auto;max-height:500px;padding-right:2px;">
+                        ${section('Active now', active, 'active')}
+                        ${section('Scheduled', upcoming, 'upcoming')}
+                        ${section('Recently resolved', resolved.slice(0, 50), 'resolved')}
                     </div>
                 `;
             }
@@ -1808,34 +1815,66 @@
             async function updateOutagesCard() {
                 try {
                     const res = await gql(`{
-                        powerOutagesSummary { activeCount accidentalCount plannedCount totalAffected lastCheck targetLocality targetCounty }
+                        currentPowerOutages { causeType locality startTime endTime startTimeStr details numAffected }
+                        upcomingPowerOutages(daysAhead: 28) { causeType locality startTime endTime startTimeStr details }
+                        powerOutagesSummary { activeCount upcomingCount lastCheck lastPdfCheck targetLocality targetCounty }
                     }`);
-                    const s = res.data && res.data.powerOutagesSummary;
-                    if (!s) return;
+                    const d = res.data || {};
+                    const s = d.powerOutagesSummary || {};
+                    const active = (d.currentPowerOutages || [])[0];
+                    const next   = (d.upcomingPowerOutages || [])[0];
+
                     const countEl     = document.getElementById('outagesCount');
                     const countLblEl  = document.getElementById('outagesCountLabel');
-                    const breakdownEl = document.getElementById('outagesBreakdown');
+                    const whenEl      = document.getElementById('outagesWhen');
+                    const localityEl  = document.getElementById('outagesLocality');
+                    const detailsEl   = document.getElementById('outagesDetails');
                     const lastCheckEl = document.getElementById('outagesLastCheck');
 
-                    if (s.activeCount > 0) {
+                    const fmtRange = (startIso, endIso) => {
+                        const opts = { timeZone: 'Europe/Bucharest', weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false };
+                        const optsTime = { timeZone: 'Europe/Bucharest', hour: '2-digit', minute: '2-digit', hour12: false };
+                        const s = startIso ? new Date(startIso).toLocaleString('en-GB', opts) : '';
+                        const e = endIso   ? new Date(endIso).toLocaleString('en-GB', optsTime) : '';
+                        return e ? `${s} – ${e}` : s;
+                    };
+
+                    if (active) {
+                        const isPlanned = (active.causeType || '').toLowerCase().startsWith('plan');
                         countEl.textContent = s.activeCount;
-                        countEl.style.color = 'var(--accent-rose)';
-                        countLblEl.textContent = 'active';
-                        const parts = [];
-                        if (s.accidentalCount > 0) parts.push(`<span style="color:var(--accent-rose)">${s.accidentalCount} accidental</span>`);
-                        if (s.plannedCount > 0)    parts.push(`<span style="color:var(--accent-amber)">${s.plannedCount} planned</span>`);
-                        if (s.totalAffected > 0)   parts.push(`${s.totalAffected} clients affected`);
-                        breakdownEl.innerHTML = parts.join(' · ') || `${s.targetLocality}, ${s.targetCounty}`;
+                        countEl.style.color = isPlanned ? 'var(--accent-amber)' : 'var(--accent-rose)';
+                        countLblEl.textContent = isPlanned ? 'planned now' : 'accidental now';
+                        whenEl.style.color = isPlanned ? 'var(--accent-amber)' : 'var(--accent-rose)';
+                        whenEl.textContent = fmtRange(active.startTime, active.endTime) || active.startTimeStr || '';
+                        localityEl.textContent = `${active.locality || 'Clopotiva'}, ${s.targetCounty || 'Hunedoara'}`;
+                        if (active.details) {
+                            detailsEl.style.display = '';
+                            detailsEl.textContent = active.details.length > 110 ? active.details.slice(0,110) + '…' : active.details;
+                        } else { detailsEl.style.display = 'none'; }
+                    } else if (next) {
+                        countEl.textContent = s.upcomingCount || 1;
+                        countEl.style.color = 'var(--accent-amber)';
+                        countLblEl.textContent = (s.upcomingCount || 1) === 1 ? 'planned' : 'planned';
+                        whenEl.style.color = 'var(--accent-amber)';
+                        whenEl.textContent = fmtRange(next.startTime, next.endTime) || next.startTimeStr || '';
+                        localityEl.textContent = `${next.locality || 'Clopotiva'}, ${s.targetCounty || 'Hunedoara'}`;
+                        if (next.details) {
+                            detailsEl.style.display = '';
+                            detailsEl.textContent = next.details.length > 110 ? next.details.slice(0,110) + '…' : next.details;
+                        } else { detailsEl.style.display = 'none'; }
                     } else {
                         countEl.textContent = '✓';
                         countEl.style.color = 'var(--accent-emerald)';
                         countLblEl.textContent = 'all clear';
-                        breakdownEl.innerHTML = `${s.targetLocality || 'Clopotiva'}, ${s.targetCounty || 'Hunedoara'}`;
+                        whenEl.textContent = '';
+                        localityEl.textContent = `${s.targetLocality || 'Clopotiva'}, ${s.targetCounty || 'Hunedoara'}`;
+                        detailsEl.style.display = 'none';
                     }
 
-                    if (s.lastCheck) {
-                        const d = new Date(s.lastCheck);
-                        lastCheckEl.textContent = 'Last check ' + d.toLocaleString('en-GB', { timeZone: 'Europe/Bucharest', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false });
+                    const lastTs = s.lastCheck || s.lastPdfCheck;
+                    if (lastTs) {
+                        const d2 = new Date(lastTs);
+                        lastCheckEl.textContent = 'Last check ' + d2.toLocaleString('en-GB', { timeZone: 'Europe/Bucharest', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false });
                     } else {
                         lastCheckEl.textContent = 'Awaiting first poll…';
                     }

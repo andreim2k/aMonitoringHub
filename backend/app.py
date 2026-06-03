@@ -433,11 +433,193 @@ def scheduled_outage_check_task():
         # Anything we had marked active that isn't in this poll → resolved.
         # Scope the resolution to the target county so we never touch outages
         # from a future expansion of the filter.
-        resolved = db.mark_outages_inactive(active_codes, scope_filter_county=OUTAGE_TARGET_COUNTY)
+        resolved = db.mark_outages_inactive(active_codes,
+                                            scope_filter_county=OUTAGE_TARGET_COUNTY,
+                                            exclude_prefix='PDF_')
         _outage_last_poll = datetime.now(timezone.utc)
         logger.info(f"Outage poll: {matched} active match(es) for {target}/{OUTAGE_TARGET_COUNTY}, {resolved} resolved")
     except Exception as e:
         logger.error(f"Outage poll error: {e}")
+
+
+# --- PDF-based scheduled outage parsing ---
+OUTAGE_LIST_PAGE_URL = "https://www.reteleelectrice.ro/intreruperi/programate/"
+_outage_pdf_last_check: Optional[datetime] = None  # set by scheduled_pdf_outage_check_task
+
+_ROMANIAN_DAYS_RE = r'(Luni|Marți|Miercuri|Joi|Vineri|Sâmbătă|Duminică)'
+_PDF_DATE_RE   = re.compile(_ROMANIAN_DAYS_RE + r'[,\s]+(\d{2})\.(\d{2})\.(\d{4})')
+_PDF_TIME_RE   = re.compile(r'(\d{2}):(\d{2})\s*[-–]\s*(\d{2}):(\d{2})')
+_PDF_STREET_RE = re.compile(r'^(Str\.|Strada\s|Sos\.|Soseaua|DN\d|DJ\d|DC\d)', re.IGNORECASE)
+_PDF_FNAME_RE  = re.compile(r'(\d{2})\.(\d{2})\.(\d{4})\s*-\s*(\d{2})\.(\d{2})\.(\d{4})\.pdf')
+
+
+def parse_outages_pdf(pdf_path: str, target_loc: str) -> list:
+    """Parse a weekly outage PDF and return entries matching the target locality."""
+    try:
+        import pypdf
+    except ImportError:
+        logger.warning("pypdf not installed - skipping PDF parsing")
+        return []
+    try:
+        reader = pypdf.PdfReader(pdf_path)
+    except Exception as e:
+        logger.warning(f"Cannot read PDF {pdf_path}: {e}")
+        return []
+
+    text = ''
+    for p in reader.pages:
+        text += '\n' + (p.extract_text() or '')
+
+    matches = list(_PDF_DATE_RE.finditer(text))
+    target_up = target_loc.upper()
+    LOC_HEAD = 80  # only check first 80 chars after each date marker
+    out = []
+    for i, m in enumerate(matches):
+        chunk_start = m.end()
+        chunk_end = matches[i+1].start() if i+1 < len(matches) else min(chunk_start + 1500, len(text))
+        chunk = text[chunk_start:chunk_end].lstrip()
+
+        if _PDF_STREET_RE.match(chunk):
+            continue
+        head = chunk[:LOC_HEAD].upper()
+        pos = head.find(target_up)
+        if pos < 0:
+            continue
+        # Word boundary checks
+        if pos > 0 and (chunk[pos-1].isalpha() or chunk[pos-1] in '.-/'):
+            continue
+        end_pos = pos + len(target_up)
+        if end_pos < len(chunk) and chunk[end_pos].isalpha():
+            continue
+
+        tm = _PDF_TIME_RE.search(chunk)
+        if tm:
+            time_str = f'{tm.group(1)}:{tm.group(2)} - {tm.group(3)}:{tm.group(4)}'
+            details = chunk[end_pos:tm.start()].strip()
+            sh, sm_, eh, em = int(tm.group(1)), int(tm.group(2)), int(tm.group(3)), int(tm.group(4))
+        else:
+            time_str = None
+            details = chunk[end_pos:].strip()
+            sh = sm_ = eh = em = None
+        details = re.sub(r'\s+', ' ', details)
+        details = re.sub(r'^Alte\s+detalii:\s*', '', details, flags=re.IGNORECASE)
+        details = details.strip(' ,;')[:500]
+
+        out.append({
+            'day': m.group(1),
+            'date_iso': f'{m.group(4)}-{m.group(3)}-{m.group(2)}',
+            'time_range': time_str,
+            'start_h': sh, 'start_m': sm_, 'end_h': eh, 'end_m': em,
+            'locality': chunk[pos:end_pos],
+            'details': details,
+        })
+    return out
+
+
+def fetch_outage_pdf_urls(now_utc: datetime) -> list:
+    """Scrape the listing page and return [(url, range_start_date, range_end_date)] for
+    PDFs that cover today or any of the next 28 days. URLs include AWS presigned params."""
+    try:
+        import html as html_mod, urllib.parse
+        r = requests.get(OUTAGE_LIST_PAGE_URL, headers={'User-Agent': 'Mozilla/5.0'}, timeout=15)
+        if r.status_code != 200:
+            logger.warning(f"Outage listing page returned status {r.status_code}")
+            return []
+        src = r.text
+        urls = re.findall(r'href="(https://[^"]+\.pdf\?[^"]+)"', src)
+        today = now_utc.date()
+        cutoff_future = today + timedelta(days=28)
+        results = []
+        for raw_url in urls:
+            url = html_mod.unescape(raw_url)
+            fname = urllib.parse.unquote(url.split('?')[0])
+            m = _PDF_FNAME_RE.search(fname)
+            if not m:
+                continue
+            try:
+                start = datetime(int(m.group(3)), int(m.group(2)), int(m.group(1))).date()
+                end   = datetime(int(m.group(6)), int(m.group(5)), int(m.group(4))).date()
+            except ValueError:
+                continue
+            # Keep weeks that overlap [today, today+28d]
+            if end >= today and start <= cutoff_future:
+                results.append((url, start, end))
+        # Dedupe by start date (some listings repeat)
+        seen = set()
+        deduped = []
+        for u, s, e in sorted(results, key=lambda r: r[1]):
+            if s in seen:
+                continue
+            seen.add(s)
+            deduped.append((u, s, e))
+        return deduped
+    except Exception as e:
+        logger.error(f"fetch_outage_pdf_urls error: {e}")
+        return []
+
+
+def scheduled_pdf_outage_check_task():
+    """Download and parse weekly outage PDFs for upcoming Clopotiva entries."""
+    global _outage_pdf_last_check
+    try:
+        from zoneinfo import ZoneInfo
+        BUC = ZoneInfo('Europe/Bucharest')
+    except Exception:
+        BUC = None
+
+    now_utc = datetime.now(timezone.utc)
+    pdfs = fetch_outage_pdf_urls(now_utc)
+    logger.info(f"PDF scan: {len(pdfs)} candidate weekly PDF(s)")
+
+    total_matches = 0
+    for url, start_d, end_d in pdfs:
+        try:
+            resp = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=30)
+            if resp.status_code != 200:
+                logger.warning(f"PDF download failed ({resp.status_code}) for week {start_d}")
+                continue
+            tmp_path = f'/tmp/outage_week_{start_d.isoformat()}.pdf'
+            with open(tmp_path, 'wb') as f:
+                f.write(resp.content)
+            entries = parse_outages_pdf(tmp_path, OUTAGE_TARGET_LOCALITY_SUBSTR)
+            for e in entries:
+                date_iso = e['date_iso']  # YYYY-MM-DD
+                sh, sm_ = e['start_h'] or 0, e['start_m'] or 0
+                eh, em  = e['end_h']   or 0, e['end_m']   or 0
+                try:
+                    y, mo, d = (int(x) for x in date_iso.split('-'))
+                    naive_start = datetime(y, mo, d, sh, sm_)
+                    naive_end   = datetime(y, mo, d, eh, em)
+                    if BUC:
+                        start_utc = naive_start.replace(tzinfo=BUC).astimezone(timezone.utc)
+                        end_utc   = naive_end.replace(tzinfo=BUC).astimezone(timezone.utc)
+                    else:
+                        start_utc = naive_start.replace(tzinfo=timezone.utc)
+                        end_utc   = naive_end.replace(tzinfo=timezone.utc)
+                except Exception:
+                    start_utc = end_utc = None
+                code = f"PDF_{date_iso}_{e['locality'].upper().replace(' ','')}_{sh:02d}{sm_:02d}"
+                attrs = {
+                    'cause_type':     'Planificat',
+                    'locality':       e['locality'],
+                    'county':         OUTAGE_TARGET_COUNTY,
+                    'region':         'BANAT',
+                    'start_time':     start_utc,
+                    'start_time_str': f"{e['day']}, {date_iso} {sh:02d}:{sm_:02d}",
+                    'end_time':       end_utc,
+                    'expected_end':   f"{date_iso} {eh:02d}:{em:02d}",
+                    'details':        e['details'],
+                    'latitude':       None,
+                    'longitude':      None,
+                    'num_affected':   0,
+                }
+                if db.upsert_outage(code, attrs):
+                    total_matches += 1
+        except Exception as ex:
+            logger.error(f"PDF process error for week {start_d}: {ex}")
+
+    _outage_pdf_last_check = datetime.now(timezone.utc)
+    logger.info(f"PDF scan complete: {total_matches} Clopotiva entries upserted")
 
 
 # GraphQL Types
@@ -561,6 +743,7 @@ class PowerOutage(ObjectType):
     """GraphQL type for a power outage near the monitored location."""
     id              = Int()
     outage_code     = String()
+    source          = String()  # 'pdf' or 'api'
     cause_type      = String()
     locality        = String()
     county          = String()
@@ -568,7 +751,10 @@ class PowerOutage(ObjectType):
     start_time      = String()
     start_time_unix = Float()
     start_time_str  = String()
+    end_time        = String()
+    end_time_unix   = Float()
     expected_end    = String()
+    details         = String()
     latitude        = Float()
     longitude       = Float()
     num_affected    = Int()
@@ -580,13 +766,17 @@ class PowerOutage(ObjectType):
 
 class PowerOutagesSummary(ObjectType):
     """Aggregate view for the dashboard card."""
-    target_locality = String()
-    target_county   = String()
-    last_check      = String()
-    active_count    = Int()
-    accidental_count = Int()
-    planned_count   = Int()
-    total_affected  = Int()
+    target_locality       = String()
+    target_county         = String()
+    last_check            = String()
+    last_pdf_check        = String()
+    active_count          = Int()
+    accidental_count      = Int()
+    planned_count         = Int()
+    upcoming_count        = Int()      # PDF-sourced scheduled events in the next 28 days
+    next_upcoming_start   = String()   # ISO of next upcoming start time
+    next_upcoming_locality = String()
+    total_affected        = Int()
 
 
 class AirQualityReading(ObjectType):
@@ -766,9 +956,10 @@ class Query(ObjectType):
     )
 
     # Power outage queries (Clopotiva, Hunedoara)
-    current_power_outages = GrapheneList(PowerOutage)
-    power_outage_history  = GrapheneList(PowerOutage, limit=Int(default_value=50))
-    power_outages_summary = Field(PowerOutagesSummary)
+    current_power_outages  = GrapheneList(PowerOutage)
+    upcoming_power_outages = GrapheneList(PowerOutage, days_ahead=Int(default_value=28))
+    power_outage_history   = GrapheneList(PowerOutage, limit=Int(default_value=50))
+    power_outages_summary  = Field(PowerOutagesSummary)
 
     # Air quality queries
     current_air_quality = Field(AirQualityReading)
@@ -1298,11 +1489,17 @@ class Query(ObjectType):
             logger.error(f"Error getting downtime events: {e}")
             return []
 
-    def _outage_to_gql(self, row) -> 'PowerOutage':
+    @staticmethod
+    def _outage_to_gql(row) -> 'PowerOutage':
+        # SQLite drops tzinfo on round-trip — re-attach UTC so isoformat() gives proper "+00:00"
         st = row.start_time
+        et = row.end_time
+        if st and st.tzinfo is None: st = st.replace(tzinfo=timezone.utc)
+        if et and et.tzinfo is None: et = et.replace(tzinfo=timezone.utc)
         return PowerOutage(
             id=row.id,
             outage_code=row.outage_code,
+            source='pdf' if (row.outage_code or '').startswith('PDF_') else 'api',
             cause_type=row.cause_type,
             locality=row.locality,
             county=row.county,
@@ -1310,7 +1507,10 @@ class Query(ObjectType):
             start_time=st.isoformat() if st else None,
             start_time_unix=st.timestamp() if st else None,
             start_time_str=row.start_time_str,
+            end_time=et.isoformat() if et else None,
+            end_time_unix=et.timestamp() if et else None,
             expected_end=row.expected_end,
+            details=row.details,
             latitude=row.latitude,
             longitude=row.longitude,
             num_affected=row.num_affected or 0,
@@ -1323,33 +1523,46 @@ class Query(ObjectType):
     def resolve_current_power_outages(self, info: Any) -> list:
         try:
             rows = db.get_active_outages()
-            return [self._outage_to_gql(r) for r in rows]
+            return [Query._outage_to_gql(r) for r in rows]
         except Exception as e:
             logger.error(f"Error getting current power outages: {e}")
+            return []
+
+    def resolve_upcoming_power_outages(self, info: Any, days_ahead: int = 28) -> list:
+        try:
+            rows = db.get_upcoming_outages(days_ahead=days_ahead)
+            return [Query._outage_to_gql(r) for r in rows]
+        except Exception as e:
+            logger.error(f"Error getting upcoming power outages: {e}")
             return []
 
     def resolve_power_outage_history(self, info: Any, limit: int = 50) -> list:
         try:
             rows = db.get_recent_outages(limit=limit)
-            return [self._outage_to_gql(r) for r in rows]
+            return [Query._outage_to_gql(r) for r in rows]
         except Exception as e:
             logger.error(f"Error getting power outage history: {e}")
             return []
 
     def resolve_power_outages_summary(self, info: Any) -> 'PowerOutagesSummary':
         try:
-            rows = db.get_active_outages()
-            acc  = sum(1 for r in rows if (r.cause_type or '').lower().startswith('acc'))
-            plan = sum(1 for r in rows if (r.cause_type or '').lower().startswith('plan'))
-            total_aff = sum((r.num_affected or 0) for r in rows)
-            last_check = _outage_last_poll
+            active = db.get_active_outages()
+            upcoming = db.get_upcoming_outages(days_ahead=28)
+            acc  = sum(1 for r in active if (r.cause_type or '').lower().startswith('acc'))
+            plan = sum(1 for r in active if (r.cause_type or '').lower().startswith('plan'))
+            total_aff = sum((r.num_affected or 0) for r in active)
+            nxt = upcoming[0] if upcoming else None
             return PowerOutagesSummary(
                 target_locality=OUTAGE_TARGET_LOCALITY_SUBSTR,
                 target_county=OUTAGE_TARGET_COUNTY,
-                last_check=last_check.isoformat() if last_check else None,
-                active_count=len(rows),
+                last_check=_outage_last_poll.isoformat() if _outage_last_poll else None,
+                last_pdf_check=_outage_pdf_last_check.isoformat() if _outage_pdf_last_check else None,
+                active_count=len(active),
                 accidental_count=acc,
                 planned_count=plan,
+                upcoming_count=len(upcoming),
+                next_upcoming_start=(nxt.start_time.isoformat() if nxt and nxt.start_time else None),
+                next_upcoming_locality=(nxt.locality if nxt else None),
                 total_affected=total_aff,
             )
         except Exception as e:
@@ -1357,7 +1570,8 @@ class Query(ObjectType):
             return PowerOutagesSummary(
                 target_locality=OUTAGE_TARGET_LOCALITY_SUBSTR,
                 target_county=OUTAGE_TARGET_COUNTY,
-                active_count=0, accidental_count=0, planned_count=0, total_affected=0
+                active_count=0, accidental_count=0, planned_count=0,
+                upcoming_count=0, total_affected=0,
             )
 
     def resolve_current_pressure(self, info: Any) -> Optional[PressureReading]:
@@ -2425,15 +2639,23 @@ def initialize_application() -> bool:
             id='outage_check',
             name='Clopotiva outage check (hourly)'
         )
+        scheduler.add_job(
+            scheduled_pdf_outage_check_task,
+            'cron',
+            hour=5, minute=30,
+            id='outage_pdf_check',
+            name='Clopotiva scheduled outage PDF scan (daily 05:30)'
+        )
         scheduler.start()
-        logger.info("Scheduler started - OCR daily at 12:00, ESP32-CAM reset daily at 00:00, heartbeat every minute, outage check hourly")
+        logger.info("Scheduler started - OCR 12:00, ESP32-CAM 00:00, heartbeat 60s, outage API hourly, outage PDF 05:30 daily")
 
-        # Run an immediate outage poll so the card has fresh data at startup.
-        # Done in a thread so it cannot delay app boot if the network is slow.
+        # Run immediate polls so the card has fresh data at startup. In threads so they
+        # cannot delay app boot if the network is slow.
         try:
             threading.Thread(target=scheduled_outage_check_task, daemon=True, name='OutageInitialPoll').start()
+            threading.Thread(target=scheduled_pdf_outage_check_task, daemon=True, name='OutagePdfInitialScan').start()
         except Exception as e:
-            logger.warning(f"Could not start initial outage poll thread: {e}")
+            logger.warning(f"Could not start initial outage poll threads: {e}")
 
         logger.info("Application initialized with USB sensor data")
         return True
