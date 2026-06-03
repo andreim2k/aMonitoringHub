@@ -1747,6 +1747,84 @@ class DatabaseManager:
             self.logger.error(f"Error computing downtime events: {e}")
             return []
 
+    def upsert_outage(self, outage_code: str, attrs: dict) -> bool:
+        """Insert or update a power outage by outage_code. Returns True on success."""
+        try:
+            with self.get_session() as session:
+                row = session.query(PowerOutage).filter(PowerOutage.outage_code == outage_code).first()
+                now = datetime.now(timezone.utc)
+                if row is None:
+                    row = PowerOutage(
+                        outage_code=outage_code,
+                        first_seen=now,
+                        first_seen_unix=time.time(),
+                    )
+                    session.add(row)
+                row.cause_type     = attrs.get('cause_type')
+                row.locality       = attrs.get('locality')
+                row.county         = attrs.get('county')
+                row.region         = attrs.get('region')
+                row.start_time     = attrs.get('start_time')
+                row.start_time_str = attrs.get('start_time_str')
+                row.expected_end   = attrs.get('expected_end')
+                row.latitude       = attrs.get('latitude')
+                row.longitude      = attrs.get('longitude')
+                row.num_affected   = attrs.get('num_affected') or 0
+                row.last_seen      = now
+                row.last_seen_unix = time.time()
+                row.is_active      = True
+                row.resolved_at    = None
+                session.commit()
+                return True
+        except Exception as e:
+            self.logger.error(f"Error upserting outage {outage_code}: {e}")
+            return False
+
+    def mark_outages_inactive(self, active_codes: List[str], scope_filter_county: Optional[str] = None) -> int:
+        """Mark all outages NOT in `active_codes` as resolved (within the scope filter). Returns rows updated."""
+        try:
+            with self.get_session() as session:
+                q = session.query(PowerOutage).filter(PowerOutage.is_active == True)
+                if scope_filter_county:
+                    q = q.filter(PowerOutage.county == scope_filter_county)
+                if active_codes:
+                    q = q.filter(~PowerOutage.outage_code.in_(active_codes))
+                now = datetime.now(timezone.utc)
+                count = 0
+                for row in q.all():
+                    row.is_active = False
+                    row.resolved_at = now
+                    count += 1
+                session.commit()
+                return count
+        except Exception as e:
+            self.logger.error(f"Error marking outages inactive: {e}")
+            return 0
+
+    def get_active_outages(self) -> List['PowerOutage']:
+        try:
+            with self.get_session() as session:
+                rows = session.query(PowerOutage).filter(PowerOutage.is_active == True)\
+                    .order_by(PowerOutage.start_time.desc().nullslast()).all()
+                for r in rows:
+                    session.expunge(r)
+                return rows
+        except Exception as e:
+            self.logger.error(f"Error getting active outages: {e}")
+            return []
+
+    def get_recent_outages(self, limit: int = 50) -> List['PowerOutage']:
+        try:
+            with self.get_session() as session:
+                rows = session.query(PowerOutage)\
+                    .order_by(PowerOutage.last_seen.desc()).limit(limit).all()
+                for r in rows:
+                    session.expunge(r)
+                return rows
+        except Exception as e:
+            self.logger.error(f"Error getting recent outages: {e}")
+            return []
+
 # Global database instance
 
 db = DatabaseManager()
@@ -1943,6 +2021,41 @@ class SystemHeartbeat(Base):
             'mq135_up': bool(self.mq135_up),
             'esp32cam_up': bool(self.esp32cam_up),
         }
+
+
+class PowerOutage(Base):
+    """SQLAlchemy model for power outages affecting the monitored location (Clopotiva, Hunedoara).
+
+    Records are upserted on each scheduled poll of the public outage map API.
+    is_active flips to False (and resolved_at is set) the first poll an outage
+    is no longer returned by the API.
+    """
+
+    __tablename__ = 'power_outages'
+
+    id              = Column(Integer, primary_key=True, autoincrement=True)
+    outage_code     = Column(String, nullable=False, unique=True)
+    cause_type      = Column(String, nullable=True)  # 'Accidental' | 'Planificat'
+    locality        = Column(String, nullable=True)
+    county          = Column(String, nullable=True)
+    region          = Column(String, nullable=True)
+    start_time      = Column(DateTime(timezone=True), nullable=True)
+    start_time_str  = Column(String, nullable=True)  # raw "DD/MM/YYYY HH:MM"
+    expected_end    = Column(String, nullable=True)  # may be free-form ("In faza de definire")
+    latitude        = Column(Float, nullable=True)
+    longitude       = Column(Float, nullable=True)
+    num_affected    = Column(Integer, nullable=False, default=0)
+    first_seen      = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+    first_seen_unix = Column(Float, nullable=False, default=lambda: time.time())
+    last_seen       = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+    last_seen_unix  = Column(Float, nullable=False, default=lambda: time.time())
+    is_active       = Column(Boolean, nullable=False, default=True)
+    resolved_at     = Column(DateTime(timezone=True), nullable=True)
+
+    __table_args__ = (
+        Index('idx_outage_code',   'outage_code'),
+        Index('idx_outage_active', 'is_active'),
+    )
 
 def init_database(database_url: Optional[str] = None):
     """Initializes the global database instance.

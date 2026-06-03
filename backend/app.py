@@ -21,7 +21,7 @@ import logging
 import argparse
 import re
 import requests
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, List, Tuple, Optional
 from queue import Queue
 import threading
@@ -361,6 +361,85 @@ def scheduled_heartbeat_task():
         logger.error(f"Heartbeat task error: {e}")
 
 
+# Power outage monitoring (Clopotiva, Hunedoara) — polls the public ArcGIS map API
+OUTAGE_API_URL = "https://services-eu1.arcgis.com/ZugzWQbNk6XT3BMo/arcgis/rest/services/OutagesMapViewLayer/FeatureServer/0/query"
+OUTAGE_TARGET_COUNTY = "HUNEDOARA"
+OUTAGE_TARGET_LOCALITY_SUBSTR = "CLOPOTIVA"
+_outage_last_poll: Optional[datetime] = None  # set by scheduled_outage_check_task
+
+
+def _parse_outage_dt(s: Optional[str]) -> Optional[datetime]:
+    """Parse 'DD/MM/YYYY HH:MM' as Europe/Bucharest local time, return UTC datetime."""
+    if not s:
+        return None
+    try:
+        naive = datetime.strptime(s.strip(), "%d/%m/%Y %H:%M")
+        # Bucharest is UTC+2 (winter) or UTC+3 (summer DST). zoneinfo handles both correctly.
+        try:
+            from zoneinfo import ZoneInfo
+            local = naive.replace(tzinfo=ZoneInfo("Europe/Bucharest"))
+            return local.astimezone(timezone.utc)
+        except Exception:
+            return naive.replace(tzinfo=timezone.utc)
+    except Exception:
+        return None
+
+
+def scheduled_outage_check_task():
+    """Polls the public outage map API and stores any outages matching the target locality."""
+    global _outage_last_poll
+    try:
+        params = {
+            "where": f"provincia='{OUTAGE_TARGET_COUNTY}'",
+            "outFields": "*",
+            "f": "json",
+            "resultRecordCount": 2000,
+        }
+        r = requests.get(OUTAGE_API_URL, params=params, timeout=15)
+        if r.status_code != 200:
+            logger.warning(f"Outage API returned status {r.status_code}")
+            return
+        data = r.json()
+        features = data.get("features", []) or []
+
+        target = OUTAGE_TARGET_LOCALITY_SUBSTR.upper()
+        active_codes = []
+        matched = 0
+        for f in features:
+            a = f.get("attributes", {}) or {}
+            descr = (a.get("descrizion") or "").upper()
+            if target not in descr:
+                continue
+            code = a.get("outage_unique_code") or f"FID_{a.get('fid0')}"
+            if not code:
+                continue
+            start_str = a.get("data_inter")
+            attrs = {
+                "cause_type":     a.get("causa_disa"),
+                "locality":       a.get("descrizion"),
+                "county":         a.get("provincia"),
+                "region":         a.get("regione"),
+                "start_time":     _parse_outage_dt(start_str),
+                "start_time_str": start_str,
+                "expected_end":   a.get("data_prev_") or a.get("data_prev_en"),
+                "latitude":       a.get("latitudine"),
+                "longitude":      a.get("longitudin"),
+                "num_affected":   int(a.get("num_cli_di") or 0),
+            }
+            if db.upsert_outage(code, attrs):
+                active_codes.append(code)
+                matched += 1
+
+        # Anything we had marked active that isn't in this poll → resolved.
+        # Scope the resolution to the target county so we never touch outages
+        # from a future expansion of the filter.
+        resolved = db.mark_outages_inactive(active_codes, scope_filter_county=OUTAGE_TARGET_COUNTY)
+        _outage_last_poll = datetime.now(timezone.utc)
+        logger.info(f"Outage poll: {matched} active match(es) for {target}/{OUTAGE_TARGET_COUNTY}, {resolved} resolved")
+    except Exception as e:
+        logger.error(f"Outage poll error: {e}")
+
+
 # GraphQL Types
 class TemperatureReading(ObjectType):
     """GraphQL type for a single temperature reading."""
@@ -476,6 +555,39 @@ class DowntimeEvent(ObjectType):
     start_time = String()
     end_time = String()
     duration_seconds = Int()
+
+
+class PowerOutage(ObjectType):
+    """GraphQL type for a power outage near the monitored location."""
+    id              = Int()
+    outage_code     = String()
+    cause_type      = String()
+    locality        = String()
+    county          = String()
+    region          = String()
+    start_time      = String()
+    start_time_unix = Float()
+    start_time_str  = String()
+    expected_end    = String()
+    latitude        = Float()
+    longitude       = Float()
+    num_affected    = Int()
+    first_seen      = String()
+    last_seen       = String()
+    is_active       = Boolean()
+    resolved_at     = String()
+
+
+class PowerOutagesSummary(ObjectType):
+    """Aggregate view for the dashboard card."""
+    target_locality = String()
+    target_county   = String()
+    last_check      = String()
+    active_count    = Int()
+    accidental_count = Int()
+    planned_count   = Int()
+    total_affected  = Int()
+
 
 class AirQualityReading(ObjectType):
     """GraphQL type for a single air quality reading."""
@@ -652,6 +764,11 @@ class Query(ObjectType):
         DowntimeEvent,
         hours_back=Int(default_value=24)
     )
+
+    # Power outage queries (Clopotiva, Hunedoara)
+    current_power_outages = GrapheneList(PowerOutage)
+    power_outage_history  = GrapheneList(PowerOutage, limit=Int(default_value=50))
+    power_outages_summary = Field(PowerOutagesSummary)
 
     # Air quality queries
     current_air_quality = Field(AirQualityReading)
@@ -1180,6 +1297,68 @@ class Query(ObjectType):
         except Exception as e:
             logger.error(f"Error getting downtime events: {e}")
             return []
+
+    def _outage_to_gql(self, row) -> 'PowerOutage':
+        st = row.start_time
+        return PowerOutage(
+            id=row.id,
+            outage_code=row.outage_code,
+            cause_type=row.cause_type,
+            locality=row.locality,
+            county=row.county,
+            region=row.region,
+            start_time=st.isoformat() if st else None,
+            start_time_unix=st.timestamp() if st else None,
+            start_time_str=row.start_time_str,
+            expected_end=row.expected_end,
+            latitude=row.latitude,
+            longitude=row.longitude,
+            num_affected=row.num_affected or 0,
+            first_seen=row.first_seen.isoformat() if row.first_seen else None,
+            last_seen=row.last_seen.isoformat() if row.last_seen else None,
+            is_active=bool(row.is_active),
+            resolved_at=row.resolved_at.isoformat() if row.resolved_at else None,
+        )
+
+    def resolve_current_power_outages(self, info: Any) -> list:
+        try:
+            rows = db.get_active_outages()
+            return [self._outage_to_gql(r) for r in rows]
+        except Exception as e:
+            logger.error(f"Error getting current power outages: {e}")
+            return []
+
+    def resolve_power_outage_history(self, info: Any, limit: int = 50) -> list:
+        try:
+            rows = db.get_recent_outages(limit=limit)
+            return [self._outage_to_gql(r) for r in rows]
+        except Exception as e:
+            logger.error(f"Error getting power outage history: {e}")
+            return []
+
+    def resolve_power_outages_summary(self, info: Any) -> 'PowerOutagesSummary':
+        try:
+            rows = db.get_active_outages()
+            acc  = sum(1 for r in rows if (r.cause_type or '').lower().startswith('acc'))
+            plan = sum(1 for r in rows if (r.cause_type or '').lower().startswith('plan'))
+            total_aff = sum((r.num_affected or 0) for r in rows)
+            last_check = _outage_last_poll
+            return PowerOutagesSummary(
+                target_locality=OUTAGE_TARGET_LOCALITY_SUBSTR,
+                target_county=OUTAGE_TARGET_COUNTY,
+                last_check=last_check.isoformat() if last_check else None,
+                active_count=len(rows),
+                accidental_count=acc,
+                planned_count=plan,
+                total_affected=total_aff,
+            )
+        except Exception as e:
+            logger.error(f"Error getting power outages summary: {e}")
+            return PowerOutagesSummary(
+                target_locality=OUTAGE_TARGET_LOCALITY_SUBSTR,
+                target_county=OUTAGE_TARGET_COUNTY,
+                active_count=0, accidental_count=0, planned_count=0, total_affected=0
+            )
 
     def resolve_current_pressure(self, info: Any) -> Optional[PressureReading]:
         """Resolves the query for the most recent pressure reading.
@@ -2239,8 +2418,22 @@ def initialize_application() -> bool:
             id='system_heartbeat',
             name='System Heartbeat (every minute)'
         )
+        scheduler.add_job(
+            scheduled_outage_check_task,
+            'interval',
+            hours=1,
+            id='outage_check',
+            name='Clopotiva outage check (hourly)'
+        )
         scheduler.start()
-        logger.info("Scheduler started - OCR task daily at 12:00, ESP32-CAM reset daily at 00:00, system heartbeat every minute")
+        logger.info("Scheduler started - OCR daily at 12:00, ESP32-CAM reset daily at 00:00, heartbeat every minute, outage check hourly")
+
+        # Run an immediate outage poll so the card has fresh data at startup.
+        # Done in a thread so it cannot delay app boot if the network is slow.
+        try:
+            threading.Thread(target=scheduled_outage_check_task, daemon=True, name='OutageInitialPoll').start()
+        except Exception as e:
+            logger.warning(f"Could not start initial outage poll thread: {e}")
 
         logger.info("Application initialized with USB sensor data")
         return True

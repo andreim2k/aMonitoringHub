@@ -681,6 +681,23 @@
                 </div>
             </section>
 
+            <section class="bento-card" id="outagesCard" onclick="app.showHistory('outages')" style="cursor: pointer;">
+                <div class="card-label">
+                    <i data-lucide="zap-off"></i>
+                    Power Outages
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <div style="display: flex; align-items: baseline; gap: 0.5rem;">
+                        <div class="card-value" id="outagesCount" style="font-size: 1.75rem; line-height: 1;">--</div>
+                        <div id="outagesCountLabel" style="font-size: 0.75rem; color: var(--text-secondary);">active</div>
+                    </div>
+                    <div id="outagesBreakdown" style="font-size: 0.7rem; color: var(--text-tertiary); display: flex; gap: 0.6rem; flex-wrap: wrap;">
+                        <span>Clopotiva, Hunedoara</span>
+                    </div>
+                    <div id="outagesLastCheck" style="font-size: 0.65rem; color: var(--text-tertiary); margin-top: 0.15rem;">Loading…</div>
+                </div>
+            </section>
+
             <!-- Bottom Row: Electricity -->
             <section class="bento-card card-wide" id="meterCard" onclick="app.showHistory('meter')">
                 <div class="offline-watermark">Offline</div>
@@ -1238,9 +1255,9 @@
 
             // --- Modal & History ---
             function showHistory(metric) {
-                const cardMap = { temp: 'tempCard', humidity: 'humidityCard', pressure: 'pressureCard', co2: 'aqiCard', meter: 'meterCard', weather: 'weatherCard', hardware: 'hardwareCard' };
+                const cardMap = { temp: 'tempCard', humidity: 'humidityCard', pressure: 'pressureCard', co2: 'aqiCard', meter: 'meterCard', weather: 'weatherCard', hardware: 'hardwareCard', outages: 'outagesCard' };
                 const card = document.getElementById(cardMap[metric]);
-                if (card && card.classList.contains('sensor-offline') && metric !== 'hardware') return;
+                if (card && card.classList.contains('sensor-offline') && metric !== 'hardware' && metric !== 'outages') return;
 
                 state.currentMetric = metric;
                 const modal = document.getElementById('historyModal');
@@ -1253,7 +1270,8 @@
                     co2: 'Air Quality Trends',
                     meter: 'Power Consumption',
                     weather: 'Weather Condition History',
-                    hardware: 'System Health'
+                    hardware: 'System Health',
+                    outages: 'Power Outages — Clopotiva'
                 };
                 
                 title.textContent = titles[metric] || 'Metric History';
@@ -1314,6 +1332,18 @@
                             downtimeEvents(hoursBack: ${hours}) { sensor startTime endTime durationSeconds }
                         }`);
                         renderHardwareHistory(res.data, period);
+                        return;
+                    }
+
+                    if (metric === 'outages') {
+                        const res = await gql(`{
+                            powerOutageHistory(limit: 100) {
+                                outageCode causeType locality county startTime startTimeStr expectedEnd
+                                numAffected firstSeen lastSeen isActive resolvedAt
+                            }
+                            powerOutagesSummary { activeCount accidentalCount plannedCount totalAffected lastCheck targetLocality targetCounty }
+                        }`);
+                        renderOutagesHistory(res.data);
                         return;
                     }
 
@@ -1502,6 +1532,103 @@
                 if (activeTab === 'incidents') app.hwTab('incidents');
             }
 
+            function renderOutagesHistory(data) {
+                const events  = data.powerOutageHistory || [];
+                const summary = data.powerOutagesSummary || {};
+
+                const chartEl = document.getElementById('modalChart');
+                if (state.charts.modalChart) { state.charts.modalChart.destroy(); state.charts.modalChart = null; }
+                const chartWrapper = chartEl.parentElement;
+                chartWrapper.style.display = 'none';
+
+                let container = document.getElementById('hardwareHistoryContainer');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = 'hardwareHistoryContainer';
+                    chartWrapper.parentNode.insertBefore(container, chartWrapper);
+                }
+                container.style.display = 'block';
+
+                const fmtDt = (iso) => {
+                    if (!iso) return '--';
+                    const d = new Date(iso);
+                    return d.toLocaleString('en-GB', { timeZone: 'Europe/Bucharest', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
+                };
+                const fmtDuration = (e) => {
+                    if (!e.startTime) return '';
+                    const start = new Date(e.startTime);
+                    const end   = e.isActive ? new Date() : (e.resolvedAt ? new Date(e.resolvedAt) : new Date(e.lastSeen));
+                    const mins  = Math.max(0, Math.floor((end - start) / 60000));
+                    if (mins < 60)   return `${mins}m`;
+                    if (mins < 1440) return `${Math.floor(mins/60)}h ${mins%60}m`;
+                    return `${Math.floor(mins/1440)}d ${Math.floor((mins%1440)/60)}h`;
+                };
+
+                const active   = events.filter(e => e.isActive);
+                const resolved = events.filter(e => !e.isActive);
+
+                const eventRow = (e) => {
+                    const isPlanned    = (e.causeType || '').toLowerCase().startsWith('plan');
+                    const stripeColor  = e.isActive ? (isPlanned ? 'var(--accent-amber)' : 'var(--accent-rose)') : 'var(--text-tertiary)';
+                    const causeLabel   = isPlanned ? 'PLANNED' : 'ACCIDENTAL';
+                    const statusBadge  = e.isActive
+                        ? `<span style="background:rgba(244,63,94,0.18);color:#f43f5e;padding:1px 7px;border-radius:9px;font-size:0.65rem;font-weight:700;">ACTIVE</span>`
+                        : `<span style="background:rgba(148,163,184,0.15);color:var(--text-tertiary);padding:1px 7px;border-radius:9px;font-size:0.65rem;font-weight:700;">RESOLVED</span>`;
+                    const affected = e.numAffected ? ` · ${e.numAffected} clients` : '';
+                    return `<div style="padding:0.55rem 0.75rem;margin-bottom:0.4rem;border-left:3px solid ${stripeColor};background:var(--bg-card-hover);border-radius:4px;font-size:0.8rem;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;gap:0.5rem;flex-wrap:wrap;">
+                            <strong style="color:${stripeColor}">${e.locality || '—'} <span style="font-weight:500;font-size:0.7rem;opacity:0.8;">(${causeLabel})</span></strong>
+                            <span style="display:flex;align-items:center;gap:0.4rem;">
+                                ${statusBadge}
+                                <span style="color:var(--text-tertiary);font-size:0.7rem;font-family:monospace;">${fmtDuration(e)}</span>
+                            </span>
+                        </div>
+                        <div style="color:var(--text-secondary);font-size:0.72rem;font-family:monospace;line-height:1.5;">
+                            <div><span style="color:var(--text-tertiary)">Start:</span> ${e.startTimeStr || fmtDt(e.startTime)}</div>
+                            <div><span style="color:var(--text-tertiary)">Expected:</span> ${e.expectedEnd || '—'}</div>
+                            ${!e.isActive ? `<div><span style="color:var(--text-tertiary)">Cleared:</span> ${fmtDt(e.resolvedAt)}</div>` : ''}
+                            ${affected ? `<div style="color:var(--text-tertiary)">${affected}</div>` : ''}
+                        </div>
+                    </div>`;
+                };
+
+                const list = (title, items) => `
+                    <div style="font-size:0.78rem;color:var(--text-secondary);margin:0.8rem 0 0.4rem;font-weight:600;">${title} <span style="color:var(--text-tertiary);font-weight:400;">(${items.length})</span></div>
+                    ${items.length === 0
+                        ? `<div style="color:var(--text-tertiary);font-size:0.8rem;padding:0.4rem 0;">None.</div>`
+                        : items.map(eventRow).join('')}
+                `;
+
+                container.innerHTML = `
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(85px,1fr));gap:0.5rem;margin-bottom:1.1rem;">
+                        <div style="text-align:center;padding:0.6rem 0.4rem;background:var(--bg-card-hover);border-radius:var(--radius-sm);">
+                            <div style="font-size:0.65rem;color:var(--text-tertiary);">ACTIVE</div>
+                            <div style="font-size:1.3rem;font-weight:700;color:${summary.activeCount ? 'var(--accent-rose)' : 'var(--accent-emerald)'};">${summary.activeCount || 0}</div>
+                        </div>
+                        <div style="text-align:center;padding:0.6rem 0.4rem;background:var(--bg-card-hover);border-radius:var(--radius-sm);">
+                            <div style="font-size:0.65rem;color:var(--text-tertiary);">ACCIDENTAL</div>
+                            <div style="font-size:1.3rem;font-weight:700;">${summary.accidentalCount || 0}</div>
+                        </div>
+                        <div style="text-align:center;padding:0.6rem 0.4rem;background:var(--bg-card-hover);border-radius:var(--radius-sm);">
+                            <div style="font-size:0.65rem;color:var(--text-tertiary);">PLANNED</div>
+                            <div style="font-size:1.3rem;font-weight:700;">${summary.plannedCount || 0}</div>
+                        </div>
+                        <div style="text-align:center;padding:0.6rem 0.4rem;background:var(--bg-card-hover);border-radius:var(--radius-sm);">
+                            <div style="font-size:0.65rem;color:var(--text-tertiary);">AFFECTED</div>
+                            <div style="font-size:1.3rem;font-weight:700;">${summary.totalAffected || 0}</div>
+                        </div>
+                    </div>
+                    <div style="font-size:0.7rem;color:var(--text-tertiary);margin-bottom:0.4rem;text-align:right;">
+                        Monitoring <strong>${summary.targetLocality || 'CLOPOTIVA'}, ${summary.targetCounty || 'HUNEDOARA'}</strong>
+                        ${summary.lastCheck ? ` · last check ${fmtDt(summary.lastCheck)}` : ''}
+                    </div>
+                    <div style="overflow-y:auto;max-height:480px;padding-right:2px;">
+                        ${list('Active', active)}
+                        ${list('Recently resolved', resolved.slice(0, 50))}
+                    </div>
+                `;
+            }
+
             function renderChart(data, metric, period = 'day') {
                 const chartEl = document.getElementById('modalChart');
                 const hwContainer = document.getElementById('hardwareHistoryContainer');
@@ -1678,6 +1805,43 @@
                 countdownEl.textContent = timeStr;
             }
 
+            async function updateOutagesCard() {
+                try {
+                    const res = await gql(`{
+                        powerOutagesSummary { activeCount accidentalCount plannedCount totalAffected lastCheck targetLocality targetCounty }
+                    }`);
+                    const s = res.data && res.data.powerOutagesSummary;
+                    if (!s) return;
+                    const countEl     = document.getElementById('outagesCount');
+                    const countLblEl  = document.getElementById('outagesCountLabel');
+                    const breakdownEl = document.getElementById('outagesBreakdown');
+                    const lastCheckEl = document.getElementById('outagesLastCheck');
+
+                    if (s.activeCount > 0) {
+                        countEl.textContent = s.activeCount;
+                        countEl.style.color = 'var(--accent-rose)';
+                        countLblEl.textContent = 'active';
+                        const parts = [];
+                        if (s.accidentalCount > 0) parts.push(`<span style="color:var(--accent-rose)">${s.accidentalCount} accidental</span>`);
+                        if (s.plannedCount > 0)    parts.push(`<span style="color:var(--accent-amber)">${s.plannedCount} planned</span>`);
+                        if (s.totalAffected > 0)   parts.push(`${s.totalAffected} clients affected`);
+                        breakdownEl.innerHTML = parts.join(' · ') || `${s.targetLocality}, ${s.targetCounty}`;
+                    } else {
+                        countEl.textContent = '✓';
+                        countEl.style.color = 'var(--accent-emerald)';
+                        countLblEl.textContent = 'all clear';
+                        breakdownEl.innerHTML = `${s.targetLocality || 'Clopotiva'}, ${s.targetCounty || 'Hunedoara'}`;
+                    }
+
+                    if (s.lastCheck) {
+                        const d = new Date(s.lastCheck);
+                        lastCheckEl.textContent = 'Last check ' + d.toLocaleString('en-GB', { timeZone: 'Europe/Bucharest', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false });
+                    } else {
+                        lastCheckEl.textContent = 'Awaiting first poll…';
+                    }
+                } catch (e) { console.error('Outages card update failed', e); }
+            }
+
             return {
                 init: () => {
                     fetchInitialData();
@@ -1687,6 +1851,10 @@
                     // Update restart countdown every second
                     updateRestartCountdown();
                     setInterval(updateRestartCountdown, 1000);
+
+                    // Power outages card — initial + refresh every 5 minutes (backend polls every 15 min)
+                    updateOutagesCard();
+                    setInterval(updateOutagesCard, 5 * 60 * 1000);
 
                     // Add entry animations
                     gsap.fromTo('.bento-card',
