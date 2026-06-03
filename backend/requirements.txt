@@ -27,3 +27,6 @@ python-dotenv>=1.0.0
 
 # Image processing (optional for future use)
 Pillow>=11.3.0
+
+# PDF text extraction for parsing weekly scheduled-outage PDFs
+pypdf>=6.0.0
