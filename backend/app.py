@@ -333,6 +333,9 @@ def scheduled_esp32_reset_task():
     logger.info("=== SCHEDULED ESP32-CAM RESET TASK COMPLETED ===")
 
 
+_esp32cam_last_status = {'up': False, 'ready': False, 'checked_at': 0}
+
+
 def scheduled_heartbeat_task():
     """Records a per-minute system heartbeat (which sensors are up)."""
     try:
@@ -347,16 +350,29 @@ def scheduled_heartbeat_task():
                 mq135_up = (current_time - app.usb_data_processor.last_mq135_reading) < 120
 
         esp32cam_up = False
+        esp32cam_ready = False
         try:
             cfg = load_app_config()
             esp32_url = cfg.get('webcam', {}).get('url', '').replace('/snapshot', '').replace('/capture', '')
             if esp32_url:
                 response = requests.get(f"{esp32_url}/status", timeout=3)
                 esp32cam_up = response.status_code == 200
+                if esp32cam_up:
+                    try:
+                        body = response.json()
+                        cam = body.get('camera') if isinstance(body, dict) else None
+                        esp32cam_ready = bool(cam.get('ready')) if isinstance(cam, dict) else True
+                    except Exception:
+                        esp32cam_ready = True
         except Exception:
             esp32cam_up = False
+            esp32cam_ready = False
 
-        db.add_heartbeat(bm280_up, mq135_up, esp32cam_up)
+        _esp32cam_last_status['up'] = esp32cam_up
+        _esp32cam_last_status['ready'] = esp32cam_ready
+        _esp32cam_last_status['checked_at'] = current_time
+
+        db.add_heartbeat(bm280_up, mq135_up, esp32cam_up and esp32cam_ready)
     except Exception as e:
         logger.error(f"Heartbeat task error: {e}")
 
@@ -2494,6 +2510,19 @@ def events() -> Response:
                                     mq135_seconds_ago = current_time - app.usb_data_processor.last_mq135_reading
                                     mq135_connected = "online" if mq135_seconds_ago < 120 else "stale"
 
+                            esp32cam_status = "offline"
+                            esp32cam_seconds_ago = None
+                            if _esp32cam_last_status['checked_at']:
+                                esp32cam_seconds_ago = current_time - _esp32cam_last_status['checked_at']
+                                if esp32cam_seconds_ago > 180:
+                                    esp32cam_status = "stale"
+                                elif _esp32cam_last_status['up'] and _esp32cam_last_status['ready']:
+                                    esp32cam_status = "online"
+                                elif _esp32cam_last_status['up']:
+                                    esp32cam_status = "not ready"
+                                else:
+                                    esp32cam_status = "offline"
+
                             sensor_status_message = {
                                 'type': 'sensor_status',
                                 'timestamp': current_time,
@@ -2507,6 +2536,10 @@ def events() -> Response:
                                     'mq135': {
                                         'status': mq135_connected,
                                         'seconds_since_reading': mq135_seconds_ago
+                                    },
+                                    'esp32cam': {
+                                        'status': esp32cam_status,
+                                        'seconds_since_reading': esp32cam_seconds_ago
                                     }
                                 }
                             }

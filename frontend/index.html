@@ -915,24 +915,33 @@
                 
                 if (data.aqi !== null) {
                     document.getElementById('currentAQI').textContent = data.aqi;
+                    updateSeverity('currentAQI', data.aqi, 'aqi');
                     const timeStr = ts.aqi ? FULL_FMT.format(new Date(ts.aqi)) : BUCHAREST_FMT.format(new Date());
                     document.getElementById('aqiLastUpdate').textContent = `Updated ${timeStr}`;
 
                     const aqStatus = document.getElementById('airQualityStatus');
                     const aqSub = document.querySelector('#aqiCard .card-subtext');
-                    // ... (rest of aqi logic)
-                    if (data.aqi < 30) {
+                    // MQ135 returns a 1-5 index: 1=Excellent, 2=Good, 3=Fair, 4=Poor, 5=Bad
+                    if (data.aqi <= 1) {
                         aqStatus.textContent = 'Pristine';
                         aqStatus.style.color = 'var(--accent-emerald)';
                         aqSub.textContent = 'Pure mountain air. Exceptional quality.';
-                    } else if (data.aqi < 70) {
+                    } else if (data.aqi <= 2) {
                         aqStatus.textContent = 'Good';
-                        aqStatus.style.color = 'var(--accent-amber)';
+                        aqStatus.style.color = 'var(--accent-emerald)';
                         aqSub.textContent = 'Healthy mountain environment.';
-                    } else {
-                        aqStatus.textContent = 'Compromised';
+                    } else if (data.aqi <= 3) {
+                        aqStatus.textContent = 'Fair';
+                        aqStatus.style.color = 'var(--accent-amber)';
+                        aqSub.textContent = 'Moderate air quality. Consider ventilation.';
+                    } else if (data.aqi <= 4) {
+                        aqStatus.textContent = 'Poor';
                         aqStatus.style.color = 'var(--accent-rose)';
-                        aqSub.textContent = 'Consider ventilation, even in the mountains.';
+                        aqSub.textContent = 'Poor air quality. Ventilate now.';
+                    } else {
+                        aqStatus.textContent = 'Hazardous';
+                        aqStatus.style.color = 'var(--accent-rose)';
+                        aqSub.textContent = 'Hazardous air. Ventilate immediately.';
                     }
                 }
                 
@@ -990,23 +999,32 @@
                 el.classList.remove('val-ok', 'val-warn', 'val-bad');
                 
                 if (type === 'temp') {
-                    if (val < 18 || val > 27) el.classList.add('val-warn');
-                    else if (val < 10 || val > 35) el.classList.add('val-bad');
+                    if (val < 10 || val > 35) el.classList.add('val-bad');
+                    else if (val < 18 || val > 27) el.classList.add('val-warn');
                     else el.classList.add('val-ok');
                 } else if (type === 'humidity') {
-                    if (val < 30 || val > 60) el.classList.add('val-warn');
+                    if (val < 20 || val > 70) el.classList.add('val-bad');
+                    else if (val < 30 || val > 60) el.classList.add('val-warn');
                     else el.classList.add('val-ok');
                 } else if (type === 'co2') {
-                    if (val > 1200) el.classList.add('val-bad');
-                    else if (val > 800) el.classList.add('val-warn');
+                    // ASHRAE: <600 fresh, 600-1000 acceptable, >1000 poor, >1500 bad
+                    if (val > 1500) el.classList.add('val-bad');
+                    else if (val > 600) el.classList.add('val-warn');
                     else el.classList.add('val-ok');
                 } else if (type === 'nh3') {
-                    if (val > 300) el.classList.add('val-bad');
-                    else if (val > 150) el.classList.add('val-warn');
+                    // MQ135 NH3 baseline ~350ppm equivalent; flag spikes above 2x/3x baseline
+                    if (val > 1000) el.classList.add('val-bad');
+                    else if (val > 600) el.classList.add('val-warn');
                     else el.classList.add('val-ok');
                 } else if (type === 'alcohol') {
-                    if (val > 200) el.classList.add('val-bad');
-                    else if (val > 100) el.classList.add('val-warn');
+                    // MQ135 alcohol baseline ~320ppm equivalent; flag spikes
+                    if (val > 1000) el.classList.add('val-bad');
+                    else if (val > 600) el.classList.add('val-warn');
+                    else el.classList.add('val-ok');
+                } else if (type === 'aqi') {
+                    // 1-5 index: 1-2 ok, 3 warn, 4-5 bad
+                    if (val >= 4) el.classList.add('val-bad');
+                    else if (val >= 3) el.classList.add('val-warn');
                     else el.classList.add('val-ok');
                 }
             }
@@ -1062,11 +1080,13 @@
             function updateSensorStatus(status) {
                 const bm = document.getElementById('bm280Status');
                 const mq = document.getElementById('mq135Status');
-                
+                const esp = document.getElementById('espStatus');
+
                 // Humidity is sourced from OpenWeatherMap, so we don't disable it with BM280
                 const bmCards = [document.getElementById('tempCard'), document.getElementById('pressureCard')];
                 const mqCards = [document.getElementById('aqiCard')];
-                
+                const espCards = [document.getElementById('meterCard')];
+
                 if (status.bm280) {
                     const isOnline = status.bm280.status === 'online';
                     bm.textContent = status.bm280.status.charAt(0).toUpperCase() + status.bm280.status.slice(1);
@@ -1078,6 +1098,14 @@
                     mq.textContent = status.mq135.status.charAt(0).toUpperCase() + status.mq135.status.slice(1);
                     mq.className = isOnline ? 'val-ok' : 'val-bad';
                     mqCards.forEach(card => card && card.classList.toggle('sensor-offline', !isOnline));
+                }
+                if (status.esp32cam && esp) {
+                    const s = status.esp32cam.status;  // 'online' | 'not ready' | 'stale' | 'offline'
+                    const isOnline = s === 'online';
+                    const label = { 'online': 'Active', 'not ready': 'Not Ready', 'stale': 'Stale', 'offline': 'Offline' }[s] || s;
+                    esp.textContent = label;
+                    esp.className = isOnline ? 'val-ok' : 'val-bad';
+                    espCards.forEach(card => card && card.classList.toggle('sensor-offline', !isOnline));
                 }
             }
 
