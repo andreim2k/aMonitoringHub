@@ -672,11 +672,7 @@
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem;">
                         <span style="color: var(--text-secondary)">ESP32-CAM</span>
-                        <span style="display: flex; align-items: center; gap: 0.35rem;">
-                            <i data-lucide="rotate-cw" style="width: 12px; height: 12px; color: var(--accent-amber);"></i>
-                            <span id="restartCountdown" class="text-mono" style="font-size: 0.65rem; color: var(--accent-amber); line-height: 1; display: inline-flex; align-items: center; transform: translateY(1px);">--:--:--</span>
-                            <span id="espStatus" class="val-ok">Active</span>
-                        </span>
+                        <span id="espStatus" class="val-ok">Active</span>
                     </div>
                 </div>
             </section>
@@ -1823,22 +1819,6 @@
                 });
             }
 
-            function updateRestartCountdown() {
-                const countdownEl = document.getElementById('restartCountdown');
-                if (!countdownEl) return;
-
-                const now = new Date();
-                const nextMidnight = new Date(now);
-                nextMidnight.setHours(24, 0, 0, 0);
-
-                const timeUntilRestart = nextMidnight - now;
-                const hours = Math.floor(timeUntilRestart / 3600000);
-                const minutes = Math.floor((timeUntilRestart % 3600000) / 60000);
-                const seconds = Math.floor((timeUntilRestart % 60000) / 1000);
-
-                const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-                countdownEl.textContent = timeStr;
-            }
 
             async function updateOutagesCard() {
                 try {
@@ -1914,10 +1894,6 @@
                     fetchInitialData();
                     connectSSE();
                     captureSnapshot('VGA (640x480)'); // Auto capture on load at VGA resolution
-
-                    // Update restart countdown every second
-                    updateRestartCountdown();
-                    setInterval(updateRestartCountdown, 1000);
 
                     // Power outages card — initial + refresh every 5 minutes (backend polls every 15 min)
                     updateOutagesCard();

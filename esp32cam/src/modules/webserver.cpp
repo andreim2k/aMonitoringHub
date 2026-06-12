@@ -1109,6 +1109,9 @@ void WebServerManager::generateStatusJson(JsonDocument &doc) {
   camera["hmirror"] = settings.hmirror;
   camera["vflip"] = settings.vflip;
 
+  // Uptime — used by dashboard to count down to next self-restart (24h)
+  doc["uptime_ms"] = millis();
+
   // Build info
   JsonObject build = doc["build"].to<JsonObject>();
   build["number"] = BUILD_NUMBER;

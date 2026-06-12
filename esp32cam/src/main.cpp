@@ -37,9 +37,10 @@ unsigned long last_wifi_check = 0;
 unsigned long last_memory_check = 0;
 unsigned long last_watchdog_reset = 0;
 bool ota_initialized = false;
-const unsigned long WIFI_CHECK_INTERVAL = 30000;     // 30 seconds
-const unsigned long MEMORY_CHECK_INTERVAL = 60000;   // 60 seconds
-const unsigned long WATCHDOG_RESET_INTERVAL = 10000; // 10 seconds
+const unsigned long WIFI_CHECK_INTERVAL = 30000;                    // 30 seconds
+const unsigned long MEMORY_CHECK_INTERVAL = 60000;                  // 60 seconds
+const unsigned long WATCHDOG_RESET_INTERVAL = 10000;                // 10 seconds
+const unsigned long DAILY_RESTART_MS = 24UL * 60UL * 60UL * 1000UL; // 24 hours
 
 // WiFi reconnect request from web UI
 volatile bool wifi_reconnect_requested = false;
@@ -518,6 +519,13 @@ void setup() {
 // ===================
 
 void loop() {
+  // Self-restart after 24h — independent of WiFi/server
+  if (millis() > DAILY_RESTART_MS) {
+    Serial.println("24h uptime reached — scheduled self-restart");
+    delay(100);
+    ESP.restart();
+  }
+
   // Reset watchdog timer to prevent crashes
   resetWatchdog();
 
