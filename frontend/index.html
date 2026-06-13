@@ -1681,23 +1681,35 @@
                     weather: '#A855F7'
                 };
 
-                // Format labels based on period
+                const TZ = 'Europe/Bucharest';
                 const formatLabel = (timestamp) => {
                     const date = new Date(timestamp * 1000);
                     if (period === 'day') {
-                        return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+                        return date.toLocaleTimeString('en-GB', { timeZone: TZ, hour: '2-digit', minute: '2-digit', hour12: false });
                     } else if (period === 'week') {
-                        return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                        return date.toLocaleDateString('en-GB', { timeZone: TZ, weekday: 'short', day: 'numeric', month: 'short' });
                     } else if (period === 'month') {
-                        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                    } else if (period === 'year') {
-                        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        return date.toLocaleDateString('en-GB', { timeZone: TZ, day: 'numeric', month: 'short' });
+                    } else {
+                        return date.toLocaleDateString('en-GB', { timeZone: TZ, month: 'short', year: '2-digit' });
                     }
-                    return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 };
+
+                // X-axis tick limits per period
+                const xTickLimit = { day: 12, week: 7, month: 15, year: 12 }[period] || 12;
 
                 let datasets = [];
                 let yTicks = { color: '#52525B', font: { size: 10 } };
+                let extraScales = {};
+
+                // Helper: compute tight Y bounds from an array of values
+                const yBounds = (vals) => {
+                    const clean = vals.filter(v => v != null && isFinite(v));
+                    if (!clean.length) return {};
+                    const lo = Math.min(...clean), hi = Math.max(...clean);
+                    const pad = Math.max((hi - lo) * 0.05, 1);
+                    return { suggestedMin: lo - pad, suggestedMax: hi + pad };
+                };
 
                 if (metric === 'weather') {
                     const conditions = ['Clear', 'Clouds', 'CloudsHeavy', 'Drizzle', 'Rain', 'Sleet', 'Snow', 'Fog', 'Thunderstorm'];
@@ -1710,72 +1722,51 @@
                         tension: 0.1,
                         pointRadius: 4
                     });
-                    yTicks = {
-                        callback: (value) => conditions[value] || '',
-                        stepSize: 1,
-                        color: '#52525B'
-                    };
+                    yTicks = { callback: (v) => conditions[v] || '', stepSize: 1, color: '#52525B' };
+
                 } else if (metric === 'co2') {
-                    // Multi-dataset for Air Quality
+                    // AQI (1-5) goes on a separate right axis so CO2/NH3/Alcohol scale correctly
                     datasets = [
-                        {
-                            label: 'CO₂ (PPM)',
-                            data: data.map(d => d.co2Ppm),
-                            borderColor: colors.co2,
-                            tension: 0.4,
-                            pointRadius: 0,
-                            borderWidth: 2
-                        },
-                        {
-                            label: 'NH₃ (PPM)',
-                            data: data.map(d => d.nh3Ppm),
-                            borderColor: colors.nh3,
-                            tension: 0.4,
-                            pointRadius: 0,
-                            borderWidth: 2
-                        },
-                        {
-                            label: 'Alcohol (PPM)',
-                            data: data.map(d => d.alcoholPpm),
-                            borderColor: colors.alc,
-                            tension: 0.4,
-                            pointRadius: 0,
-                            borderWidth: 2
-                        },
-                        {
-                            label: 'AQI Index',
-                            data: data.map(d => d.aqi),
-                            borderColor: colors.aqi,
-                            tension: 0.4,
-                            pointRadius: 0,
-                            borderWidth: 1.5
-                        }
+                        { label: 'CO₂ (PPM)',    yAxisID: 'y',  data: data.map(d => d.co2Ppm),     borderColor: colors.co2, tension: 0.4, pointRadius: 0, borderWidth: 2 },
+                        { label: 'NH₃ (PPM)',    yAxisID: 'y',  data: data.map(d => d.nh3Ppm),     borderColor: colors.nh3, tension: 0.4, pointRadius: 0, borderWidth: 2 },
+                        { label: 'Alcohol (PPM)',yAxisID: 'y',  data: data.map(d => d.alcoholPpm), borderColor: colors.alc, tension: 0.4, pointRadius: 0, borderWidth: 2 },
+                        { label: 'AQI Index',    yAxisID: 'y2', data: data.map(d => d.aqi),        borderColor: colors.aqi, tension: 0.4, pointRadius: 0, borderWidth: 1.5 }
                     ];
+                    const gasVals = [...data.map(d => d.co2Ppm), ...data.map(d => d.nh3Ppm), ...data.map(d => d.alcoholPpm)];
+                    const gasBounds = yBounds(gasVals);
+                    yTicks = { color: '#52525B', font: { size: 10 } };
+                    extraScales = {
+                        y2: {
+                            position: 'right',
+                            min: 0, max: 5,
+                            grid: { display: false },
+                            ticks: { color: '#52525B', font: { size: 9 }, stepSize: 1,
+                                callback: (v) => v === 0 ? '' : `AQI ${v}` }
+                        }
+                    };
+                    Object.assign(yTicks, gasBounds);
+
                 } else {
                     const values = data.map(d => {
-                        if (metric === 'temp') return d.temperatureC;
+                        if (metric === 'temp')     return d.temperatureC;
                         if (metric === 'humidity') return d.humidityPercent;
                         if (metric === 'pressure') return d.pressureHpa;
-                        if (metric === 'meter') return parseFloat(d.meterValue);
+                        if (metric === 'meter')    return parseFloat(d.meterValue);
                         return 0;
                     });
-
-                    // Show points if only 1 data point, hide if many
                     const showPoints = data.length <= 5;
-
                     datasets.push({
                         label: metric.toUpperCase(),
                         data: values,
                         borderColor: colors[metric],
                         backgroundColor: `${colors[metric]}20`,
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 2,
+                        fill: true, tension: 0.4, borderWidth: 2,
                         pointRadius: showPoints ? 5 : 0,
                         pointBackgroundColor: colors[metric],
-                        pointBorderColor: '#141416',
-                        pointBorderWidth: 2
+                        pointBorderColor: '#141416', pointBorderWidth: 2
                     });
+                    const bounds = yBounds(values);
+                    Object.assign(yTicks, bounds);
                 }
 
                 state.charts.modalChart = new Chart(ctx, {
@@ -1787,8 +1778,8 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { 
-                            legend: { 
+                        plugins: {
+                            legend: {
                                 display: metric === 'co2',
                                 labels: { color: '#A1A1AA', font: { size: 10, family: 'Geist Sans' }, usePointStyle: true }
                             },
@@ -1796,24 +1787,40 @@
                                 mode: 'index',
                                 intersect: false,
                                 callbacks: {
+                                    title: (items) => {
+                                        if (!items.length) return '';
+                                        const ts = data[items[0].dataIndex]?.timestampUnix;
+                                        if (!ts) return items[0].label;
+                                        const d = new Date(ts * 1000);
+                                        return d.toLocaleString('en-GB', {
+                                            timeZone: TZ,
+                                            day: '2-digit', month: 'short', year: 'numeric',
+                                            hour: '2-digit', minute: '2-digit', second: '2-digit',
+                                            hour12: false
+                                        });
+                                    },
                                     label: (context) => {
                                         if (metric === 'weather') {
                                             const conditions = ['Clear', 'Clouds', 'CloudsHeavy', 'Drizzle', 'Rain', 'Sleet', 'Snow', 'Fog', 'Thunderstorm'];
                                             return `Condition: ${conditions[context.parsed.y] || 'Unknown'}`;
                                         }
-                                        return `${context.dataset.label}: ${context.parsed.y}`;
+                                        return `${context.dataset.label}: ${typeof context.parsed.y === 'number' ? context.parsed.y.toFixed(1) : context.parsed.y}`;
                                     }
                                 }
                             }
                         },
                         scales: {
-                            x: { grid: { display: false }, ticks: { color: '#52525B', font: { size: 10 } } },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#52525B', font: { size: 10 }, maxTicksLimit: xTickLimit, maxRotation: 0 }
+                            },
                             y: {
                                 grid: { color: 'rgba(255,255,255,0.03)' },
-                                ticks: yTicks,
-                                suggestedMin: metric === 'meter' ? Math.max(...datasets[0].data) * 0.95 : undefined,
-                                suggestedMax: metric === 'meter' ? Math.max(...datasets[0].data) * 1.05 : undefined
-                            }
+                                ticks: { ...yTicks, maxTicksLimit: 8 },
+                                suggestedMin: yTicks.suggestedMin,
+                                suggestedMax: yTicks.suggestedMax
+                            },
+                            ...extraScales
                         }
                     }
                 });
