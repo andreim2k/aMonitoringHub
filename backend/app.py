@@ -296,6 +296,7 @@ _PLUG_DPS_CURRENT = "21"   # mA
 _PLUG_DPS_POWER   = "22"   # 0.1 W
 _PLUG_DPS_VOLTAGE = "23"   # 0.1 V
 _smartplug_last = {'volts': None, 'amps': None, 'watts': None, 'polled_at': 0, 'online': False}
+_smartplug_lock = threading.Lock()  # only one TCP connection to the device at a time
 
 
 def scheduled_heartbeat_task():
@@ -340,31 +341,49 @@ def scheduled_heartbeat_task():
         logger.error(f"Heartbeat task error: {e}")
 
 
+def _poll_smartplug_device():
+    """Connect to the Tuya device and return fresh (volts, amps, watts) or raise."""
+    import tinytuya
+    cfg = load_app_config()
+    plug_cfg = cfg.get('smartplug', {})
+    key = plug_cfg.get('local_key', '')
+    device_id = plug_cfg.get('device_id', '')
+    ip = plug_cfg.get('ip', '')
+    version = plug_cfg.get('version', 3.5)
+    if not key or not device_id or not ip:
+        raise ValueError("Smart plug not configured")
+    plug = tinytuya.OutletDevice(dev_id=device_id, address=ip, local_key=key, version=version)
+    plug.set_socketTimeout(6)
+    result = plug.updatedps(index=[int(_PLUG_DPS_CURRENT), int(_PLUG_DPS_POWER), int(_PLUG_DPS_VOLTAGE)])
+    dps = result.get('dps', {}) if isinstance(result, dict) else {}
+    # updatedps sometimes returns partial DPS (missing voltage); fall back to status() for a full read
+    if _PLUG_DPS_VOLTAGE not in dps or _PLUG_DPS_POWER not in dps or _PLUG_DPS_CURRENT not in dps:
+        status = plug.status()
+        full_dps = status.get('dps', {}) if isinstance(status, dict) else {}
+        dps = {**full_dps, **dps}  # merge: updatedps values win over status() values
+    if _PLUG_DPS_VOLTAGE not in dps or _PLUG_DPS_POWER not in dps:
+        raise ValueError("No complete DPS data from device")
+    volts = dps.get(_PLUG_DPS_VOLTAGE, 0) / 10.0
+    amps  = dps.get(_PLUG_DPS_CURRENT, 0) / 1000.0
+    watts = dps.get(_PLUG_DPS_POWER,   0) / 10.0
+    return volts, amps, watts
+
+
 def scheduled_smartplug_task():
     """Poll the Tuya T34 smart plug and record voltage, current, and power."""
     global _smartplug_last
+    if not _smartplug_lock.acquire(blocking=False):
+        return  # another poll is already in progress
     try:
-        import tinytuya
-        cfg = load_app_config()
-        plug_cfg = cfg.get('smartplug', {})
-        key = plug_cfg.get('local_key', '')
-        device_id = plug_cfg.get('device_id', '')
-        ip = plug_cfg.get('ip', '')
-        version = plug_cfg.get('version', 3.5)
-        if not key or not device_id or not ip:
-            return
-        plug = tinytuya.OutletDevice(dev_id=device_id, address=ip, local_key=key, version=version)
-        plug.set_socketTimeout(5)
-        status = plug.status()
-        dps = status.get('dps', {}) if isinstance(status, dict) else {}
-        if _PLUG_DPS_VOLTAGE not in dps and _PLUG_DPS_POWER not in dps:
-            _smartplug_last['online'] = False
-            _smartplug_last['polled_at'] = time.time()
-            return
-        volts = dps.get(_PLUG_DPS_VOLTAGE, 0) / 10.0
-        amps  = dps.get(_PLUG_DPS_CURRENT, 0) / 1000.0
-        watts = dps.get(_PLUG_DPS_POWER,   0) / 10.0
-        now   = time.time()
+        from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
+        with ThreadPoolExecutor(max_workers=1) as ex:
+            future = ex.submit(_poll_smartplug_device)
+            try:
+                volts, amps, watts = future.result(timeout=12)
+            except FuturesTimeout:
+                future.cancel()
+                raise RuntimeError("Device poll timed out after 12s")
+        now = time.time()
         _smartplug_last.update({'volts': volts, 'amps': amps, 'watts': watts, 'polled_at': now, 'online': True})
         db.add_plug_reading(volts, amps, watts)
         if has_sse_subscribers():
@@ -382,9 +401,11 @@ def scheduled_smartplug_task():
             except Exception:
                 pass
     except Exception as e:
-        _smartplug_last['online'] = False
-        _smartplug_last['polled_at'] = time.time()
         logger.error(f"Smart plug poll error: {e}")
+        # Don't touch _smartplug_last on failure — preserve last good state.
+        # The sensor_status SSE age check will show 'stale' after 90s naturally.
+    finally:
+        _smartplug_lock.release()
 
 
 # Power outage monitoring (Clopotiva, Hunedoara) — polls the public ArcGIS map API
@@ -2534,23 +2555,21 @@ def events() -> Response:
 
             # Immediately send latest temperature from database
             try:
-                with db.get_connection() as conn:
-                    cursor = conn.cursor()
-                    cursor.execute("SELECT temperature_c, timestamp, sensor_type, sensor_id FROM temperature_readings ORDER BY timestamp DESC LIMIT 1")
-                    temp_row = cursor.fetchone()
-                    if temp_row:
-                        temp_data = {
-                            'temperature_c': temp_row[0],
-                            'timestamp_iso': temp_row[1],
-                            'sensor_type': temp_row[2],
-                            'sensor_id': temp_row[3]
-                        }
-                        sse_message = {
-                            'type': 'temperature_update',
-                            'data': temp_data,
-                            'timestamp': temp_row[1]
-                        }
-                        yield f"data: {json.dumps(sse_message)}\n\n"
+                readings = db.get_recent_readings(limit=1)
+                if readings:
+                    r = readings[0]
+                    temp_data = {
+                        'temperature_c': r.temperature_c,
+                        'timestamp_iso': r.timestamp.isoformat() if r.timestamp else None,
+                        'sensor_type': r.sensor_type,
+                        'sensor_id': r.sensor_id
+                    }
+                    sse_message = {
+                        'type': 'temperature_update',
+                        'data': temp_data,
+                        'timestamp': temp_data['timestamp_iso']
+                    }
+                    yield f"data: {json.dumps(sse_message)}\n\n"
             except Exception as e:
                 print(f"Error sending initial data: {e}")
 
@@ -2604,9 +2623,9 @@ def events() -> Response:
                             smartplug_status = "offline"
                             if _smartplug_last['polled_at']:
                                 sp_age = current_time - _smartplug_last['polled_at']
-                                if sp_age > 120:
+                                if sp_age > 30:
                                     smartplug_status = "stale"
-                                elif _smartplug_last['online']:
+                                else:
                                     smartplug_status = "online"
 
                             sensor_status_message = {
@@ -2633,6 +2652,7 @@ def events() -> Response:
                                         'watts': _smartplug_last.get('watts'),
                                         'volts': _smartplug_last.get('volts'),
                                         'amps': _smartplug_last.get('amps'),
+                                        'polled_at': _smartplug_last.get('polled_at') or None,
                                     }
                                 }
                             }
@@ -2746,16 +2766,16 @@ def initialize_application() -> bool:
         scheduler.add_job(
             scheduled_heartbeat_task,
             'interval',
-            seconds=60,
+            seconds=20,
             id='system_heartbeat',
             name='System Heartbeat (every minute)'
         )
         scheduler.add_job(
             scheduled_smartplug_task,
             'interval',
-            seconds=30,
+            seconds=5,
             id='smartplug_poll',
-            name='Smart Plug poll (every 30s)'
+            name='Smart Plug poll (every 5s)'
         )
         scheduler.add_job(
             scheduled_outage_check_task,
@@ -2774,8 +2794,44 @@ def initialize_application() -> bool:
         scheduler.start()
         logger.info("Scheduler started - OCR 12:00, ESP32-CAM 00:00, heartbeat 60s, outage API hourly, outage PDF 05:30 daily")
 
-        # Run immediate polls so the card has fresh data at startup. In threads so they
-        # cannot delay app boot if the network is slow.
+        # Pre-populate _smartplug_last from DB so page refresh shows data immediately,
+        # even before the first live poll completes.
+        try:
+            recent = db.get_recent_plug_readings(limit=1)
+            if recent:
+                r = recent[0]
+                _smartplug_last.update({
+                    'volts': r.voltage_v,
+                    'amps': r.current_a,
+                    'watts': r.power_w,
+                    'polled_at': r.timestamp_unix,
+                    'online': True,
+                })
+                logger.info(f"Smart plug pre-seeded from DB: {r.power_w}W @ {r.voltage_v}V")
+        except Exception as e:
+            logger.warning(f"Could not pre-seed smart plug from DB: {e}")
+
+        # Pre-check ESP32-CAM so it shows online immediately rather than waiting 60s for heartbeat.
+        try:
+            cfg = load_app_config()
+            esp32_base = cfg.get('webcam', {}).get('url', '').replace('/snapshot', '').replace('/capture', '')
+            if esp32_base:
+                r = requests.get(f"{esp32_base}/status", timeout=3)
+                if r.status_code == 200:
+                    _esp32cam_last_status['up'] = True
+                    _esp32cam_last_status['ready'] = True
+                    _esp32cam_last_status['checked_at'] = time.time()
+                    try:
+                        body = r.json()
+                        cam = body.get('camera') if isinstance(body, dict) else None
+                        _esp32cam_last_status['ready'] = bool(cam.get('ready')) if isinstance(cam, dict) else True
+                        _esp32cam_last_status['uptime_ms'] = body.get('uptime_ms')
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+
+        # Run immediate polls so the card has fresh data at startup.
         try:
             threading.Thread(target=scheduled_outage_check_task, daemon=True, name='OutageInitialPoll').start()
             threading.Thread(target=scheduled_pdf_outage_check_task, daemon=True, name='OutagePdfInitialScan').start()
@@ -3078,16 +3134,16 @@ def run_ocr() -> Response:
                     break
 
             if four_digit:
-                meter_value_with_prefix = "1" + four_digit
+                meter_value_with_prefix = "2" + four_digit
 
-                # Validation 1: Check minimum threshold (must be >= 19770)
+                # Validation 1: Check minimum threshold (must be >= 20000)
                 try:
                     meter_int = int(meter_value_with_prefix)
-                    if meter_int < 19770:
-                        logger.warning(f"❌ Reading {meter_value_with_prefix} below minimum threshold 19770")
+                    if meter_int < 20000:
+                        logger.warning(f"❌ Reading {meter_value_with_prefix} below minimum threshold 20000")
                         return jsonify({
                             "success": False,
-                            "error": f"Reading {meter_value_with_prefix} is below minimum threshold 19770",
+                            "error": f"Reading {meter_value_with_prefix} is below minimum threshold 20000",
                             "engine": engine_name,
                             "image": cap_json['image'],
                             "timestamp": datetime.now().isoformat() + "Z",

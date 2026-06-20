@@ -666,6 +666,10 @@
                         <span style="color: var(--text-secondary)">ESP32-CAM</span>
                         <span id="espStatus" class="val-ok">Active</span>
                     </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem;">
+                        <span style="color: var(--text-secondary)">Smart Plug</span>
+                        <span id="smartplugStatus" class="val-ok">Online</span>
+                    </div>
                 </div>
             </section>
 
@@ -677,9 +681,8 @@
                     Smart Plug
                 </div>
                 <div>
-                    <div style="display: flex; align-items: baseline; gap: 0.75rem;">
+                    <div>
                         <div class="card-value" id="plugWatts" style="font-size: 2.5rem;">-- W</div>
-                        <div id="plugOnlineStatus" style="font-size: 0.75rem; font-weight: 600; color: var(--text-tertiary);">--</div>
                     </div>
                     <div style="display: flex; gap: 2rem; margin-top: 0.5rem;">
                         <div>
@@ -986,11 +989,6 @@
                     document.getElementById('plugWatts').textContent = `${data.plug.watts.toFixed(1)} W`;
                     document.getElementById('plugVolts').textContent = `${(data.plug.volts || 0).toFixed(1)} V`;
                     document.getElementById('plugAmps').textContent = `${(data.plug.amps || 0).toFixed(3)} A`;
-                    const plugStatusEl = document.getElementById('plugOnlineStatus');
-                    plugStatusEl.textContent = data.plug.online ? 'Online' : 'Offline';
-                    plugStatusEl.style.color = data.plug.online ? 'var(--accent-emerald)' : 'var(--accent-rose)';
-                    const timeStr = ts.plug ? FULL_FMT.format(new Date(ts.plug)) : BUCHAREST_FMT.format(new Date());
-                    document.getElementById('plugLastUpdate').textContent = `Updated ${timeStr}`;
                 }
 
                 if (data.weather) {
@@ -1144,11 +1142,30 @@
                 if (status.smartplug) {
                     const sp = status.smartplug;
                     const isOnline = sp.status === 'online';
+                    const isStale = sp.status === 'stale';
+
+                    // System health badge
+                    const plugStatusEl = document.getElementById('smartplugStatus');
+                    if (plugStatusEl) {
+                        plugStatusEl.textContent = isOnline ? 'Online' : (isStale ? 'Stale' : 'Offline');
+                        plugStatusEl.className = isOnline ? 'val-ok' : 'val-bad';
+                    }
+
+                    // Card offline overlay
                     const plugCard = document.getElementById('smartplugCard');
-                    if (plugCard) plugCard.classList.toggle('sensor-offline', !isOnline);
-                    if (isOnline && sp.watts !== null && sp.watts !== undefined) {
-                        state.currentData.plug = { watts: sp.watts, volts: sp.volts, amps: sp.amps, online: true };
-                        updateDisplay();
+                    if (plugCard) plugCard.classList.toggle('sensor-offline', !isOnline && !isStale);
+
+                    // Update card values directly — sensor_status fires every second so this is always fresh
+                    if (sp.watts !== null && sp.watts !== undefined) {
+                        document.getElementById('plugWatts').textContent = `${sp.watts.toFixed(1)} W`;
+                        document.getElementById('plugVolts').textContent = `${(sp.volts || 0).toFixed(1)} V`;
+                        document.getElementById('plugAmps').textContent = `${(sp.amps || 0).toFixed(3)} A`;
+                        state.currentData.plug = { watts: sp.watts, volts: sp.volts, amps: sp.amps, online: isOnline };
+                    }
+                    if (sp.polled_at) {
+                        const timeStr = FULL_FMT.format(new Date(sp.polled_at * 1000));
+                        document.getElementById('plugLastUpdate').textContent = `Updated ${timeStr}`;
+                        state.currentData.timestamps.plug = new Date(sp.polled_at * 1000).toISOString();
                     }
                 }
             }
