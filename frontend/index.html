@@ -677,6 +677,34 @@
                 </div>
             </section>
 
+            <!-- Smart Plug -->
+            <section class="bento-card card-wide" id="smartplugCard" onclick="app.showHistory('smartplug')" style="cursor: pointer;">
+                <div class="offline-watermark">Offline</div>
+                <div class="card-label">
+                    <i data-lucide="plug-zap"></i>
+                    Smart Plug
+                </div>
+                <div>
+                    <div style="display: flex; align-items: baseline; gap: 0.75rem;">
+                        <div class="card-value" id="plugWatts" style="font-size: 2.5rem;">-- W</div>
+                        <div id="plugOnlineStatus" style="font-size: 0.75rem; font-weight: 600; color: var(--text-tertiary);">--</div>
+                    </div>
+                    <div style="display: flex; gap: 2rem; margin-top: 0.5rem;">
+                        <div>
+                            <div style="font-size: 0.65rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.06em;">Voltage</div>
+                            <div id="plugVolts" class="text-mono" style="font-size: 0.9rem; color: var(--text-secondary);">-- V</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.65rem; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.06em;">Current</div>
+                            <div id="plugAmps" class="text-mono" style="font-size: 0.9rem; color: var(--text-secondary);">-- A</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="plugLastUpdate" class="text-mono" style="font-size: 0.65rem; color: var(--text-tertiary); margin-top: 1rem;">
+                    Updated --:--:--
+                </div>
+            </section>
+
             <section class="bento-card card-wide" id="outagesCard" onclick="app.showHistory('outages')" style="cursor: pointer;">
                 <div class="card-label">
                     <i data-lucide="zap-off"></i>
@@ -695,7 +723,7 @@
             </section>
 
             <!-- Bottom Row: Electricity -->
-            <section class="bento-card card-wide" id="meterCard" onclick="app.showHistory('meter')">
+            <section class="bento-card" id="meterCard" onclick="app.showHistory('meter')" style="grid-column: span 4;">
                 <div class="offline-watermark">Offline</div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;" class="meter-layout">
@@ -805,6 +833,7 @@
                     alcohol: null,
                     meter: null,
                     weather: null,
+                    plug: { watts: null, volts: null, amps: null, online: false },
                     sparklineHistory: [],
                     timestamps: {
                         temperature: null,
@@ -812,7 +841,8 @@
                         pressure: null,
                         aqi: null,
                         meter: null,
-                        esp: null
+                        esp: null,
+                        plug: null
                     }
                 },
                 charts: {
@@ -960,6 +990,17 @@
                     document.getElementById('meterLastUpdate').textContent = `Updated ${timeStr}`;
                 }
 
+                if (data.plug && data.plug.watts !== null) {
+                    document.getElementById('plugWatts').textContent = `${data.plug.watts.toFixed(1)} W`;
+                    document.getElementById('plugVolts').textContent = `${(data.plug.volts || 0).toFixed(1)} V`;
+                    document.getElementById('plugAmps').textContent = `${(data.plug.amps || 0).toFixed(3)} A`;
+                    const plugStatusEl = document.getElementById('plugOnlineStatus');
+                    plugStatusEl.textContent = data.plug.online ? 'Online' : 'Offline';
+                    plugStatusEl.style.color = data.plug.online ? 'var(--accent-emerald)' : 'var(--accent-rose)';
+                    const timeStr = ts.plug ? FULL_FMT.format(new Date(ts.plug)) : BUCHAREST_FMT.format(new Date());
+                    document.getElementById('plugLastUpdate').textContent = `Updated ${timeStr}`;
+                }
+
                 if (data.weather) {
                     const icons = {
                         'Clear': '☀️',
@@ -1062,6 +1103,11 @@
                         case 'sensor_status':
                             updateSensorStatus(d);
                             break;
+                        case 'smartplug_update':
+                            state.currentData.plug = { watts: d.power_w, volts: d.voltage_v, amps: d.current_a, online: true };
+                            state.currentData.timestamps.plug = d.timestamp_iso;
+                            updateDisplay();
+                            break;
                     }
                 };
                 
@@ -1103,6 +1149,16 @@
                     esp.className = isOnline ? 'val-ok' : 'val-bad';
                     espCards.forEach(card => card && card.classList.toggle('sensor-offline', !isOnline));
                 }
+                if (status.smartplug) {
+                    const sp = status.smartplug;
+                    const isOnline = sp.status === 'online';
+                    const plugCard = document.getElementById('smartplugCard');
+                    if (plugCard) plugCard.classList.toggle('sensor-offline', !isOnline);
+                    if (isOnline && sp.watts !== null && sp.watts !== undefined) {
+                        state.currentData.plug = { watts: sp.watts, volts: sp.volts, amps: sp.amps, online: true };
+                        updateDisplay();
+                    }
+                }
             }
 
             // --- GraphQL Data Fetching ---
@@ -1124,6 +1180,7 @@
                         currentWeather { condition description temperatureC humidityPercent pressureHpa seaLevelPressureHpa dewPointC timestamp }
                         currentAirQuality { aqi co2Ppm nh3Ppm alcoholPpm status timestamp }
                         currentMeterReading { meterValue timestamp }
+                        currentSmartPlug { currentWatts currentVolts currentAmps online polledAt }
                         temperatureHistory(limit: 20) { temperatureC timestampUnix }
                         health { 
                             bm280Status { secondsSinceLastReading connected }
@@ -1164,6 +1221,14 @@
                     if (d.currentMeterReading) {
                         state.currentData.meter = d.currentMeterReading.meterValue;
                         ts.meter = d.currentMeterReading.timestamp;
+                    }
+                    if (d.currentSmartPlug && d.currentSmartPlug.currentWatts !== null) {
+                        state.currentData.plug = {
+                            watts: d.currentSmartPlug.currentWatts,
+                            volts: d.currentSmartPlug.currentVolts,
+                            amps: d.currentSmartPlug.currentAmps,
+                            online: d.currentSmartPlug.online
+                        };
                     }
 
                     if (d.health) {
@@ -1279,7 +1344,7 @@
 
             // --- Modal & History ---
             function showHistory(metric) {
-                const cardMap = { temp: 'tempCard', humidity: 'humidityCard', pressure: 'pressureCard', co2: 'aqiCard', meter: 'meterCard', weather: 'weatherCard', hardware: 'hardwareCard', outages: 'outagesCard' };
+                const cardMap = { temp: 'tempCard', humidity: 'humidityCard', pressure: 'pressureCard', co2: 'aqiCard', meter: 'meterCard', weather: 'weatherCard', hardware: 'hardwareCard', outages: 'outagesCard', smartplug: 'smartplugCard' };
                 const card = document.getElementById(cardMap[metric]);
                 if (card && card.classList.contains('sensor-offline') && metric !== 'hardware' && metric !== 'outages') return;
 
@@ -1295,7 +1360,8 @@
                     meter: 'Power Consumption',
                     weather: 'Weather Condition History',
                     hardware: 'System Health',
-                    outages: 'Power Outages — Clopotiva'
+                    outages: 'Power Outages — Clopotiva',
+                    smartplug: 'Smart Plug — Power History'
                 };
                 
                 title.textContent = titles[metric] || 'Metric History';
@@ -1387,6 +1453,7 @@
                     else if (metric === 'co2')  { query = `{ airQualityHistory(range: "${range}", limit: 1000) { co2Ppm nh3Ppm alcoholPpm aqi timestampUnix } }`; dataField = 'airQualityHistory'; }
                     else if (metric === 'meter') { query = `{ meterHistory(range: "${range}", limit: 1000) { meterValue timestampUnix } }`; dataField = 'meterHistory'; }
                     else if (metric === 'weather') { query = `{ weatherHistory(limit: 1000) { condition description timestampUnix } }`; dataField = 'weatherHistory'; }
+                    else if (metric === 'smartplug') { query = `{ smartPlugHistory(range: "${range}", limit: 1000) { powerW voltageV currentA timestampUnix } }`; dataField = 'smartPlugHistory'; }
 
                     const res = await gql(query);
                     const history = res.data[dataField].sort((a, b) => a.timestampUnix - b.timestampUnix);
@@ -1678,7 +1745,8 @@
                     alc: '#A855F7',
                     aqi: '#FFFFFF',
                     meter: '#10B981',
-                    weather: '#A855F7'
+                    weather: '#A855F7',
+                    smartplug: '#FB923C'
                 };
 
                 const TZ = 'Europe/Bucharest';
@@ -1748,10 +1816,11 @@
 
                 } else {
                     const values = data.map(d => {
-                        if (metric === 'temp')     return d.temperatureC;
-                        if (metric === 'humidity') return d.humidityPercent;
-                        if (metric === 'pressure') return d.pressureHpa;
-                        if (metric === 'meter')    return parseFloat(d.meterValue);
+                        if (metric === 'temp')      return d.temperatureC;
+                        if (metric === 'humidity')  return d.humidityPercent;
+                        if (metric === 'pressure')  return d.pressureHpa;
+                        if (metric === 'meter')     return parseFloat(d.meterValue);
+                        if (metric === 'smartplug') return d.powerW;
                         return 0;
                     });
                     const showPoints = data.length <= 5;
@@ -1780,7 +1849,7 @@
                         maintainAspectRatio: false,
                         plugins: {
                             legend: {
-                                display: metric === 'co2',
+                                display: metric === 'co2' || metric === 'weather',
                                 labels: { color: '#A1A1AA', font: { size: 10, family: 'Geist Sans' }, usePointStyle: true }
                             },
                             tooltip: {

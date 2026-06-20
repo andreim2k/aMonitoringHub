@@ -1747,6 +1747,52 @@ class DatabaseManager:
             self.logger.error(f"Error computing downtime events: {e}")
             return []
 
+    def add_plug_reading(self, voltage_v: float, current_a: float, power_w: float) -> Optional['SmartPlugReading']:
+        try:
+            with self.get_session() as session:
+                now = datetime.now(timezone.utc)
+                reading = SmartPlugReading(
+                    timestamp=now,
+                    timestamp_unix=now.timestamp(),
+                    voltage_v=round(voltage_v, 2),
+                    current_a=round(current_a, 3),
+                    power_w=round(power_w, 1),
+                )
+                session.add(reading)
+                session.commit()
+                session.refresh(reading)
+                return reading
+        except Exception as e:
+            self.logger.error(f"Error adding plug reading: {e}")
+            return None
+
+    def get_recent_plug_readings(self, limit: int = 100) -> List['SmartPlugReading']:
+        try:
+            with self.get_session() as session:
+                readings = session.query(SmartPlugReading).order_by(
+                    SmartPlugReading.timestamp.desc()
+                ).limit(limit).all()
+                for r in readings:
+                    session.expunge(r)
+                return readings
+        except Exception as e:
+            self.logger.error(f"Error getting plug readings: {e}")
+            return []
+
+    def get_plug_readings_by_range(self, hours_back: int = 24) -> List['SmartPlugReading']:
+        try:
+            with self.get_session() as session:
+                cutoff = datetime.now(timezone.utc) - timedelta(hours=hours_back)
+                readings = session.query(SmartPlugReading).filter(
+                    SmartPlugReading.timestamp >= cutoff
+                ).order_by(SmartPlugReading.timestamp.asc()).all()
+                for r in readings:
+                    session.expunge(r)
+                return readings
+        except Exception as e:
+            self.logger.error(f"Error getting plug readings by range: {e}")
+            return []
+
     def upsert_outage(self, outage_code: str, attrs: dict) -> bool:
         """Insert or update a power outage by outage_code. Returns True on success."""
         try:
@@ -2069,6 +2115,20 @@ class SystemHeartbeat(Base):
             'mq135_up': bool(self.mq135_up),
             'esp32cam_up': bool(self.esp32cam_up),
         }
+
+
+class SmartPlugReading(Base):
+    """SQLAlchemy model for Tuya T34 smart plug readings (voltage, current, power)."""
+    __tablename__ = 'smart_plug_readings'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    timestamp = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+    timestamp_unix = Column(Float, nullable=False, default=lambda: time.time())
+    voltage_v = Column(Float, nullable=False)
+    current_a = Column(Float, nullable=False)
+    power_w = Column(Float, nullable=False)
+    __table_args__ = (
+        Index('idx_plug_timestamp', 'timestamp'),
+    )
 
 
 class PowerOutage(Base):

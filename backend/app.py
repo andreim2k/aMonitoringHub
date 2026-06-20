@@ -292,6 +292,11 @@ def scheduled_ocr_task():
 
 _esp32cam_last_status = {'up': False, 'ready': False, 'checked_at': 0, 'uptime_ms': None}
 
+_PLUG_DPS_CURRENT = "21"   # mA
+_PLUG_DPS_POWER   = "22"   # 0.1 W
+_PLUG_DPS_VOLTAGE = "23"   # 0.1 V
+_smartplug_last = {'volts': None, 'amps': None, 'watts': None, 'polled_at': 0, 'online': False}
+
 
 def scheduled_heartbeat_task():
     """Records a per-minute system heartbeat (which sensors are up)."""
@@ -333,6 +338,53 @@ def scheduled_heartbeat_task():
         db.add_heartbeat(bm280_up, mq135_up, esp32cam_up and esp32cam_ready)
     except Exception as e:
         logger.error(f"Heartbeat task error: {e}")
+
+
+def scheduled_smartplug_task():
+    """Poll the Tuya T34 smart plug and record voltage, current, and power."""
+    global _smartplug_last
+    try:
+        import tinytuya
+        cfg = load_app_config()
+        plug_cfg = cfg.get('smartplug', {})
+        key = plug_cfg.get('local_key', '')
+        device_id = plug_cfg.get('device_id', '')
+        ip = plug_cfg.get('ip', '')
+        version = plug_cfg.get('version', 3.5)
+        if not key or not device_id or not ip:
+            return
+        plug = tinytuya.OutletDevice(dev_id=device_id, address=ip, local_key=key, version=version)
+        plug.set_socketTimeout(5)
+        status = plug.status()
+        dps = status.get('dps', {}) if isinstance(status, dict) else {}
+        if _PLUG_DPS_VOLTAGE not in dps and _PLUG_DPS_POWER not in dps:
+            _smartplug_last['online'] = False
+            _smartplug_last['polled_at'] = time.time()
+            return
+        volts = dps.get(_PLUG_DPS_VOLTAGE, 0) / 10.0
+        amps  = dps.get(_PLUG_DPS_CURRENT, 0) / 1000.0
+        watts = dps.get(_PLUG_DPS_POWER,   0) / 10.0
+        now   = time.time()
+        _smartplug_last.update({'volts': volts, 'amps': amps, 'watts': watts, 'polled_at': now, 'online': True})
+        db.add_plug_reading(volts, amps, watts)
+        if has_sse_subscribers():
+            try:
+                sse_clients.put_nowait({
+                    'type': 'smartplug_update',
+                    'data': {
+                        'voltage_v': volts,
+                        'current_a': amps,
+                        'power_w': watts,
+                        'timestamp': now,
+                        'timestamp_iso': datetime.fromtimestamp(now, tz=timezone.utc).isoformat()
+                    }
+                })
+            except Exception:
+                pass
+    except Exception as e:
+        _smartplug_last['online'] = False
+        _smartplug_last['polled_at'] = time.time()
+        logger.error(f"Smart plug poll error: {e}")
 
 
 # Power outage monitoring (Clopotiva, Hunedoara) — polls the public ArcGIS map API
@@ -713,6 +765,27 @@ class DowntimeEvent(ObjectType):
     duration_seconds = Int()
 
 
+class SmartPlugReading(ObjectType):
+    """GraphQL type for a single smart plug reading."""
+    id = Int()
+    voltage_v = Float()
+    current_a = Float()
+    power_w = Float()
+    timestamp = String()
+    timestamp_unix = Float()
+
+class SmartPlugStats(ObjectType):
+    """GraphQL type for live smart plug stats + 24h aggregates."""
+    online = Boolean()
+    polled_at = Float()
+    current_watts = Float()
+    current_volts = Float()
+    current_amps = Float()
+    avg_watts = Float()
+    max_watts = Float()
+    min_watts = Float()
+
+
 class PowerOutage(ObjectType):
     """GraphQL type for a power outage near the monitored location."""
     id              = Int()
@@ -927,6 +1000,14 @@ class Query(ObjectType):
     downtime_events = GrapheneList(
         DowntimeEvent,
         hours_back=Int(default_value=24)
+    )
+
+    # Smart plug queries
+    current_smart_plug = Field(SmartPlugStats)
+    smart_plug_history = GrapheneList(
+        SmartPlugReading,
+        range=String(default_value='day'),
+        limit=Int(default_value=1000)
     )
 
     # Power outage queries (Clopotiva, Hunedoara)
@@ -1461,6 +1542,45 @@ class Query(ObjectType):
             ) for e in events]
         except Exception as e:
             logger.error(f"Error getting downtime events: {e}")
+            return []
+
+    def resolve_current_smart_plug(self, info: Any) -> SmartPlugStats:
+        try:
+            readings = db.get_plug_readings_by_range(hours_back=24)
+            watts_vals = [r.power_w for r in readings if r.power_w is not None]
+            return SmartPlugStats(
+                online=_smartplug_last.get('online', False),
+                polled_at=_smartplug_last.get('polled_at', 0),
+                current_watts=_smartplug_last.get('watts'),
+                current_volts=_smartplug_last.get('volts'),
+                current_amps=_smartplug_last.get('amps'),
+                avg_watts=round(sum(watts_vals) / len(watts_vals), 1) if watts_vals else None,
+                max_watts=max(watts_vals) if watts_vals else None,
+                min_watts=min(watts_vals) if watts_vals else None,
+            )
+        except Exception as e:
+            logger.error(f"Error getting smart plug stats: {e}")
+            return SmartPlugStats(online=False)
+
+    def resolve_smart_plug_history(self, info: Any, range: str = 'day', limit: int = 1000) -> List[SmartPlugReading]:
+        try:
+            hours_map = {'day': 24, 'week': 168, 'month': 720, 'year': 8760}
+            readings = db.get_plug_readings_by_range(hours_back=hours_map.get(range, 24))
+            readings = _thin(readings, limit)
+            result = [
+                SmartPlugReading(
+                    id=r.id,
+                    voltage_v=r.voltage_v,
+                    current_a=r.current_a,
+                    power_w=r.power_w,
+                    timestamp=_to_local_iso_unix(r.timestamp)[0],
+                    timestamp_unix=_to_local_iso_unix(r.timestamp)[1],
+                ) for r in readings
+            ]
+            result.sort(key=lambda x: x.timestamp_unix)
+            return result
+        except Exception as e:
+            logger.error(f"Error getting smart plug history: {e}")
             return []
 
     @staticmethod
@@ -2481,6 +2601,14 @@ def events() -> Response:
                                 else:
                                     esp32cam_status = "offline"
 
+                            smartplug_status = "offline"
+                            if _smartplug_last['polled_at']:
+                                sp_age = current_time - _smartplug_last['polled_at']
+                                if sp_age > 120:
+                                    smartplug_status = "stale"
+                                elif _smartplug_last['online']:
+                                    smartplug_status = "online"
+
                             sensor_status_message = {
                                 'type': 'sensor_status',
                                 'timestamp': current_time,
@@ -2499,6 +2627,12 @@ def events() -> Response:
                                         'status': esp32cam_status,
                                         'seconds_since_reading': esp32cam_seconds_ago,
                                         'uptime_ms': _esp32cam_last_status.get('uptime_ms')
+                                    },
+                                    'smartplug': {
+                                        'status': smartplug_status,
+                                        'watts': _smartplug_last.get('watts'),
+                                        'volts': _smartplug_last.get('volts'),
+                                        'amps': _smartplug_last.get('amps'),
                                     }
                                 }
                             }
@@ -2617,6 +2751,13 @@ def initialize_application() -> bool:
             name='System Heartbeat (every minute)'
         )
         scheduler.add_job(
+            scheduled_smartplug_task,
+            'interval',
+            seconds=30,
+            id='smartplug_poll',
+            name='Smart Plug poll (every 30s)'
+        )
+        scheduler.add_job(
             scheduled_outage_check_task,
             'interval',
             hours=1,
@@ -2638,8 +2779,9 @@ def initialize_application() -> bool:
         try:
             threading.Thread(target=scheduled_outage_check_task, daemon=True, name='OutageInitialPoll').start()
             threading.Thread(target=scheduled_pdf_outage_check_task, daemon=True, name='OutagePdfInitialScan').start()
+            threading.Thread(target=scheduled_smartplug_task, daemon=True, name='SmartPlugInitialPoll').start()
         except Exception as e:
-            logger.warning(f"Could not start initial outage poll threads: {e}")
+            logger.warning(f"Could not start initial poll threads: {e}")
 
         logger.info("Application initialized with USB sensor data")
         return True

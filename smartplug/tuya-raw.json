@@ -1,0 +1,87 @@
+{
+    "result": [
+        {
+            "active_time": 1781954187,
+            "biz_type": 0,
+            "category": "tdq",
+            "create_time": 1781950923,
+            "icon": "smart/icon/bay1677130922441Tlce/e20919d47fc7e35c12cfdaa2648baae4.png",
+            "id": "bff469d209baf7cb01sjqu",
+            "ip": "209.198.149.208",
+            "lat": "",
+            "local_key": "}N|e6pBdMNkr'1f~",
+            "lon": "",
+            "model": "",
+            "name": "T34-Smart Plug+",
+            "online": true,
+            "owner_id": "294008611",
+            "product_id": "m4jtkjc43ltrilru",
+            "product_name": "T34-Smart Plug+",
+            "status": [
+                {
+                    "code": "switch_1",
+                    "value": true
+                },
+                {
+                    "code": "countdown_1",
+                    "value": 0
+                },
+                {
+                    "code": "add_ele",
+                    "value": 42
+                },
+                {
+                    "code": "cur_current",
+                    "value": 402
+                },
+                {
+                    "code": "cur_power",
+                    "value": 849
+                },
+                {
+                    "code": "cur_voltage",
+                    "value": 2370
+                },
+                {
+                    "code": "test_bit",
+                    "value": 1
+                },
+                {
+                    "code": "fault",
+                    "value": 0
+                },
+                {
+                    "code": "relay_status",
+                    "value": "2"
+                },
+                {
+                    "code": "random_time",
+                    "value": ""
+                },
+                {
+                    "code": "cycle_time",
+                    "value": ""
+                },
+                {
+                    "code": "switch_inching",
+                    "value": "AAAC"
+                }
+            ],
+            "sub": false,
+            "time_zone": "+03:00",
+            "uid": "eu17819536093817xCdk",
+            "update_time": 1781960498,
+            "uuid": "bca5d72bb8949d6b"
+        }
+    ],
+    "success": true,
+    "t": 1781963415833,
+    "tid": "f780d9456cae11f1a01a1ea82e67030d",
+    "file": {
+        "name": "tuya-raw.json",
+        "description": "Full raw list of Tuya devices.",
+        "account": "7cvmuj5cqwrxvcq4xe4x",
+        "date": "2026-06-20T16:50:16.320612",
+        "tinytuya": "1.18.1"
+    }
+}
