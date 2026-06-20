@@ -385,72 +385,64 @@
             cursor: pointer;
         }
 
-        /* Mobile Adjustments */
+        /* card-full: full 4-column span on desktop only */
+        .card-full { grid-column: span 4; }
+
+        /* Tablet (≤1024px): collapse to 2-column grid */
         @media (max-width: 1024px) {
             .bento-grid { grid-template-columns: repeat(2, 1fr); }
+            .card-full  { grid-column: span 2; }
+            #meterCard  { grid-column: span 2; order: 99; }
         }
 
+        /* Mobile (≤640px): 2-column grid, single-column cards for hero/tall */
         @media (max-width: 640px) {
             .bento-grid {
                 grid-template-columns: repeat(2, 1fr);
                 grid-auto-rows: auto;
                 gap: 0.75rem;
             }
-            /* Pairs on mobile: Temperature and Air Quality on row 1 */
+
             .card-hero, .card-tall {
                 grid-column: span 1;
                 grid-row: span 1;
             }
+            .card-hero .card-value { font-size: 2.5rem; }
 
-            /* Electricity at the very end, full width */
+            /* All wide/full cards become full-width on mobile */
+            .card-wide, .card-full {
+                grid-column: span 2;
+            }
+
+            /* Meter card always last and full-width */
             #meterCard {
                 grid-column: span 2;
                 order: 99;
             }
 
-            /* Reset wide cards if any others exist */
-            .card-wide:not(#meterCard) {
-                grid-column: span 2;
-            }
-
-            .card-hero .card-value { font-size: 2.5rem; }
-            .card-tall .card-value { font-size: 2.5rem; }
-
-            /* Desktop meter card layout */
+            /* Meter card internal layout: stack vertically */
             .meter-layout {
-                grid-template-columns: 1fr 1fr !important;
+                grid-template-columns: 1fr !important;
             }
-
-            /* Desktop keeps inline styles: 100px × 80px */
-
-            /* Mobile-friendly meter card layout */
-            @media (max-width: 640px) {
-                .meter-layout {
-                    grid-template-columns: 1fr !important;
-                }
-
-                #webcamContainer {
-                    width: 100% !important;
-                    height: 150px !important;
-                    margin-bottom: 1.5rem !important;
-                }
-
-                /* Controls already vertical on desktop, no changes needed for mobile */
+            #webcamContainer {
+                width: 100% !important;
+                height: 150px !important;
+                margin-bottom: 1rem !important;
             }
 
             .container { padding: 1rem; }
             header { margin-bottom: 2rem; }
-            
-            .meter-grid { 
-                grid-template-columns: 1fr; 
-                gap: 0.5rem; 
+
+            .meter-grid {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
             }
-            .meter-item { 
-                display: flex; 
-                justify-content: space-between; 
-                align-items: center; 
-                padding: 0.6rem 0.75rem; 
-                text-align: left; 
+            .meter-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.6rem 0.75rem;
+                text-align: left;
             }
             .meter-item-label { margin-bottom: 0; font-size: 0.6rem; }
             .meter-item-value { font-size: 0.8rem; }
@@ -723,7 +715,7 @@
             </section>
 
             <!-- Bottom Row: Electricity -->
-            <section class="bento-card" id="meterCard" onclick="app.showHistory('meter')" style="grid-column: span 4;">
+            <section class="bento-card card-full" id="meterCard" onclick="app.showHistory('meter')">
                 <div class="offline-watermark">Offline</div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;" class="meter-layout">
