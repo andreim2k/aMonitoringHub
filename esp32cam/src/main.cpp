@@ -50,6 +50,10 @@ const int PING_FAIL_REBOOT_THRESHOLD = 12;       // 12 × 15s = 3 min
 unsigned long last_ping_time = 0;
 int gateway_ping_fail_count = 0;
 
+// WiFi runtime reconnect failure counter — reboot after 10 consecutive failures (~5 min)
+const int WIFI_RECONNECT_REBOOT_THRESHOLD = 10;
+int wifi_reconnect_fail_count = 0;
+
 // WiFi reconnect request from web UI
 volatile bool wifi_reconnect_requested = false;
 
@@ -215,6 +219,7 @@ void checkWiFiConnection() {
       // Wait for connection with timeout
       int attempts = 0;
       while (WiFi.status() != WL_CONNECTED && attempts < 20) {
+        esp_task_wdt_reset();
         delay(500);
         attempts++;
         Serial.print(".");
@@ -223,7 +228,8 @@ void checkWiFiConnection() {
       if (WiFi.status() == WL_CONNECTED) {
         Serial.println();
         Serial.println("WiFi reconnected successfully");
-        gateway_ping_fail_count = 0; // reset ping monitor after successful reconnect
+        gateway_ping_fail_count = 0;
+        wifi_reconnect_fail_count = 0;
         char ip_str[16];
         WiFi.localIP().toString().toCharArray(ip_str, sizeof(ip_str));
         Serial.printf("IP Address: %s\n", ip_str);
@@ -234,7 +240,15 @@ void checkWiFiConnection() {
         Serial.println("HTTP server and OTA restarted after WiFi reconnect");
       } else {
         Serial.println();
-        Serial.println("WiFi reconnection failed");
+        wifi_reconnect_fail_count++;
+        Serial.printf("WiFi reconnection failed (%d/%d)\n",
+                      wifi_reconnect_fail_count, WIFI_RECONNECT_REBOOT_THRESHOLD);
+        if (wifi_reconnect_fail_count >= WIFI_RECONNECT_REBOOT_THRESHOLD) {
+          Serial.println("FATAL: WiFi unreachable too long — rebooting");
+          esp_task_wdt_reset();
+          delay(500);
+          ESP.restart();
+        }
       }
     }
     last_wifi_check = now;
@@ -356,8 +370,10 @@ void initWiFi() {
 
     // Configure static IP before connecting
     if (!WiFi.config(staticIP, gateway, subnet, primaryDNS, secondaryDNS)) {
-      Serial.println("ERROR: Failed to configure static IP!");
-      return;
+      Serial.println("FATAL: Failed to configure static IP — rebooting in 3s");
+      esp_task_wdt_reset();
+      delay(3000);
+      ESP.restart();
     }
   } else {
     Serial.println("Using DHCP (automatic IP assignment)");
@@ -542,9 +558,10 @@ void checkGatewayPing() {
     gateway_ping_fail_count = 0;
   } else {
     gateway_ping_fail_count++;
+    char gw_str[16];
+    GATEWAY_PING_IP.toString().toCharArray(gw_str, sizeof(gw_str));
     Serial.printf("Gateway ping FAILED %d/%d (target: %s)\n",
-                  gateway_ping_fail_count, PING_FAIL_REBOOT_THRESHOLD,
-                  GATEWAY_PING_IP.toString().c_str());
+                  gateway_ping_fail_count, PING_FAIL_REBOOT_THRESHOLD, gw_str);
     if (gateway_ping_fail_count >= PING_FAIL_REBOOT_THRESHOLD) {
       Serial.println("FATAL: Gateway unreachable — rebooting now");
       esp_task_wdt_reset();
