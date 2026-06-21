@@ -41,7 +41,6 @@ bool ota_initialized = false;
 const unsigned long WIFI_CHECK_INTERVAL = 30000;                    // 30 seconds
 const unsigned long MEMORY_CHECK_INTERVAL = 60000;                  // 60 seconds
 const unsigned long WATCHDOG_RESET_INTERVAL = 10000;                // 10 seconds
-const unsigned long DAILY_RESTART_MS = 24UL * 60UL * 60UL * 1000UL; // 24 hours
 
 // Gateway ping monitoring — reboot after 12 consecutive failures (~3 min)
 const IPAddress GATEWAY_PING_IP(192, 168, 50, 1);
@@ -576,13 +575,6 @@ void checkGatewayPing() {
 // ===================
 
 void loop() {
-  // Self-restart after 24h — independent of WiFi/server
-  if (millis() > DAILY_RESTART_MS) {
-    Serial.println("24h uptime reached — scheduled self-restart");
-    delay(100);
-    ESP.restart();
-  }
-
   // Reset watchdog timer to prevent crashes
   resetWatchdog();
 
