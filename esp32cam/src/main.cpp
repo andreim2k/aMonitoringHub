@@ -23,6 +23,7 @@
 #include "modules/flash.h"
 #include "modules/webserver.h"
 #include <ArduinoOTA.h>
+#include <ESP32Ping.h>
 #include <WiFi.h>
 
 // ===================
@@ -41,6 +42,13 @@ const unsigned long WIFI_CHECK_INTERVAL = 30000;                    // 30 second
 const unsigned long MEMORY_CHECK_INTERVAL = 60000;                  // 60 seconds
 const unsigned long WATCHDOG_RESET_INTERVAL = 10000;                // 10 seconds
 const unsigned long DAILY_RESTART_MS = 24UL * 60UL * 60UL * 1000UL; // 24 hours
+
+// Gateway ping monitoring — reboot after 12 consecutive failures (~3 min)
+const IPAddress GATEWAY_PING_IP(192, 168, 50, 1);
+const unsigned long PING_CHECK_INTERVAL = 15000; // 15 seconds between pings
+const int PING_FAIL_REBOOT_THRESHOLD = 12;       // 12 × 15s = 3 min
+unsigned long last_ping_time = 0;
+int gateway_ping_fail_count = 0;
 
 // WiFi reconnect request from web UI
 volatile bool wifi_reconnect_requested = false;
@@ -215,6 +223,7 @@ void checkWiFiConnection() {
       if (WiFi.status() == WL_CONNECTED) {
         Serial.println();
         Serial.println("WiFi reconnected successfully");
+        gateway_ping_fail_count = 0; // reset ping monitor after successful reconnect
         char ip_str[16];
         WiFi.localIP().toString().toCharArray(ip_str, sizeof(ip_str));
         Serial.printf("IP Address: %s\n", ip_str);
@@ -366,47 +375,42 @@ void initWiFi() {
   applyWiFiBandwidthMode();
   Serial.println("WiFi bandwidth mode applied from configuration");
 
-  Serial.println("Connecting to WiFi...");
-  // Connect using saved SSID/password from EEPROM
-  WiFi.begin(configManager.getWiFiSSID(), configManager.getWiFiPassword());
+  // 5-round boot connection — reboot if all rounds fail
+  const int BOOT_MAX_ROUNDS = 5;
+  const unsigned long BOOT_ATTEMPT_TIMEOUT_MS = 10000; // 10s per round
 
-  // Non-blocking connection with watchdog resets
-  int attempts = 0;
-  const int maxAttempts = 30; // 15 seconds timeout
-  unsigned long start_time = millis();
+  Serial.printf("Connecting to WiFi (max %d attempts)...\n", BOOT_MAX_ROUNDS);
 
-  while (WiFi.status() != WL_CONNECTED && attempts < maxAttempts) {
-    // Reset watchdog during connection attempts
-    esp_task_wdt_reset();
+  for (int round = 1; round <= BOOT_MAX_ROUNDS; round++) {
+    Serial.printf("Attempt %d/%d ", round, BOOT_MAX_ROUNDS);
+    WiFi.begin(configManager.getWiFiSSID(), configManager.getWiFiPassword());
 
-    delay(500);
-    Serial.print(".");
-    attempts++;
-
-    // Print status every 10 attempts
-    if (attempts % 10 == 0) {
-      Serial.println();
-      Serial.printf("Connection attempt %d/%d...\n", attempts, maxAttempts);
-      Serial.printf("WiFi status: %d\n", WiFi.status());
+    unsigned long t0 = millis();
+    while (WiFi.status() != WL_CONNECTED && (millis() - t0) < BOOT_ATTEMPT_TIMEOUT_MS) {
+      esp_task_wdt_reset();
+      delay(500);
+      Serial.print(".");
     }
+    Serial.println();
 
-    // Additional watchdog reset for long operations
-    if (attempts % 5 == 0) {
+    if (WiFi.status() == WL_CONNECTED) break;
+
+    Serial.printf("Attempt %d failed (status=%d)\n", round, (int)WiFi.status());
+    if (round < BOOT_MAX_ROUNDS) {
+      WiFi.disconnect();
+      delay(2000);
       esp_task_wdt_reset();
     }
   }
 
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.println();
     Serial.println("======== WiFi Connected Successfully ========");
     char ip_str[16];
     WiFi.localIP().toString().toCharArray(ip_str, sizeof(ip_str));
     Serial.printf("IP Address: %s\n", ip_str);
     char gateway_ip_str[16], subnet_mask_str[16], dns_ip_str[16];
-    WiFi.gatewayIP().toString().toCharArray(gateway_ip_str,
-                                            sizeof(gateway_ip_str));
-    WiFi.subnetMask().toString().toCharArray(subnet_mask_str,
-                                             sizeof(subnet_mask_str));
+    WiFi.gatewayIP().toString().toCharArray(gateway_ip_str, sizeof(gateway_ip_str));
+    WiFi.subnetMask().toString().toCharArray(subnet_mask_str, sizeof(subnet_mask_str));
     WiFi.dnsIP().toString().toCharArray(dns_ip_str, sizeof(dns_ip_str));
     Serial.printf("Gateway:    %s\n", gateway_ip_str);
     Serial.printf("Subnet:     %s\n", subnet_mask_str);
@@ -419,12 +423,14 @@ void initWiFi() {
     Serial.printf("Channel:    %d\n", WiFi.channel());
     Serial.println("===========================================");
   } else {
-    Serial.println();
-    Serial.println("ERROR: WiFi connection failed!");
-    Serial.printf("Check your WiFi network (%s) and password.\n", configManager.getWiFiSSID());
-    Serial.printf("Final WiFi status: %d\n", WiFi.status());
+    Serial.println("FATAL: All WiFi boot attempts failed — rebooting in 5s");
     printWiFiScanDiagnostics();
-    Serial.println("Device will continue but network features won't work.");
+    for (int i = 5; i > 0; i--) {
+      Serial.printf("Reboot in %d...\n", i);
+      esp_task_wdt_reset();
+      delay(1000);
+    }
+    ESP.restart();
   }
 }
 
@@ -514,6 +520,40 @@ void setup() {
   Serial.println("==========================================");
 }
 
+/**
+ * Ping the gateway every 15s; reboot after 12 consecutive failures (~3 min).
+ * Only runs while WiFi is up — WiFi-down path handled by checkWiFiConnection().
+ */
+void checkGatewayPing() {
+  unsigned long now = millis();
+  if (now - last_ping_time < PING_CHECK_INTERVAL) return;
+  last_ping_time = now;
+
+  if (WiFi.status() != WL_CONNECTED) return;
+
+  esp_task_wdt_reset();
+  bool ok = Ping.ping(GATEWAY_PING_IP, 2); // 2 ICMP echo requests
+  esp_task_wdt_reset();
+
+  if (ok) {
+    if (gateway_ping_fail_count > 0) {
+      Serial.printf("Gateway ping restored after %d failure(s)\n", gateway_ping_fail_count);
+    }
+    gateway_ping_fail_count = 0;
+  } else {
+    gateway_ping_fail_count++;
+    Serial.printf("Gateway ping FAILED %d/%d (target: %s)\n",
+                  gateway_ping_fail_count, PING_FAIL_REBOOT_THRESHOLD,
+                  GATEWAY_PING_IP.toString().c_str());
+    if (gateway_ping_fail_count >= PING_FAIL_REBOOT_THRESHOLD) {
+      Serial.println("FATAL: Gateway unreachable — rebooting now");
+      esp_task_wdt_reset();
+      delay(500);
+      ESP.restart();
+    }
+  }
+}
+
 // ===================
 // MAIN LOOP
 // ===================
@@ -532,6 +572,7 @@ void loop() {
   // Monitor system health
   checkMemoryUsage();
   checkWiFiConnection();
+  checkGatewayPing();
 
   // Check for critical memory conditions
   size_t free_heap = esp_get_free_heap_size();
@@ -561,6 +602,7 @@ void loop() {
     delay(100);
     webServerManager.begin();
     if (WiFi.status() == WL_CONNECTED) {
+      gateway_ping_fail_count = 0;
       initOTA();
     }
     Serial.println("HTTP server and OTA restarted after WiFi reconnect");
