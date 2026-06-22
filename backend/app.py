@@ -2051,9 +2051,26 @@ class Query(ObjectType):
             # Handle time-based queries
             now = datetime.now(timezone.utc)
 
-            if range == 'day' or range == 'week':
-                # For day and week, just get recent readings
-                readings = db.get_recent_meter_readings(limit=min(limit, 5000))
+            if range == 'day':
+                cutoff = now - timedelta(hours=24)
+                with db.get_session() as session:
+                    rows = (session.query(DBMeterReading)
+                            .filter(DBMeterReading.timestamp >= cutoff)
+                            .order_by(DBMeterReading.timestamp.desc())
+                            .limit(min(limit, 5000)).all())
+                    for r in rows:
+                        session.expunge(r)
+                readings = rows
+            elif range == 'week':
+                cutoff = now - timedelta(days=7)
+                with db.get_session() as session:
+                    rows = (session.query(DBMeterReading)
+                            .filter(DBMeterReading.timestamp >= cutoff)
+                            .order_by(DBMeterReading.timestamp.desc())
+                            .limit(min(limit, 5000)).all())
+                    for r in rows:
+                        session.expunge(r)
+                readings = rows
             elif range == 'month':
                 readings = db.get_meter_readings_by_month(year=now.year, month=now.month)
             elif range == 'year':
