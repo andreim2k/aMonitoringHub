@@ -369,6 +369,8 @@
             padding: 2rem;
             position: relative;
             box-shadow: var(--shadow-lg);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .modal-header {
@@ -432,6 +434,15 @@
 
             .container { padding: 1rem; }
             header { margin-bottom: 2rem; }
+
+            .modal {
+                padding: 1rem;
+                max-height: 95vh;
+                border-radius: var(--radius);
+            }
+            .modal-header {
+                margin-bottom: 0.75rem;
+            }
 
             .meter-grid {
                 grid-template-columns: 1fr;
@@ -1685,31 +1696,31 @@
                                        : 'var(--text-tertiary)';
                     const causeLabel   = isPlanned ? 'PLANNED' : 'ACCIDENTAL';
                     const badges = {
-                        active:   `<span style="background:rgba(244,63,94,0.18);color:#f43f5e;padding:1px 7px;border-radius:9px;font-size:0.65rem;font-weight:700;">ACTIVE</span>`,
-                        upcoming: `<span style="background:rgba(245,158,11,0.18);color:#f59e0b;padding:1px 7px;border-radius:9px;font-size:0.65rem;font-weight:700;">SCHEDULED</span>`,
-                        resolved: `<span style="background:rgba(148,163,184,0.15);color:var(--text-tertiary);padding:1px 7px;border-radius:9px;font-size:0.65rem;font-weight:700;">RESOLVED</span>`,
+                        active:   `<span style="background:rgba(244,63,94,0.18);color:#f43f5e;padding:1px 7px;border-radius:9px;font-size:0.65rem;font-weight:700;white-space:nowrap;">ACTIVE</span>`,
+                        upcoming: `<span style="background:rgba(245,158,11,0.18);color:#f59e0b;padding:1px 7px;border-radius:9px;font-size:0.65rem;font-weight:700;white-space:nowrap;">SCHEDULED</span>`,
+                        resolved: `<span style="background:rgba(148,163,184,0.15);color:var(--text-tertiary);padding:1px 7px;border-radius:9px;font-size:0.65rem;font-weight:700;white-space:nowrap;">RESOLVED</span>`,
                     };
-                    const affected = e.numAffected ? ` · ${e.numAffected} clients` : '';
+                    const affected = e.numAffected ? `${e.numAffected} clients` : '';
                     const fmtRange = () => {
                         if (!e.startTime) return e.startTimeStr || '—';
                         const dStart = new Date(e.startTime);
                         const dEnd   = e.endTime ? new Date(e.endTime) : null;
                         const opts = { timeZone: 'Europe/Bucharest', weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false };
                         const optsTime = { timeZone: 'Europe/Bucharest', hour: '2-digit', minute: '2-digit', hour12: false };
-                        return dEnd ? `${dStart.toLocaleString('en-GB', opts)} – ${dEnd.toLocaleString('en-GB', optsTime)}`
-                                    : dStart.toLocaleString('en-GB', opts);
+                        if (!dEnd) return dStart.toLocaleString('en-GB', opts);
+                        return `${dStart.toLocaleString('en-GB', opts)}<br><span style="padding-left:0.3rem;">– ${dEnd.toLocaleString('en-GB', optsTime)}</span>`;
                     };
-                    return `<div style="padding:0.55rem 0.75rem;margin-bottom:0.4rem;border-left:3px solid ${stripeColor};background:var(--bg-card-hover);border-radius:4px;font-size:0.8rem;">
-                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;gap:0.5rem;flex-wrap:wrap;">
-                            <strong style="color:${stripeColor}">${e.locality || '—'} <span style="font-weight:500;font-size:0.7rem;opacity:0.8;">(${causeLabel})</span></strong>
-                            <span style="display:flex;align-items:center;gap:0.4rem;">
+                    return `<div style="padding:0.55rem 0.75rem;margin-bottom:0.4rem;border-left:3px solid ${stripeColor};background:var(--bg-card-hover);border-radius:4px;font-size:0.8rem;min-width:0;overflow:hidden;">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.25rem;gap:0.4rem;flex-wrap:wrap;">
+                            <strong style="color:${stripeColor};min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${e.locality || '—'} <span style="font-weight:500;font-size:0.68rem;opacity:0.8;">(${causeLabel})</span></strong>
+                            <span style="display:flex;align-items:center;gap:0.4rem;flex-shrink:0;">
                                 ${badges[status] || ''}
-                                ${status !== 'upcoming' ? `<span style="color:var(--text-tertiary);font-size:0.7rem;font-family:monospace;">${fmtDuration(e)}</span>` : ''}
+                                ${status !== 'upcoming' ? `<span style="color:var(--text-tertiary);font-size:0.7rem;font-family:monospace;white-space:nowrap;">${fmtDuration(e)}</span>` : ''}
                             </span>
                         </div>
-                        <div style="color:var(--text-secondary);font-size:0.72rem;font-family:monospace;line-height:1.5;">
+                        <div style="color:var(--text-secondary);font-size:0.72rem;font-family:monospace;line-height:1.6;word-break:break-word;">
                             <div><span style="color:var(--text-tertiary)">When:</span> ${fmtRange()}</div>
-                            ${e.details ? `<div style="font-family:inherit;color:var(--text-tertiary);margin-top:0.2rem;">${e.details}</div>` : ''}
+                            ${e.details ? `<div style="font-family:inherit;color:var(--text-tertiary);margin-top:0.2rem;font-size:0.68rem;white-space:normal;">${e.details}</div>` : ''}
                             ${status === 'resolved' ? `<div><span style="color:var(--text-tertiary)">Cleared:</span> ${fmtDt(e.resolvedAt)}</div>` : ''}
                             ${affected ? `<div style="color:var(--text-tertiary)">${affected}</div>` : ''}
                         </div>
@@ -1728,7 +1739,7 @@
                         <span>Monitoring <strong>${summary.targetLocality || 'CLOPOTIVA'}, ${summary.targetCounty || 'HUNEDOARA'}</strong></span>
                         <span>${summary.lastCheck ? `last live check ${fmtDt(summary.lastCheck)}` : ''}</span>
                     </div>
-                    <div style="overflow-y:auto;max-height:500px;padding-right:2px;">
+                    <div style="overflow-y:auto;max-height:min(500px,calc(85vh - 140px));padding-right:2px;-webkit-overflow-scrolling:touch;">
                         ${section('Active now', active, 'active')}
                         ${section('Scheduled', upcoming, 'upcoming')}
                         ${section('Recently resolved', resolved.slice(0, 50), 'resolved')}
