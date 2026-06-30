@@ -149,11 +149,19 @@ class DatabaseManager:
         already exist.
         """
         try:
+            is_sqlite = "sqlite" in self.database_url
+            connect_args = {"check_same_thread": False, "timeout": 30} if is_sqlite else {}
             self.engine = create_engine(
                 self.database_url,
-                echo=False,  # Set to True for SQL debugging
-                connect_args={"check_same_thread": False} if "sqlite" in self.database_url else {}
+                echo=False,
+                connect_args=connect_args,
             )
+            if is_sqlite:
+                from sqlalchemy import event
+                @event.listens_for(self.engine, "connect")
+                def set_wal_mode(dbapi_conn, _):
+                    dbapi_conn.execute("PRAGMA journal_mode=WAL")
+                    dbapi_conn.execute("PRAGMA busy_timeout=30000")
             
             # Create tables
             Base.metadata.create_all(self.engine)
