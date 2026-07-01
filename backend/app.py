@@ -2817,9 +2817,9 @@ def initialize_application() -> bool:
         scheduler.add_job(
             scheduled_smartplug_task,
             'interval',
-            seconds=1,
+            seconds=5,
             id='smartplug_poll',
-            name='Smart Plug poll (every 1s live, DB write every 10min)'
+            name='Smart Plug poll (every 5s live, DB write every 10min)'
         )
         scheduler.add_job(
             scheduled_outage_check_task,
