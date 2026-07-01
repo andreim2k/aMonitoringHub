@@ -81,7 +81,7 @@ app_config = load_app_config()
 from graphene import ObjectType, String, Float, List as GrapheneList, Field, Int, Schema, Boolean
 
 # Import our modules
-from models import init_database, db, TemperatureReading as DBTemperatureReading, HumidityReading as DBHumidityReading, MeterReading as DBMeterReading, WeatherReading as DBWeatherReading
+from models import init_database, db, TemperatureReading as DBTemperatureReading, HumidityReading as DBHumidityReading, MeterReading as DBMeterReading, WeatherReading as DBWeatherReading, PressureReading as DBPressureReading, AirQualityReading as DBAirQualityReading
 from sensor_reader import TemperatureSensorReader, HumiditySensorReader
 from usb_json_reader import USBJSONReader
 
@@ -1223,9 +1223,9 @@ class Query(ObjectType):
             elif range == 'week':
                 readings = db.get_daily_readings(days_back=7)
             elif range == 'month':
-                readings = db.get_readings_by_month(year=now.year, month=now.month)
+                readings = db.get_daily_readings(days_back=30)
             elif range == 'year':
-                readings = db.get_readings_by_year(year=now.year)
+                readings = db.get_daily_readings(days_back=365)
             else:
                 readings = db.get_recent_readings(limit=min(limit, 5000))
 
@@ -1361,16 +1361,17 @@ class Query(ObjectType):
                     readings = db.get_humidity_readings_by_year(year, sensor_id=sensor_id)
             else:
                 now = datetime.now(timezone.utc)
-                if range in ('day', 'daily'):
-                    readings = db.get_humidity_readings_by_day(now.year, now.month, now.day, sensor_id=sensor_id)
-                elif range in ('week', 'weekly'):
-                    cutoff_unix = time.time() - 7 * 86400
-                    readings = db.get_recent_humidity_readings(limit=99999, sensor_id=sensor_id)
-                    readings = [r for r in readings if r.timestamp_unix and r.timestamp_unix >= cutoff_unix]
-                elif range == 'month':
-                    readings = db.get_humidity_readings_by_month(now.year, now.month, sensor_id=sensor_id)
-                elif range == 'year':
-                    readings = db.get_humidity_readings_by_year(now.year, sensor_id=sensor_id)
+                days_back_map = {'day': 1, 'daily': 1, 'week': 7, 'weekly': 7, 'month': 30, 'year': 365}
+                if range in days_back_map:
+                    cutoff = now - timedelta(days=days_back_map[range])
+                    with db.get_session() as session:
+                        q = session.query(DBHumidityReading).filter(DBHumidityReading.timestamp >= cutoff)
+                        if sensor_id:
+                            q = q.filter(DBHumidityReading.sensor_id == sensor_id)
+                        rows = q.order_by(DBHumidityReading.timestamp.asc()).limit(min(limit, 99999)).all()
+                        for r in rows:
+                            session.expunge(r)
+                    readings = rows
                 else:
                     readings = db.get_recent_humidity_readings(limit=limit, sensor_id=sensor_id)
 
@@ -1739,16 +1740,17 @@ class Query(ObjectType):
                     readings = db.get_pressure_readings_by_month(year, month)
                 else:
                     readings = db.get_pressure_readings_by_year(year)
-            elif range == 'day':
-                readings = db.get_pressure_readings_by_day(now.year, now.month, now.day)
-            elif range == 'week':
-                cutoff_unix = time.time() - 7 * 86400
-                readings = db.get_pressure_readings_by_month(now.year, now.month)
-                readings = [r for r in readings if r.timestamp_unix and r.timestamp_unix >= cutoff_unix]
-            elif range == 'month':
-                readings = db.get_pressure_readings_by_month(now.year, now.month)
-            elif range == 'year':
-                readings = db.get_pressure_readings_by_year(now.year)
+            elif range in ('day', 'week', 'month', 'year'):
+                days_back = {'day': 1, 'week': 7, 'month': 30, 'year': 365}[range]
+                cutoff = now - timedelta(days=days_back)
+                with db.get_session() as session:
+                    rows = (session.query(DBPressureReading)
+                            .filter(DBPressureReading.timestamp >= cutoff)
+                            .order_by(DBPressureReading.timestamp.asc())
+                            .limit(min(limit, 5000)).all())
+                    for r in rows:
+                        session.expunge(r)
+                readings = rows
             else:
                 readings = db.get_recent_pressure_readings(limit=min(limit, 5000))
 
@@ -1945,16 +1947,17 @@ class Query(ObjectType):
                     readings = db.get_air_quality_readings_by_month(year, month)
                 else:
                     readings = db.get_air_quality_readings_by_year(year)
-            elif range == 'day':
-                readings = db.get_air_quality_readings_by_day(now.year, now.month, now.day)
-            elif range == 'week':
-                cutoff_unix = time.time() - 7 * 86400
-                readings = db.get_recent_air_quality_readings(limit=99999)
-                readings = [r for r in readings if r.timestamp_unix and r.timestamp_unix >= cutoff_unix]
-            elif range == 'month':
-                readings = db.get_air_quality_readings_by_month(now.year, now.month)
-            elif range == 'year':
-                readings = db.get_air_quality_readings_by_year(now.year)
+            elif range in ('day', 'week', 'month', 'year'):
+                days_back = {'day': 1, 'week': 7, 'month': 30, 'year': 365}[range]
+                cutoff = now - timedelta(days=days_back)
+                with db.get_session() as session:
+                    rows = (session.query(DBAirQualityReading)
+                            .filter(DBAirQualityReading.timestamp >= cutoff)
+                            .order_by(DBAirQualityReading.timestamp.asc())
+                            .limit(min(limit, 5000)).all())
+                    for r in rows:
+                        session.expunge(r)
+                readings = rows
             else:
                 readings = db.get_recent_air_quality_readings(limit=min(limit, 5000))
 
