@@ -2072,9 +2072,25 @@ class Query(ObjectType):
                         session.expunge(r)
                 readings = rows
             elif range == 'month':
-                readings = db.get_meter_readings_by_month(year=now.year, month=now.month)
+                cutoff = now - timedelta(days=30)
+                with db.get_session() as session:
+                    rows = (session.query(DBMeterReading)
+                            .filter(DBMeterReading.timestamp >= cutoff)
+                            .order_by(DBMeterReading.timestamp.desc())
+                            .limit(min(limit, 5000)).all())
+                    for r in rows:
+                        session.expunge(r)
+                readings = rows
             elif range == 'year':
-                readings = db.get_meter_readings_by_year(year=now.year)
+                cutoff = now - timedelta(days=365)
+                with db.get_session() as session:
+                    rows = (session.query(DBMeterReading)
+                            .filter(DBMeterReading.timestamp >= cutoff)
+                            .order_by(DBMeterReading.timestamp.desc())
+                            .limit(min(limit, 5000)).all())
+                    for r in rows:
+                        session.expunge(r)
+                readings = rows
             elif year is not None:
                 if month is not None and day is not None:
                     readings = db.get_meter_readings_by_day(year, month, day)

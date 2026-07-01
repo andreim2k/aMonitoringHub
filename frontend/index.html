@@ -304,7 +304,7 @@
             height: 100%;
             border-radius: var(--radius-md);
             object-fit: cover;
-            object-position: center center;
+            object-position: center 90%;
             border: 1px solid var(--border);
         }
 
@@ -1429,7 +1429,7 @@
                 const range = rangeMap[period] || 'day';
 
                 const subtitle = document.querySelector('.modal-header .location-badge');
-                const periodLabels = { 'day': 'Last 24 Hours', 'week': 'Last 7 Days', 'month': 'Current Month', 'year': 'Current Year' };
+                const periodLabels = { 'day': 'Last 24 Hours', 'week': 'Last 7 Days', 'month': 'Last 30 Days', 'year': 'Last 365 Days' };
                 if (subtitle) subtitle.textContent = periodLabels[period] || 'Historical Data Analytics';
 
                 try {
