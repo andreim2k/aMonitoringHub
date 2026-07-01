@@ -297,6 +297,8 @@ _PLUG_DPS_POWER   = "22"   # 0.1 W
 _PLUG_DPS_VOLTAGE = "23"   # 0.1 V
 _smartplug_last = {'volts': None, 'amps': None, 'watts': None, 'polled_at': 0, 'online': False}
 _smartplug_lock = threading.Lock()  # only one TCP connection to the device at a time
+_SMARTPLUG_DB_WRITE_INTERVAL = 600  # store to DB every 10 minutes; SSE/live still update every poll
+_smartplug_last_db_write = 0
 
 
 def scheduled_heartbeat_task():
@@ -370,8 +372,12 @@ def _poll_smartplug_device():
 
 
 def scheduled_smartplug_task():
-    """Poll the Tuya T34 smart plug and record voltage, current, and power."""
-    global _smartplug_last
+    """Poll the Tuya T34 smart plug every second for live SSE updates.
+
+    DB writes are throttled to once per _SMARTPLUG_DB_WRITE_INTERVAL so the
+    history table doesn't fill up with a row per second.
+    """
+    global _smartplug_last, _smartplug_last_db_write
     if not _smartplug_lock.acquire(blocking=False):
         return  # another poll is already in progress
     try:
@@ -385,7 +391,9 @@ def scheduled_smartplug_task():
                 raise RuntimeError("Device poll timed out after 12s")
         now = time.time()
         _smartplug_last.update({'volts': volts, 'amps': amps, 'watts': watts, 'polled_at': now, 'online': True})
-        db.add_plug_reading(volts, amps, watts)
+        if now - _smartplug_last_db_write >= _SMARTPLUG_DB_WRITE_INTERVAL:
+            db.add_plug_reading(volts, amps, watts)
+            _smartplug_last_db_write = now
         if has_sse_subscribers():
             try:
                 sse_clients.put_nowait({
@@ -2759,7 +2767,7 @@ def initialize_application() -> bool:
     Returns:
         True if initialization was successful, False otherwise.
     """
-    global temperature_sensor, humidity_sensor, scheduler, usb_reader
+    global temperature_sensor, humidity_sensor, scheduler, usb_reader, _smartplug_last_db_write
 
     try:
         logger.info("Initializing database...")
@@ -2809,9 +2817,9 @@ def initialize_application() -> bool:
         scheduler.add_job(
             scheduled_smartplug_task,
             'interval',
-            seconds=5,
+            seconds=1,
             id='smartplug_poll',
-            name='Smart Plug poll (every 5s)'
+            name='Smart Plug poll (every 1s live, DB write every 10min)'
         )
         scheduler.add_job(
             scheduled_outage_check_task,
@@ -2843,6 +2851,7 @@ def initialize_application() -> bool:
                     'polled_at': r.timestamp_unix,
                     'online': True,
                 })
+                _smartplug_last_db_write = r.timestamp_unix or 0
                 logger.info(f"Smart plug pre-seeded from DB: {r.power_w}W @ {r.voltage_v}V")
         except Exception as e:
             logger.warning(f"Could not pre-seed smart plug from DB: {e}")
