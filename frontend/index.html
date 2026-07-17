@@ -526,6 +526,262 @@
         }
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     </style>
+
+    <!-- Hacker TUI visual system. The original rules remain as a functional
+         baseline; this layer deliberately replaces their visual language. -->
+    <style id="tui-redesign">
+        :root, :root[data-theme="codex"] {
+            --bg-page:#080a0c; --bg-card:#0d1014; --bg-card-hover:#11161b; --bg-raised:#151a20;
+            --border:#2a3038; --border-hover:#c7ff4a; --accent-blue:#c7ff4a; --accent-emerald:#5ee6a8;
+            --accent-amber:#f0c674; --accent-rose:#ff657a; --accent-purple:#b7a0ff; --text-primary:#eef2f6;
+            --text-secondary:#aeb7c2; --text-tertiary:#69737f; --grid-color:rgba(199,255,74,.045);
+            --panel-tint:rgba(199,255,74,.035); --selection:#c7ff4a; --selection-ink:#080a0c;
+            --shadow-sm:none; --shadow-md:none; --shadow-lg:8px 8px 0 rgba(0,0,0,.35);
+            --radius-lg:0; --radius-md:0; --radius-sm:0;
+        }
+        :root[data-theme="grayscale"] {
+            --bg-page:#090909; --bg-card:#111; --bg-card-hover:#181818; --bg-raised:#202020;
+            --border:#393939; --border-hover:#f4f4f4; --accent-blue:#f4f4f4; --accent-emerald:#d6d6d6;
+            --accent-amber:#aaa; --accent-rose:#fff; --accent-purple:#c5c5c5; --text-primary:#f5f5f5;
+            --text-secondary:#b8b8b8; --text-tertiary:#707070; --grid-color:rgba(255,255,255,.035);
+            --panel-tint:rgba(255,255,255,.025); --selection:#fff; --selection-ink:#000;
+        }
+        :root[data-theme="vt100"] {
+            --bg-page:#001407; --bg-card:#001b09; --bg-card-hover:#00280d; --bg-raised:#003312;
+            --border:#087a31; --border-hover:#3cff78; --accent-blue:#3cff78; --accent-emerald:#53ff8d;
+            --accent-amber:#b8ff43; --accent-rose:#ff6b6b; --accent-purple:#63ffb0; --text-primary:#a4ffbf;
+            --text-secondary:#55d87b; --text-tertiary:#267a44; --grid-color:rgba(60,255,120,.055);
+            --panel-tint:rgba(60,255,120,.045); --selection:#3cff78; --selection-ink:#001407;
+        }
+        :root[data-theme="github-dark"] {
+            --bg-page:#0d1117; --bg-card:#161b22; --bg-card-hover:#1f2630; --bg-raised:#21262d;
+            --border:#30363d; --border-hover:#58a6ff; --accent-blue:#58a6ff; --accent-emerald:#3fb950;
+            --accent-amber:#d29922; --accent-rose:#f85149; --accent-purple:#bc8cff; --text-primary:#f0f6fc;
+            --text-secondary:#b1bac4; --text-tertiary:#6e7681; --grid-color:rgba(88,166,255,.035);
+            --panel-tint:rgba(88,166,255,.025); --selection:#58a6ff; --selection-ink:#0d1117;
+        }
+        :root[data-theme="github-light"] {
+            --bg-page:#f6f8fa; --bg-card:#fff; --bg-card-hover:#f3f4f6; --bg-raised:#eaeef2;
+            --border:#d0d7de; --border-hover:#0969da; --accent-blue:#0969da; --accent-emerald:#1a7f37;
+            --accent-amber:#9a6700; --accent-rose:#cf222e; --accent-purple:#8250df; --text-primary:#1f2328;
+            --text-secondary:#59636e; --text-tertiary:#818b98; --grid-color:rgba(9,105,218,.055);
+            --panel-tint:rgba(9,105,218,.025); --selection:#0969da; --selection-ink:#fff;
+        }
+        :root[data-theme="claude"] {
+            --bg-page:#f0eee8; --bg-card:#faf9f6; --bg-card-hover:#f4f0e8; --bg-raised:#e7e2d8;
+            --border:#c9c1b4; --border-hover:#d97757; --accent-blue:#d97757; --accent-emerald:#397a62;
+            --accent-amber:#a66a2c; --accent-rose:#c0444a; --accent-purple:#7656a0; --text-primary:#2b2926;
+            --text-secondary:#625d56; --text-tertiary:#938b80; --grid-color:rgba(217,119,87,.06);
+            --panel-tint:rgba(217,119,87,.035); --selection:#d97757; --selection-ink:#fffaf5;
+        }
+        :root[data-theme="vscode"] {
+            --bg-page:#181818; --bg-card:#1f1f1f; --bg-card-hover:#252526; --bg-raised:#2d2d30;
+            --border:#3c3c3c; --border-hover:#007acc; --accent-blue:#4fc1ff; --accent-emerald:#4ec9b0;
+            --accent-amber:#dcdcaa; --accent-rose:#f44747; --accent-purple:#c586c0; --text-primary:#d4d4d4;
+            --text-secondary:#adadad; --text-tertiary:#6a6a6a; --grid-color:rgba(79,193,255,.035);
+            --panel-tint:rgba(0,122,204,.03); --selection:#007acc; --selection-ink:#fff;
+        }
+        :root[data-theme="matrix"] {
+            --bg-page:#000; --bg-card:#030703; --bg-card-hover:#071007; --bg-raised:#091509;
+            --border:#123d12; --border-hover:#00ff41; --accent-blue:#00ff41; --accent-emerald:#00ff41;
+            --accent-amber:#b6ff00; --accent-rose:#ff335f; --accent-purple:#49ff78; --text-primary:#b5ffb5;
+            --text-secondary:#48c948; --text-tertiary:#246824; --grid-color:rgba(0,255,65,.06);
+            --panel-tint:rgba(0,255,65,.035); --selection:#00ff41; --selection-ink:#000;
+        }
+        :root[data-theme="dracula"] {
+            --bg-page:#191a21; --bg-card:#282a36; --bg-card-hover:#303341; --bg-raised:#343746;
+            --border:#44475a; --border-hover:#bd93f9; --accent-blue:#8be9fd; --accent-emerald:#50fa7b;
+            --accent-amber:#f1fa8c; --accent-rose:#ff5555; --accent-purple:#bd93f9; --text-primary:#f8f8f2;
+            --text-secondary:#c7c7c2; --text-tertiary:#72758a; --grid-color:rgba(189,147,249,.045);
+            --panel-tint:rgba(189,147,249,.035); --selection:#bd93f9; --selection-ink:#191a21;
+        }
+        :root[data-theme="nord"] {
+            --bg-page:#242933; --bg-card:#2e3440; --bg-card-hover:#353c49; --bg-raised:#3b4252;
+            --border:#4c566a; --border-hover:#88c0d0; --accent-blue:#88c0d0; --accent-emerald:#a3be8c;
+            --accent-amber:#ebcb8b; --accent-rose:#bf616a; --accent-purple:#b48ead; --text-primary:#eceff4;
+            --text-secondary:#d8dee9; --text-tertiary:#7b88a1; --grid-color:rgba(136,192,208,.04);
+            --panel-tint:rgba(136,192,208,.03); --selection:#88c0d0; --selection-ink:#242933;
+        }
+        :root[data-theme="solarized"] {
+            --bg-page:#002b36; --bg-card:#073642; --bg-card-hover:#0b404d; --bg-raised:#114b57;
+            --border:#42636a; --border-hover:#2aa198; --accent-blue:#268bd2; --accent-emerald:#859900;
+            --accent-amber:#b58900; --accent-rose:#dc322f; --accent-purple:#6c71c4; --text-primary:#fdf6e3;
+            --text-secondary:#93a1a1; --text-tertiary:#657b83; --grid-color:rgba(42,161,152,.05);
+            --panel-tint:rgba(42,161,152,.03); --selection:#2aa198; --selection-ink:#002b36;
+        }
+        :root[data-theme="amber"] {
+            --bg-page:#120900; --bg-card:#190d00; --bg-card-hover:#241400; --bg-raised:#2e1900;
+            --border:#6f3d00; --border-hover:#ffb000; --accent-blue:#ffb000; --accent-emerald:#ffd05c;
+            --accent-amber:#ffb000; --accent-rose:#ff5b2e; --accent-purple:#ffc34d; --text-primary:#ffd27a;
+            --text-secondary:#d88b1e; --text-tertiary:#7f4c08; --grid-color:rgba(255,176,0,.06);
+            --panel-tint:rgba(255,176,0,.04); --selection:#ffb000; --selection-ink:#120900;
+        }
+        :root[data-theme="cyberpunk"] {
+            --bg-page:#080612; --bg-card:#100b20; --bg-card-hover:#17102c; --bg-raised:#1d1235;
+            --border:#39256a; --border-hover:#00f6ff; --accent-blue:#00f6ff; --accent-emerald:#55ff9a;
+            --accent-amber:#fff500; --accent-rose:#ff2a6d; --accent-purple:#d300c5; --text-primary:#f7f5ff;
+            --text-secondary:#b8aadd; --text-tertiary:#6b5b91; --grid-color:rgba(0,246,255,.055);
+            --panel-tint:rgba(255,42,109,.035); --selection:#00f6ff; --selection-ink:#080612;
+        }
+        :root[data-theme="synthwave"] {
+            --bg-page:#15102a; --bg-card:#20153d; --bg-card-hover:#281a4b; --bg-raised:#31205a;
+            --border:#563c7c; --border-hover:#f92aad; --accent-blue:#36f9f6; --accent-emerald:#72f1b8;
+            --accent-amber:#fede5d; --accent-rose:#fe4450; --accent-purple:#f92aad; --text-primary:#fff8ff;
+            --text-secondary:#d7c4f2; --text-tertiary:#826ba9; --grid-color:rgba(54,249,246,.05);
+            --panel-tint:rgba(249,42,173,.035); --selection:#f92aad; --selection-ink:#15102a;
+        }
+        :root[data-theme="phosphor"] {
+            --bg-page:#07100f; --bg-card:#0b1815; --bg-card-hover:#10221d; --bg-raised:#163028;
+            --border:#285647; --border-hover:#7fffd4; --accent-blue:#7fffd4; --accent-emerald:#6fffc3;
+            --accent-amber:#d4ff7f; --accent-rose:#ff6f91; --accent-purple:#8fded0; --text-primary:#c8ffe9;
+            --text-secondary:#78bd9f; --text-tertiary:#3f755f; --grid-color:rgba(127,255,212,.055);
+            --panel-tint:rgba(127,255,212,.035); --selection:#7fffd4; --selection-ink:#07100f;
+        }
+        * { scrollbar-width:thin; scrollbar-color:var(--border-hover) var(--bg-page); }
+        *::selection { background:var(--selection); color:var(--selection-ink); }
+        html { background:var(--bg-page); color-scheme:dark; }
+        html[data-theme="github-light"],html[data-theme="claude"] { color-scheme:light; }
+        body {
+            background-color:var(--bg-page);
+            background-image:linear-gradient(var(--grid-color) 1px,transparent 1px),linear-gradient(90deg,var(--grid-color) 1px,transparent 1px);
+            background-size:28px 28px; color:var(--text-primary); font-family:var(--font-mono); line-height:1.35;
+        }
+        body::after {
+            content:""; position:fixed; inset:0; z-index:9999; pointer-events:none; opacity:.45;
+            background:repeating-linear-gradient(0deg,rgba(0,0,0,.045),rgba(0,0,0,.045) 1px,transparent 1px,transparent 3px);
+        }
+        .ambient-glow { display:none; }
+        .container { width:min(100%,1480px); max-width:none; padding:18px; }
+        header {
+            margin:0; min-height:74px; padding:10px 12px; gap:16px; border:1px solid var(--border);
+            border-top:3px solid var(--accent-blue); background:var(--bg-card);
+        }
+        header::before {
+            content:"root@monitoring-hub:~/telemetry"; position:absolute; top:-12px; left:10px; padding:1px 7px;
+            color:var(--accent-blue); background:var(--bg-page); font-size:10px; font-weight:700;
+        }
+        .logo-group { gap:3px; min-width:0; }
+        .logo { font-family:var(--font-mono); font-size:16px; letter-spacing:.04em; text-transform:uppercase; }
+        .logo::before { content:">_"; color:var(--accent-blue); font-weight:900; }
+        .logo i,.location-badge i { display:none; }
+        .text-gradient { background:none; -webkit-text-fill-color:currentColor; color:var(--text-primary); }
+        .location-badge { font-family:var(--font-mono); color:var(--text-tertiary); font-size:10px; text-transform:uppercase; letter-spacing:.08em; }
+        .location-badge::before { content:"// "; color:var(--accent-blue); }
+        .header-actions { display:flex; align-items:center; justify-content:flex-end; gap:8px; flex-wrap:wrap; }
+        .theme-control { display:flex; align-items:center; height:34px; border:1px solid var(--border); background:var(--bg-page); }
+        .theme-control label { padding:0 8px; color:var(--text-tertiary); font-size:9px; letter-spacing:.1em; text-transform:uppercase; border-right:1px solid var(--border); }
+        .theme-control select {
+            min-width:146px; height:32px; border:0; border-radius:0; outline:0; padding:0 28px 0 9px;
+            background:var(--bg-page); color:var(--text-primary); font:700 11px var(--font-mono); text-transform:uppercase;
+        }
+        .theme-control select:focus { box-shadow:inset 0 0 0 1px var(--accent-blue); }
+        .status-pill {
+            height:34px; padding:0 10px; border-radius:0; border:1px solid var(--accent-emerald); background:transparent;
+            color:var(--accent-emerald); font-size:10px; letter-spacing:.08em; text-transform:uppercase;
+        }
+        .status-dot { width:7px; height:7px; border-radius:0; box-shadow:0 0 8px var(--accent-emerald); }
+        .terminal-clock { min-width:80px; color:var(--text-secondary); font-size:10px; text-align:right; }
+        .command-strip { display:flex; align-items:stretch; margin:8px 0; min-height:31px; border:1px solid var(--border); background:var(--bg-card); overflow-x:auto; white-space:nowrap; }
+        .command-strip span { display:flex; align-items:center; padding:0 11px; border-right:1px solid var(--border); color:var(--text-tertiary); font-size:9px; letter-spacing:.08em; text-transform:uppercase; }
+        .command-strip .command-active { color:var(--selection-ink); background:var(--selection); font-weight:800; }
+        .command-strip .command-path { margin-left:auto; border:0; color:var(--accent-blue); }
+        .system-banner { display:grid; grid-template-columns:repeat(4,1fr); margin-bottom:8px; border:1px solid var(--border); background:var(--panel-tint); }
+        .system-banner div { min-width:0; padding:6px 9px; border-right:1px solid var(--border); font-size:9px; color:var(--text-tertiary); text-transform:uppercase; letter-spacing:.06em; }
+        .system-banner div:last-child { border:0; }
+        .system-banner strong { color:var(--text-primary); font-weight:700; }
+        .system-banner strong::before { content:"["; color:var(--accent-blue); }
+        .system-banner strong::after { content:"]"; color:var(--accent-blue); }
+        .bento-grid { grid-template-columns:repeat(12,minmax(0,1fr)); grid-auto-rows:minmax(156px,auto); gap:8px; }
+        .bento-card {
+            min-width:0; padding:36px 14px 13px; border:1px solid var(--border); border-radius:0;
+            background:linear-gradient(135deg,var(--panel-tint),transparent 45%),var(--bg-card);
+            box-shadow:none; transition:background .12s,border-color .12s,box-shadow .12s; overflow:hidden;
+        }
+        .bento-card::before {
+            content:"[ " attr(data-module) " ]"; position:absolute; top:0; left:0; right:0; height:24px;
+            display:flex; align-items:center; padding:0 9px; border-bottom:1px solid var(--border); background:var(--bg-raised);
+            color:var(--text-tertiary); font-size:9px; font-weight:700; letter-spacing:.12em;
+        }
+        .bento-card::after { content:"+"; position:absolute; top:4px; right:8px; color:var(--accent-blue); font-size:11px; }
+        .bento-card[onclick]:hover { background:var(--bg-card-hover); border-color:var(--border-hover); transform:none; box-shadow:inset 3px 0 0 var(--accent-blue); }
+        .bento-card[onclick]:focus-visible { outline:2px solid var(--accent-blue); outline-offset:2px; }
+        .card-hero { grid-column:span 7; grid-row:span 2; background:linear-gradient(135deg,var(--panel-tint),transparent 48%),var(--bg-card); }
+        .card-tall { grid-column:span 5; grid-row:span 2; }
+        #humidityCard,#pressureCard,#weatherCard,#hardwareCard { grid-column:span 3; }
+        .card-wide { grid-column:span 6; }
+        .card-full { grid-column:span 12; }
+        .card-label { margin:0 0 15px; color:var(--text-secondary); font:700 10px var(--font-mono); letter-spacing:.12em; text-transform:uppercase; }
+        .card-label::before { content:"$ get "; color:var(--accent-blue); }
+        .card-label i { width:14px; height:14px; color:var(--accent-blue); stroke-width:1.5; }
+        .card-value { margin:0 0 4px; color:var(--text-primary); font:700 clamp(28px,3vw,42px)/1 var(--font-mono); letter-spacing:-.06em; }
+        .card-hero .card-value { font-size:clamp(54px,8vw,102px); text-shadow:0 0 26px color-mix(in srgb,var(--accent-blue) 22%,transparent); }
+        .card-subtext { color:var(--text-tertiary); font:500 10px/1.5 var(--font-mono); text-transform:uppercase; }
+        .card-trend { border:1px solid currentColor; border-radius:0; background:transparent; font-size:9px; }
+        .trend-up,.trend-down { background:transparent; }
+        .chart-sparkline { height:120px; opacity:.95; }
+        .meter-grid { gap:6px; margin-top:18px; }
+        .meter-item { padding:9px 7px; border:1px solid var(--border); border-radius:0; background:var(--bg-page); text-align:left; }
+        .meter-item-label { color:var(--text-tertiary); font-size:9px; letter-spacing:.12em; }
+        .meter-item-label::before { content:"::"; color:var(--accent-blue); margin-right:4px; }
+        .meter-item-value { color:var(--text-primary); font-size:13px; }
+        #weatherIcon { filter:saturate(.65); }
+        #hardwareCard>div:last-child>div { padding:4px 0; border-bottom:1px dotted var(--border); }
+        #hardwareCard>div:last-child>div span:first-child::before { content:"/dev/"; color:var(--text-tertiary); }
+        #webcamContainer { border:1px solid var(--border); background:var(--bg-page); }
+        .webcam-preview { border:0; border-radius:0; filter:saturate(.55) contrast(1.08); }
+        .meter-controls { padding:7px; border:1px solid var(--border); background:var(--bg-page); }
+        input[type="range"],input[type="checkbox"] { accent-color:var(--accent-blue); }
+        .btn-glass { min-height:32px; border:1px solid var(--border); border-radius:0; background:var(--bg-page); backdrop-filter:none; color:var(--text-secondary); font:700 10px var(--font-mono); text-transform:uppercase; letter-spacing:.06em; }
+        .btn-glass:hover { border-color:var(--accent-blue); background:var(--panel-tint); color:var(--accent-blue); }
+        .btn-glass-active { background:var(--selection)!important; border-color:var(--selection)!important; color:var(--selection-ink)!important; }
+        footer { margin:10px 0 0!important; padding:10px; border:1px solid var(--border); text-align:left!important; font-family:var(--font-mono); }
+        footer p::before { content:"root@hub:~$ "; color:var(--accent-blue); }
+        .overlay { padding:18px; background:color-mix(in srgb,var(--bg-page) 88%,transparent); backdrop-filter:blur(4px); }
+        .modal { max-width:980px; padding:42px 16px 16px; border:1px solid var(--border); border-top:3px solid var(--accent-blue); border-radius:0; background:var(--bg-card); box-shadow:12px 12px 0 rgba(0,0,0,.35); }
+        .modal::before { content:"history.log — read only"; position:absolute; top:0; left:0; right:0; height:27px; display:flex; align-items:center; padding:0 9px; border-bottom:1px solid var(--border); color:var(--text-tertiary); background:var(--bg-raised); font-size:9px; text-transform:uppercase; letter-spacing:.1em; }
+        .modal-header { margin-bottom:14px; padding-bottom:12px; border-bottom:1px dashed var(--border); }
+        .modal-header h2 { font:700 17px var(--font-mono); text-transform:uppercase; }
+        .close-btn { width:34px; height:34px; display:grid; place-items:center; border:1px solid var(--border); color:var(--text-secondary); }
+        .close-btn:hover { border-color:var(--accent-rose); color:var(--accent-rose); }
+        .offline-watermark { border:1px solid var(--accent-rose); border-radius:0; background:var(--bg-page); color:var(--accent-rose); box-shadow:6px 6px 0 rgba(0,0,0,.4); font-size:10px; }
+        .sensor-offline { border-color:var(--accent-rose)!important; }
+        .spinner { border-radius:0; border-color:var(--border); border-top-color:var(--accent-blue); }
+        @media(max-width:1024px) {
+            .bento-grid { grid-template-columns:repeat(6,minmax(0,1fr)); }
+            .card-hero,.card-tall,#humidityCard,#pressureCard,#weatherCard,#hardwareCard { grid-column:span 3; }
+            .card-wide,.card-full,#meterCard { grid-column:span 6; }
+            .system-banner { grid-template-columns:repeat(2,1fr); }
+        }
+        @media(max-width:640px) {
+            body::after { opacity:.25; }
+            .container { padding:10px 8px max(12px,env(safe-area-inset-bottom)); }
+            header { min-height:auto; align-items:flex-start; padding:10px; flex-direction:column; }
+            .header-actions { width:100%; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:6px; }
+            .theme-control { min-width:0; } .theme-control label { display:none; }
+            .theme-control select { width:100%; min-width:0; font-size:11px; }
+            .terminal-clock { position:absolute; top:12px; right:10px; }
+            .status-pill { justify-content:center; padding:0 8px; }
+            .command-strip { margin:6px 0; } .command-strip span { padding:0 9px; } .command-strip .command-path { display:none; }
+            .system-banner { grid-template-columns:1fr 1fr; } .system-banner div { padding:6px; font-size:8px; }
+            .bento-grid { display:grid; grid-template-columns:1fr; gap:6px; }
+            .card-hero,.card-tall,#humidityCard,#pressureCard,#weatherCard,#hardwareCard,.card-wide,.card-full,#meterCard { grid-column:1; grid-row:auto; }
+            .bento-card { min-height:146px; padding:34px 12px 11px; } .card-hero { min-height:260px; }
+            .card-hero .card-value { font-size:clamp(58px,21vw,84px); } .card-value { font-size:30px; }
+            .meter-grid { grid-template-columns:repeat(3,1fr); } .meter-item { display:block; padding:7px; text-align:left; }
+            .meter-layout { grid-template-columns:1fr!important; gap:12px!important; }
+            #webcamContainer { width:100%!important; height:auto!important; aspect-ratio:16/7; margin:0!important; }
+            .meter-controls { display:grid!important; grid-template-columns:1fr auto auto; }
+            .modal { max-height:calc(100dvh - 12px); padding:39px 10px 10px; } .overlay { padding:6px; }
+            .modal>div:has(>#modalChart) { height:52dvh!important; min-height:280px; }
+        }
+        @media(max-width:380px) {
+            .logo { font-size:14px; } .location-badge,.status-pill { font-size:9px; }
+            .meter-grid { grid-template-columns:1fr; } .meter-item { display:flex; justify-content:space-between; }
+        }
+        @media(prefers-reduced-motion:reduce) {
+            *,*::before,*::after { animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; }
+        }
+    </style>
 </head>
 <body>
     <div class="ambient-glow">
@@ -538,23 +794,60 @@
             <div class="logo-group">
                 <div class="logo">
                     <i data-lucide="layout-grid"></i>
-                    <span class="text-gradient">aMonitoringHub</span>
+                    <span class="text-gradient">aMonitoringHub.OS</span>
                 </div>
                 <div class="location-badge">
                     <i data-lucide="map-pin" style="width: 12px;"></i>
-                    Clopotiva, Hunedoara
+                    node clopotiva-01 / hunedoara / ro
                 </div>
             </div>
-            
-            <div class="status-pill" id="globalStatus">
-                <div class="status-dot"></div>
-                System Live
+
+            <div class="header-actions">
+                <div class="terminal-clock" id="terminalClock" aria-label="Local time">--:--:-- EEST</div>
+                <div class="theme-control">
+                    <label for="themeSelect">palette</label>
+                    <select id="themeSelect" onchange="app.setTheme(this.value)" aria-label="Color theme">
+                        <option value="codex">Codex</option>
+                        <option value="grayscale">Grayscale</option>
+                        <option value="vt100">VT100</option>
+                        <option value="github-dark">GitHub Dark</option>
+                        <option value="github-light">GitHub Light</option>
+                        <option value="claude">Claude</option>
+                        <option value="vscode">VS Code</option>
+                        <option value="matrix">Matrix</option>
+                        <option value="dracula">Dracula</option>
+                        <option value="nord">Nord</option>
+                        <option value="solarized">Solarized</option>
+                        <option value="amber">Amber CRT</option>
+                        <option value="cyberpunk">Cyberpunk</option>
+                        <option value="synthwave">Synthwave</option>
+                        <option value="phosphor">Phosphor</option>
+                    </select>
+                </div>
+                <div class="status-pill" id="globalStatus">
+                    <div class="status-dot"></div>
+                    System Live
+                </div>
             </div>
         </header>
 
+        <nav class="command-strip" aria-label="Telemetry console sections">
+            <span class="command-active">01 / dashboard</span>
+            <span>02 / sensors</span>
+            <span>03 / energy</span>
+            <span>04 / incidents</span>
+            <span class="command-path">mode: realtime // stream: sse</span>
+        </nav>
+        <div class="system-banner" aria-label="System metadata">
+            <div>host <strong>monitoring-hub</strong></div>
+            <div>profile <strong id="activeThemeLabel">codex</strong></div>
+            <div>refresh <strong>live stream</strong></div>
+            <div>timezone <strong>europe/bucharest</strong></div>
+        </div>
+
         <main class="bento-grid">
             <!-- Top Row: Temperature & Air Quality -->
-            <section class="bento-card card-hero" id="tempCard" onclick="app.showHistory('temp')">
+            <section class="bento-card card-hero" data-module="ENV.TEMP / 0x01" tabindex="0" id="tempCard" onclick="app.showHistory('temp')">
                 <div class="offline-watermark">Offline</div>
                 <div>
                     <div class="card-label">
@@ -577,7 +870,7 @@
                 </div>
             </section>
 
-            <section class="bento-card card-tall" id="aqiCard" onclick="app.showHistory('co2')">
+            <section class="bento-card card-tall" data-module="AIR.QUALITY / 0x02" tabindex="0" id="aqiCard" onclick="app.showHistory('co2')">
                 <div class="offline-watermark">Offline</div>
                 <div>
                     <div class="card-label">
@@ -613,7 +906,7 @@
             </section>
 
             <!-- Middle Row: Humidity, Pressure, Weather, Status -->
-            <section class="bento-card" id="humidityCard" onclick="app.showHistory('humidity')">
+            <section class="bento-card" data-module="ENV.HUMID / 0x03" tabindex="0" id="humidityCard" onclick="app.showHistory('humidity')">
                 <div class="offline-watermark">Offline</div>
                 <div class="card-label">
                     <i data-lucide="droplets"></i>
@@ -628,7 +921,7 @@
                 </div>
             </section>
 
-            <section class="bento-card" id="pressureCard" onclick="app.showHistory('pressure')">
+            <section class="bento-card" data-module="ENV.PRESS / 0x04" tabindex="0" id="pressureCard" onclick="app.showHistory('pressure')">
                 <div class="offline-watermark">Offline</div>
                 <div class="card-label">
                     <i data-lucide="gauge"></i>
@@ -645,7 +938,7 @@
                 </div>
             </section>
 
-            <section class="bento-card" id="weatherCard" onclick="app.showHistory('weather')">
+            <section class="bento-card" data-module="EXT.WEATHER / 0x05" tabindex="0" id="weatherCard" onclick="app.showHistory('weather')">
                 <div class="card-label">
                     <i data-lucide="cloud-sun"></i>
                     Current Weather
@@ -659,7 +952,7 @@
                 </div>
             </section>
 
-            <section class="bento-card" id="hardwareCard" onclick="app.showHistory('hardware')" style="cursor: pointer;">
+            <section class="bento-card" data-module="SYS.DEVICES / 0x06" tabindex="0" id="hardwareCard" onclick="app.showHistory('hardware')" style="cursor: pointer;">
                 <div class="card-label">
                     <i data-lucide="cpu"></i>
                     System Health
@@ -685,7 +978,7 @@
             </section>
 
             <!-- Smart Plug -->
-            <section class="bento-card card-wide" id="smartplugCard" onclick="app.showHistory('smartplug')" style="cursor: pointer;">
+            <section class="bento-card card-wide" data-module="PWR.PLUG / 0x07" tabindex="0" id="smartplugCard" onclick="app.showHistory('smartplug')" style="cursor: pointer;">
                 <div class="offline-watermark">Offline</div>
                 <div class="card-label">
                     <i data-lucide="plug-zap"></i>
@@ -711,7 +1004,7 @@
                 </div>
             </section>
 
-            <section class="bento-card card-wide" id="outagesCard" onclick="app.showHistory('outages')" style="cursor: pointer;">
+            <section class="bento-card card-wide" data-module="GRID.OUTAGES / 0x08" tabindex="0" id="outagesCard" onclick="app.showHistory('outages')" style="cursor: pointer;">
                 <div class="card-label">
                     <i data-lucide="zap-off"></i>
                     Power Outages
@@ -729,7 +1022,7 @@
             </section>
 
             <!-- Bottom Row: Electricity -->
-            <section class="bento-card card-full" id="meterCard" onclick="app.showHistory('meter')">
+            <section class="bento-card card-full" data-module="PWR.METER + CAM / 0x09" tabindex="0" id="meterCard" onclick="app.showHistory('meter')">
                 <div class="offline-watermark">Offline</div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;" class="meter-layout">
@@ -782,7 +1075,7 @@
         </main>
 
         <footer style="margin-top: 4rem; text-align: center; color: var(--text-tertiary); font-size: 0.75rem;">
-            <p>© 2026 aMonitoringHub. Engineered for precision.</p>
+            <p>telemetry stream active // aMonitoringHub.OS v2.6 // click any module for history</p>
         </footer>
     </div>
 
@@ -826,6 +1119,78 @@
     </div>
 
     <script>
+        // --- TUI Theme + Interaction Layer ---
+        const TUI_THEMES = new Set([
+            'codex', 'grayscale', 'vt100', 'github-dark', 'github-light',
+            'claude', 'vscode', 'matrix', 'dracula', 'nord', 'solarized',
+            'amber', 'cyberpunk', 'synthwave', 'phosphor'
+        ]);
+
+        function uiColor(variable) {
+            return getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
+        }
+
+        function withAlpha(color, alpha) {
+            const hex = color.replace('#', '');
+            if (/^[0-9a-f]{3}$/i.test(hex)) {
+                const full = hex.split('').map(char => char + char).join('');
+                return `rgba(${parseInt(full.slice(0,2),16)},${parseInt(full.slice(2,4),16)},${parseInt(full.slice(4,6),16)},${alpha})`;
+            }
+            if (/^[0-9a-f]{6}$/i.test(hex)) {
+                return `rgba(${parseInt(hex.slice(0,2),16)},${parseInt(hex.slice(2,4),16)},${parseInt(hex.slice(4,6),16)},${alpha})`;
+            }
+            return color;
+        }
+
+        function applyTheme(theme, persist = true) {
+            const safeTheme = TUI_THEMES.has(theme) ? theme : 'codex';
+            document.documentElement.dataset.theme = safeTheme;
+            const select = document.getElementById('themeSelect');
+            const label = document.getElementById('activeThemeLabel');
+            if (select) select.value = safeTheme;
+            if (label) label.textContent = safeTheme;
+            const meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.content = uiColor('--bg-page');
+            if (window.Chart) {
+                Chart.defaults.color = uiColor('--text-tertiary');
+                Chart.defaults.borderColor = uiColor('--border');
+                Chart.defaults.font.family = 'Geist Mono, monospace';
+            }
+            if (persist) {
+                try { localStorage.setItem('monitoringhub-theme', safeTheme); } catch (_) {}
+            }
+            return safeTheme;
+        }
+
+        function initTUI() {
+            let savedTheme = 'codex';
+            try { savedTheme = localStorage.getItem('monitoringhub-theme') || 'codex'; } catch (_) {}
+            applyTheme(savedTheme, false);
+
+            const clock = document.getElementById('terminalClock');
+            const updateClock = () => {
+                if (!clock) return;
+                const time = new Intl.DateTimeFormat('en-GB', {
+                    timeZone: 'Europe/Bucharest', hour: '2-digit', minute: '2-digit',
+                    second: '2-digit', hour12: false
+                }).format(new Date());
+                clock.textContent = time + ' EEST';
+            };
+            updateClock();
+            setInterval(updateClock, 1000);
+
+            document.querySelectorAll('.bento-card[onclick]').forEach(card => {
+                card.setAttribute('role', 'button');
+                card.setAttribute('aria-label', 'Open ' + (card.dataset.module || 'module') + ' history');
+                card.addEventListener('keydown', event => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        card.click();
+                    }
+                });
+            });
+        }
+
         // --- Core Application Module ---
         const app = (function() {
             let state = {
@@ -1283,7 +1648,7 @@
                         labels: data.map(d => d.timestampUnix),
                         datasets: [{
                             data: data.map(d => d.temperatureC),
-                            borderColor: 'rgba(56, 189, 248, 0.4)',
+                            borderColor: withAlpha(uiColor('--accent-blue'), 0.55),
                             borderWidth: 2,
                             fill: true,
                             backgroundColor: (context) => {
@@ -1292,7 +1657,7 @@
                                 if (!chartArea) return null;
                                 const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
                                 gradient.addColorStop(0, 'transparent');
-                                gradient.addColorStop(1, 'rgba(56, 189, 248, 0.1)');
+                                gradient.addColorStop(1, withAlpha(uiColor('--accent-blue'), 0.14));
                                 return gradient;
                             },
                             tension: 0.4,
@@ -1513,9 +1878,9 @@
                 const fmtDt   = (d) => d ? d.toLocaleString('en-GB', { timeZone: 'Europe/Bucharest', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) : '--';
 
                 const sensors = [
-                    { key: 'bm280Up',    label: 'BM280',     pct: stats.bm280UptimePercent,    color: '#38BDF8', up: 6,   down: 5,   mid: 5.5 },
-                    { key: 'mq135Up',    label: 'MQ135',     pct: stats.mq135UptimePercent,    color: '#F59E0B', up: 3.5, down: 2.5, mid: 3.0 },
-                    { key: 'esp32camUp', label: 'ESP32-CAM', pct: stats.esp32camUptimePercent, color: '#A855F7', up: 1,   down: 0,   mid: 0.5 }
+                    { key: 'bm280Up',    label: 'BM280',     pct: stats.bm280UptimePercent,    color: uiColor('--accent-blue'), up: 6,   down: 5,   mid: 5.5 },
+                    { key: 'mq135Up',    label: 'MQ135',     pct: stats.mq135UptimePercent,    color: uiColor('--accent-amber'), up: 3.5, down: 2.5, mid: 3.0 },
+                    { key: 'esp32camUp', label: 'ESP32-CAM', pct: stats.esp32camUptimePercent, color: uiColor('--accent-purple'), up: 1,   down: 0,   mid: 0.5 }
                 ];
 
                 const eventRows = events.length === 0
@@ -1608,7 +1973,7 @@
                         plugins: {
                             legend: {
                                 display: true,
-                                labels: { color: '#A1A1AA', font: { size: 10, family: 'Geist Sans' }, usePointStyle: true }
+                                labels: { color: uiColor('--text-secondary'), font: { size: 10, family: 'Geist Sans' }, usePointStyle: true }
                             },
                             tooltip: {
                                 mode: 'index',
@@ -1625,10 +1990,10 @@
                         scales: {
                             x: {
                                 grid: { display: false },
-                                ticks: { color: '#52525B', font: { size: 10 }, maxTicksLimit: 8, maxRotation: 0 }
+                                ticks: { color: uiColor('--text-tertiary'), font: { size: 10 }, maxTicksLimit: 8, maxRotation: 0 }
                             },
                             y: {
-                                grid: { color: 'rgba(255,255,255,0.03)' },
+                                grid: { color: withAlpha(uiColor('--border'), 0.45) },
                                 min: -0.4,
                                 max: 6.9,
                                 ticks: {
@@ -1757,16 +2122,16 @@
                 if (state.charts.modalChart) state.charts.modalChart.destroy();
 
                 const colors = {
-                    temp: '#38BDF8',
-                    humidity: '#A855F7',
-                    pressure: '#F59E0B',
-                    co2: '#F43F5E',
-                    nh3: '#10B981',
-                    alc: '#A855F7',
-                    aqi: '#FFFFFF',
-                    meter: '#10B981',
-                    weather: '#A855F7',
-                    smartplug: '#FB923C'
+                    temp: uiColor('--accent-blue'),
+                    humidity: uiColor('--accent-purple'),
+                    pressure: uiColor('--accent-amber'),
+                    co2: uiColor('--accent-rose'),
+                    nh3: uiColor('--accent-emerald'),
+                    alc: uiColor('--accent-purple'),
+                    aqi: uiColor('--text-primary'),
+                    meter: uiColor('--accent-emerald'),
+                    weather: uiColor('--accent-purple'),
+                    smartplug: uiColor('--accent-amber')
                 };
 
                 const TZ = 'Europe/Bucharest';
@@ -1787,7 +2152,7 @@
                 const xTickLimit = { day: 12, week: 7, month: 15, year: 12 }[period] || 12;
 
                 let datasets = [];
-                let yTicks = { color: '#52525B', font: { size: 10 } };
+                let yTicks = { color: uiColor('--text-tertiary'), font: { size: 10 } };
                 let extraScales = {};
 
                 // Helper: compute tight Y bounds from an array of values
@@ -1810,7 +2175,7 @@
                         tension: 0.1,
                         pointRadius: 4
                     });
-                    yTicks = { callback: (v) => conditions[v] || '', stepSize: 1, color: '#52525B' };
+                    yTicks = { callback: (v) => conditions[v] || '', stepSize: 1, color: uiColor('--text-tertiary') };
 
                 } else if (metric === 'co2') {
                     // AQI (1-5) goes on a separate right axis so CO2/NH3/Alcohol scale correctly
@@ -1822,13 +2187,13 @@
                     ];
                     const gasVals = [...data.map(d => d.co2Ppm), ...data.map(d => d.nh3Ppm), ...data.map(d => d.alcoholPpm)];
                     const gasBounds = yBounds(gasVals);
-                    yTicks = { color: '#52525B', font: { size: 10 } };
+                    yTicks = { color: uiColor('--text-tertiary'), font: { size: 10 } };
                     extraScales = {
                         y2: {
                             position: 'right',
                             min: 0, max: 5,
                             grid: { display: false },
-                            ticks: { color: '#52525B', font: { size: 9 }, stepSize: 1,
+                            ticks: { color: uiColor('--text-tertiary'), font: { size: 9 }, stepSize: 1,
                                 callback: (v) => v === 0 ? '' : `AQI ${v}` }
                         }
                     };
@@ -1852,7 +2217,7 @@
                         fill: true, tension: 0.4, borderWidth: 2,
                         pointRadius: showPoints ? 5 : 0,
                         pointBackgroundColor: colors[metric],
-                        pointBorderColor: '#141416', pointBorderWidth: 2
+                        pointBorderColor: uiColor('--bg-card'), pointBorderWidth: 2
                     });
                     const bounds = yBounds(values);
                     Object.assign(yTicks, bounds);
@@ -1870,7 +2235,7 @@
                         plugins: {
                             legend: {
                                 display: metric === 'co2' || metric === 'weather',
-                                labels: { color: '#A1A1AA', font: { size: 10, family: 'Geist Sans' }, usePointStyle: true }
+                                labels: { color: uiColor('--text-secondary'), font: { size: 10, family: 'Geist Sans' }, usePointStyle: true }
                             },
                             tooltip: {
                                 mode: 'index',
@@ -1901,10 +2266,10 @@
                         scales: {
                             x: {
                                 grid: { display: false },
-                                ticks: { color: '#52525B', font: { size: 10 }, maxTicksLimit: xTickLimit, maxRotation: 0 }
+                                ticks: { color: uiColor('--text-tertiary'), font: { size: 10 }, maxTicksLimit: xTickLimit, maxRotation: 0 }
                             },
                             y: {
-                                grid: { color: 'rgba(255,255,255,0.03)' },
+                                grid: { color: withAlpha(uiColor('--border'), 0.45) },
                                 ticks: { ...yTicks, maxTicksLimit: 8 },
                                 suggestedMin: yTicks.suggestedMin,
                                 suggestedMax: yTicks.suggestedMax
@@ -1987,6 +2352,7 @@
 
             return {
                 init: () => {
+                    initTUI();
                     fetchInitialData();
                     connectSSE();
                     captureSnapshot('VGA (640x480)'); // Auto capture on load at VGA resolution
@@ -2035,7 +2401,12 @@
                 updateFlash: (checked) => {
                     state.cameraSettings.flash = checked;
                 },
-                captureSnapshot
+                captureSnapshot,
+                setTheme: (theme) => {
+                    applyTheme(theme);
+                    if (state.currentData.sparklineHistory.length) renderSparkline(state.currentData.sparklineHistory);
+                    if (document.getElementById('historyModal').style.display === 'flex') updateModalChart();
+                }
             };
         })();
 
