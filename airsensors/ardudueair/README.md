@@ -9,8 +9,8 @@ Auto-boot JSON sensor monitor for Arduino Due. Outputs BME280 (I2C) + MQ135 (ADC
 |---|---|---|
 | VIN | **5V** | power input (module has onboard regulator to 3.3V) |
 | GND | **GND** | |
-| SCL | **D20** (Wire SCL) | I2C clock |
-| SDA | **D21** (Wire SDA) | I2C data |
+| SCL | **D21** (Wire SCL) | I2C clock |
+| SDA | **D20** (Wire SDA) | I2C data |
 | 3V3 | (unconnected) | output from regulator, not needed |
 
 ### MQ135 → Arduino Due (analog sensor)

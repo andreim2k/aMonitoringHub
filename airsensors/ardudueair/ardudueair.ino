@@ -14,6 +14,38 @@ unsigned long last_bme280_init_attempt_ms = 0;
 void blink_pattern(int count, int duration_ms = LED_BLINK_DURATION_MS, int pause_ms = 150);
 void blink_error(int duration_ms = 200);
 
+// Recovers a wedged I2C bus: if a slave is stuck holding SDA low mid-byte
+// (e.g. after a transaction was interrupted by noise or a reset), the TWI
+// peripheral alone can't free it since it never sees the bus as idle. Bit-bang
+// up to 9 SCL pulses to walk the stuck slave through the rest of its byte,
+// then issue a manual STOP so the bus returns to idle before Wire.begin().
+static void i2c_bus_recovery() {
+  pinMode(I2C_SDA_PIN, INPUT_PULLUP);
+  pinMode(I2C_SCL_PIN, OUTPUT);
+  digitalWrite(I2C_SCL_PIN, HIGH);
+
+  for (int i = 0; i < 9; i++) {
+    if (digitalRead(I2C_SDA_PIN) == HIGH) break;  // bus already released
+    digitalWrite(I2C_SCL_PIN, LOW);
+    delayMicroseconds(5);
+    digitalWrite(I2C_SCL_PIN, HIGH);
+    delayMicroseconds(5);
+  }
+
+  // Manual STOP condition: SDA low->high while SCL is high
+  pinMode(I2C_SDA_PIN, OUTPUT);
+  digitalWrite(I2C_SDA_PIN, LOW);
+  delayMicroseconds(5);
+  digitalWrite(I2C_SCL_PIN, HIGH);
+  delayMicroseconds(5);
+  digitalWrite(I2C_SDA_PIN, HIGH);
+  delayMicroseconds(5);
+
+  // Release pins back to inputs so Wire.begin() can reclaim them as TWI peripheral pins
+  pinMode(I2C_SDA_PIN, INPUT);
+  pinMode(I2C_SCL_PIN, INPUT);
+}
+
 static void ts(float t) {
   Serial.print(t, 3);
 }
@@ -88,6 +120,7 @@ void setup() {
   ts(millis() / 1000.0);
   Serial.println(F(",\"status\":\"led_initialized\",\"pin\":\"13\"}"));
 
+  i2c_bus_recovery();
   Wire.begin();
 
   // Initialize BME280
@@ -233,6 +266,8 @@ void loop() {
       ts(timestamp);
       Serial.println(F(",\"status\":\"bme280_reconnect_attempt\",\"message\":\"Attempting to reinitialize BME280\"}"));
       if (bme280 != NULL) delete bme280;
+      i2c_bus_recovery();
+      Wire.begin();
       bme280 = new BME280_I2C(BME280_I2C_ADDR);
       if (bme280 != NULL && bme280->getChipId() != 0) {
         bme280_available = true;
@@ -273,6 +308,8 @@ void loop() {
       Serial.println(F(",\"status\":\"error\",\"sensor\":\"bme280\",\"error\":\"BME280 read error\",\"attempting_recovery\":true}"));
 
       bool recovered = false;
+      i2c_bus_recovery();
+      Wire.begin();
       bme280->reset();
       delay(3);
       bme280->reconfigure();

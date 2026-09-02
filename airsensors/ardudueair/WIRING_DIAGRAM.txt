@@ -9,8 +9,8 @@ Wiring is I2C for BME280 and analog for MQ135.
 +------------+---------------+-------------------------------+
 | VIN        | Power (5V)    | 5V (regulator onboard module) |
 | GND        | Ground        | GND                           |
-| SCL        | I2C Clock     | D20 (SCL0)                    |
-| SDA        | I2C Data      | D21 (SDA0)                    |
+| SCL        | I2C Clock     | D21 (SCL0)                    |
+| SDA        | I2C Data      | D20 (SDA0)                    |
 | 3V3        | (regulator    | leave unconnected             |
 |            |  output)      |                               |
 +------------+---------------+-------------------------------+
@@ -44,8 +44,8 @@ CHECKLIST BEFORE UPLOAD
  BME280:
    VIN  -> 5V
    GND  -> GND
-   SCL  -> D20
-   SDA  -> D21
+   SCL  -> D21
+   SDA  -> D20
    3V3  -> (unconnected)
 
  MQ135:

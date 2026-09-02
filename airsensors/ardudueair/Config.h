@@ -6,6 +6,11 @@
 
 // I2C Configuration (BME280 on I2C)
 const int BME280_I2C_ADDR = 0x76;  // BME280 I2C address (SDO→GND)
+// NOTE: WIRING_DIAGRAM.txt/README.md label these backwards (they say SCL=D20,
+// SDA=D21). The actual Due core (variant.h: PIN_WIRE_SDA=20, PIN_WIRE_SCL=21)
+// defines it the other way around; the docs are wrong, not the wiring.
+const int I2C_SDA_PIN = 20;        // Wire SDA
+const int I2C_SCL_PIN = 21;        // Wire SCL
 
 // LED Configuration
 const int LED_PIN = 13;
