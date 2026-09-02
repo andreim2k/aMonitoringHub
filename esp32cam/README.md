@@ -238,7 +238,7 @@ Use this for initial flashing, partition-table changes, and recovery.
 [env:esp32cam-ota]
 extends = env:esp32cam
 upload_protocol = espota
-upload_port = 192.168.50.3
+upload_port = 10.0.0.3
 monitor_port = /dev/cu.usbserial-110
 lib_deps =
     ArduinoJson @ 7.4.3
@@ -290,15 +290,15 @@ IP address.
 8. Open the UI.
 
    ```text
-   http://192.168.50.3/
+   http://10.0.0.3/
    ```
 
 The default persistent network profile currently forces:
 
-- IP: `192.168.50.3`
-- Gateway: `192.168.50.1`
+- IP: `10.0.0.3`
+- Gateway: `10.0.0.1`
 - Subnet: `255.255.255.0`
-- Primary DNS: `192.168.50.1`
+- Primary DNS: `10.0.0.1`
 - Secondary DNS: `8.8.8.8`
 
 ## OTA Update Workflow
@@ -352,7 +352,7 @@ Returns JSON status for flash, WiFi, and camera.
 Example:
 
 ```bash
-curl http://192.168.50.3/status
+curl http://10.0.0.3/status
 ```
 
 Status fields include:
@@ -370,7 +370,7 @@ Captures and returns a JPEG.
 Example:
 
 ```bash
-curl -X POST "http://192.168.50.3/snapshot" \
+curl -X POST "http://10.0.0.3/snapshot" \
   -H "Content-Type: application/json" \
   -d '{
     "resolution": "UXGA",
@@ -426,7 +426,7 @@ Saves WiFi settings to EEPROM and requests a reconnect.
 Example:
 
 ```bash
-curl -X POST "http://192.168.50.3/wifi" \
+curl -X POST "http://10.0.0.3/wifi" \
   -H "Content-Type: application/json" \
   -d '{
     "ssid": "MyNetwork",

@@ -42,8 +42,9 @@ const unsigned long WIFI_CHECK_INTERVAL = 30000;                    // 30 second
 const unsigned long MEMORY_CHECK_INTERVAL = 60000;                  // 60 seconds
 const unsigned long WATCHDOG_RESET_INTERVAL = 10000;                // 10 seconds
 
-// Gateway ping monitoring — reboot after 12 consecutive failures (~3 min)
-const IPAddress GATEWAY_PING_IP(192, 168, 50, 1);
+// Gateway ping monitoring — reboot after 12 consecutive failures (~3 min).
+// Target follows the configured gateway; a hardcoded address here silently
+// turns into a permanent reboot loop whenever the LAN is renumbered.
 const unsigned long PING_CHECK_INTERVAL = 15000; // 15 seconds between pings
 const int PING_FAIL_REBOOT_THRESHOLD = 12;       // 12 × 15s = 3 min
 unsigned long last_ping_time = 0;
@@ -546,8 +547,10 @@ void checkGatewayPing() {
 
   if (WiFi.status() != WL_CONNECTED) return;
 
+  const IPAddress gateway_ping_ip = configManager.getGateway();
+
   esp_task_wdt_reset();
-  bool ok = Ping.ping(GATEWAY_PING_IP, 2); // 2 ICMP echo requests
+  bool ok = Ping.ping(gateway_ping_ip, 2); // 2 ICMP echo requests
   esp_task_wdt_reset();
 
   if (ok) {
@@ -558,7 +561,7 @@ void checkGatewayPing() {
   } else {
     gateway_ping_fail_count++;
     char gw_str[16];
-    GATEWAY_PING_IP.toString().toCharArray(gw_str, sizeof(gw_str));
+    gateway_ping_ip.toString().toCharArray(gw_str, sizeof(gw_str));
     Serial.printf("Gateway ping FAILED %d/%d (target: %s)\n",
                   gateway_ping_fail_count, PING_FAIL_REBOOT_THRESHOLD, gw_str);
     if (gateway_ping_fail_count >= PING_FAIL_REBOOT_THRESHOLD) {

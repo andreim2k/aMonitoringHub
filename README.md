@@ -66,7 +66,7 @@ The system uses a professional POST-based approach for webcam integration:
   "hmirror": false,
   "vflip": false,
   "timestamp": "2025-09-14T14:49:08.241Z",
-  "api_endpoint": "http://192.168.50.3/snapshot",
+  "api_endpoint": "http://10.0.0.3/snapshot",
   "method": "POST",
   "content_type": "application/json"
 }
@@ -89,7 +89,7 @@ Edit `backend/config.json`:
 ```json
 {
   "webcam": {
-    "url": "http://192.168.50.3/snapshot",
+    "url": "http://10.0.0.3/snapshot",
     "enabled": true,
     "title": "📹 Cabana 1 Electricity Meter"
   },
@@ -322,7 +322,7 @@ aMonitoringHub/
 **ESP32-CAM Connection:**
 ```bash
 # Test ESP32-CAM endpoint
-curl -X POST "http://192.168.50.3/snapshot" \
+curl -X POST "http://10.0.0.3/snapshot" \
   -H "Content-Type: application/json" \
   -d '{"resolution": "UXGA", "flash": "off"}'
 ```

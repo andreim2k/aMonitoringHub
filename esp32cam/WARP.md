@@ -100,7 +100,7 @@ pio device list
 ### Network Configuration
 - Edit `src/main.cpp` WiFi credentials and IP settings
 - Toggle `USE_STATIC_IP` between static and DHCP modes
-- Default static IP: 192.168.50.3
+- Default static IP: 10.0.0.3
 
 ### Hardware Requirements
 - ESP32-CAM module (AI Thinker or compatible)

@@ -6,7 +6,7 @@ from pathlib import Path
 import tinytuya
 
 DEVICE_ID = "bff469d209baf7cb01sjqu"
-DEVICE_IP = "192.168.50.105"
+DEVICE_IP = "10.0.0.105"
 PROTOCOL_VERSION = 3.5
 
 # This T34-Smart Plug+ unit reports energy data on DPS 21/22/23 (confirmed via

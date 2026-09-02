@@ -82,7 +82,7 @@ start_app() {
     
     cd "$BACKEND_PATH"
     nohup "$VENV_PATH/bin/python" app.py \
-        > "$LOG_FILE" 2>&1 &
+        >> "$LOG_FILE" 2>&1 &
     
     APP_PID=$!
     echo $APP_PID > "$PID_FILE"
@@ -204,7 +204,7 @@ case "$1" in
         check_backend
         ensure_logs_dir
         cd "$BACKEND_PATH"
-        nohup "$VENV_PATH/bin/gunicorn" -w 2 -k gthread -t 60 -b 0.0.0.0:5000             --log-level info --access-logfile "$LOGS_PATH/access.log" --error-logfile "$LOGS_PATH/error.log"             backend.wsgi:application > "$LOG_FILE" 2>&1 &
+        nohup "$VENV_PATH/bin/gunicorn" -w 2 -k gthread -t 60 -b 0.0.0.0:5000             --log-level info --access-logfile "$LOGS_PATH/access.log" --error-logfile "$LOGS_PATH/error.log"             backend.wsgi:application >> "$LOG_FILE" 2>&1 &
         APP_PID=$!
         echo $APP_PID > "$PID_FILE"
         sleep 2

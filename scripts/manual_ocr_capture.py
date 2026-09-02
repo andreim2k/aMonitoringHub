@@ -22,7 +22,7 @@ config_path = os.path.join(os.path.dirname(__file__), '..', 'backend', 'config.j
 with open(config_path, 'r') as f:
     config = json.load(f)
 
-webcam_url = config.get('webcam', {}).get('url', 'http://192.168.50.3/snapshot')
+webcam_url = config.get('webcam', {}).get('url', 'http://10.0.0.3/snapshot')
 google_config = config['ocr']['engines']['google']
 api_key = os.environ.get('GOOGLE_API_KEY')
 model = google_config.get('model', 'gemini-flash-latest')

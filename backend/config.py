@@ -6,7 +6,7 @@ CONFIG_FILE = 'config.json'
 
 DEFAULT_CONFIG: Dict[str, Any] = {
     "webcam": {
-        "url": "http://192.168.50.3/capture?size=VGA&flash=1",
+        "url": "http://10.0.0.3/snapshot",
         "enabled": True,
         "title": "📹 Cabana 1 Electricity Meter"
     },

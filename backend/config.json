@@ -1,6 +1,6 @@
 {
   "webcam": {
-    "url": "http://192.168.50.3/snapshot",
+    "url": "http://10.0.0.3/snapshot",
     "enabled": true,
     "title": "\ud83d\udcf9 Cabana 1 Electricity Meter"
   },
@@ -24,7 +24,7 @@
   },
   "smartplug": {
     "device_id": "bff469d209baf7cb01sjqu",
-    "ip": "192.168.50.105",
+    "ip": "10.0.0.105",
     "local_key": "}N|e6pBdMNkr'1f~",
     "version": 3.5
   }

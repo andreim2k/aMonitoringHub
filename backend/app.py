@@ -121,6 +121,24 @@ for _name in ['werkzeug', 'urllib3', 'requests', 'apscheduler', 'graphql', 'PIL'
 
 logger = logging.getLogger(__name__)
 
+# The meter is read once a day, and the root logger above is pinned to ERROR to
+# keep the SSE chatter out of backend.log. That combination left successful and
+# silently-skipped OCR runs with no trace at all, so route the OCR audit trail to
+# its own INFO-level file that stays small (one handful of lines per day).
+ocr_logger = logging.getLogger('ocr_audit')
+ocr_logger.setLevel(logging.INFO)
+ocr_logger.propagate = False
+if not ocr_logger.handlers:
+    try:
+        _ocr_handler = logging.FileHandler('../logs/ocr.log')
+        _ocr_handler.setLevel(logging.INFO)
+        _ocr_handler.setFormatter(
+            logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        )
+        ocr_logger.addHandler(_ocr_handler)
+    except Exception as _ocr_log_err:  # never let logging setup break startup
+        logger.error(f"Could not open OCR audit log: {_ocr_log_err}")
+
 # Flask application setup
 app = Flask(__name__)
 # Use environment variable for secret key, generate secure fallback if not set
@@ -260,30 +278,40 @@ def scheduled_ocr_task():
     """
     import traceback
     logger.info("=== SCHEDULED OCR TASK STARTED ===")
-    logger.info(f"Current time: {time.strftime('%Y-%m-%d %H:%M:%S')}")
-    
+    ocr_logger.info("=== scheduled OCR run started ===")
+
     try:
         # Use Flask test client to call the OCR endpoint
         with app.test_client() as client:
             logger.info("Making POST request to /webcam/ocr endpoint...")
             response = client.post('/webcam/ocr')
             logger.info(f"Response status code: {response.status_code}")
-            
+
             if response.status_code != 200:
                 logger.error(f"OCR endpoint returned status {response.status_code}")
+                ocr_logger.error(f"FAILED: endpoint returned HTTP {response.status_code}")
                 return
-                
+
             result = response.get_json()
             logger.info(f"OCR response: {result}")
 
             if result and result.get('success'):
                 logger.info(f"✅ SCHEDULED OCR SUCCEEDED: {result.get('index')}")
+                ocr_logger.info(
+                    f"SUCCESS: index={result.get('index')} raw={result.get('raw_ocr')!r} "
+                    f"engine={result.get('engine')}"
+                )
             else:
-                logger.error(f"❌ SCHEDULED OCR FAILED: {result.get('error', 'Unknown error')}")
-                logger.error(f"Full OCR response: {result}")
+                # Log without the response body — it carries a base64 JPEG.
+                error_text = (result or {}).get('error', 'Unknown error')
+                logger.error(f"❌ SCHEDULED OCR FAILED: {error_text}")
+                ocr_logger.error(
+                    f"FAILED: {error_text} (raw={(result or {}).get('raw_ocr')!r})"
+                )
     except Exception as e:
         logger.error(f"❌ SCHEDULED OCR TASK EXCEPTION: {e}")
         logger.error(f"Exception traceback: {traceback.format_exc()}")
+        ocr_logger.error(f"EXCEPTION: {e}")
     
     logger.info("=== SCHEDULED OCR TASK COMPLETED ===")
 
@@ -291,6 +319,17 @@ def scheduled_ocr_task():
 
 
 _esp32cam_last_status = {'up': False, 'ready': False, 'checked_at': 0, 'uptime_ms': None}
+
+# OCR runs once a day, so a lone transient failure costs the whole day's reading.
+_OCR_REQUEST_TIMEOUT = 45   # seconds per Gemini attempt
+_OCR_MAX_ATTEMPTS = 3
+_OCR_RETRY_BACKOFF = 5      # seconds, multiplied by attempt number
+
+# Meter creep allowance: readings may only rise, and only so fast. The budget has
+# to scale with the gap since the last stored reading, otherwise a run of missed
+# days pushes the true value past a fixed cap and locks OCR out permanently.
+_METER_MAX_UNITS_PER_DAY = 100
+_METER_MIN_UNIT_ALLOWANCE = 100
 
 _PLUG_DPS_CURRENT = "21"   # mA
 _PLUG_DPS_POWER   = "22"   # 0.1 W
@@ -2932,7 +2971,7 @@ def get_config() -> Response:
         # Return minimal working config
         return jsonify({
             "webcam": {
-                "url": "http://192.168.50.3/snapshot",
+                "url": "http://10.0.0.3/snapshot",
                 "enabled": True,
                 "title": "📹 Cabana 1 Electricity Meter"
             },
@@ -2967,7 +3006,7 @@ def capture_webcam() -> Response:
         with open(os.path.join(os.path.dirname(__file__), 'config.json'), 'r') as f:
             config = json.load(f)
         
-        webcam_url = config.get('webcam', {}).get('url', 'http://192.168.50.3/snapshot')
+        webcam_url = config.get('webcam', {}).get('url', 'http://10.0.0.3/snapshot')
         
         # Prepare the camera payload defaults.
         payload = {
@@ -3123,13 +3162,36 @@ def run_ocr() -> Response:
 
             gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/{gemini_model}:generateContent?key={api_key}"
             logger.info(f"Sending request to Google Gemini API model: {gemini_model}")
-            ocr_response = requests.post(
-                gemini_url,
-                headers={"Content-Type": "application/json"},
-                json=payload,
-                timeout=30
-            )
-            ocr_response.raise_for_status()
+
+            # The meter is read once a day, so a single transient network blip
+            # costs a whole day's reading. Retry with backoff before giving up.
+            ocr_response = None
+            last_exc = None
+            for attempt in range(1, _OCR_MAX_ATTEMPTS + 1):
+                try:
+                    ocr_response = requests.post(
+                        gemini_url,
+                        headers={"Content-Type": "application/json"},
+                        json=payload,
+                        timeout=_OCR_REQUEST_TIMEOUT
+                    )
+                    ocr_response.raise_for_status()
+                    break
+                except (requests.exceptions.RequestException, requests.exceptions.HTTPError) as exc:
+                    last_exc = exc
+                    if attempt == _OCR_MAX_ATTEMPTS:
+                        logger.error(f"Gemini API failed after {attempt} attempt(s): {exc}")
+                        raise
+                    delay = _OCR_RETRY_BACKOFF * attempt
+                    logger.warning(
+                        f"Gemini API attempt {attempt}/{_OCR_MAX_ATTEMPTS} failed ({exc}); "
+                        f"retrying in {delay}s"
+                    )
+                    ocr_logger.warning(
+                        f"Gemini attempt {attempt}/{_OCR_MAX_ATTEMPTS} failed ({exc}); "
+                        f"retrying in {delay}s"
+                    )
+                    time.sleep(delay)
 
             result = ocr_response.json()
 
@@ -3205,14 +3267,23 @@ def run_ocr() -> Response:
                         "raw_ocr": ocr_text
                     })
 
-                # Validation 2: Check against previous reading (max 100 unit difference)
+                # Validation 2: readings may only rise, and only as fast as the
+                # elapsed time allows. The allowance scales with the gap since the
+                # last stored reading so a run of missed days can still be caught up.
                 try:
-                    previous_readings = db.session.query(db.models.MeterReading).order_by(db.models.MeterReading.id.desc()).limit(1).all()
+                    previous_readings = db.get_recent_meter_readings(limit=1)
                     if previous_readings:
                         prev_reading = previous_readings[0].meter_value
+                        prev_ts_unix = previous_readings[0].timestamp_unix
                         try:
                             prev_int = int(prev_reading)
                             diff = meter_int - prev_int
+
+                            elapsed_days = max(1.0, (time.time() - prev_ts_unix) / 86400.0)
+                            max_diff = max(
+                                _METER_MIN_UNIT_ALLOWANCE,
+                                int(elapsed_days * _METER_MAX_UNITS_PER_DAY)
+                            )
                             if diff < 0:
                                 logger.warning(f"❌ Reading went backwards: {prev_int} → {meter_int}")
                                 return jsonify({
@@ -3223,17 +3294,23 @@ def run_ocr() -> Response:
                                     "timestamp": datetime.now().isoformat() + "Z",
                                     "raw_ocr": ocr_text
                                 })
-                            elif diff > 100:
-                                logger.warning(f"❌ Reading jumped too much: {prev_int} → {meter_int} (diff: {diff})")
+                            elif diff > max_diff:
+                                logger.warning(
+                                    f"❌ Reading jumped too much: {prev_int} → {meter_int} "
+                                    f"(diff: {diff}, allowed: {max_diff} over {elapsed_days:.1f}d)"
+                                )
                                 return jsonify({
                                     "success": False,
-                                    "error": f"Invalid: meter jumped {diff} units (max 100 allowed). Previous: {prev_int}, Current: {meter_int}",
+                                    "error": f"Invalid: meter jumped {diff} units (max {max_diff} allowed over {elapsed_days:.1f} days). Previous: {prev_int}, Current: {meter_int}",
                                     "engine": engine_name,
                                     "image": cap_json['image'],
                                     "timestamp": datetime.now().isoformat() + "Z",
                                     "raw_ocr": ocr_text
                                 })
-                            logger.info(f"✅ Validation passed: {prev_int} → {meter_int} (diff: {diff})")
+                            logger.info(
+                                f"✅ Validation passed: {prev_int} → {meter_int} "
+                                f"(diff: {diff}, allowed: {max_diff} over {elapsed_days:.1f}d)"
+                            )
                         except ValueError:
                             logger.warning(f"Could not parse previous reading: {prev_reading}")
                 except Exception as validation_err:
@@ -3332,8 +3409,8 @@ if __name__ == '__main__':
             sys.exit(1)
             
         logger.info(f"Starting OPTIMIZED aMonitoringHub GraphQL server on {args.host}:{args.port}")
-        logger.info("GraphQL endpoint: http://192.168.50.2:5000/graphql")
-        logger.info("SSE endpoint: http://192.168.50.2:5000/events")
+        logger.info("GraphQL endpoint: http://10.0.0.2:5000/graphql")
+        logger.info("SSE endpoint: http://10.0.0.2:5000/events")
         logger.info(f"SSE optimization: Updates only when temp changes >= {args.threshold}°C")
         logger.info("Press Ctrl+C to stop the server")
         

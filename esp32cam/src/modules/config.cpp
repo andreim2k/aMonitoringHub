@@ -201,10 +201,10 @@ void ConfigManager::resetToDefaults() {
 
   // Default to fixed LAN address.
   config.use_static_ip = true;
-  config.static_ip = IPAddress(192, 168, 50, 3);
-  config.gateway = IPAddress(192, 168, 50, 1);
+  config.static_ip = IPAddress(10, 0, 0, 3);
+  config.gateway = IPAddress(10, 0, 0, 1);
   config.subnet = IPAddress(255, 255, 255, 0);
-  config.dns_primary = IPAddress(192, 168, 50, 1);
+  config.dns_primary = IPAddress(10, 0, 0, 1);
   config.dns_secondary = IPAddress(8, 8, 8, 8);
 
   config.jpeg_quality = DEFAULT_JPEG_QUALITY;
@@ -247,17 +247,16 @@ bool ConfigManager::applyLegacyDefaultUpdates(bool force_default_wifi_profile) {
     changed = true;
   }
 
-  if (!config.use_static_ip ||
-      config.static_ip != IPAddress(192, 168, 50, 3) ||
-      config.gateway != IPAddress(192, 168, 50, 1) ||
+  if (!config.use_static_ip || config.static_ip != IPAddress(10, 0, 0, 3) ||
+      config.gateway != IPAddress(10, 0, 0, 1) ||
       config.subnet != IPAddress(255, 255, 255, 0) ||
-      config.dns_primary != IPAddress(192, 168, 50, 1)) {
-    Serial.println("Forcing persistent static IP configuration: 192.168.50.3");
+      config.dns_primary != IPAddress(10, 0, 0, 1)) {
+    Serial.println("Forcing persistent static IP configuration: 10.0.0.3");
     config.use_static_ip = true;
-    config.static_ip = IPAddress(192, 168, 50, 3);
-    config.gateway = IPAddress(192, 168, 50, 1);
+    config.static_ip = IPAddress(10, 0, 0, 3);
+    config.gateway = IPAddress(10, 0, 0, 1);
     config.subnet = IPAddress(255, 255, 255, 0);
-    config.dns_primary = IPAddress(192, 168, 50, 1);
+    config.dns_primary = IPAddress(10, 0, 0, 1);
     config.dns_secondary = IPAddress(8, 8, 8, 8);
     changed = true;
   }

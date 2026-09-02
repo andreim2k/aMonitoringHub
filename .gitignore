@@ -14,6 +14,9 @@ __pycache__/
 backend/*.db
 !backend/database.db-example
 !backend/monitoringhub.db
+# SQLite WAL/shared-memory sidecars are transient runtime state, never commit them
+backend/*.db-wal
+backend/*.db-shm
 
 # Environment variables
 .env
